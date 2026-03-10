@@ -221,3 +221,10 @@
   padding: 10px 20px;
   font-size: 16px;
 }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  padding: 20px;
+  text-align: center;
+}
