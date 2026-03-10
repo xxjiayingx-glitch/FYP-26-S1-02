@@ -222,11 +222,6 @@
   font-size: 16px;
 }
 
-.button-container {
-  text-align: center;
-  margin-top: 20px;
-}
-
 .features-grid {
   display: grid;
   grid-template-columns: auto auto auto auto;
