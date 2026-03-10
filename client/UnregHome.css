@@ -1,18 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 32px;
-  background-color: #83C6FF;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 16px 16px;
+  background-color: #83c6ff;
 }
 
 .logo h1 {
-  font-size: 22px;
+  font-size: 56px;
   font-weight: 800;
-  line-height: 1.2;
+  font-family: Inter;
   margin: 0;
   color: #000000;
 }
@@ -26,14 +26,13 @@
 .navLinks a {
   text-decoration: none;
   color: #000000;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
 }
 
 .navLinks a:hover {
   text-decoration: underline;
 }
-
 
 .headline {
   display: grid;
@@ -70,29 +69,39 @@
   display: block;
 }
 
-.news {
+/* .news {
   display: grid;
   grid-template-columns: auto auto auto;
   padding: 10px;
-}
-.news div {
-  padding: 10px;
-  font-size: 30px;
+} */
+.news-grid {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  padding: 20px;
   text-align: center;
+
 }
 
+.news-title {
+  font-size: 24px;
+  font-family: Inter;
+}
 
 .view-more {
-  align-items: center;
-  text-align: center;
-  background-color: #0a66c2;
-  color:#fff
-}
+  grid-column: span 3; /* make button take full row */
+  justify-self: center; /* center horizontally */
 
+  background-color: #0a66c2;
+  color: #fff;
+  font-size: 30px;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
 
 .footer {
   display: flex;
-  background-color: #83C6FF;
+  background-color: #83c6ff;
   font-family: Inknut Antiqua;
 }
 
@@ -147,7 +156,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.18s, transform 0.18s;
+  transition:
+    opacity 0.18s,
+    transform 0.18s;
 }
 
 .footer-social-icon:hover {
@@ -205,7 +216,10 @@
   font-size: 0.78rem;
   color: #475569;
 }
+<<<<<<< HEAD
 
 .viewmorebutton {
   text-align: center;
 }
+=======
+>>>>>>> d55ea46893de23d36be559d7b7475f6041a5e6b4
