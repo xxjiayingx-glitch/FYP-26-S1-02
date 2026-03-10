@@ -217,6 +217,7 @@
   color: #475569;
 }
 
-.viewmorebutton {
-  text-align: center;
+.view-more {
+  padding: 10px 20px;
+  font-size: 16px;
 }
