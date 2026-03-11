@@ -56,13 +56,13 @@ html {
 
 /* Left side text */
 .headline-title {
-  font-size: 32px;
+  font-size: 56px;
   font-weight: 800;
   margin-bottom: 15px;
 }
 
 .headline-description {
-  font-size: 16px;
+  font-size: 24px;
   color: #555;
   margin-bottom: 10px;
 }
@@ -108,6 +108,7 @@ html {
 
 .testimonial-title {
   text-align: center;
+  font-size:48px;
 }
 .testimonial-desc {
   text-align: center;
@@ -148,6 +149,7 @@ html {
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size:48px;
 }
 .product-features-btn {
   text-align: center;
