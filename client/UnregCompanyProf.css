@@ -1,0 +1,152 @@
+/* Header section */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px;
+  background-color: #83c6ff;
+}
+
+.logo h1 {
+  font-size: 56px;
+  font-weight: 800;
+  font-family: Inter;
+  margin: 0;
+  color: #000000;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.navLinks a {
+  text-decoration: none;
+  color: #000000;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.navLinks a:hover {
+  text-decoration: underline;
+}
+
+/* Footer section*/
+.footer {
+  display: flex;
+  background-color: #83c6ff;
+  font-family: Inknut Antiqua;
+}
+
+.footer-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 44px 24px 36px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 48px;
+}
+
+.footer-brand {
+  border-right: 1px solid #2d3f52;
+  padding-right: 40px;
+}
+
+.footer-links-section {
+  padding-left: 40px;
+}
+
+.footer-title {
+  color: #000;
+  font-weight: 800;
+  font-size: 36px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #2d3f52;
+  padding-bottom: 8px;
+}
+
+.footer-description {
+  font-size: 16px;
+  line-height: 1.75;
+  color: #000;
+  max-width: 260px;
+  margin-bottom: 22px;
+}
+
+.footer-social {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-social-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity 0.18s,
+    transform 0.18s;
+}
+
+.footer-social-icon:hover {
+  opacity: 0.8;
+  transform: scale(1.12);
+}
+
+.facebook {
+  background: #1877f2;
+}
+
+.linkedin {
+  background: #0a66c2;
+}
+
+.twitter {
+  background: #000;
+}
+
+.footer-links-title {
+  color: #000;
+  font-weight: 700;
+  font-size: 32px;
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid #2d3f52;
+  padding-bottom: 8px;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+}
+
+.footer-link {
+  color: #000;
+  text-decoration: none;
+  font-size: 16px;
+  line-height: 1.6;
+  transition: color 0.15s;
+}
+
+.footer-link:hover {
+  color: #000;
+}
+
+.footer-bottom {
+  border-top: 1px solid #2d3f52;
+  padding: 16px 24px;
+  text-align: center;
+}
+
+.footer-bottom p {
+  font-size: 0.78rem;
+  color: #475569;
+}
