@@ -18,9 +18,9 @@
   color: #000000;
 }
 
-.logo a{
-    text-decoration: none;
-    color: inherit;
+.logo a {
+  text-decoration: none;
+  color: inherit;
 }
 
 .navLinks {
@@ -82,14 +82,17 @@ html {
 
 .news-grid {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: repeat(3, 1fr);
   padding: 20px;
-  text-align: center;
+  gap: 20px;
 }
 
 .news-title {
   font-size: 24px;
   font-family: Inter;
+}
+.news-btn {
+  text-align: center;
 }
 
 .view-more {
@@ -136,15 +139,25 @@ html {
 }
 .features-grid {
   display: grid;
-  grid-template-columns: auto auto auto auto;
+  grid-template-columns: repeat(4, 1fr);
   padding: 20px;
-  text-align: center;
+  gap: 20px;
 }
 
 .features-title {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.product-features-btn {
+  text-align: center;
+}
+
+.news-btn,
+.testimonial-btn,
+.product-features-btn{
+  grid-column: 1 / -1;
+  text-align:center;
 }
 
 /* Footer section*/

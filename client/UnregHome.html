@@ -48,7 +48,7 @@
 
     <section id="articles" class="news">
       <div class="news-grid">
-        <div>
+        <div class="news-card">
           <img src="images/first.jpg" alt="first news" />
           <h5 class="news-title">
             S'pore passes tougher laws on vapes with heavier penalties;
@@ -59,7 +59,7 @@
             facing a fine of up to $2,000.
           </p>
         </div>
-        <div>
+        <div class="news-card">
           <img src="images/second.jpg" alt="second news" />
           <h5 class="news-title">
             S'pore passes tougher laws on vapes with heavier penalties;
@@ -71,7 +71,7 @@
           </p>
         </div>
 
-        <div>
+        <div class="news-card">
           <img src="images/third.jpg" alt="third news" />
           <h5 class="news-title">
             S'pore passes tougher laws on vapes with heavier penalties;
@@ -83,7 +83,27 @@
           </p>
         </div>
 
-        <button class="view-more">View More</button>
+        <div class="news-card hidden ">
+          <img src="images/third.jpg" alt="fourth news" />
+          <h5 class="news-title">More News</h5>
+          <p>More description here</p>
+        </div>
+        <div class="news-card hidden ">
+          <img src="images/third.jpg" alt="fourth news" />
+          <h5 class="news-title">More News</h5>
+          <p>More description here</p>
+        </div>
+        <div class="news-card hidden ">
+          <img src="images/third.jpg" alt="fourth news" />
+          <h5 class="news-title">More News</h5>
+          <p>More description here</p>
+        </div>
+
+        <div class="news-btn">
+          <button class="view-more" onclick="showMore(this)">
+            View More
+          </button>
+        </div>
       </div>
     </section>
 
@@ -91,9 +111,6 @@
       <h1 class="testimonial-title">Testimonials</h1>
       <h2 class="testimonial-desc">Here's what people are saying</h2>
       <div class="testimonial-grid">
-        <!-- <img src="images/eighth.jpg" alt="Test1"/>
-        <img src="images/nineth.jpg" alt="Test2"/>
-        <img src="images/tenth.jpg" alt="Test3"/> -->
         <div class="testimonial-card">
           <h4>Carl</h4>
           <p>★★★★★</p>
@@ -117,37 +134,37 @@
           <p>Overall the platform is good but the free tier could improve.</p>
         </div>
 
-        <!-- Row 2 (Hidden initially) -->
-        <div class="testimonial-card hidden">
+        <!-- More testimonial -->
+        <div class="testimonial-card hidden ">
           <h4>Jason</h4>
           <p>★★★★★</p>
           <p>Very easy to navigate and the articles are informative.</p>
         </div>
 
-        <div class="testimonial-card hidden">
+        <div class="testimonial-card hidden ">
           <h4>Anna</h4>
           <p>★★★★★</p>
           <p>I love the clean design and simple layout.</p>
         </div>
 
-        <div class="testimonial-card hidden">
+        <div class="testimonial-card hidden ">
           <h4>David</h4>
           <p>★★★★☆</p>
           <p>Great content but would like more technology news.</p>
         </div>
-        <div class="testimonial-card hidden">
+        <div class="testimonial-card hidden ">
           <h4>James</h4>
           <p>★★★★★</p>
           <p>Very easy to navigate and the articles are informative.</p>
         </div>
 
-        <div class="testimonial-card hidden">
+        <div class="testimonial-card hidden ">
           <h4>Ben</h4>
           <p>★★★★★</p>
           <p>I love the clean design and simple layout.</p>
         </div>
 
-        <div class="testimonial-card hidden">
+        <div class="testimonial-card hidden ">
           <h4>Goliath</h4>
           <p>★★★★☆</p>
           <p>Great content but would like more technology news.</p>
@@ -155,7 +172,9 @@
 
         <br />
         <div class="testimonial-btn">
-          <button class="view-more" onclick="showMore()">View More</button>
+          <button class="view-more" onclick="showMore(this)">
+            View More
+          </button>
         </div>
       </div>
     </section>
@@ -167,20 +186,46 @@
         <img src="images/fifth.jpg" alt="View Articles" />
         <img src="images/sixth.jpg" alt="Post Articles" />
         <img src="images/seventh.jpg" alt="View Testimonials" />
+
+        <img
+          src="images/feature5.jpg"
+          class="hidden "
+          alt="Add Comments"
+        />
+        <img
+          src="images/feature6.jpg"
+          class="hidden "
+          alt="Add Comments"
+        />
+        <img
+          src="images/feature7.jpg"
+          class="hidden "
+          alt="Add Comments"
+        />
+        <img
+          src="images/feature8.jpg"
+          class="hidden "
+          alt="Add Comments"
+        />
+
         <br />
-        <button class="view-more">View More</button>
+        <div class="product-features-btn">
+          <button class="view-more" onclick="showMore(this)">
+            View More
+          </button>
+        </div>
       </div>
     </section>
 
     <script>
-      function showMore() {
-        let hiddenCards = document.querySelectorAll(".hidden");
+      function showMore(button) {
+        let section = button.closest("section");
+        let hiddenItems = section.querySelectorAll(".hidden");
 
-        hiddenCards.forEach(function (card) {
-          card.style.display = "block";
+        hiddenItems.forEach(function (item) {
+          item.style.display = "block";
+          item.classList.remove("hidden");
         });
-
-        document.querySelector(".view-more").style.display = "none";
       }
     </script>
   </body>
