@@ -91,6 +91,11 @@ html {
   font-size: 24px;
   font-family: Inter;
 }
+
+.news,.para {
+  font-size:18px;
+}
+
 .news-btn {
   text-align: center;
 }
