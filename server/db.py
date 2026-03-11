@@ -1,10 +1,10 @@
 import mysql.connector
 
-def get_db_connection():
-    db = mysql.connector.connect(
+def connect_db():
+    connection = mysql.connector.connect(
         host="localhost",
         user="root",
         password="",
-        database="mydatabase"
+        database="news_system"
     )
-    return db
+    return connection
