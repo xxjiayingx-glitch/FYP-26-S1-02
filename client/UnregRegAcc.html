@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Scoop</title>
+    <link rel="stylesheet" href="UnregHome.css" />
+  </head>
+
+  <header class="navbar">
+    <div class="logo">
+      <h1>Daily Scoop</h1>
+      <h1>News System</h1>
+    </div>
+
+    <nav class="navLinks">
+      <a href="/company-profile">Company Profile</a>
+      <a href="/product-feature">Product Feature</a>
+      <a href="/articles">Articles</a>
+      <a href="/subscription">Subscription</a>
+      <a href="/testimonials">Testimonials</a>
+      <a href="/login">Log In</a>
+    </nav>
+  </header>
+
+  <body>
+      <div class="form-container">
+      <h2>Welcome!</h2>
+      <p>Sign Up</p>
+
+      <form action="/signup" method="POST">
+
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" placeholder="First Name" />
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" placeholder="Last Name" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" />
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter your username" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Password" />
+          <small>Minimum 10 Characters</small>
+        </div>
+
+        <div class="form-group">
+          <label for="retypePassword">Retype Password</label>
+          <input type="password" id="retypePassword" name="retypePassword" placeholder="Retype" />
+        </div>
+
+        <button type="submit" class="signup-btn">Sign Up</button>
+
+      </form>
+
+      <p class="signin-link">Have an account? <a href="/login">Sign In</a></p>
+    </div>
+  </body>
+</html>
