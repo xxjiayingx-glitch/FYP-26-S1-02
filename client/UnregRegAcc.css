@@ -1,3 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
 /* Header section */
 .navbar {
   display: flex;
@@ -13,6 +16,11 @@
   font-family: Inter;
   margin: 0;
   color: #000000;
+}
+
+.logo a{
+    text-decoration: none;
+    color: inherit;
 }
 
 .navLinks {

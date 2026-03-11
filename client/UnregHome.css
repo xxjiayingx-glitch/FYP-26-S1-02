@@ -18,6 +18,11 @@
   color: #000000;
 }
 
+.logo a{
+    text-decoration: none;
+    color: inherit;
+}
+
 .navLinks {
   display: flex;
   align-items: center;
