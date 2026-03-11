@@ -35,6 +35,10 @@
   text-decoration: underline;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Body section */
 .headline {
   display: grid;
