@@ -47,59 +47,140 @@
     <section class="news">
       <div class="news-grid">
         <div>
-            <img src="images/first.jpg" alt="first news"/>
-            <h5 class="news-title">
-                S'pore passes tougher laws on vapes with heavier penalties; protecting young a concern
-            </h5>
-            <p>Vaping was banned in Singapore in 2018, with those caught using one facing a fine of up to $2,000.
-            </p>
+          <img src="images/first.jpg" alt="first news" />
+          <h5 class="news-title">
+            S'pore passes tougher laws on vapes with heavier penalties;
+            protecting young a concern
+          </h5>
+          <p>
+            Vaping was banned in Singapore in 2018, with those caught using one
+            facing a fine of up to $2,000.
+          </p>
         </div>
         <div>
-            <img src="images/second.jpg" alt="second news"/>
-            <h5 class="news-title">
-                S'pore passes tougher laws on vapes with heavier penalties; protecting young a concern
-            </h5>
-            <p>Vaping was banned in Singapore in 2018, with those caught using one facing a fine of up to $2,000.
-            </p>
+          <img src="images/second.jpg" alt="second news" />
+          <h5 class="news-title">
+            S'pore passes tougher laws on vapes with heavier penalties;
+            protecting young a concern
+          </h5>
+          <p>
+            Vaping was banned in Singapore in 2018, with those caught using one
+            facing a fine of up to $2,000.
+          </p>
         </div>
 
         <div>
-            <img src="images/third.jpg" alt="third news"/>
-            <h5 class="news-title">
-                S'pore passes tougher laws on vapes with heavier penalties; protecting young a concern
-            </h5>
-            <p>Vaping was banned in Singapore in 2018, with those caught using one facing a fine of up to $2,000.
-            </p>
+          <img src="images/third.jpg" alt="third news" />
+          <h5 class="news-title">
+            S'pore passes tougher laws on vapes with heavier penalties;
+            protecting young a concern
+          </h5>
+          <p>
+            Vaping was banned in Singapore in 2018, with those caught using one
+            facing a fine of up to $2,000.
+          </p>
         </div>
-        
-        <button class="view-more"> View More</button>
+
+        <button class="view-more">View More</button>
       </div>
-    
     </section>
 
     <section class="testimonials">
       <h1 class="testimonial-title">Testimonials</h1>
-      <div class="news-grid">
-        <img src="images/eighth.jpg" alt="Test1"/>
+      <h2 class="testimonial-desc">Here's what people are saying</h2>
+      <div class="testimonial-grid">
+        <!-- <img src="images/eighth.jpg" alt="Test1"/>
         <img src="images/nineth.jpg" alt="Test2"/>
-        <img src="images/tenth.jpg" alt="Test3"/>
-        <br>
-        <button class="view-more"> View More</button>
+        <img src="images/tenth.jpg" alt="Test3"/> -->
+        <div class="testimonial-card">
+          <h4>Carl</h4>
+          <p>★★★★★</p>
+          <p>
+            A reliable news platform with interesting articles and a great
+            reading experience.
+          </p>
+        </div>
+
+        <div class="testimonial-card">
+          <h4>Sally</h4>
+          <p>★★★★★</p>
+          <p>
+            As a premium user, I enjoy the analytics insights for my articles.
+          </p>
+        </div>
+
+        <div class="testimonial-card">
+          <h4>Clara</h4>
+          <p>★★★★☆</p>
+          <p>Overall the platform is good but the free tier could improve.</p>
+        </div>
+
+        <!-- Row 2 (Hidden initially) -->
+        <div class="testimonial-card hidden">
+          <h4>Jason</h4>
+          <p>★★★★★</p>
+          <p>Very easy to navigate and the articles are informative.</p>
+        </div>
+
+        <div class="testimonial-card hidden">
+          <h4>Anna</h4>
+          <p>★★★★★</p>
+          <p>I love the clean design and simple layout.</p>
+        </div>
+
+        <div class="testimonial-card hidden">
+          <h4>David</h4>
+          <p>★★★★☆</p>
+          <p>Great content but would like more technology news.</p>
+        </div>
+        <div class="testimonial-card hidden">
+          <h4>James</h4>
+          <p>★★★★★</p>
+          <p>Very easy to navigate and the articles are informative.</p>
+        </div>
+
+        <div class="testimonial-card hidden">
+          <h4>Ben</h4>
+          <p>★★★★★</p>
+          <p>I love the clean design and simple layout.</p>
+        </div>
+
+        <div class="testimonial-card hidden">
+          <h4>Goliath</h4>
+          <p>★★★★☆</p>
+          <p>Great content but would like more technology news.</p>
+        </div>
+
+        <br />
+        <div class="testimonial-btn">
+          <button class="view-more" onclick="showMore()">View More</button>
+        </div>
       </div>
     </section>
-
 
     <section class="feature">
-      <h1 class="feature-title">Product Feature</h1>
+      <h1 class="features-title">Product Feature</h1>
       <div class="features-grid">
-        <img src="images/fourth.jpg" alt="Add Comments"/>
-        <img src="images/fifth.jpg" alt="View Articles"/>
-        <img src="images/sixth.jpg" alt="Post Articles"/>
-        <img src="images/seventh.jpg" alt="View Testimonials"/>
-        <br>
-        <button class="view-more"> View More</button>
+        <img src="images/fourth.jpg" alt="Add Comments" />
+        <img src="images/fifth.jpg" alt="View Articles" />
+        <img src="images/sixth.jpg" alt="Post Articles" />
+        <img src="images/seventh.jpg" alt="View Testimonials" />
+        <br />
+        <button class="view-more">View More</button>
       </div>
     </section>
+
+    <script>
+      function showMore() {
+        let hiddenCards = document.querySelectorAll(".hidden");
+
+        hiddenCards.forEach(function (card) {
+          card.style.display = "block";
+        });
+
+        document.querySelector(".view-more").style.display = "none";
+      }
+    </script>
   </body>
 
   <footer class="footer">
