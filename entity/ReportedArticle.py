@@ -30,3 +30,13 @@ class ReportedArticle:
         result = cursor.fetchall()
         conn.close()
         return result
+
+    def report_article(articleID,userID,reason):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = """
+    INSERT INTO ReportedArticle(articleID,userID,optionalComment,reported_at)
+    VALUES(%s,%s,%s,NOW())
+    """
+    cursor.execute(query,(articleID,userID,reason))
+    conn.commit()
