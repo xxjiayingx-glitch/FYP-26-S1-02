@@ -1,4 +1,4 @@
-from entity.report_entity import report_article
+from entity.Report import report_article
 
 def report(articleID,userID,reason):
 

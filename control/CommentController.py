@@ -1,12 +1,10 @@
-from entity.comment_entity import CommentEntity
+from entity.Comment import CommentEntity 
 
 comment_entity = CommentEntity()
 
-def __init__(self):
-        self.comment_entity = CommentEntity()
-
 def add_comment(articleID, userID, commentText):
-
+    """
+    Adds a comment to the database
+    """
     comment_entity.add_comment(articleID, userID, commentText)
-
     print("Comment Added")
