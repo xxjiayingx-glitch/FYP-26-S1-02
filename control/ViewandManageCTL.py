@@ -1,7 +1,4 @@
-from entity.subscription_entity import get_subscription
+from entity.Subscription import Subscription 
 
 def view_subscription(userID):
-
-    sub = get_subscription(userID)
-
-    return sub
+    return Subscription.get_subscription(userID)  
