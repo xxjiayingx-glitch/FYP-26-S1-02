@@ -1,0 +1,273 @@
+@import url("https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Page layout */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: Inter, sans-serif;
+}
+
+/* ── Header ── */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #83c6ff;
+}
+
+.logo h1 {
+  font-size: 40px;
+  font-weight: 800;
+  font-family: Inter, sans-serif;
+  margin: 0;
+  color: #000000;
+  line-height: 1.1;
+}
+
+.logo a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.navLinks a {
+  text-decoration: none;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.navLinks a:hover {
+  text-decoration: underline;
+}
+
+/* ── Main content area (white, centered) ── */
+.page-content {
+  flex: 1;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 16px 80px;
+}
+
+/* ── Form container ── */
+.form-container {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.form-container h2 {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: Inter, sans-serif;
+  color: #000;
+  margin-bottom: 4px;
+}
+
+.form-container > p {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 24px;
+}
+
+/* Form fields */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #000;
+  font-family: Inter, sans-serif;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px 4px;
+  border: none;
+  border-bottom: 1px solid #bbb;
+  background: transparent;
+  font-size: 13px;
+  font-family: Inter, sans-serif;
+  color: #333;
+  outline: none;
+}
+
+.form-group input::placeholder {
+  color: #ccc;
+  font-size: 12px;
+}
+
+.form-group input:focus {
+  border-bottom: 1px solid #000;
+}
+
+.form-group small {
+  font-size: 11px;
+  color: #999;
+  text-align: right;
+}
+
+/* Sign Up button */
+.signup-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background-color: #2d5a1b;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: Inter, sans-serif;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.signup-btn:hover {
+  background-color: #1e3d12;
+}
+
+/* Sign in link */
+.signin-link {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #444;
+  text-align: center;
+}
+
+.signin-link a {
+  color: #2d5a1b;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signin-link a:hover {
+  text-decoration: underline;
+}
+
+/* ── Footer ── */
+.footer {
+  background-color: #83c6ff;
+  font-family: "Inknut Antiqua", serif;
+  width: 100%;
+}
+
+.footer-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 44px 24px 36px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 48px;
+}
+
+.footer-brand {
+  border-right: 1px solid #2d3f52;
+  padding-right: 40px;
+}
+
+.footer-links-section {
+  padding-left: 40px;
+}
+
+.footer-title {
+  color: #000;
+  font-weight: 800;
+  font-size: 36px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #2d3f52;
+  padding-bottom: 8px;
+}
+
+.footer-description {
+  font-size: 16px;
+  line-height: 1.75;
+  color: #000;
+  max-width: 260px;
+  margin-bottom: 22px;
+}
+
+.footer-social {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-social-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.18s, transform 0.18s;
+}
+
+.footer-social-icon:hover {
+  opacity: 0.8;
+  transform: scale(1.12);
+}
+
+.facebook  { background: #1877f2; }
+.linkedin  { background: #0a66c2; }
+.twitter   { background: #000; }
+
+.footer-links-title {
+  color: #000;
+  font-weight: 700;
+  font-size: 32px;
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid #2d3f52;
+  padding-bottom: 8px;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+}
+
+.footer-link {
+  color: #000;
+  text-decoration: none;
+  font-size: 16px;
+  line-height: 1.6;
+  transition: color 0.15s;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
