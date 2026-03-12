@@ -1,5 +1,5 @@
 from flask import Blueprint,render_template,request,redirect,session
-from control.auth_controller import AuthController
+from control.LoginCTL import AuthController
 
 login_bp = Blueprint('login',__name__)
 

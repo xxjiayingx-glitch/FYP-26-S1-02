@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, session
-from control.user_controller import update_user_profile
+from control.UpdateProfileCTL import update_user_profile
 
 profile_bp = Blueprint('profile', __name__)
 

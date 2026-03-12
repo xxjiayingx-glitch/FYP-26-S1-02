@@ -1,4 +1,4 @@
-from entity.user_entity import UserEntity
+from entity.User import UserEntity
 
 user_entity = UserEntity()
 

@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 import mysql.connector
 
-from boundary.login_boundary import login_bp
-from boundary.user_profile_boundary import profile_bp
-from boundary.article_boundary import article_bp
-from boundary.comment_boundary import comment_bp
-from boundary.subscription_boundary import subscription_bp
+from boundary.LoginPage import login_bp
+from boundary.UpdateProfilePage import profile_bp
+from boundary.SearchPage import article_bp
+from boundary.ArticlePage import comment_bp
+from boundary.ViewandManagePage import subscription_bp
 
 app = Flask(__name__)
 app.secret_key = "secretkey"

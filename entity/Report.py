@@ -1,4 +1,4 @@
-from entity.database import connect_db
+from entity.db_connection import connect_db
 
 def report_article(articleID,userID,reason):
 

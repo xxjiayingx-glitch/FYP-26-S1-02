@@ -1,5 +1,5 @@
 from flask import Blueprint, request, redirect, session
-from control.comment_controller import add_comment
+from control.CommentController import add_comment
 
 comment_bp = Blueprint('comment', __name__)
 

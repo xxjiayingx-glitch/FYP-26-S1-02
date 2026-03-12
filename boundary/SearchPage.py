@@ -1,5 +1,5 @@
 from flask import Blueprint,render_template,request
-from control.article_controller import ArticleController
+from control.ArticleController import ArticleController
 
 article_bp = Blueprint('article',__name__)
 
