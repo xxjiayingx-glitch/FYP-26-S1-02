@@ -1,8 +1,8 @@
 from flask import jsonify, request
 from flask_cors import cross_origin
-from app.entities.CompanyProfile import CompanyProfile
-from app.db import get_database
-from app.routes.UnregisteredUser_routes import UnregisteredUser
+from control.entities.CompanyProfile import CompanyProfile
+from control.db import get_database
+from control.routes.UnregisteredUser_routes import UnregisteredUser
 
 
 class ViewCompanyProfileCTL:

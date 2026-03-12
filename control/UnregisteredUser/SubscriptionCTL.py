@@ -1,9 +1,4 @@
-from flask import jsonify
-from flask_cors import cross_origin
-from app.entities.SubscriptionPlan import SubscriptionPlan
-from app.db import get_database
-from app.routes.UnregisteredUser_routes import UnregisteredUser
-
+from entity.subscription_entity import get_subscription
 
 class SubscriptionCTL:
     def __init__(self):
