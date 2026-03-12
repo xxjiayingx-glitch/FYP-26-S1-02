@@ -1,0 +1,57 @@
+{% block title %}Premium User Home{% endblock %}
+
+{% block content %}
+<div class="hero-box">
+    <span class="badge badge-premium">Premium Registered User</span>
+    <h2>Welcome, {{ session.get('username', 'User') }}</h2>
+    <p>Your premium plan includes article recommendations, saved articles, verified publisher badge support, and article insights tools.</p>
+    <div class="card-actions">
+        <a class="btn" href="{{ url_for('insight') }}">Go to Insights</a>
+        <a class="btn" href="{{ url_for('saved_articles') }}">Saved Articles</a>
+    </div>
+</div>
+
+<div class="section-box">
+    <h2 class="section-title">Recommended for You + Latest News</h2>
+    <div class="search-bar">
+        <input type="text" placeholder="Search articles by title or keyword">
+        <button class="btn">Search</button>
+    </div>
+
+    <div class="card-grid">
+        <div class="news-card">
+            <span class="badge badge-verified">Verified Publisher Badge</span>
+            <h3>Global News Credibility Review</h3>
+            <div class="news-meta">Category: World | 12 Mar 2026</div>
+            <p>Premium users can access extended metadata, credibility signals, and deeper fact-checking review output.</p>
+            <div class="card-actions">
+                <a class="btn" href="{{ url_for('article_detail') }}">View Article</a>
+                <button class="btn">Save Article</button>
+                <button class="btn btn-danger">Report Article</button>
+            </div>
+        </div>
+
+        <div class="news-card">
+            <h3>Priority AI Article Review Summary</h3>
+            <div class="news-meta">Category: AI | 11 Mar 2026</div>
+            <p>See recommended content based on your activity and premium-level review priority features.</p>
+            <div class="card-actions">
+                <a class="btn" href="{{ url_for('article_detail') }}">View Article</a>
+                <button class="btn">Save Article</button>
+                <button class="btn btn-danger">Report Article</button>
+            </div>
+        </div>
+
+        <div class="news-card">
+            <h3>Editorial Transparency in Modern News</h3>
+            <div class="news-meta">Category: Media | 10 Mar 2026</div>
+            <p>Understand article performance and review whether a publisher has credibility indicators attached.</p>
+            <div class="card-actions">
+                <a class="btn" href="{{ url_for('article_detail') }}">View Article</a>
+                <button class="btn">Save Article</button>
+                <button class="btn btn-danger">Report Article</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,26 +1,46 @@
-from entity.database import connect_db
+from entity.db_connection import get_db_connection
 
-def get_user(username, password):
+class UserEntity:
 
-    conn = connect_db()
-    cursor = conn.cursor(dictionary=True)
+    def login(self,email,pwd):
 
-    query = "SELECT * FROM UserAccount WHERE username=%s AND pwd=%s"
-    cursor.execute(query,(username,password))
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    return cursor.fetchone()
+        sql = "SELECT * FROM UserAccount WHERE email=%s AND pwd=%s"
+        cursor.execute(sql,(email,pwd))
+
+        user = cursor.fetchone()
+        conn.close()
+
+        return user
 
 
-def update_profile(userID, phone, email):
+    def get_profile(self,userID):
 
-    conn = connect_db()
-    cursor = conn.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    query = """
-    UPDATE UserAccount
-    SET phone=%s,email=%s
-    WHERE userID=%s
-    """
+        sql = "SELECT * FROM UserAccount WHERE userID=%s"
+        cursor.execute(sql,(userID,))
 
-    cursor.execute(query,(phone,email,userID))
-    conn.commit()
+        user = cursor.fetchone()
+        conn.close()
+
+        return user
+
+
+    def update_profile(self,userID,first,last,phone):
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        sql = """
+        UPDATE UserAccount
+        SET first_name=%s,last_name=%s,phone=%s
+        WHERE userID=%s
+        """
+
+        cursor.execute(sql,(first,last,phone,userID))
+        conn.commit()
+        conn.close()

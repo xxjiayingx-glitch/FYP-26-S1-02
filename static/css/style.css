@@ -1,0 +1,102 @@
+grid-template-columns: 2fr 1fr;
+gap: 20px;
+}
+
+.article-main,
+.article-side {
+    background: #fff;
+    border: 1px solid #cddfea;
+    padding: 20px;
+}
+
+.article-title {
+    margin-top: 0;
+    color: #1f4f6b;
+}
+
+.article-body {
+    line-height: 1.7;
+    color: #333;
+}
+
+.comment-box {
+    margin-top: 18px;
+    border-top: 1px solid #e6eef4;
+    padding-top: 16px;
+}
+
+.insight-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.stat-card p {
+    margin: 8px 0;
+}
+
+.subscription-grid,
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.plan-card {
+    background: #fff;
+    border: 1px solid #cddfea;
+    padding: 18px;
+}
+
+.plan-card h3 {
+    margin-top: 0;
+    color: #1f4f6b;
+}
+
+.price {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1f4f6b;
+    margin: 10px 0;
+}
+
+.footer {
+    background: #cfe8f7;
+    border-top: 1px solid #9fc7de;
+    padding: 22px 0;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.footer-box h4 {
+    margin-top: 0;
+    color: #1f4f6b;
+}
+
+.muted {
+    color: #687b86;
+    font-size: 13px;
+}
+
+@media (max-width: 900px) {
+
+    .profile-layout,
+    .article-layout,
+    .insight-grid,
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}

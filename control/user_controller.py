@@ -1,7 +1,9 @@
-from entity.user_entity import update_profile
+from entity.user_entity import UserEntity
 
-def update_user_profile(userID,phone,email):
+user_entity = UserEntity()
 
-    update_profile(userID,phone,email)
+def update_user_profile(userID, first, last, phone):
+
+    user_entity.update_profile(userID, first, last, phone)
 
     print("Profile Updated")

@@ -1,0 +1,13 @@
+<h2>Articles</h2>
+
+<form method="POST" action="/search">
+<input name="keyword">
+<button>Search</button>
+</form>
+
+{% for article in articles %}
+
+<h3>{{article.articleTitle}}</h3>
+<p>{{article.content}}</p>
+
+{% endfor %}

@@ -1,8 +1,15 @@
-from control.comment_controller import comment_article
+from flask import Blueprint, request, redirect, session
+from control.comment_controller import add_comment
 
-def comment(userID):
+comment_bp = Blueprint('comment', __name__)
 
-    articleID = input("Article ID: ")
-    text = input("Comment: ")
+@comment_bp.route("/add_comment", methods=["POST"])
+def add_comment_route():
 
-    comment_article(articleID,userID,text)
+    articleID = request.form["articleID"]
+    commentText = request.form["commentText"]
+    userID = session["userID"]
+
+    add_comment(articleID, userID, commentText)
+
+    return redirect("/dashboard")

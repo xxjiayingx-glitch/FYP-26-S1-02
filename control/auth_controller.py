@@ -1,10 +1,14 @@
-from entity.user_entity import get_user
+from entity.user_entity import UserEntity
 
-def login_user(username,password):
+class AuthController:
 
-    user = get_user(username,password)
+    def __init__(self):
+        self.user_entity = UserEntity()
 
-    if user:
-        return user
-    else:
+    def login(self,email,pwd):
+
+        user = self.user_entity.login(email,pwd)
+
+        if user:
+            return user
         return None

@@ -1,15 +1,22 @@
-from control.auth_controller import login_user
+from flask import Blueprint,render_template,request,redirect,session
+from control.auth_controller import AuthController
 
+login_bp = Blueprint('login',__name__)
+
+auth = AuthController()
+
+@login_bp.route("/",methods=["GET","POST"])
 def login():
 
-    username = input("Username: ")
-    password = input("Password: ")
+    if request.method=="POST":
 
-    user = login_user(username,password)
+        email = request.form["email"]
+        pwd = request.form["password"]
 
-    if user:
-        print("Login Successful")
-        return user
-    else:
-        print("Login Failed")
-        return None
+        user = auth.login(email,pwd)
+
+        if user:
+            session["userID"] = user["userID"]
+            return redirect("/dashboard")
+
+    return render_template("login.html")

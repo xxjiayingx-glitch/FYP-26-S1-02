@@ -1,8 +1,23 @@
+from flask import Blueprint, render_template, request, redirect, session
 from control.user_controller import update_user_profile
 
-def update_profile(userID):
+profile_bp = Blueprint('profile', __name__)
 
-    phone = input("New Phone: ")
-    email = input("New Email: ")
+@profile_bp.route("/profile")
+def profile():
 
-    update_user_profile(userID,phone,email)
+    return render_template("profile.html")
+
+
+@profile_bp.route("/update_profile", methods=["POST"])
+def update_profile():
+
+    userID = session["userID"]
+
+    first = request.form["first_name"]
+    last = request.form["last_name"]
+    phone = request.form["phone"]
+
+    update_user_profile(userID, first, last, phone)
+
+    return redirect("/profile")

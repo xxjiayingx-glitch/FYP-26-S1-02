@@ -1,7 +1,15 @@
-from entity.article_entity import get_articles, search_articles
+from entity.article_entity import ArticleEntity
 
-def view_articles():
-    return get_articles()
+class ArticleController:
 
-def search_article(keyword):
-    return search_articles(keyword)
+    def __init__(self):
+        self.article_entity = ArticleEntity()
+
+    def get_articles(self):
+        return self.article_entity.get_all_articles()
+
+    def search(self,keyword):
+        return self.article_entity.search_articles(keyword)
+
+    def get_article(self,id):
+        return self.article_entity.get_article(id)

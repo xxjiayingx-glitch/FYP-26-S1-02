@@ -1,10 +1,8 @@
-from control.subscription_controller import view_subscription
+from flask import Blueprint, render_template
 
-def view_subscription_info(userID):
+subscription_bp = Blueprint('subscription', __name__)
 
-    sub = view_subscription(userID)
+@subscription_bp.route("/subscription")
+def subscription():
 
-    if sub:
-        print("Subscription Active")
-    else:
-        print("Free User")
+    return render_template("subscription.html")

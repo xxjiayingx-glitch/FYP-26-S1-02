@@ -1,14 +1,17 @@
-from entity.database import connect_db
+from entity.db_connection import get_db_connection
 
-def add_comment(articleID,userID,comment):
+class CommentEntity:
 
-    conn = connect_db()
-    cursor = conn.cursor()
+    def add_comment(self,articleID,userID,text):
 
-    query = """
-    INSERT INTO Comment(articleID,userID,commentText,created_at)
-    VALUES(%s,%s,%s,NOW())
-    """
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    cursor.execute(query,(articleID,userID,comment))
-    conn.commit()
+        sql="""
+        INSERT INTO Comment(articleID,userID,commentText,created_at)
+        VALUES(%s,%s,%s,NOW())
+        """
+
+        cursor.execute(sql,(articleID,userID,text))
+        conn.commit()
+        conn.close()

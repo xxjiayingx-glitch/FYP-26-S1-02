@@ -1,22 +1,42 @@
-from entity.database import connect_db
+from entity.db_connection import get_db_connection
 
-def get_articles():
+class ArticleEntity:
 
-    conn = connect_db()
-    cursor = conn.cursor(dictionary=True)
+    def get_all_articles(self):
 
-    cursor.execute("SELECT articleID, articleTitle FROM Article")
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    return cursor.fetchall()
+        cursor.execute("SELECT * FROM Article")
+        articles = cursor.fetchall()
+
+        conn.close()
+        return articles
 
 
-def search_articles(keyword):
+    def search_articles(self,keyword):
 
-    conn = connect_db()
-    cursor = conn.cursor(dictionary=True)
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    query = "SELECT articleTitle FROM Article WHERE articleTitle LIKE %s"
+        sql = "SELECT * FROM Article WHERE articleTitle LIKE %s"
+        cursor.execute(sql,('%'+keyword+'%',))
 
-    cursor.execute(query,("%"+keyword+"%",))
+        articles = cursor.fetchall()
+        conn.close()
 
-    return cursor.fetchall()
+        return articles
+
+
+    def get_article(self,articleID):
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        sql="SELECT * FROM Article WHERE articleID=%s"
+        cursor.execute(sql,(articleID,))
+
+        article = cursor.fetchone()
+        conn.close()
+
+        return article

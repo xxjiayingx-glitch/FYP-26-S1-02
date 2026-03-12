@@ -1,18 +1,23 @@
-from control.article_controller import view_articles, search_article
+from flask import Blueprint,render_template,request
+from control.article_controller import ArticleController
 
-def display_articles():
+article_bp = Blueprint('article',__name__)
 
-    articles = view_articles()
+article_controller = ArticleController()
 
-    for a in articles:
-        print(a["articleID"], a["articleTitle"])
+@article_bp.route("/dashboard")
+def dashboard():
+
+    articles = article_controller.get_articles()
+
+    return render_template("articles.html",articles=articles)
 
 
-def search_articles():
+@article_bp.route("/search",methods=["POST"])
+def search():
 
-    keyword = input("Keyword: ")
+    keyword = request.form["keyword"]
 
-    results = search_article(keyword)
+    articles = article_controller.search(keyword)
 
-    for r in results:
-        print(r["articleTitle"])
+    return render_template("articles.html",articles=articles)
