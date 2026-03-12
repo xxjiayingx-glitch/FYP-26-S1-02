@@ -3,83 +3,315 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Daily Scoop</title>
-    <link rel="stylesheet" href="../../static/css/Unregistered/UnregCompanyProf.css" />
+    <title>Daily Scoop - Our Company</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html, body {
+        height: 100%;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        font-family: Inter, sans-serif;
+        background-color: #ffffff;
+      }
+
+      /* ── NAVBAR ── */
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background-color: #83c6ff;
+      }
+
+      .logo h1 {
+        font-size: 28px;
+        font-weight: 800;
+        font-family: Inter, sans-serif;
+        margin: 0;
+        color: #000;
+        line-height: 1.2;
+      }
+
+      .logo a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .navLinks {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+
+      .navLinks a {
+        text-decoration: none;
+        color: #000;
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .navLinks a:hover {
+        text-decoration: underline;
+      }
+
+      /* ── MAIN CONTENT ── */
+      main {
+        flex: 1;
+        padding: 48px 32px 64px;
+        background-color: #fff;
+      }
+
+      .section-title {
+        font-family: Inter, sans-serif;
+        font-size: 40px;
+        font-weight: 800;
+        color: #000;
+        margin-bottom: 32px;
+      }
+
+      .company-card {
+        display: flex;
+        align-items: stretch;
+        border-radius: 4px;
+        overflow: hidden;
+        max-width: 900px;
+        min-height: 320px;
+      }
+
+      /* Image placeholder — swap src when ready */
+      .card-image {
+        flex: 0 0 55%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* Placeholder shown when no image is present */
+      .img-placeholder {
+        width: 100%;
+        height: 100%;
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #7a9e74;
+        font-size: 14px;
+        font-family: Inter, sans-serif;
+        gap: 10px;
+      }
+
+      .img-placeholder svg {
+        opacity: 0.5;
+      }
+
+      .card-text {
+        flex: 1;
+        padding: 40px 36px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .card-text h2 {
+        font-family: Inter, sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 16px;
+      }
+
+      .card-text p {
+        font-family: Inter, sans-serif;
+        font-size: 14px;
+        line-height: 1.75;
+        color: #222;
+      }
+
+      /* ── FOOTER ── */
+      .footer {
+        background-color: #83c6ff;
+        font-family: "Inknut Antiqua", serif;
+      }
+
+      .footer-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 44px 24px 36px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 48px;
+      }
+
+      .footer-brand {
+        border-right: 1px solid #2d3f52;
+        padding-right: 40px;
+      }
+
+      .footer-links-section {
+        padding-left: 40px;
+      }
+
+      .footer-title {
+        color: #000;
+        font-weight: 800;
+        font-size: 24px;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #2d3f52;
+        padding-bottom: 8px;
+      }
+
+      .footer-description {
+        font-size: 13px;
+        line-height: 1.75;
+        color: #000;
+        max-width: 260px;
+        margin-bottom: 22px;
+      }
+
+      .footer-social {
+        display: flex;
+        gap: 12px;
+      }
+
+      .footer-social-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.18s, transform 0.18s;
+      }
+
+      .footer-social-icon:hover {
+        opacity: 0.8;
+        transform: scale(1.12);
+      }
+
+      .facebook { background: #1877f2; }
+      .linkedin  { background: #0a66c2; }
+      .twitter   { background: #000; }
+
+      .footer-links-title {
+        color: #000;
+        font-weight: 700;
+        font-size: 22px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid #2d3f52;
+        padding-bottom: 8px;
+      }
+
+      .footer-links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 20px;
+      }
+
+      .footer-link {
+        color: #000;
+        text-decoration: none;
+        font-size: 13px;
+        line-height: 1.6;
+        transition: color 0.15s;
+      }
+
+      .footer-link:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
 
-  <header class="navbar">
-    <div class="logo">
-      <a href="UnregHome.html">
-         <h1>Daily Scoop</h1>
-        <h1>News System</h1>
-      </a>
-    </div>
-
-    <nav class="navLinks">
-      <a href="UnregCompanyProf.html">Company Profile</a>
-       <a href="#product-feature">Product Feature</a>
-      <a href="#articles">Articles</a>
-      <a href="UnregSubscription.html">Subscription</a>
-      <a href="UnregTestimonial.html">Testimonials</a>
-      <a href="UnregLogin.html">Log In</a>
-    </nav>
-  </header>
-
   <body>
-    placeholder
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <div class="logo">
+        <a href="UnregHome.html">
+          <h1>Daily Scoop</h1>
+          <h1>News System</h1>
+        </a>
+      </div>
+      <nav class="navLinks">
+        <a href="UnregCompanyProf.html">Company Profile</a>
+        <a href="#product-feature">Product Feature</a>
+        <a href="#articles">Articles</a>
+        <a href="UnregSubscription.html">Subscription</a>
+        <a href="UnregTestimonial.html">Testimonials</a>
+        <a href="UnregLogin.html">Log In</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1 class="section-title">Our Company</h1>
+
+      <div class="company-card">
+        <img src="images/companyprofile.jpg" alt="Company image">
+
+        <div class="card-text">
+          <h2>Introduction</h2>
+          <p>
+            Daily Scoop News is a multi-user news platform built for both readers and creators. 
+            We empower users to explore, publish, and engage with news in real time — fostering 
+            an active and dynamic community. With AI-assisted fact-checking, we ensure the content 
+            you read is credible and trustworthy. Backed by robust administrative tools and platform 
+            moderation, Daily Scoop News delivers a reliable, interactive, and well-governed space 
+            where quality journalism thrives.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-brand">
+          <h3 class="footer-title">Daily Scoop News</h3>
+          <p class="footer-description">
+            Delivering reliable and AI-powered news to keep readers informed
+            with credible and up-to-date stories.
+          </p>
+          <div class="footer-social">
+            <a href="https://facebook.com" target="_blank" class="footer-social-icon facebook" rel="noopener">f</a>
+            <a href="https://linkedin.com"  target="_blank" class="footer-social-icon linkedin"  rel="noopener">in</a>
+            <a href="https://x.com"         target="_blank" class="footer-social-icon twitter"   rel="noopener">𝕏</a>
+          </div>
+        </div>
+
+        <div class="footer-links-section">
+          <h4 class="footer-links-title">Social Links</h4>
+          <div class="footer-links">
+            <a href="/contact"       class="footer-link">Contact Us</a>
+            <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+            <a href="/about"         class="footer-link">About Us</a>
+            <a href="/terms"         class="footer-link">Terms &amp; Conditions</a>
+            <a href="/support"       class="footer-link">Need help? Reach us here.</a>
+            <a href="/advertise"     class="footer-link">Advertise with us</a>
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
-
-  <footer class="footer">
-    <div class="footer-container">
-      <!-- Brand Section -->
-      <div class="footer-brand">
-        <h3 class="footer-title">Daily Scoop News</h3>
-
-        <p class="footer-description">
-          Delivering reliable and AI-powered news to keep readers informed with
-          credible and up-to-date stories.
-        </p>
-
-        <div class="footer-social">
-          <a
-            href="https://facebook.com"
-            target="_blank"
-            class="footer-social-icon facebook"
-            rel="noopener"
-            >f</a
-          >
-
-          <a
-            href="https://linkedin.com"
-            target="_blank"
-            class="footer-social-icon linkedin"
-            rel="noopener"
-            >in</a
-          >
-
-          <a
-            href="https://x.com"
-            target="_blank"
-            class="footer-social-icon twitter"
-            rel="noopener"
-            >in</a
-          >
-        </div>
-      </div>
-
-      <!-- Links Section -->
-      <div class="footer-links-section">
-        <h4 class="footer-links-title">Social Links</h4>
-
-        <div class="footer-links">
-          <a href="/contact" class="footer-link">Contact Us</a>
-          <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
-          <a href="/about" class="footer-link">About Us</a>
-          <a href="/terms" class="footer-link">Terms & Conditions</a>
-          <a href="/support" class="footer-link">Need help? Reach us here.</a>
-          <a href="/advertise" class="footer-link">Advertise with us</a>
-        </div>
-      </div>
-    </div>
-  </footer>
 </html>
