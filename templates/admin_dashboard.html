@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">Daily Scoop News System</div>
+        <div class="top-right">
+            <div class="user-badge">👤</div>
+            <span>Hi, {{ admin.username }}</span>
+            <a href="#">Logout</a>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="profile-box">
+                <div class="avatar">👤</div>
+                <div>
+                    <div class="username">{{ admin.username }}</div>
+                    <div class="role">{{ admin.userType }}</div>
+                </div>
+            </div>
+
+            <nav class="menu">
+                <a class="active" href="#">Dashboard</a>
+                <a href="#">User Accounts</a>
+                <a href="#">Article Reported</a>
+                <a href="#">Category Management</a>
+                <a href="#">Webpage Management</a>
+                <a href="#">System Monitoring</a>
+                <a href="#">Auto-Publish Rules</a>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <div class="hamburger">☰</div>
+            <h1>System Admin’s Dashboard</h1>
+
+            <section class="stats-grid">
+                <div class="card">
+                    <h3>Total Users</h3>
+                    <p class="number">{{ stats.total_users }}</p>
+                    <span class="positive">N/A</span>
+                </div>
+
+                <div class="card">
+                    <h3>Active Subscriptions</h3>
+                    <p class="number">{{ stats.active_subscriptions }}</p>
+                    <span class="negative">N/A</span>
+                </div>
+
+                <div class="card">
+                    <h3>Reported Articles</h3>
+                    <p class="number">{{ stats.reported_articles }}</p>
+                    <span class="negative">N/A</span>
+                </div>
+
+                <div class="card">
+                    <h3>Total Articles</h3>
+                    <p class="number">{{ stats.total_articles }}</p>
+                    <span class="positive">N/A</span>
+                </div>
+            </section>
+
+            <section class="review-section">
+                <h2 class="action-title">Action needed !</h2>
+                <h3 class="subheading">⚠ Reported Articles Needing Review</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Report On</th>
+                            <th>Report Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if reported_list %}
+                            {% for report in reported_list %}
+                            <tr>
+                                <td>{{ report.reportID }}</td>
+                                <td>{{ report.articleTitle }}</td>
+                                <td>{{ report.report_date }}</td>
+                                <td>{{ report.report_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4">No reported articles for review.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <button class="primary-btn">Review Now</button>
+            </section>
+
+            <section class="activity-section">
+                <h2>Recent Activity</h2>
+
+                {% if recent_logs %}
+                    <div class="activity-list">
+                        {% for log in recent_logs %}
+                            <div class="activity-item">
+                                {{ log.action }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No recent activity found.</p>
+                {% endif %}
+
+                <button class="primary-btn">View More</button>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
