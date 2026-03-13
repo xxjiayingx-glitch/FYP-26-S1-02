@@ -56,9 +56,13 @@ def dashboard():
     if "userID" not in session:
         return redirect(url_for("login"))
 
-    if session.get("userType", "").lower() == "premium":
-        return render_template("premium_dashboard.html")
-    return render_template("free_dashboard.html")
+    user_type = str(session.get("userType", "")).strip().lower()
+    print("SESSION userType =", user_type)
+
+    if user_type == "premium":
+        return render_template("premium_homepage.html")
+
+    return render_template("free_homepage.html")
 
 
 @app.route("/article")

@@ -17,6 +17,9 @@ def login():
 
         if user:
             session["userID"] = user["userID"]
+            session["username"] = user["username"]
+            session["userType"] = user["userType"]
+
             return redirect("/dashboard")
 
     return render_template("login.html")

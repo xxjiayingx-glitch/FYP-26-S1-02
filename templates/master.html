@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Daily Scoop News System{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+        }
+
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background:#f3f3f3;
+            color:#000;
+        }
+
+        a{
+            text-decoration:none;
+            color:inherit;
+        }
+
+        /* TOP NAVBAR */
+        .topbar{
+            background:#c4def4;
+            min-height:90px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:10px 28px;
+        }
+
+        .brand{
+            font-weight:900;
+            font-size:28px;
+            line-height:0.95;
+            color:#000;
+        }
+
+        .nav-links{
+            display:flex;
+            gap:22px;
+            align-items:center;
+            font-size:11px;
+            font-weight:600;
+            color:#111;
+        }
+
+        .nav-links a:hover{
+            text-decoration:underline;
+        }
+
+        /* MAIN CONTENT */
+        .page-wrapper{
+            min-height:calc(100vh - 90px - 190px);
+            padding:30px 28px;
+        }
+
+        /* FOOTER */
+        .footer{
+            background:#a9c3d8;
+            border-top:6px solid #4f94b8;
+            padding:30px 40px;
+        }
+
+        .footer-container{
+            display:flex;
+            justify-content:space-between;
+        }
+
+        .footer-left{
+            width:50%;
+            padding-right:40px;
+        }
+
+        .footer-right{
+            width:50%;
+            padding-left:40px;
+            border-left:2px solid #6e7d87;
+        }
+
+        .footer h2{
+            font-family: Georgia, serif;
+            font-size:26px;
+        }
+
+        .footer-line{
+            border-bottom:2px solid #6e7d87;
+            margin:10px 0 20px;
+        }
+
+        .footer p{
+            font-size:13px;
+            max-width:300px;
+            margin-bottom:40px;
+        }
+
+        .social-icons{
+            display:flex;
+            gap:15px;
+            font-size:18px;
+        }
+
+        .footer-links{
+            display:flex;
+            justify-content:space-between;
+            max-width:450px;
+        }
+
+        .footer-links div{
+            display:flex;
+            flex-direction:column;
+            gap:15px;
+        }
+
+        .footer-links a{
+            font-size:13px;
+            color:#000;
+            text-decoration:none;
+        }
+
+        .footer-links a:hover{
+            text-decoration:underline;
+        }
+        /* optional content helpers */
+        .content-card{
+            background:#fff;
+            border:1px solid #d9d9d9;
+            padding:20px;
+        }
+
+        @media (max-width: 768px){
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+                gap:15px;
+            }
+
+            .nav-links{
+                flex-wrap:wrap;
+                gap:14px;
+            }
+
+            .footer-inner{
+                grid-template-columns:1fr;
+            }
+
+            .footer-box.left{
+                border-right:none;
+                border-bottom:2px solid #6e7d87;
+                padding-bottom:20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <header class="topbar">
+        <div class="brand">
+            Daily Scoop<br>
+            News System
+        </div>
+
+        <nav class="nav-links">
+            <a href="{{ url_for('profile') }}">Own Profile</a>
+            <a href="{{ url_for('testimonial') }}">Testimonials</a>
+            <a href="#">About Us</a>
+            <a href="{{ url_for('logout') }}">Log Out</a>
+        </nav>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="page-wrapper">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        <div class="footer-container">
+
+            <!-- LEFT SIDE -->
+            <div class="footer-left">
+
+                <h2>Daily Scoop News</h2>
+                <div class="footer-line"></div>
+
+                <p>
+                    Delivering reliable and AI-powered news to keep readers
+                    informed with credible and up-to-date stories.
+                </p>
+
+                <div class="social-icons">
+                    <i class="fa-brands fa-instagram"></i>
+                    <i class="fa-brands fa-linkedin"></i>
+                    <i class="fa-brands fa-x-twitter"></i>
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT SIDE -->
+            <div class="footer-right">
+
+                <h2>Social Links</h2>
+                <div class="footer-line"></div>
+
+                <div class="footer-links">
+
+                    <div>
+                        <a href="#">Contact Us</a>
+                        <a href="#">About Us</a>
+                        <a href="#">Need help? Reach us here.</a>
+                    </div>
+
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Advertise with us</a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>
