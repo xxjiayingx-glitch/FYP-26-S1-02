@@ -44,6 +44,7 @@
             font-size:28px;
             line-height:0.95;
             color:#000;
+            cursor:pointer;
         }
 
         .premium-badge{
@@ -185,16 +186,18 @@
     <!-- TOP NAVBAR -->
     <header class="topbar">
         <div class="brand-wrap">
-            <div class="brand">
+
+            <a href="{{ url_for('dashboard') }}" class="brand">
                 Daily Scoop<br>
                 News System
-            </div>
+            </a>
 
             {% if session.get("userType", "").strip().lower() == "premium" %}
             <span class="premium-badge">
-            <i class="fa-solid fa-crown"></i> PREMIUM
+                <i class="fa-solid fa-crown"></i> PREMIUM
             </span>
             {% endif %}
+
         </div>
 
         <nav class="nav-links">
