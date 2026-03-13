@@ -1,0 +1,21 @@
+{% extends "master.html" %}
+{% block title %}Add Testimonial{% endblock %}
+{% block content %}
+<h2>Add Your Testimonial</h2>
+<form method="POST" style="max-width:500px;">
+    <label>Rating:</label><br>
+    <select name="rating" required style="padding:5px; margin-bottom:10px;">
+        <option value="">Select rating</option>
+        <option value="5">★★★★★</option>
+        <option value="4">★★★★☆</option>
+        <option value="3">★★★☆☆</option>
+        <option value="2">★★☆☆☆</option>
+        <option value="1">★☆☆☆☆</option>
+    </select><br>
+    <label>Comment:</label><br>
+    <textarea name="comment" required style="width:100%; height:100px; padding:5px; margin-bottom:10px;"></textarea><br>
+    <button type="submit" style="padding:10px 15px; font-weight:bold; background:#4f94b8; color:white; border:none; border-radius:5px; cursor:pointer;">
+        Submit
+    </button>
+</form>
+{% endblock %}

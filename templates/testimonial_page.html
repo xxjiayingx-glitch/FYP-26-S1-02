@@ -1,0 +1,21 @@
+{% extends "master.html" %}
+{% block title %}Testimonials{% endblock %}
+{% block content %}
+<h2>Testimonials</h2>
+{% if user_logged_in %}
+<!-- Create button at the top -->
+<a href="{{ url_for('testimonial.create_testimonial') }}">
+    <button style="padding:10px 15px; font-weight:bold; background:#4f94b8; color:white; border:none; border-radius:5px; cursor:pointer; margin-bottom:20px;">
+        Create Testimonial
+    </button>
+</a>
+{% endif %}
+<div class="testimonial-list">
+    {% for t in testimonials %}
+        <div class="testimonial-card" style="border:1px solid #ccc; padding:15px; margin-bottom:15px; border-radius:8px; background:#fefefe;">
+            <strong>{{ t.username }}</strong> - <span style="color:gold">{{ t.stars }}</span><br>
+            <p>{{ t.comment }}</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
