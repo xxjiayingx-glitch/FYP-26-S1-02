@@ -1,0 +1,12 @@
+# Ignore Python cache folders
+__pycache__/
+
+# Ignore Python compiled files
+*.pyc
+*.pyo
+*.pyd
+
+# Optional: ignore virtual environments
+venv/
+.venv/
+env/
