@@ -4,27 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daily Scoop</title>
-    <link rel="stylesheet" href="../../static/css/Unregistered/UnregRegAcc.css" />
+    <link
+      rel="stylesheet"
+      href="../../static/css/Unregistered/UnregRegAcc.css"
+    />
   </head>
 
   <body>
-
     <header class="navbar">
       <div class="logo">
-      <a href="{{ url_for('home.unreg_home') }}">
+        <a href="{{ url_for('home.unreg_home') }}">
           <h1>Daily Scoop</h1>
           <h1>News System</h1>
         </a>
       </div>
 
-       <nav class="navLinks">
-      <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
-      <a href="{{ url_for('home.unreg_home') }}#product-feature">Product Feature</a>
-      <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
-      <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
-      <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
-      <a href="UnregLogin.html">Log In</a>
-    </nav>
+      <nav class="navLinks">
+        <a href="{{ url_for('companyprofile.unreg_companyprof') }}"
+          >Company Profile</a
+        >
+        <a href="{{ url_for('home.unreg_home') }}#product-feature"
+          >Product Feature</a
+        >
+        <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
+        <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
+        <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+        <a href="{{ url_for('login.login') }}">Log In</a>
+      </nav>
     </header>
 
     <main class="page-content">
@@ -32,8 +38,11 @@
         <h2>Welcome!</h2>
         <p>Sign Up</p>
 
-        <form action="/signup" method="POST">
+        <form action="{{ url_for('register.register') }}" method="POST">
           <div class="form-group">
+            {% if error %}
+            <p style="color: red">{{ error }}</p>
+            {% endif %}
             <label for="firstName">First Name</label>
             <input
               type="text"
@@ -107,7 +116,9 @@
           <button type="submit" class="signup-btn">Sign Up</button>
         </form>
 
-        <p class="signin-link">Have an account? <a href="../login.html">Sign In</a></p>
+        <p class="signin-link">
+          Have an account? <a href="{{ url_for('login.login') }}">Sign In</a>
+        </p>
       </div>
     </main>
 
@@ -118,8 +129,8 @@
           <h3 class="footer-title">Daily Scoop News</h3>
 
           <p class="footer-description">
-            Delivering reliable and AI-powered news to keep readers informed with
-            credible and up-to-date stories.
+            Delivering reliable and AI-powered news to keep readers informed
+            with credible and up-to-date stories.
           </p>
 
           <div class="footer-social">
@@ -164,6 +175,5 @@
         </div>
       </div>
     </footer>
-
   </body>
 </html>

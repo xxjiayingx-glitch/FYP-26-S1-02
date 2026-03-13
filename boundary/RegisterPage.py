@@ -1,0 +1,55 @@
+#  working code
+# from flask import Blueprint, render_template, request, redirect, url_for
+# from control.RegisterCTL import RegisterController
+
+# register_bp = Blueprint("register", __name__)
+# registerCTL = RegisterController()
+
+
+# @register_bp.route("/register", methods=["GET", "POST"])
+# def register():
+
+#     if request.method == "POST":
+
+#         username = request.form["username"]
+#         email = request.form["email"]
+#         password = request.form["password"]
+
+#         result = registerCTL.register(username, email, password)
+
+#         if result["success"]:
+#             return redirect(url_for("login.login"))
+
+#         return render_template("Unregistered/UnregRegAcc.html", error=result["message"])
+
+#     return render_template("Unregistered/UnregRegAcc.html")
+
+# test password validation code
+from flask import Blueprint, render_template, request, redirect, url_for
+from control.RegisterCTL import RegisterController
+
+register_bp = Blueprint('register', __name__)
+
+registerCTL = RegisterController()
+
+@register_bp.route("/register", methods=["GET","POST"])
+def register():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        email = request.form["email"]
+        password = request.form["password"]
+        retypePassword = request.form["retypePassword"]
+
+        result = registerCTL.register(username, email, password, retypePassword)
+
+        if result["success"]:
+            return redirect(url_for("login.login"))
+
+        return render_template(
+            "Unregistered/UnregRegAcc.html",
+            error=result["message"]
+        )
+
+    return render_template("Unregistered/UnregRegAcc.html")

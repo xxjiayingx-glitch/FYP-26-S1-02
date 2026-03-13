@@ -10,6 +10,7 @@ from boundary.TestimonialPage import testimonial_bp
 from boundary.HomePage import home_bp
 from boundary.CompanyProfilePage import companyprof_bp
 from boundary.UnregSubscriptionPage import unregSub_bp
+from boundary.RegisterPage import register_bp
 
 from control.ArticleController import ArticleController
 app = Flask(__name__)
@@ -25,6 +26,7 @@ app.register_blueprint(testimonial_bp)
 app.register_blueprint(home_bp)
 app.register_blueprint(companyprof_bp)
 app.register_blueprint(unregSub_bp)
+app.register_blueprint(register_bp)
 
 # MySQL connection
 db = mysql.connector.connect(
