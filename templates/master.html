@@ -26,11 +26,17 @@
         /* TOP NAVBAR */
         .topbar{
             background:#c4def4;
-            min-height:90px;
+            min-height:95px;
             display:flex;
             justify-content:space-between;
             align-items:center;
-            padding:10px 28px;
+            padding:14px 32px;
+        }
+
+        .brand-wrap{
+            display:flex;
+            align-items:center;
+            gap:10px;
         }
 
         .brand{
@@ -40,12 +46,30 @@
             color:#000;
         }
 
+        .premium-badge{
+            font-size:11px;
+            font-weight:700;
+            letter-spacing:1px;
+
+            padding:4px 10px;
+
+            background:#ffeaa7;
+            color:#7a5600;
+
+            border-radius:20px;
+
+            display:flex;
+            align-items:center;
+            gap:5px;
+
+            margin-left:12px;
+        }
         .nav-links{
             display:flex;
-            gap:22px;
+            gap:28px;
             align-items:center;
             font-size:11px;
-            font-weight:600;
+            font-weight:700;
             color:#111;
         }
 
@@ -160,19 +184,36 @@
 
     <!-- TOP NAVBAR -->
     <header class="topbar">
-        <div class="brand">
-            Daily Scoop<br>
-            News System
+        <div class="brand-wrap">
+            <div class="brand">
+                Daily Scoop<br>
+                News System
+            </div>
+
+            {% if session.get("userType", "").strip().lower() == "premium" %}
+            <span class="premium-badge">
+            <i class="fa-solid fa-crown"></i> PREMIUM
+            </span>
+            {% endif %}
         </div>
 
         <nav class="nav-links">
-            <a href="{{ url_for('profile') }}">Own Profile</a>
+            <span class="user-icon">
+                <i class="fa-regular fa-user"></i>
+                Hi, {{ session.get('username','User') }}
+            </span>
+            <a href="{{ url_for('my_articles') }}">My Articles</a>
+            <a href="{{ url_for('profile') }}">My Profile</a>
             <a href="{{ url_for('testimonial') }}">Testimonials</a>
-            <a href="#">About Us</a>
+            {% if session.get("userType","").lower() == "premium" %}
+                <a href="{{ url_for('insight') }}">Insights</a>
+            {% endif %}
             <a href="{{ url_for('logout') }}">Log Out</a>
         </nav>
     </header>
+<div class="nav-links">
 
+</div>
     <!-- PAGE CONTENT -->
     <main class="page-wrapper">
         {% block content %}{% endblock %}

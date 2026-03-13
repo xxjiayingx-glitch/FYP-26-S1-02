@@ -6,6 +6,8 @@ from boundary.UpdateProfilePage import profile_bp
 from boundary.SearchPage import article_bp
 from boundary.ArticlePage import comment_bp
 from boundary.ViewandManagePage import subscription_bp
+from control.ArticleController import ArticleController
+
 
 app = Flask(__name__)
 app.secret_key = "secretkey"
@@ -50,19 +52,30 @@ def login():
 
     return render_template("login.html")
 
+article_controller = ArticleController()
 
 @app.route("/dashboard")
 def dashboard():
     if "userID" not in session:
         return redirect(url_for("login"))
 
-    user_type = str(session.get("userType", "")).strip().lower()
-    print("SESSION userType =", user_type)
+    user_type = str(session.get("userType","")).lower()
 
     if user_type == "premium":
         return render_template("premium_homepage.html")
 
-    return render_template("free_homepage.html")
+    headline = article_controller.get_headline()
+    latest_news = article_controller.get_latest(3)
+
+    # ADD THESE TWO LINES HERE
+    print("HEADLINE =", headline)
+    print("LATEST =", latest_news)
+
+    return render_template(
+        "free_homepage.html",
+        headline=headline,
+        latest_news=latest_news
+    )
 
 
 @app.route("/article")

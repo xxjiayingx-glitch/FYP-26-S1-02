@@ -1,0 +1,81 @@
+{% extends "master.html" %}
+
+{% block title %}Free User Home{% endblock %}
+
+{% block content %}
+
+<div class="hero-box">
+
+    {% if headline %}
+        <h1>{{ headline.articleTitle }}</h1>
+        <p>
+            {{ headline.content[:220] }}{% if headline.content|length > 220 %}...{% endif %}
+        </p>
+
+        <div class="card-actions">
+            <a class="btn" href="{{ url_for('article_detail', articleID=headline.articleID) }}">Read More</a>
+        </div>
+    {% else %}
+        <h1>No headline news available</h1>
+        <p>Please add published articles into the database.</p>
+    {% endif %}
+</div>
+
+<div class="section-box">
+    <h2 class="section-title">Latest News + Testimonials</h2>
+
+    <div class="search-bar">
+        <form method="POST" action="/search" style="display:flex; gap:10px; width:100%;">
+            <input type="text" name="keyword" placeholder="Search articles by title or keyword">
+            <button class="btn" type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="card-grid">
+        {% if latest_news %}
+            {% for article in latest_news %}
+            <div class="news-card">
+                <h3>{{ article.articleTitle }}</h3>
+
+                <div class="news-meta">
+                    {% if article.articleStatus %}
+                        Status: {{ article.articleStatus }}
+                    {% else %}
+                        Latest Article
+                    {% endif %}
+                </div>
+
+                <p>
+                    {{ article.content[:140] }}{% if article.content|length > 140 %}...{% endif %}
+                </p>
+
+                <div class="card-actions">
+                    <a class="btn" href="{{ url_for('article_detail', articleID=article.articleID) }}">View Article</a>
+                    <button class="btn btn-danger">Report Article</button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No latest news available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="section-box">
+    <h2 class="section-title">Latest Testimonials</h2>
+    <div class="testimonial-grid">
+        <div class="feature-card">
+            <h3>Helpful and Easy to Use</h3>
+            <p>“The platform is simple and makes article checking much easier for me.”</p>
+            <p class="muted">- Free User</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>Useful for Daily Reading</h3>
+            <p>“I like that I can browse the latest news and report suspicious content quickly.”</p>
+            <p class="muted">- Registered User</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
