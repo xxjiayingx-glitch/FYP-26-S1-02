@@ -13,4 +13,3 @@ def add_comment_route():
     add_comment(articleID, userID, commentText)
 
     return redirect("/dashboard")
-
