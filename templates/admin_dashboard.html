@@ -10,36 +10,89 @@
     <header class="topbar">
         <div class="brand">Daily Scoop News System</div>
         <div class="top-right">
-            <div class="user-badge">👤</div>
+             <div class="avatar-top">
+                {% if admin and admin.profileImage %}
+                    <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
+                {% endif %}
+            </div>
             <span>Hi, {{ admin.username }}</span>
             <a href="#">Logout</a>
         </div>
     </header>
 
     <div class="layout">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="profile-box">
-                <div class="avatar">👤</div>
-                <div>
+                <div class="avatar-wrapper">
+                    <div class="avatar">
+                        {% if admin and admin.profileImage %}
+                            <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
+                        {% endif %}
+                    </div>
+
+                    <form action="{{ url_for('admin_dashboard.upload_profile_picture') }}" 
+                        method="POST" 
+                        enctype="multipart/form-data"
+                        class="upload-form">
+                        
+                        <input type="file" 
+                            name="profileImage" 
+                            id="profileImageInput" 
+                            accept=".png,.jpg,.jpeg,.webp" 
+                            hidden
+                            onchange="this.form.submit()">
+
+                        <label for="profileImageInput" class="update-profile-link">
+                            Update Profile Picture
+                        </label>
+                    </form>
+                </div>
+
+                <div class="profile-info">
                     <div class="username">{{ admin.username }}</div>
                     <div class="role">{{ admin.userType }}</div>
                 </div>
             </div>
 
             <nav class="menu">
-                <a class="active" href="#">Dashboard</a>
-                <a href="#">User Accounts</a>
-                <a href="#">Article Reported</a>
-                <a href="#">Category Management</a>
-                <a href="#">Webpage Management</a>
-                <a href="#">System Monitoring</a>
-                <a href="#">Auto-Publish Rules</a>
+                <a href="/admin/dashboard">
+                    <span class="menu-icon"></span>
+                    <span class="menu-text">Dashboard</span>
+                </a>
+                <a href="/admin/user-accounts">
+                    <span class="menu-icon"></span>
+                    <span class="menu-text">User Accounts</span>
+                </a>
+                <a href="#">
+                    <span class="menu-icon"></span>
+                    <span class="menu-text">Article Reported</span>
+                </a>
+                <a href="#">
+                    <span class="menu-icon"></span>
+                    <span class="menu-text">Category Management</span>
+                </a>
+                <a href="#">
+                    <span class="menu-icon"></span>
+                    <span class="menu-text">Webpage Management</span>
+                </a>
+                <a href="#">
+                    <span class="menu-icon"></span>
+                    <span class="menu-text">System Monitoring</span>
+                </a>
+                <a href="#">
+                    <span class="menu-icon"></span>
+                    <span class="menu-text">Auto-Publish Rules</span>
+                </a>
             </nav>
         </aside>
 
-        <main class="content">
-            <div class="hamburger">☰</div>
-            <h1>System Admin’s Dashboard</h1>
+        <main class="content" id="mainContent">
+            <button class="hamburger" id="toggleSidebar">☰</button>
+            <h1>System Admin's Dashboard</h1>
 
             <section class="stats-grid">
                 <div class="card">
@@ -120,5 +173,13 @@
             </section>
         </main>
     </div>
+    <script>
+        const toggleButton = document.getElementById("toggleSidebar");
+        const sidebar = document.getElementById("sidebar");
+
+        toggleButton.addEventListener("click", function () {
+            sidebar.classList.toggle("collapsed");
+        });
+    </script>
 </body>
 </html>
