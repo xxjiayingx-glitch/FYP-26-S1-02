@@ -6,13 +6,12 @@ from boundary.UpdateProfilePage import profile_bp
 from boundary.SearchPage import article_bp
 from boundary.ArticlePage import comment_bp
 from boundary.ViewandManagePage import subscription_bp
-<<<<<<< HEAD
-from control.ArticleController import ArticleController
-
-=======
 from boundary.TestimonialPage import testimonial_bp
->>>>>>> c0c6e2086cd3a8db67bb9692e038183ccb344177
+from boundary.HomePage import home_bp
+from boundary.CompanyProfilePage import companyprof_bp
+from boundary.UnregSubscriptionPage import unregSub_bp
 
+from control.ArticleController import ArticleController
 app = Flask(__name__)
 app.secret_key = "secretkey"
 
@@ -23,6 +22,9 @@ app.register_blueprint(article_bp)
 app.register_blueprint(comment_bp)
 app.register_blueprint(subscription_bp)
 app.register_blueprint(testimonial_bp)
+app.register_blueprint(home_bp)
+app.register_blueprint(companyprof_bp)
+app.register_blueprint(unregSub_bp)
 
 # MySQL connection
 db = mysql.connector.connect(
