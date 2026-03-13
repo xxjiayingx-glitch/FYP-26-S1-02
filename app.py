@@ -11,6 +11,7 @@ from boundary.HomePage import home_bp
 from boundary.CompanyProfilePage import companyprof_bp
 from boundary.UnregSubscriptionPage import unregSub_bp
 from boundary.RegisterPage import register_bp
+from boundary.AdminDashboardPage import admin_dashboard_bp
 
 from control.ArticleController import ArticleController
 app = Flask(__name__)
@@ -27,6 +28,10 @@ app.register_blueprint(home_bp)
 app.register_blueprint(companyprof_bp)
 app.register_blueprint(unregSub_bp)
 app.register_blueprint(register_bp)
+app.register_blueprint(admin_dashboard_bp)
+
+# Image File Size
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 # MySQL connection
 db = mysql.connector.connect(
