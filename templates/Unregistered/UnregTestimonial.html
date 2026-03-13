@@ -4,33 +4,48 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daily Scoop</title>
-    <link rel="stylesheet" href="../../static/css/Unregistered/UnregTestimonial.css" />
+    <link
+      rel="stylesheet"
+      href="../../static/css/Unregistered/UnregTestimonial.css"
+    />
   </head>
 
   <header class="navbar">
     <div class="logo">
       <a href="UnregHome.html">
-         <h1>Daily Scoop</h1>
+        <h1>Daily Scoop</h1>
         <h1>News System</h1>
       </a>
     </div>
 
     <nav class="navLinks">
       <a href="UnregCompanyProf.html">Company Profile</a>
-       <a href="#product-feature">Product Feature</a>
+      <a href="#product-feature">Product Feature</a>
       <a href="#articles">Articles</a>
       <a href="UnregSubscription.html">Subscription</a>
-      <a href="UnregTestimonial.html">Testimonials</a>
+      <a href="/testimonials">Testimonials</a>
       <a href="UnregLogin.html">Log In</a>
     </nav>
   </header>
 
   <body>
-    <!-- to be change to get data from database -->
     <section class="testimonials">
       <h1 class="testimonial-title">Testimonials</h1>
-      <h2 class="testimonial-desc">A little line about what's being said and who's saying it.</h2>
+      <h2 class="testimonial-desc">
+        A little line about what's being said and who's saying it.
+      </h2>
+
       <div class="testimonial-grid">
+        {% for t in testimonials %}
+        <div class="testimonial-card">
+          <h4>{{ t.username }}</h4>
+          <p>{{ t.stars }}</p>
+          <p>{{ t.comment }}</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- <div class="testimonial-grid">
         <div class="testimonial-card">
           <h4>Carl</h4>
           <p>★★★★★</p>
@@ -54,7 +69,7 @@
           <p>Overall the platform is good but the free tier could improve.</p>
         </div>
 
-        <!-- More testimonial -->
+        More testimonial 
         <div class="testimonial-card">
           <h4>Jason</h4>
           <p>★★★★★</p>
@@ -89,7 +104,7 @@
           <p>★★★★☆</p>
           <p>Great content but would like more technology news.</p>
         </div>
-      </div>
+      </div> -->
     </section>
   </body>
 

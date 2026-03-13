@@ -6,6 +6,7 @@ from boundary.UpdateProfilePage import profile_bp
 from boundary.SearchPage import article_bp
 from boundary.ArticlePage import comment_bp
 from boundary.ViewandManagePage import subscription_bp
+from boundary.TestimonialPage import testimonial_bp
 
 app = Flask(__name__)
 app.secret_key = "secretkey"
@@ -16,14 +17,13 @@ app.register_blueprint(profile_bp)
 app.register_blueprint(article_bp)
 app.register_blueprint(comment_bp)
 app.register_blueprint(subscription_bp)
+app.register_blueprint(testimonial_bp)
 
 # MySQL connection
 db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="news_system"
+    host="localhost", user="root", password="", database="news_system"
 )
+
 
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -93,11 +93,11 @@ def subscription():
     return render_template("subscription.html")
 
 
-@app.route("/testimonial")
-def testimonial():
-    if "userID" not in session:
-        return redirect(url_for("login"))
-    return render_template("testimonial.html")
+# @app.route("/testimonial")
+# def testimonial():
+#     if "userID" not in session:
+#         return redirect(url_for("login"))
+#     return render_template("testimonial.html")
 
 
 @app.route("/saved-articles")
