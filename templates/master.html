@@ -204,7 +204,7 @@
             </span>
             <a href="{{ url_for('my_articles') }}">My Articles</a>
             <a href="{{ url_for('profile') }}">My Profile</a>
-            <a href="{{ url_for('testimonial') }}">Testimonials</a>
+            <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
             {% if session.get("userType","").lower() == "premium" %}
                 <a href="{{ url_for('insight') }}">Insights</a>
             {% endif %}

@@ -19,16 +19,16 @@ app.secret_key = "secretkey"
 
 # Register Blueprints
 app.register_blueprint(login_bp)
-app.register_blueprint(profile_bp)
-app.register_blueprint(article_bp)
-app.register_blueprint(comment_bp)
-app.register_blueprint(subscription_bp)
-app.register_blueprint(testimonial_bp)
+app.register_blueprint(profile_bp, url_prefix="/profile")
+app.register_blueprint(article_bp, url_prefix="/articles")
+app.register_blueprint(comment_bp, url_prefix="/comments")
+app.register_blueprint(subscription_bp, url_prefix="/subscription")
+app.register_blueprint(testimonial_bp, url_prefix="/testimonial")
 app.register_blueprint(home_bp)
-app.register_blueprint(companyprof_bp)
-app.register_blueprint(unregSub_bp)
+app.register_blueprint(companyprof_bp, url_prefix="/company")
+app.register_blueprint(unregSub_bp, url_prefix="/subscribe")
 app.register_blueprint(register_bp)
-app.register_blueprint(admin_dashboard_bp)
+app.register_blueprint(admin_dashboard_bp, url_prefix="/admin")
 
 # Image File Size
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
