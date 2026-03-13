@@ -66,3 +66,15 @@ class UserAccount:
         result = cursor.fetchone()
         conn.close()
         return result["total_users"]
+
+    @staticmethod
+    def update_profile_image(user_id, filename):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE UserAccount
+            SET profileImage = %s
+            WHERE userID = %s
+        """, (filename, user_id))
+        conn.commit()
+        conn.close()
