@@ -354,7 +354,7 @@ button{
     <div class="menuIcon">☰</div>
 
     <div class="breadcrumb">
-        <a href="/category-management">CategoryManagement</a> / Article Category
+        <a href="/admin/category-management">CategoryManagement</a> / Article Category
     </div>
 
     <div class="pageTitle">Article Category</div>
@@ -470,7 +470,7 @@ function saveEdit(){
         return;
     }
 
-    fetch(`http://127.0.0.1:5000/category/${editingID}`, {
+    fetch(`http://127.0.0.1:5000/admin/category/${editingID}`, {
         method:"PUT",
         headers:{
             "Content-Type":"application/json"
@@ -494,7 +494,7 @@ function addCategory(){
         return;
     }
 
-    fetch("http://127.0.0.1:5000/category", {
+    fetch("http://127.0.0.1:5000/admin/category", {
         method:"POST",
         headers:{
             "Content-Type":"application/json"
@@ -520,7 +520,7 @@ function closeDelete(){
 }
 
 function confirmDelete(){
-    fetch(`http://127.0.0.1:5000/category/${deletingID}`, {
+    fetch(`http://127.0.0.1:5000/admin/category/${deletingID}`, {
         method:"DELETE"
     })
     .then(()=>{
@@ -540,7 +540,7 @@ function closeSuccess(){
 }
 
 function loadCategories(){
-    fetch("http://127.0.0.1:5000/categories")
+    fetch("http://127.0.0.1:5000/admin/categories")
     .then(res=>res.json())
     .then(data=>{
         const tbody = document.querySelector("#categoryTable tbody");

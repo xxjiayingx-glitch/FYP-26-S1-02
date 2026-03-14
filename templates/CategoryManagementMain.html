@@ -215,7 +215,7 @@ body{
     <div class="topbarRight">
         <div class="profileIcon">👤</div>
         <div>Hi, Username</div>
-        <div>Logout</div>
+        <div onclick="window.location.href='/logout'" style="cursor:pointer;">Logout</div>
     </div>
 </div>
 
@@ -229,37 +229,37 @@ body{
             <div class="profileRole">Role</div>
         </div>
 
-        <div class="menuItem">
+        <div class="menuItem" onclick="window.location.href='/admin/dashboard'">
             <span class="menuIconOnly">🏠</span>
             <span class="menuText">Dashboard</span>
         </div>
 
-        <div class="menuItem">
+        <div class="menuItem" onclick="window.location.href='/admin/user-accounts'">
             <span class="menuIconOnly">👤</span>
             <span class="menuText">User Accounts</span>
         </div>
 
-        <div class="menuItem">
+        <div class="menuItem" onclick="window.location.href='/admin/article-reported'">
             <span class="menuIconOnly">🚩</span>
             <span class="menuText">Article Reported</span>
         </div>
 
-        <div class="menuItem activeMenu">
+        <div class="menuItem activeMenu" onclick="window.location.href='/admin/category-management'">
             <span class="menuIconOnly">▦</span>
             <span class="menuText">Category Management</span>
         </div>
 
-        <div class="menuItem">
+        <div class="menuItem" onclick="window.location.href='/admin/webpage-management'">
             <span class="menuIconOnly">🗂</span>
             <span class="menuText">Webpage Management</span>
         </div>
 
-        <div class="menuItem">
+        <div class="menuItem" onclick="window.location.href='/admin/system-monitoring'">
             <span class="menuIconOnly">🖥</span>
             <span class="menuText">System Monitoring</span>
         </div>
 
-        <div class="menuItem">
+        <div class="menuItem" onclick="window.location.href='/admin/auto-publish-rules'">
             <span class="menuIconOnly">☑</span>
             <span class="menuText">Auto-Publish Rules</span>
         </div>
@@ -291,7 +291,7 @@ body{
 <script>
 
 function goArticle(){
-    window.location.href = "/article-category";
+    window.location.href = "/admin/article-category";
 }
 
 function toggleSidebar(){

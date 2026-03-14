@@ -14,6 +14,13 @@ from boundary.CompanyProfilePage import companyprof_bp
 from boundary.UnregSubscriptionPage import unregSub_bp
 from boundary.RegisterPage import register_bp
 from boundary.AdminDashboardPage import admin_dashboard_bp
+from boundary.CategoryManagementPage import category_management_bp
+from boundary.ArticleCategoryPage import article_category_page_bp
+from boundary.CategoryAPI import category_bp
+from boundary.WebpageManagementPage import webpage_management_bp
+from boundary.EditCompanyProfilePage import edit_company_profile_bp
+from boundary.EditSubscriptionPlansPage import edit_subscription_plans_bp
+from boundary.WebAdminAPI import web_admin_api_bp
 
 from control.ArticleController import ArticleController
 app = Flask(__name__)
@@ -31,6 +38,13 @@ app.register_blueprint(companyprof_bp, url_prefix="/company")
 app.register_blueprint(unregSub_bp, url_prefix="/subscribe")
 app.register_blueprint(register_bp)
 app.register_blueprint(admin_dashboard_bp, url_prefix="/admin")
+app.register_blueprint(category_management_bp)
+app.register_blueprint(article_category_page_bp)
+app.register_blueprint(category_bp)
+app.register_blueprint(webpage_management_bp)
+app.register_blueprint(edit_company_profile_bp)
+app.register_blueprint(edit_subscription_plans_bp)
+app.register_blueprint(web_admin_api_bp)
 
 # Image File Size
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024

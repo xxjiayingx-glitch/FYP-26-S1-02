@@ -12,7 +12,7 @@ def connect_db():
     )
 
 
-@category_bp.route("/categories", methods=["GET"])
+@category_bp.route("/admin/categories", methods=["GET"])
 def get_categories():
     conn = connect_db()
     cursor = conn.cursor(dictionary=True)
@@ -26,7 +26,7 @@ def get_categories():
     return jsonify(result)
 
 
-@category_bp.route("/category", methods=["POST"])
+@category_bp.route("/admin/category", methods=["POST"])
 def add_category():
     data = request.json
     name = data.get("categoryName")
@@ -46,7 +46,7 @@ def add_category():
     return jsonify({"message": "Category added"})
 
 
-@category_bp.route("/category/<int:id>", methods=["PUT"])
+@category_bp.route("/admin/category/<int:id>", methods=["PUT"])
 def update_category(id):
     data = request.json
     name = data.get("categoryName")
@@ -66,7 +66,7 @@ def update_category(id):
     return jsonify({"message": "Category updated"})
 
 
-@category_bp.route("/category/<int:id>", methods=["DELETE"])
+@category_bp.route("/admin/category/<int:id>", methods=["DELETE"])
 def delete_category(id):
     conn = connect_db()
     cursor = conn.cursor()
