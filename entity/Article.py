@@ -29,9 +29,10 @@ class Article:
         cursor = conn.cursor()
 
         sql = """
-        SELECT a.*, c.categoryName
+        SELECT a.*, c.categoryName, ai.imageURL
         FROM Article a
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
         WHERE a.created_by = %s
         ORDER BY a.created_at DESC
         """

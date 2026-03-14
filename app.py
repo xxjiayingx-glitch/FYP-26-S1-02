@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for, flash
 import mysql.connector
+import os
+from werkzeug.utils import secure_filename
 
 from boundary.LoginPage import login_bp
 from boundary.UpdateProfilePage import profile_bp
@@ -32,6 +34,9 @@ app.register_blueprint(admin_dashboard_bp, url_prefix="/admin")
 
 # Image File Size
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+#Upload image
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # MySQL connection
 db = mysql.connector.connect(
@@ -125,9 +130,23 @@ def create_article():
         content = request.form.get("content")
         status = request.form.get("status")
         featured_image = request.files.get("featured_image")
+        image_filename = None
 
+        if featured_image and featured_image.filename:
+            image_filename = secure_filename(featured_image.filename)
+            save_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+            featured_image.save(save_path)
+            
         # create article
-        article_controller.create_article(user_id, title, category_id, content, status, featured_image)
+        article_controller.create_article(
+            user_id,
+            title,
+            category_id,
+            content,
+            status,
+            image_filename
+        )
+        flash("Article created successfully!", "success")
         return redirect(url_for("my_articles"))
 
     # GET → fetch categories
