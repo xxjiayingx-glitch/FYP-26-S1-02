@@ -2,7 +2,6 @@ from entity.db_connection import get_db_connection
 
 class UserAccount:
     def login(self,email,pwd):
-
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -16,7 +15,6 @@ class UserAccount:
 
 
     def get_profile(self,userID):
-
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -29,18 +27,22 @@ class UserAccount:
         return user
 
 
-    def update_profile(self,userID,first,last,phone):
-
+    @staticmethod
+    def update_profile(userID, firstName, lastName, email, phone, age, gender):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        sql = """
-        UPDATE UserAccount
-        SET first_name=%s,last_name=%s,phone=%s
+        query = """
+        UPDATE user
+        SET firstName=%s,
+            lastName=%s,
+            email=%s,
+            phone=%s,
+            age=%s,
+            gender=%s
         WHERE userID=%s
         """
-
-        cursor.execute(sql,(first,last,phone,userID))
+        cursor.execute(query, (firstName, lastName, email, phone, age, gender, userID))
         conn.commit()
         conn.close()
         
@@ -76,5 +78,17 @@ class UserAccount:
             SET profileImage = %s
             WHERE userID = %s
         """, (filename, user_id))
+        conn.commit()
+        conn.close()
+
+    def update_photo(userID, filename):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "UPDATE UserAccount SET profile_pic=%s WHERE userID=%s",
+            (filename, userID)
+        )
+
         conn.commit()
         conn.close()

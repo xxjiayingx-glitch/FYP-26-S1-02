@@ -1,9 +1,27 @@
-from entity.User import UserEntity
+from entity.UserAccount import UserAccount
 
-user_entity = UserEntity()
+class UpdateProfileCTL:
 
-def update_user_profile(userID, first, last, phone):
+    @staticmethod
+    def update_profile(userID, form):
 
-    user_entity.update_profile(userID, first, last, phone)
+        firstName = form.get("firstName")
+        lastName = form.get("lastName")
+        email = form.get("email")
+        phone = form.get("phone")
+        age = form.get("age")
+        gender = form.get("gender")
 
-    print("Profile Updated")
+        UserAccount.update_profile(
+            userID,
+            firstName,
+            lastName,
+            email,
+            phone,
+            age,
+            gender
+        )
+
+    @staticmethod
+    def update_profile_photo(userID, filename):
+        UserAccount.update_photo(userID, filename)

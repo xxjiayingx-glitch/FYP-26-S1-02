@@ -206,7 +206,14 @@ def delete_article(article_id):
 def profile():
     if "userID" not in session:
         return redirect(url_for("login"))
-    return render_template("profile.html")
+
+    user = {
+        "userID": session.get("userID"),
+        "username": session.get("username"),
+        "userType": session.get("userType")
+    }
+
+    return render_template("profile.html", user=user)
 
 
 @app.route("/subscription")

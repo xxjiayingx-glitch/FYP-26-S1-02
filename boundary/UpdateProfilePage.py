@@ -1,23 +1,67 @@
-from flask import Blueprint, render_template, request, redirect, session
-from control.UpdateProfileCTL import update_user_profile
+import os
+from flask import request, redirect, session, url_for, current_app
+from flask import Blueprint, flash, render_template, request, redirect, session
+from control.UpdateProfileCTL import UpdateProfileCTL
 
-profile_bp = Blueprint('profile', __name__)
+profile_bp = Blueprint("profile", __name__)
+
 
 @profile_bp.route("/profile")
-def profile():
+def profile_page():
 
-    return render_template("profile.html")
+    user = session.get("user")
+
+    return render_template(
+        "profile.html",
+        user=user
+    )
 
 
-@profile_bp.route("/update_profile", methods=["POST"])
+@profile_bp.route("/update", methods=["POST"])
 def update_profile():
 
-    userID = session["userID"]
+    UpdateProfileCTL.update_profile(
+        session["userID"],
+        request.form,
+        request.files
+    )
 
-    first = request.form["first_name"]
-    last = request.form["last_name"]
-    phone = request.form["phone"]
+    flash("Profile updated successfully")
+    return redirect("/profile")
 
-    update_user_profile(userID, first, last, phone)
+@profile_bp.route("/change-password", methods=["POST"])
+def change_password():
+
+    password = request.form["password"]
+    new_password = request.form["new_password"]
+
+    UpdateProfileCTL.change_password(
+        session["userID"],
+        password,
+        new_password
+    )
+
+    flash("Password updated")
+    return redirect("/profile")
+
+@profile_bp.route("/upload-photo", methods=["POST"])
+def upload_photo():
+
+    if "userID" not in session:
+        return redirect(url_for("login"))
+
+    file = request.files.get("profile_pic")
+
+    if file and file.filename != "":
+        filename = secure_filename(file.filename)
+
+        path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+        file.save(path)
+
+        # update database
+        UpdateProfileCTL.update_profile_photo(
+            session["userID"],
+            filename
+        )
 
     return redirect("/profile")
