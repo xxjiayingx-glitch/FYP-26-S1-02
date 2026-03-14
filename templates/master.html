@@ -151,6 +151,7 @@
         .footer-links a:hover{
             text-decoration:underline;
         }
+
         /* optional content helpers */
         .content-card{
             background:#fff;
@@ -158,7 +159,63 @@
             padding:20px;
         }
 
+        /* ===== Testimonial Carousel Helper ===== */
+        .testimonial-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .testimonial-container {
+            display: flex;
+            gap: 20px;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .testimonial-card {
+            flex: 0 0 calc(16.66% - 15px); /* 6 per view */
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.08);
+            transition:0.25s;
+        }
+
+        .testimonial-card:hover {
+            transform:translateY(-5px);
+            box-shadow:0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 40%;
+            z-index: 10;
+            background:#4f94b8;
+            border:none;
+            color:white;
+            padding:10px 14px;
+            cursor:pointer;
+            border-radius:50%;
+        }
+
+        .slider-btn:hover {
+            background:#3c7fa0;
+        }
+
+        .prev { left:5px; }
+        .next { right:5px; }
+
+        @media (max-width: 1024px){
+            .testimonial-card {
+                flex: 0 0 calc(33.33% - 15px); /* 3 per view */
+            }
+        }
+
         @media (max-width: 768px){
+            .testimonial-card {
+                flex: 0 0 calc(50% - 12px); /* 2 per view */
+            }
+
             .topbar{
                 flex-direction:column;
                 align-items:flex-start;
@@ -180,6 +237,13 @@
                 padding-bottom:20px;
             }
         }
+
+        @media (max-width: 480px){
+            .testimonial-card {
+                flex: 0 0 calc(100% - 10px); /* 1 per view on mobile */
+            }
+        }
+
     </style>
 </head>
 <body>

@@ -11,23 +11,31 @@ class TestimonialEntity:
     def getAllTestimonials():
         conn = get_connection()
         cursor = conn.cursor()
+
         cursor.execute("""
-            SELECT u.username, t.rating, t.comment
+            SELECT u.username, t.rating, t.comment, t.created_at
             FROM UserAccount u
             JOIN Testimonial t ON u.userID = t.userID
+            WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
             ORDER BY t.created_at DESC
         """)
+
         rows = cursor.fetchall()
+
         cursor.close()
         conn.close()
+
         testimonials = []
+
         for row in rows:
             testimonials.append({
                 "username": row[0],
                 "rating": row[1],
                 "comment": row[2],
-                "stars": "★" * row[1] + "☆" * (5 - row[1])  # Add star display
+                "created_at": row[3],
+                "stars": "★" * row[1] + "☆" * (5 - row[1])
             })
+
         return testimonials
     
     @staticmethod
