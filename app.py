@@ -97,11 +97,51 @@ def article_detail():
     return render_template("article_detail.html")
 
 
-@app.route("/my-articles")
+# My Articles page
+@app.route("/my_articles")
 def my_articles():
+    user_id = session.get('userID')  # <-- use the same key as login
+    if not user_id:
+        return redirect(url_for("login"))
+    articles = article_controller.get_my_articles(user_id)
+    return render_template("my_articles.html", articles=articles)
+
+
+# Create Article page
+@app.route("/create_article", methods=["GET", "POST"])
+def create_article():
     if "userID" not in session:
         return redirect(url_for("login"))
-    return render_template("my_articles.html")
+
+    user_id = session.get("userID")
+    categories = article_controller.get_categories()
+
+    if request.method == "POST":
+        title = request.form.get("title")
+        category = request.form.get("category")
+        content = request.form.get("content")
+        status = request.form.get("status")
+        featured_image = request.files.get("featured_image")
+
+        # Debugging prints
+        print("Form submission:")
+        print("user_id:", user_id)
+        print("title:", title)
+        print("category:", category)
+        print("content length:", len(content) if content else 0)
+        print("status:", status)
+        print("featured_image:", featured_image.filename if featured_image else None)
+
+        article_id = article_controller.create_article(user_id, title, category, content, status, featured_image)
+
+        if article_id:
+            print("Article created successfully with ID:", article_id)
+            return redirect(url_for("my_articles"))
+        else:
+            print("Failed to create article.")
+            return render_template("create_article.html", categories=categories, error="Failed to create article.")
+
+    return render_template("create_article.html", categories=categories)
 
 
 @app.route("/profile")

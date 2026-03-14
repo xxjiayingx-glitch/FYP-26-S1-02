@@ -1,10 +1,152 @@
-grid-template-columns: 2fr 1fr;
-gap: 20px;
+/* ===== Global ===== */
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fa;
+}
+
+a {
+    text-decoration: none;
+    color: #2a6db3;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    width: 90%;
+    margin: auto;
+}
+
+/* ===== Navigation Bar ===== */
+
+.topbar {
+    background: #cfe3f5;
+    padding: 20px 0;
+}
+
+.topbar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.nav-links a {
+    margin-left: 20px;
+    font-weight: 500;
+}
+
+/* ===== Search + Create Article ===== */
+
+.top-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 30px 0;
+}
+
+.search-box input {
+    padding: 8px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* ===== Create Article Button ===== */
+
+.create-btn {
+    background: #4c7edc;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.create-btn:hover {
+    background: #3a67bb;
+}
+
+/* ===== Article Grid ===== */
+
+.article-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+/* ===== Article Card ===== */
+
+.article-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid #dbe7f0;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.08);
+}
+
+.article-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.article-card h3 {
+    margin-top: 12px;
+    font-size: 18px;
+}
+
+.article-card p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* ===== Article Actions ===== */
+
+.article-actions {
+    margin-top: 12px;
+}
+
+.article-actions a {
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+/* ===== Status Badge ===== */
+
+.status {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.status-draft {
+    color: #666;
+}
+
+.status-published {
+    color: green;
+}
+
+/* ===== Article Layout (View Page) ===== */
+
+.article-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
 }
 
 .article-main,
 .article-side {
-    background: #fff;
+    background: white;
     border: 1px solid #cddfea;
     padding: 20px;
 }
@@ -19,11 +161,15 @@ gap: 20px;
     color: #333;
 }
 
+/* ===== Comment Box ===== */
+
 .comment-box {
     margin-top: 18px;
     border-top: 1px solid #e6eef4;
     padding-top: 16px;
 }
+
+/* ===== Insights Page ===== */
 
 .insight-grid {
     display: grid;
@@ -31,9 +177,17 @@ gap: 20px;
     gap: 18px;
 }
 
+.stat-card {
+    background: white;
+    padding: 16px;
+    border: 1px solid #cddfea;
+}
+
 .stat-card p {
     margin: 8px 0;
 }
+
+/* ===== Subscription + Testimonials ===== */
 
 .subscription-grid,
 .testimonial-grid {
@@ -43,7 +197,7 @@ gap: 20px;
 }
 
 .plan-card {
-    background: #fff;
+    background: white;
     border: 1px solid #cddfea;
     padding: 18px;
 }
@@ -60,10 +214,13 @@ gap: 20px;
     margin: 10px 0;
 }
 
+/* ===== Footer ===== */
+
 .footer {
     background: #cfe8f7;
     border-top: 1px solid #9fc7de;
-    padding: 22px 0;
+    padding: 30px 0;
+    margin-top: 40px;
 }
 
 .footer-grid {
@@ -82,18 +239,30 @@ gap: 20px;
     font-size: 13px;
 }
 
+/* ===== Responsive Design ===== */
+
 @media (max-width: 900px) {
+
+    .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .top-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .article-grid {
+        grid-template-columns: 1fr;
+    }
 
     .profile-layout,
     .article-layout,
     .insight-grid,
     .footer-grid {
         grid-template-columns: 1fr;
-    }
-
-    .topbar-inner {
-        flex-direction: column;
-        align-items: flex-start;
     }
 
     .form-grid {

@@ -1,0 +1,72 @@
+{% extends "master.html" %}
+
+{% block title %}
+My Articles
+{% endblock %}
+
+{% block content %}
+
+<div class="main-container">
+
+    <!-- Search + Create -->
+    <div class="top-bar">
+
+        <div>
+            <h3>Search for Article</h3>
+
+            <form method="GET" action="{{ url_for('my_articles') }}">
+                <input type="text" name="search" placeholder="Search">
+            </form>
+        </div>
+
+        <a href="{{ url_for('create_article') }}">
+            <button class="create-btn">Create Article</button>
+        </a>
+
+    </div>
+
+
+    <!-- Article Grid -->
+    <div class="article-grid">
+
+        {% if articles %}
+            {% for article in articles %}
+
+            <div class="article-card">
+
+                <img src="{{ article.image }}" class="article-img">
+
+                <h3>{{ article.title }}</h3>
+
+                <p>{{ article.summary }}</p>
+
+                <div class="article-actions">
+
+                    <a href="{{ url_for('view_article', id=article.id) }}">View</a>
+
+                    <a href="{{ url_for('edit_article', id=article.id) }}">Edit</a>
+
+                    <a href="{{ url_for('delete_article', id=article.id) }}">Delete</a>
+
+                    {% if article.status == "Draft" %}
+                        <span class="draft">Draft</span>
+                    {% else %}
+                        <span class="published">Published</span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+        {% else %}
+
+            <p>No articles found.</p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
