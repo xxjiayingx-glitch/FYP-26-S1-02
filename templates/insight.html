@@ -1,0 +1,199 @@
+{% extends "master.html" %}
+
+{% block content %}
+
+<style>
+
+.container{
+    width:80%;
+    margin:auto;
+}
+
+h2{
+    margin-bottom:30px;
+}
+
+.section{
+    margin-top:40px;
+    text-align:center;
+}
+
+.box{
+    background:#eeeeee;
+    padding:25px;
+    width:350px;
+    margin:auto;
+    border-radius:6px;
+}
+
+.performance-table{
+    margin:auto;
+    border-collapse:collapse;
+}
+
+.performance-table th,
+.performance-table td{
+    padding:10px 30px;
+    border-right:1px solid #aaa;
+}
+
+.performance-table th:last-child,
+.performance-table td:last-child{
+    border-right:none;
+}
+
+.review-box{
+    background:#eeeeee;
+    padding:25px;
+    width:500px;
+    margin:auto;
+    border-radius:6px;
+    text-align:left;
+}
+
+.actions{
+    margin-top:15px;
+}
+
+.btn{
+    padding:10px 25px;
+    margin:8px;
+    background:#4c7bd9;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.btn:hover{
+    background:#355db5;
+}
+
+.article-select{
+    margin-bottom:30px;
+}
+
+</style>
+
+
+<div class="container">
+
+<h2>Article Insights</h2>
+
+
+<!-- ARTICLE DROPDOWN -->
+
+<form method="GET" action="/insight" class="article-select">
+
+<label><b>Select Article:</b></label>
+
+<select name="article_id" onchange="this.form.submit()">
+
+<option>Select your Article</option>
+
+{% for article in articles %}
+<option value="{{article.id}}"
+{% if selected_article and selected_article.id == article.id %}
+selected
+{% endif %}
+>
+{{article.title}}
+</option>
+{% endfor %}
+
+</select>
+
+</form>
+
+
+{% if selected_article %}
+
+<!-- PERFORMANCE -->
+
+<div class="section">
+
+<h3>Overview Performance</h3>
+
+<div class="box">
+
+<table class="performance-table">
+
+<tr>
+<th>Views</th>
+<th>Likes</th>
+<th>Shares</th>
+</tr>
+
+<tr>
+<td>{{selected_article.views}}</td>
+<td>{{selected_article.likes}}</td>
+<td>{{selected_article.shares}}</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+<!-- CREDIBILITY -->
+
+<div class="section">
+
+<h3>Credibility Analysis</h3>
+
+<div class="box">
+
+<p><b>Credibility Score:</b> {{selected_article.credibility_score}} / 100</p>
+
+<p><b>Article Last Updated:</b> {{selected_article.updated_at}}</p>
+
+</div>
+
+</div>
+
+
+
+<!-- AI REVIEW -->
+
+<div class="section">
+
+<h3>Priority AI Article Review</h3>
+
+<div class="review-box">
+
+{{selected_article.ai_review}}
+
+</div>
+
+</div>
+
+
+
+<!-- ACTIONS -->
+
+<div class="section">
+
+<h3>Article Action</h3>
+
+<div class="actions">
+
+<a href="/view_article/{{selected_article.id}}">
+<button class="btn">View Article</button>
+</a>
+
+<a href="/edit_article/{{selected_article.id}}">
+<button class="btn">Edit Article</button>
+</a>
+
+</div>
+
+</div>
+
+{% endif %}
+
+</div>
+
+{% endblock %}
