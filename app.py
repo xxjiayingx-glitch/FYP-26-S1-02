@@ -97,51 +97,85 @@ def article_detail():
     return render_template("article_detail.html")
 
 
-# My Articles page
-@app.route("/my_articles")
+# My Articles Route
+@app.route('/my_articles')
 def my_articles():
-    user_id = session.get('userID')  # <-- use the same key as login
-    if not user_id:
-        return redirect(url_for("login"))
+    user_id = session.get('user_id')  # make sure this is the logged-in user
+    article_controller = ArticleController()
     articles = article_controller.get_my_articles(user_id)
-    return render_template("my_articles.html", articles=articles)
+    print("Route articles:", articles)  # debug
+    return render_template('my_articles.html', articles=articles)
 
 
-# Create Article page
+# Create Article Route
 @app.route("/create_article", methods=["GET", "POST"])
 def create_article():
-    if "userID" not in session:
+    user_id = session.get("userID")  # match your login session key
+    if not user_id:
         return redirect(url_for("login"))
-
-    user_id = session.get("userID")
-    categories = article_controller.get_categories()
 
     if request.method == "POST":
         title = request.form.get("title")
-        category = request.form.get("category")
+        category_id = request.form.get("category")
         content = request.form.get("content")
         status = request.form.get("status")
         featured_image = request.files.get("featured_image")
 
-        # Debugging prints
-        print("Form submission:")
-        print("user_id:", user_id)
-        print("title:", title)
-        print("category:", category)
-        print("content length:", len(content) if content else 0)
-        print("status:", status)
-        print("featured_image:", featured_image.filename if featured_image else None)
+        # create article
+        article_controller.create_article(user_id, title, category_id, content, status, featured_image)
+        return redirect(url_for("my_articles"))
 
-        article_id = article_controller.create_article(user_id, title, category, content, status, featured_image)
-
-        if article_id:
-            print("Article created successfully with ID:", article_id)
-            return redirect(url_for("my_articles"))
-        else:
-            print("Failed to create article.")
-            return render_template("create_article.html", categories=categories, error="Failed to create article.")
-
+    # GET → fetch categories
+    categories = article_controller.get_categories()
     return render_template("create_article.html", categories=categories)
+
+
+# Edit Article Route
+@app.route('/edit_article/<int:article_id>', methods=['GET', 'POST'])
+def edit_article(article_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    article = article_controller.get_article(article_id)
+
+    # Ensure the article belongs to the logged-in user
+    if not article or article['created_by'] != user_id:
+        flash("You do not have permission to edit this article.", "error")
+        return redirect(url_for('my_articles'))
+
+    categories = article_controller.get_categories()
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        category_id = request.form.get('category')
+        content = request.form.get('content')
+        status = request.form.get('status')
+        featured_image = request.files.get('featured_image')
+
+        article_controller.update_article(article_id, title, category_id, content, status, featured_image)
+        flash("Article updated successfully!", "success")
+        return redirect(url_for('my_articles'))
+
+    return render_template('edit_article.html', article=article, categories=categories)
+
+
+# Delete Article Route
+@app.route('/delete_article/<int:article_id>', methods=['GET'])
+def delete_article(article_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    article = article_controller.get_article(article_id)
+
+    if not article or article['created_by'] != user_id:
+        flash("You do not have permission to delete this article.", "error")
+        return redirect(url_for('my_articles'))
+
+    article_controller.delete_article(article_id)
+    flash("Article deleted successfully!", "success")
+    return redirect(url_for('my_articles'))
 
 
 @app.route("/profile")

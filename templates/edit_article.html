@@ -2,25 +2,20 @@
 
 {% block content %}
 <div class="create-article-container" style="max-width: 800px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-    <h2>Create New Article</h2>
-
+    <h2>Edit Article</h2>
     <form method="POST" enctype="multipart/form-data">
         <!-- Title -->
         <div style="margin-bottom: 15px;">
             <label for="title"><strong>Title:</strong></label><br>
-            <input type="text" id="title" name="title" required 
-                   value="{{ request.form.title or '' }}" 
-                   style="width: 100%; padding: 8px;"/>
+            <input type="text" id="title" name="title" value="{{ article.articleTitle }}" required style="width: 100%; padding: 8px;"/>
         </div>
 
         <!-- Category -->
         <div style="margin-bottom: 15px;">
             <label for="category"><strong>Category:</strong></label><br>
             <select id="category" name="category" required style="width: 100%; padding: 8px;">
-                <option value="">-- Select Category --</option>
                 {% for cat in categories %}
-                    <option value="{{ cat.categoryID }}"
-                        {% if request.form.category == cat.categoryID|string %}selected{% endif %}>
+                    <option value="{{ cat.categoryID }}" {% if article.categoryID == cat.categoryID %}selected{% endif %}>
                         {{ cat.categoryName }}
                     </option>
                 {% endfor %}
@@ -30,8 +25,7 @@
         <!-- Content -->
         <div style="margin-bottom: 15px;">
             <label for="content"><strong>Content:</strong></label><br>
-            <textarea id="content" name="content" rows="10" required 
-                      style="width: 100%; padding: 8px;">{{ request.form.content or '' }}</textarea>
+            <textarea id="content" name="content" rows="10" required style="width: 100%; padding: 8px;">{{ article.content }}</textarea>
         </div>
 
         <!-- Featured Image -->
@@ -44,16 +38,15 @@
         <div style="margin-bottom: 15px;">
             <label for="status"><strong>Status:</strong></label><br>
             <select id="status" name="status" required style="width: 100%; padding: 8px;">
-                <option value="draft" {% if request.form.status == 'draft' %}selected{% endif %}>Draft</option>
-                <option value="published" {% if request.form.status == 'published' %}selected{% endif %}>Published</option>
+                <option value="draft" {% if article.articleStatus == 'draft' %}selected{% endif %}>Draft</option>
+                <option value="published" {% if article.articleStatus == 'published' %}selected{% endif %}>Published</option>
             </select>
         </div>
 
         <!-- Buttons -->
         <div style="margin-top: 20px;">
-            <a href="{{ url_for('my_articles') }}" class="btn-cancel" 
-               style="padding: 10px 20px; margin-right: 10px; background: #ccc; color: black; text-decoration: none; border-radius: 5px;">Cancel</a>
-            <button type="submit" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px;">Submit</button>
+            <a href="{{ url_for('my_articles') }}" class="btn-cancel" style="padding: 10px 20px; margin-right: 10px; background: #ccc; color: black; text-decoration: none; border-radius: 5px;">Cancel</a>
+            <button type="submit" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px;">Update</button>
         </div>
     </form>
 </div>
