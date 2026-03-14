@@ -1,5 +1,4 @@
 import mysql.connector
-
 def get_connection():
     return mysql.connector.connect(
         host="localhost",
@@ -7,9 +6,7 @@ def get_connection():
         password="",
         database="news_system"
     )
-
 class TestimonialEntity:
-
     @staticmethod
     def getAllTestimonials():
         conn = get_connection()
@@ -34,11 +31,14 @@ class TestimonialEntity:
         return testimonials
     
     @staticmethod
-    def insertTestimonial(user_id, rating, comment):
+    def insertTestimonial(user_id, rating, comment, semantic_score, combined_score):
         conn = get_connection()
         cursor = conn.cursor()
-        query = "INSERT INTO Testimonial (userID, rating, comment, created_at) VALUES (%s, %s, %s, NOW())"
-        cursor.execute(query, (user_id, rating, comment))
+        query = """
+            INSERT INTO Testimonial (userID, rating, comment, semanticScore, combinedScore, created_at)
+            VALUES (%s, %s, %s, %s, %s, NOW())
+        """
+        cursor.execute(query, (user_id, rating, comment, semantic_score, combined_score))
         conn.commit()
         cursor.close()
         conn.close()
