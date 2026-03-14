@@ -21,3 +21,7 @@ pip install flask mysql-connector-python
 ## HOW TO RUN THE APP ##
 python app.py
 http://127.0.0.1:5000
+
+## HOW TO INSTALL TEXTBLOB ##
+pip install textblob
+python -m textblob.download_corpora
