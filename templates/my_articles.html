@@ -1,20 +1,23 @@
 {% extends "master.html" %}
 
 {% block content %}
-<div style="max-width: 900px; margin: auto; padding: 20px;">
-    <h2>My Articles</h2>
+<div class="my-articles-container">
+    <h2 class="page-title">My Articles</h2>
 
-    <!-- Top Bar: Search + Create Article -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <!-- Search Form -->
-        <form method="GET" action="{{ url_for('my_articles') }}" style="flex-grow: 1; margin-right: 20px;">
-            <input type="text" name="keyword" placeholder="Search articles..." value="{{ request.args.get('keyword', '') }}" style="width: 100%; padding: 8px;">
+    <div class="articles-topbar">
+        <form method="GET" action="{{ url_for('my_articles') }}" class="search-bar">
+            <input 
+                type="text" 
+                name="keyword" 
+                class="search-input"
+                placeholder="Search articles..."
+                value="{{ keyword if keyword else '' }}"
+            >
+            <button type="submit" class="search-btn">Search</button>
         </form>
 
-        <!-- Create Article Button -->
-        <a href="{{ url_for('create_article') }}" 
-           style="padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
-           Create New Article
+        <a href="{{ url_for('create_article') }}" class="create-article-btn">
+            Create New Article
         </a>
     </div>
 

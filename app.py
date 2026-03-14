@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 import mysql.connector
 
 from boundary.LoginPage import login_bp
@@ -98,15 +98,20 @@ def article_detail():
 
 
 # My Articles Route
-@app.route('/my_articles')
+@app.route('/my_articles', methods=['GET'])
 def my_articles():
-    user_id = session.get('user_id')  # make sure this is the logged-in user
-    article_controller = ArticleController()
-    articles = article_controller.get_my_articles(user_id)
-    print("Route articles:", articles)  # debug
-    return render_template('my_articles.html', articles=articles)
+    user_id = session.get('userID')
+    if not user_id:
+        return redirect(url_for('login'))
 
+    keyword = request.args.get('keyword', '').strip()
 
+    if keyword:
+        articles = article_controller.search_my_articles(user_id, keyword)
+    else:
+        articles = article_controller.get_my_articles(user_id)
+
+    return render_template('my_articles.html', articles=articles, keyword=keyword)
 # Create Article Route
 @app.route("/create_article", methods=["GET", "POST"])
 def create_article():
@@ -133,7 +138,7 @@ def create_article():
 # Edit Article Route
 @app.route('/edit_article/<int:article_id>', methods=['GET', 'POST'])
 def edit_article(article_id):
-    user_id = session.get('user_id')
+    user_id = session.get('userID')
     if not user_id:
         return redirect(url_for('login'))
 
@@ -163,7 +168,7 @@ def edit_article(article_id):
 # Delete Article Route
 @app.route('/delete_article/<int:article_id>', methods=['GET'])
 def delete_article(article_id):
-    user_id = session.get('user_id')
+    user_id = session.get('userID')
     if not user_id:
         return redirect(url_for('login'))
 
