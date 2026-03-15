@@ -75,6 +75,7 @@ db = mysql.connector.connect(
 
 @app.route("/")
 def unreghome():
+    session.clear()
     return render_template("Unregistered/UnregHome.html")
 
 
@@ -94,6 +95,9 @@ def login():
         cursor.close()
 
         if user:
+            session.clear()   # clear any previous session
+            
+            session["logged_in"] = True
             session["userID"] = user["userID"]
             session["username"] = user["username"]
             session["userType"] = user["userType"]
@@ -108,7 +112,7 @@ article_controller = ArticleController()
 
 @app.route("/dashboard")
 def dashboard():
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
 
     user_type = str(session.get("userType", "")).lower()
@@ -138,7 +142,7 @@ def dashboard():
 # Article detail page
 @app.route("/article/<int:article_id>")
 def article_detail(article_id):
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
 
     user_id = session["userID"]
@@ -157,7 +161,7 @@ def article_detail(article_id):
 # Add comment route
 @app.route("/add_comment", methods=["POST"])
 def add_comment_route():
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
 
     article_id = request.form.get("articleID")
@@ -173,8 +177,9 @@ def add_comment_route():
 # Save article route (for premium users)
 @app.route("/saved_articles", methods=["POST"])
 def save_article():
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
+    
     if session.get("userType", "").lower() != "premium":
         return redirect(url_for("dashboard"))
 
@@ -190,9 +195,9 @@ def save_article():
 
 @app.route("/toggle_save_article", methods=["POST"])
 def toggle_save_article():
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
-
+    
     article_id = request.form.get("articleID")
     user_id = session["userID"]
     article_controller.toggle_save_article(user_id, article_id)  # toggles saved/unsaved
@@ -202,7 +207,7 @@ def toggle_save_article():
 # Report article route
 @app.route("/report_article", methods=["POST"])
 def report_article():
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
 
     article_id = request.form.get("articleID")
@@ -317,7 +322,7 @@ def delete_article(article_id):
 
 @app.route("/profile")
 def profile():
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
 
     user = {
@@ -331,21 +336,21 @@ def profile():
 
 @app.route("/subscription")
 def subscription():
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
     return render_template("subscription.html")
 
 
 # @app.route("/testimonial")
 # def testimonial():
-#     if "userID" not in session:
-#         return redirect(url_for("login"))
+#     if not session.get("logged_in"):
+#        return redirect(url_for("login"))
 #     return render_template("testimonial.html")
 
 
 @app.route("/saved-articles")
 def saved_articles():
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
 
     if session.get("userType", "").lower() != "premium":
@@ -356,7 +361,7 @@ def saved_articles():
 
 @app.route("/insight")
 def insight():
-    if "userID" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
 
     if session.get("userType", "").lower() != "premium":
