@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS Article(
     categoryID INT,
     reviewPriority VARCHAR(20),
     credibilityScore FLOAT,
+    aiReview TEXT,
     FOREIGN KEY(created_by) REFERENCES UserAccount(userID),
     FOREIGN KEY(categoryID) REFERENCES ArticleCategory(categoryID)
 )

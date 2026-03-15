@@ -30,3 +30,8 @@ python -m textblob.download_corpora
 pip install transformers torch
 pip install --upgrade transformers
 pip install --upgrade torch
+
+
+## IF NEVER RUN THE DATABASE AND WANT TO ADD IN THE NEW FEATURE ##
+ALTER TABLE Article
+ADD COLUMN aiReview TEXT;

@@ -72,6 +72,39 @@ class ArticleController:
         cursor.close()
         return article
 
+    def update_article(self, article_id, title, category_id, content, status, featured_image=None):
+        cursor = self.db.cursor()
+        # Update article basic info
+        sql = """
+            UPDATE Article
+            SET articleTitle=%s,
+                categoryID=%s,
+                content=%s,
+                articleStatus=%s,
+                updated_at=NOW()
+            WHERE articleID=%s
+        """
+        cursor.execute(sql, (title, category_id, content, status, article_id))
+        
+        # If there's a new featured image, update it or insert
+        if featured_image:
+            # Check if an image already exists for this article
+            check_sql = "SELECT articleID FROM ArticleImage WHERE articleID=%s LIMIT 1"
+            cursor.execute(check_sql, (article_id,))
+            exists = cursor.fetchone()
+            if exists:
+                # Update existing image
+                update_sql = "UPDATE ArticleImage SET imageURL=%s, uploaded_at=NOW() WHERE articleID=%s"
+                cursor.execute(update_sql, (featured_image, article_id))
+            else:
+                # Insert new image
+                insert_sql = "INSERT INTO ArticleImage (articleID, imageURL, uploaded_at) VALUES (%s, %s, NOW())"
+                cursor.execute(insert_sql, (article_id, featured_image))
+
+        self.db.commit()
+        cursor.close()
+
+        
     def get_article_images(self, article_id):
         cursor = self.db.cursor(dictionary=True)
         sql = "SELECT imageURL FROM ArticleImage WHERE articleID=%s ORDER BY uploaded_at ASC"
@@ -91,7 +124,6 @@ class ArticleController:
                 a.credibilityScore,
                 a.reviewPriority,
                 a.updated_at,
-                a.aiReview,
                 IFNULL(an.views,0) as views,
                 IFNULL(an.likes,0) as likes,
                 IFNULL(an.shares,0) as shares
