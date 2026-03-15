@@ -30,6 +30,7 @@
   <body>
     <section class="headline">
       <div class="headline-text">
+        {% if headline %}
         <h1 class="headline-title">{{ headline['articleTitle'] }}</h1>
 
         <p class="headline-description">{{ headline['content'][:200] }}...</p>
@@ -39,25 +40,32 @@
 
       <div class="headline-image">
         <img
-          src="{{ url_for('static', filename='uploads/' + headline['imageURL']) }}"
+          src="{{ url_for('static', filename='uploads/' + (headline['imageURL'] or 'placeholder.png')) }}"
           alt="{{ headline['articleTitle'] }}"
         />
       </div>
+      {% else %}
+      <p class="no-headline">No headline available</p>
+      {% endif %}
     </section>
 
     <section id="articles" class="news">
       <div class="news-grid" id="latest-articles">
-        {% for article in articles %}
+        {% if articles %} {% for article in articles %}
 
         <div class="news-card">
           <img
-            src="{{ url_for('static', filename='uploads/' + article['imageURL']) }}"
+            src="{{ url_for('static', filename='uploads/' + (article['imageURL'] or 'placeholder.png')) }}"
             alt="{{ article['articleTitle'] }}"
           />
           <h5 class="news-title">{{ article['articleTitle'] }}</h5>
           <p class="news-para">{{ article['content'][:150] }}...</p>
         </div>
-        {% endfor %}
+        {% endfor %} {% else %}
+        <p class="no-articles">
+          No articles available at the moment. Please check back later.
+        </p>
+        {% endif %}
 
         <div class="news-btn">
           <button
@@ -76,7 +84,7 @@
       <h2 class="testimonial-desc">Here's what people are saying</h2>
       <div class="testimonial-grid">
         <div class="testimonial-card">
-          <h4>Carl</h4>
+          <!-- <h4>Carl</h4>
           <p>★★★★★</p>
           <p>
             A reliable news platform with interesting articles and a great
@@ -98,7 +106,7 @@
           <p>Overall the platform is good but the free tier could improve.</p>
         </div>
 
-        <!-- More testimonial -->
+       
         <div class="testimonial-card hidden">
           <h4>Jason</h4>
           <p>★★★★★</p>
@@ -132,7 +140,7 @@
           <h4>Goliath</h4>
           <p>★★★★☆</p>
           <p>Great content but would like more technology news.</p>
-        </div>
+        </div> -->
 
         <br />
         <div class="testimonial-btn">
@@ -143,7 +151,7 @@
 
     <section id="product-feature" class="feature">
       <h1 class="features-title">Product Feature</h1>
-      <div class="features-grid">
+      <!-- <div class="features-grid">
         <img src="images/fourth.jpg" alt="Add Comments" />
         <img src="images/fifth.jpg" alt="View Articles" />
         <img src="images/sixth.jpg" alt="Post Articles" />
@@ -158,7 +166,7 @@
         <div class="product-features-btn">
           <button class="view-more" onclick="showMore(this)">View More</button>
         </div>
-      </div>
+      </div> -->
     </section>
 
     <script>
@@ -171,7 +179,8 @@
       });
       }
 
-      let articleOffset = {{ articles|length if articles is defined else 0 }};
+      //let articleOffset = {{ articles|length if articles is defined else 0 }};
+      let articleOffset = articles?.length ?? 0;
       const articleLimit = 6;
 
       function loadMoreArticles(button) {
