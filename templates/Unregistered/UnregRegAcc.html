@@ -38,11 +38,24 @@
         <h2>Welcome!</h2>
         <p>Sign Up</p>
 
+        <!-- Success Message -->
+        {% if success %}
+        <p style="color: green">{{ success }}</p>
+
+        <script>
+          setTimeout(function () {
+            window.location.href = "{{ url_for('login.login') }}";
+          }, 2000); // 2 seconds delay
+        </script>
+
+        {% endif %} 
+        
+        <!-- Error Message -->
+        {% if error %}
+        <p style="color: red">{{ error }}</p>
+        {% endif %}
         <form action="{{ url_for('register.register') }}" method="POST">
           <div class="form-group">
-            {% if error %}
-            <p style="color: red">{{ error }}</p>
-            {% endif %}
             <label for="firstName">First Name</label>
             <input
               type="text"
