@@ -30,6 +30,7 @@
   <body>
     <section class="headline">
       <div class="headline-text">
+        {% if headline %}
         <h1 class="headline-title">{{ headline['articleTitle'] }}</h1>
 
         <p class="headline-description">{{ headline['content'][:200] }}...</p>
@@ -43,11 +44,14 @@
           alt="{{ headline['articleTitle'] }}"
         />
       </div>
+      {% else %}
+      <p class="no-headline">No headline available</p>
+      {% endif% }
     </section>
 
     <section id="articles" class="news">
       <div class="news-grid" id="latest-articles">
-        {% for article in articles %}
+        {% if articles %} {% for article in articles %}
 
         <div class="news-card">
           <img
@@ -57,7 +61,11 @@
           <h5 class="news-title">{{ article['articleTitle'] }}</h5>
           <p class="news-para">{{ article['content'][:150] }}...</p>
         </div>
-        {% endfor %}
+        {% endfor %} {% else %}
+        <p class="no-articles">
+          No articles available at the moment. Please check back later.
+        </p>
+        {% endif %}
 
         <div class="news-btn">
           <button
