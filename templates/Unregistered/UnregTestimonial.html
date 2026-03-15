@@ -19,8 +19,12 @@
     </div>
 
     <nav class="navLinks">
-      <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
-      <a href="{{ url_for('home.unreg_home') }}#product-feature">Product Feature</a>
+      <a href="{{ url_for('companyprofile.unreg_companyprof') }}"
+        >Company Profile</a
+      >
+      <a href="{{ url_for('home.unreg_home') }}#product-feature"
+        >Product Feature</a
+      >
       <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
       <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
       <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
@@ -36,75 +40,17 @@
       </h2>
 
       <div class="testimonial-grid">
+        {% if testimonials %}
         {% for t in testimonials %}
         <div class="testimonial-card">
           <h4>{{ t.username }}</h4>
           <p>{{ t.stars }}</p>
           <p>{{ t.comment }}</p>
         </div>
-        {% endfor %}
+        {% endfor %} {% else %}
+        <p>No testimonials available yet.</p>
+        {% endif %}
       </div>
-
-      <!-- <div class="testimonial-grid">
-        <div class="testimonial-card">
-          <h4>Carl</h4>
-          <p>★★★★★</p>
-          <p>
-            A reliable news platform with interesting articles and a great
-            reading experience.
-          </p>
-        </div>
-
-        <div class="testimonial-card">
-          <h4>Sally</h4>
-          <p>★★★★★</p>
-          <p>
-            As a premium user, I enjoy the analytics insights for my articles.
-          </p>
-        </div>
-
-        <div class="testimonial-card">
-          <h4>Clara</h4>
-          <p>★★★★☆</p>
-          <p>Overall the platform is good but the free tier could improve.</p>
-        </div>
-
-        More testimonial 
-        <div class="testimonial-card">
-          <h4>Jason</h4>
-          <p>★★★★★</p>
-          <p>Very easy to navigate and the articles are informative.</p>
-        </div>
-
-        <div class="testimonial-card">
-          <h4>Anna</h4>
-          <p>★★★★★</p>
-          <p>I love the clean design and simple layout.</p>
-        </div>
-
-        <div class="testimonial-card">
-          <h4>David</h4>
-          <p>★★★★☆</p>
-          <p>Great content but would like more technology news.</p>
-        </div>
-        <div class="testimonial-card">
-          <h4>James</h4>
-          <p>★★★★★</p>
-          <p>Very easy to navigate and the articles are informative.</p>
-        </div>
-
-        <div class="testimonial-card">
-          <h4>Ben</h4>
-          <p>★★★★★</p>
-          <p>I love the clean design and simple layout.</p>
-        </div>
-
-        <div class="testimonial-card">
-          <h4>Goliath</h4>
-          <p>★★★★☆</p>
-          <p>Great content but would like more technology news.</p>
-        </div>
-      </div> -->
     </section>
   </body>
 

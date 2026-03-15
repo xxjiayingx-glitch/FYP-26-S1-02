@@ -9,10 +9,17 @@ testimonialCTL = TestimonialController()
 def testimonial_page():
     testimonials = testimonialCTL.getTestimonials()
     user_logged_in = "userID" in session
+
+    # Redirect to unregistered testimonial page if user not logged in
+    if not user_logged_in:
+        return render_template(
+            "Unregistered/UnregTestimonial.html", testimonials=testimonials
+        )
+
     return render_template(
         "testimonial_page.html",
         testimonials=testimonials,
-        user_logged_in=user_logged_in
+        user_logged_in=user_logged_in,
     )
 
 # Create testimonial (separate form page)
