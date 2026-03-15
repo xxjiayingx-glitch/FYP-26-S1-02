@@ -11,7 +11,7 @@ def unreg_home():
 
     if user_type is None:
         # Get headline article
-        headline = articleCTL.get_headline()
+        headline = articleCTL.get_home_headline()
     
     # Get latest 3 articles
     latest_articles = []

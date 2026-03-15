@@ -58,19 +58,10 @@ class Article:
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # sql = """
-        # SELECT * FROM Article
-        # WHERE articleStatus = 'Active'
-        # ORDER BY created_at DESC
-        # LIMIT 1
-        # """
-
         sql = """
-        SELECT a.*, ai.imageURL
-        FROM Article a
-        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-        WHERE a.articleStatus = 'Active'
-        ORDER BY a.created_at DESC
+        SELECT * FROM Article
+        WHERE articleStatus = 'Active'
+        ORDER BY created_at DESC
         LIMIT 1
         """
 
@@ -170,6 +161,24 @@ class Article:
 
         conn.close()
         return articles
+
+    def get_home_headline_article(self):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        sql = """
+        SELECT a.*, ai.imageURL
+        FROM Article a
+        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+        WHERE a.articleStatus = 'Active'
+        ORDER BY a.created_at DESC
+        LIMIT 1
+        """
+        cursor.execute(sql)
+        article = cursor.fetchone()
+
+        conn.close()
+        return article
 
     def get_home_latest_articles(self, limit=3, offset=0, exclude_id=None):
         conn = get_db_connection()
