@@ -179,7 +179,8 @@
       });
       }
 
-      let articleOffset = {{ articles|length if articles is defined else 0 }};
+      //let articleOffset = {{ articles|length if articles is defined else 0 }};
+      let articleOffset = articles?.length ?? 0;
       const articleLimit = 6;
 
       function loadMoreArticles(button) {
