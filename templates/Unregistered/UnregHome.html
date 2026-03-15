@@ -16,7 +16,9 @@
     </div>
 
     <nav class="navLinks">
-      <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
+      <a href="{{ url_for('companyprofile.unreg_companyprof') }}"
+        >Company Profile</a
+      >
       <a href="#product-feature">Product Feature</a>
       <a href="#articles">Articles</a>
       <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
@@ -28,79 +30,43 @@
   <body>
     <section class="headline">
       <div class="headline-text">
-        <h1 class="headline-title">
-          SIA and Scoot extend cancellation of Middle East flights amid
-          geopolitical tensions
-        </h1>
+        <h1 class="headline-title">{{ headline['articleTitle'] }}</h1>
 
-        <p class="headline-description">
-          SIA flights between Singapore and Dubai and Scoot flights between
-          Singapore and Jeddah are affected.
-        </p>
+        <p class="headline-description">{{ headline['content'][:200] }}...</p>
 
         <a href="#" class="headline-link">read more.....</a>
       </div>
 
       <div class="headline-image">
-        <img src="images/flight.jpg" alt="Scoot airplane" />
+        <img
+          src="{{ url_for('static', filename='uploads/' + headline['imageURL']) }}"
+          alt="{{ headline['articleTitle'] }}"
+        />
       </div>
     </section>
 
     <section id="articles" class="news">
-      <div class="news-grid">
-        <div class="news-card">
-          <img src="images/first.jpg" alt="first news" />
-          <h5 class="news-title">
-            S'pore passes tougher laws on vapes with heavier penalties;
-            protecting young a concern
-          </h5>
-          <p class="news-para">
-            Vaping was banned in Singapore in 2018, with those caught using one
-            facing a fine of up to $2,000.
-          </p>
-        </div>
-        <div class="news-card">
-          <img src="images/second.jpg" alt="second news" />
-          <h5 class="news-title">
-            S'pore passes tougher laws on vapes with heavier penalties;
-            protecting young a concern
-          </h5>
-          <p class="news-para">
-            Vaping was banned in Singapore in 2018, with those caught using one
-            facing a fine of up to $2,000.
-          </p>
-        </div>
+      <div class="news-grid" id="latest-articles">
+        {% for article in articles %}
 
         <div class="news-card">
-          <img src="images/third.jpg" alt="third news" />
-          <h5 class="news-title">
-            S'pore passes tougher laws on vapes with heavier penalties;
-            protecting young a concern
-          </h5>
-          <p class="news-para">
-            Vaping was banned in Singapore in 2018, with those caught using one
-            facing a fine of up to $2,000.
-          </p>
+          <img
+            src="{{ url_for('static', filename='uploads/' + article['imageURL']) }}"
+            alt="{{ article['articleTitle'] }}"
+          />
+          <h5 class="news-title">{{ article['articleTitle'] }}</h5>
+          <p class="news-para">{{ article['content'][:150] }}...</p>
         </div>
-
-        <div class="news-card hidden">
-          <img src="images/third.jpg" alt="fourth news" />
-          <h5 class="news-title">More News</h5>
-          <p class="news-para">More description here</p>
-        </div>
-        <div class="news-card hidden">
-          <img src="images/third.jpg" alt="fourth news" />
-          <h5 class="news-title">More News</h5>
-          <p class="news-para">More description here</p>
-        </div>
-        <div class="news-card hidden">
-          <img src="images/third.jpg" alt="fourth news" />
-          <h5 class="news-title">More News</h5>
-          <p class="news-para">More description here</p>
-        </div>
+        {% endfor %}
 
         <div class="news-btn">
-          <button class="view-more" onclick="showMore(this)">View More</button>
+          <button
+            class="view-more-articles"
+            data-section="articles"
+            onclick="loadMoreArticles(this)"
+          >
+            View More
+          </button>
         </div>
       </div>
     </section>
@@ -197,12 +163,38 @@
 
     <script>
       function showMore(button) {
-        let section = button.closest("section");
-        let hiddenItems = section.querySelectorAll(".hidden");
+      let section = button.closest("section");
+      let hiddenItems = section.querySelectorAll(".hidden");
+      hiddenItems.forEach(function (item) {
+        item.style.display = "block";
+        item.classList.remove("hidden");
+      });
+      }
 
-        hiddenItems.forEach(function (item) {
-          item.style.display = "block";
-          item.classList.remove("hidden");
+      let articleOffset = {{ articles|length if articles is defined else 0 }};
+      const articleLimit = 6;
+
+      function loadMoreArticles(button) {
+      fetch(`/load_more_articles?offset=${articleOffset}&limit=${articleLimit}`)
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('latest-articles');
+          data.forEach(article => {
+            const card = document.createElement('div');
+            card.classList.add('news-card');
+            card.innerHTML = `
+              <img src="/static/uploads/${article.imageURL}" alt="${article.articleTitle}">
+              <h5 class="news-title">${article.articleTitle}</h5>
+              <p class="news-para">${article.content}...</p>
+            `;
+            container.appendChild(card);
+          });
+
+          articleOffset += data.length;
+
+          if (data.length < articleLimit) {
+            button.style.display = 'none';
+          }
         });
       }
     </script>

@@ -1,5 +1,6 @@
 from entity.db_connection import get_db_connection
 
+
 class Article:
     def get_all_articles(self):
         conn = get_db_connection()
@@ -18,7 +19,7 @@ class Article:
         WHERE articleTitle LIKE %s
         ORDER BY created_at DESC
         """
-        cursor.execute(sql, ('%' + keyword + '%',))
+        cursor.execute(sql, ("%" + keyword + "%",))
         articles = cursor.fetchall()
 
         conn.close()
@@ -57,12 +58,22 @@ class Article:
         conn = get_db_connection()
         cursor = conn.cursor()
 
+        # sql = """
+        # SELECT * FROM Article
+        # WHERE articleStatus = 'Active'
+        # ORDER BY created_at DESC
+        # LIMIT 1
+        # """
+
         sql = """
-        SELECT * FROM Article
-        WHERE articleStatus = 'published'
-        ORDER BY created_at DESC
+        SELECT a.*, ai.imageURL
+        FROM Article a
+        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+        WHERE a.articleStatus = 'Active'
+        ORDER BY a.created_at DESC
         LIMIT 1
         """
+
         cursor.execute(sql)
         article = cursor.fetchone()
 
@@ -75,7 +86,7 @@ class Article:
 
         sql = """
         SELECT * FROM Article
-        WHERE articleStatus = 'published'
+        WHERE articleStatus = 'Active'
         ORDER BY created_at DESC
         LIMIT 1, %s
         """
@@ -141,7 +152,7 @@ class Article:
 
         conn.commit()
         conn.close()
-    
+
     def search_my_articles(self, user_id, keyword):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -154,9 +165,33 @@ class Article:
         AND a.articleTitle LIKE %s
         ORDER BY a.created_at DESC
         """
-        cursor.execute(sql, (user_id, '%' + keyword + '%'))
+        cursor.execute(sql, (user_id, "%" + keyword + "%"))
         articles = cursor.fetchall()
 
+        conn.close()
+        return articles
+
+    def get_home_latest_articles(self, limit=3, offset=0, exclude_id=None):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        sql = """
+        SELECT a.*, ai.imageURL
+        FROM Article a
+        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+        WHERE a.articleStatus = 'Active'
+        """
+        params = []
+
+        if exclude_id:
+            sql += " AND a.articleID != %s"
+            params.append(exclude_id)
+
+        sql += " ORDER BY a.created_at DESC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+
+        cursor.execute(sql, tuple(params))
+        articles = cursor.fetchall()
         conn.close()
         return articles
 

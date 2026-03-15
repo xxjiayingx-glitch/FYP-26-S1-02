@@ -100,7 +100,7 @@ html {
   text-align: center;
 }
 
-.view-more {
+.view-more, .view-more-articles {
   grid-column: span 3; /* make button take full row */
   justify-self: center; /* center horizontally */
   background-color: #0a66c2;

@@ -35,6 +35,9 @@ class ArticleController:
     def get_latest(self, limit=3):
         return self.article_entity.get_latest_articles(limit)
 
+    def get_home_latest_articles(self, limit=3, offset=0, exclude_id=None):
+        return self.article_entity.get_home_latest_articles(limit, offset, exclude_id)
+
     def delete_article(self, article_id):
         return self.article_entity.delete_article(article_id)
 
