@@ -1,10 +1,19 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash ,jsonify  
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    session,
+    url_for,
+    flash,
+    jsonify,
+)
 import mysql.connector
 import os
 from werkzeug.utils import secure_filename
 from transformers import pipeline
 
-# Blueprints 
+# Blueprints
 from boundary.LoginPage import login_bp
 from boundary.UpdateProfilePage import profile_bp
 from boundary.SearchPage import article_bp
@@ -24,11 +33,12 @@ from boundary.EditCompanyProfilePage import edit_company_profile_bp
 from boundary.EditSubscriptionPlansPage import edit_subscription_plans_bp
 from boundary.WebAdminAPI import web_admin_api_bp
 
-# Controllers 
+# Controllers
 from control.ArticleController import ArticleController
+
 article_controller = ArticleController()
 
-# Flask App 
+# Flask App
 app = Flask(__name__)
 app.secret_key = "secretkey"
 
@@ -53,18 +63,22 @@ app.register_blueprint(edit_subscription_plans_bp)
 app.register_blueprint(web_admin_api_bp)
 
 # Image File Size
-app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
-#Upload image
-app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
+# Upload image
+app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # MySQL connection
 db = mysql.connector.connect(
     host="localhost", user="root", password="", database="news_system"
 )
 
+@app.route("/")
+def unreghome():
+    return render_template("Unregistered/UnregHome.html")
 
-@app.route("/", methods=["GET", "POST"])
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         email = request.form["email"]
@@ -89,6 +103,7 @@ def login():
 
     return render_template("login.html")
 
+
 article_controller = ArticleController()
 
 @app.route("/dashboard")
@@ -96,7 +111,7 @@ def dashboard():
     if "userID" not in session:
         return redirect(url_for("login"))
 
-    user_type = str(session.get("userType","")).lower()
+    user_type = str(session.get("userType", "")).lower()
 
     if user_type == "premium":
         return render_template("premium_homepage.html")
@@ -109,9 +124,7 @@ def dashboard():
     print("LATEST =", latest_news)
 
     return render_template(
-        "free_homepage.html",
-        headline=headline,
-        latest_news=latest_news
+        "free_homepage.html", headline=headline, latest_news=latest_news
     )
 
 
@@ -123,20 +136,22 @@ def article_detail():
 
 
 # My Articles Route
-@app.route('/my_articles', methods=['GET'])
+@app.route("/my_articles", methods=["GET"])
 def my_articles():
-    user_id = session.get('userID')
+    user_id = session.get("userID")
     if not user_id:
-        return redirect(url_for('login'))
+        return redirect(url_for("login"))
 
-    keyword = request.args.get('keyword', '').strip()
+    keyword = request.args.get("keyword", "").strip()
 
     if keyword:
         articles = article_controller.search_my_articles(user_id, keyword)
     else:
         articles = article_controller.get_my_articles(user_id)
 
-    return render_template('my_articles.html', articles=articles, keyword=keyword)
+    return render_template("my_articles.html", articles=articles, keyword=keyword)
+
+
 # Create Article Route
 @app.route("/create_article", methods=["GET", "POST"])
 def create_article():
@@ -154,17 +169,12 @@ def create_article():
 
         if featured_image and featured_image.filename:
             image_filename = secure_filename(featured_image.filename)
-            save_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
             featured_image.save(save_path)
-            
+
         # create article
         article_controller.create_article(
-            user_id,
-            title,
-            category_id,
-            content,
-            status,
-            image_filename
+            user_id, title, category_id, content, status, image_filename
         )
         flash("Article created successfully!", "success")
         return redirect(url_for("my_articles"))
@@ -175,51 +185,53 @@ def create_article():
 
 
 # Edit Article Route
-@app.route('/edit_article/<int:article_id>', methods=['GET', 'POST'])
+@app.route("/edit_article/<int:article_id>", methods=["GET", "POST"])
 def edit_article(article_id):
-    user_id = session.get('userID')
+    user_id = session.get("userID")
     if not user_id:
-        return redirect(url_for('login'))
+        return redirect(url_for("login"))
 
     article = article_controller.get_article(article_id)
 
     # Ensure the article belongs to the logged-in user
-    if not article or article['created_by'] != user_id:
+    if not article or article["created_by"] != user_id:
         flash("You do not have permission to edit this article.", "error")
-        return redirect(url_for('my_articles'))
+        return redirect(url_for("my_articles"))
 
     categories = article_controller.get_categories()
 
-    if request.method == 'POST':
-        title = request.form.get('title')
-        category_id = request.form.get('category')
-        content = request.form.get('content')
-        status = request.form.get('status')
-        featured_image = request.files.get('featured_image')
+    if request.method == "POST":
+        title = request.form.get("title")
+        category_id = request.form.get("category")
+        content = request.form.get("content")
+        status = request.form.get("status")
+        featured_image = request.files.get("featured_image")
 
-        article_controller.update_article(article_id, title, category_id, content, status, featured_image)
+        article_controller.update_article(
+            article_id, title, category_id, content, status, featured_image
+        )
         flash("Article updated successfully!", "success")
-        return redirect(url_for('my_articles'))
+        return redirect(url_for("my_articles"))
 
-    return render_template('edit_article.html', article=article, categories=categories)
+    return render_template("edit_article.html", article=article, categories=categories)
 
 
 # Delete Article Route
-@app.route('/delete_article/<int:article_id>', methods=['GET'])
+@app.route("/delete_article/<int:article_id>", methods=["GET"])
 def delete_article(article_id):
-    user_id = session.get('userID')
+    user_id = session.get("userID")
     if not user_id:
-        return redirect(url_for('login'))
+        return redirect(url_for("login"))
 
     article = article_controller.get_article(article_id)
 
-    if not article or article['created_by'] != user_id:
+    if not article or article["created_by"] != user_id:
         flash("You do not have permission to delete this article.", "error")
-        return redirect(url_for('my_articles'))
+        return redirect(url_for("my_articles"))
 
     article_controller.delete_article(article_id)
     flash("Article deleted successfully!", "success")
-    return redirect(url_for('my_articles'))
+    return redirect(url_for("my_articles"))
 
 
 @app.route("/profile")
@@ -230,7 +242,7 @@ def profile():
     user = {
         "userID": session.get("userID"),
         "username": session.get("username"),
-        "userType": session.get("userType")
+        "userType": session.get("userType"),
     }
 
     return render_template("profile.html", user=user)
@@ -285,12 +297,12 @@ def insight():
 
     # Auto-show first article if none selected
     if not selected_article and articles:
-        selected_article = article_controller.get_article_insight(articles[0]['articleID'])
+        selected_article = article_controller.get_article_insight(
+            articles[0]["articleID"]
+        )
 
     return render_template(
-        "insight.html",
-        articles=articles,
-        selected_article=selected_article
+        "insight.html", articles=articles, selected_article=selected_article
     )
 
 
