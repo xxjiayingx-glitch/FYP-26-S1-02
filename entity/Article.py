@@ -60,7 +60,7 @@ class Article:
 
         sql = """
         SELECT * FROM Article
-        WHERE articleStatus = 'Active'
+        WHERE articleStatus = 'published'
         ORDER BY created_at DESC
         LIMIT 1
         """
@@ -77,7 +77,7 @@ class Article:
 
         sql = """
         SELECT * FROM Article
-        WHERE articleStatus = 'Active'
+        WHERE articleStatus = 'published'
         ORDER BY created_at DESC
         LIMIT 1, %s
         """
