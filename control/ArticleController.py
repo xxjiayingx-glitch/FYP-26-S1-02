@@ -45,7 +45,38 @@ class ArticleController:
         return self.article_entity.search_my_articles(user_id, keyword)
     
     def get_article(self, article_id):
-        return self.article_entity.get_article(article_id)
+        cursor = self.db.cursor(dictionary=True)
+        query = """
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                a.created_at,
+                CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                c.categoryName,
+                a.created_by,  
+                ai.imageURL AS featured_image
+            FROM Article a
+            JOIN UserAccount u ON a.created_by = u.userID
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            WHERE a.articleID = %s
+            ORDER BY ai.uploaded_at ASC
+            LIMIT 1
+        """
+        cursor.execute(query, (article_id,))
+        article = cursor.fetchone()
+        cursor.close()
+        return article
+
+    def get_article_images(self, article_id):
+        cursor = self.db.cursor(dictionary=True)
+        sql = "SELECT imageURL FROM ArticleImage WHERE articleID=%s ORDER BY uploaded_at ASC"
+        cursor.execute(sql, (article_id,))
+        images = cursor.fetchall()
+        cursor.close()
+        return [img['imageURL'] for img in images]
+    
 
     def get_article_insight(self, article_id):
         cursor = self.db.cursor(dictionary=True)
@@ -75,5 +106,101 @@ class ArticleController:
         cursor = self.db.cursor()
         sql = "UPDATE Article SET aiReview = %s WHERE articleID = %s"
         cursor.execute(sql, (review_text, article_id))
+        self.db.commit()
+        cursor.close()
+
+    def get_recommended_articles(self, user_id):
+        """
+        Fetch recommended articles for the given user.
+        For now, we just return the latest 3 articles as a placeholder.
+        """
+        cursor = self.db.cursor(dictionary=True)
+        query = """
+            SELECT a.articleID, a.articleTitle, a.content AS summary, c.categoryName,
+                a.created_at, u.username
+            FROM Article a
+            JOIN UserAccount u ON a.created_by = u.userID
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            WHERE a.articleStatus = 'published'
+            ORDER BY a.created_at DESC
+            LIMIT 3
+        """
+        cursor.execute(query)
+        articles = cursor.fetchall()
+        cursor.close()
+
+        # Add featured_image key if missing
+        for article in articles:
+            if 'featured_image' not in article:
+                article['featured_image'] = None
+
+        return articles
+    
+    # Fetch approved comments for an article
+    def get_comments_for_article(self, article_id):
+        cursor = self.db.cursor(dictionary=True)
+        sql = """
+            SELECT c.commentID, c.commentText, c.created_at, u.username
+            FROM Comment c
+            JOIN UserAccount u ON c.userID = u.userID
+            WHERE c.articleID = %s AND c.commentStatus = 'approved'
+            ORDER BY c.created_at ASC
+        """
+        cursor.execute(sql, (article_id,))
+        comments = cursor.fetchall()
+        cursor.close()
+        return comments
+
+    # Add a new comment
+    def add_comment(self, user_id, article_id, comment_text):
+        cursor = self.db.cursor()
+        sql = """
+            INSERT INTO Comment (articleID, userID, commentText, created_at, commentStatus)
+            VALUES (%s, %s, %s, NOW(), 'approved')
+        """
+        cursor.execute(sql, (article_id, user_id, comment_text))
+        self.db.commit()
+        cursor.close()
+
+    def is_article_saved(self, user_id, article_id):
+        cursor = self.db.cursor(dictionary=True)  # use dictionary cursor
+        sql = "SELECT 1 FROM Favourite WHERE userID=%s AND articleID=%s LIMIT 1"
+        cursor.execute(sql, (user_id, article_id))
+        result = cursor.fetchone()  # fetch just one row
+        cursor.close()
+        return bool(result)
+    
+    def save_article(self, user_id, article_id):
+        cursor = self.db.cursor()
+        sql = "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())"
+        cursor.execute(sql, (user_id, article_id))
+        self.db.commit()
+        cursor.close()
+
+    def toggle_save_article(self, user_id, article_id):
+        if self.is_article_saved(user_id, article_id):
+            # Already saved → remove
+            cursor = self.db.cursor()
+            sql = "DELETE FROM Favourite WHERE userID=%s AND articleID=%s"
+            cursor.execute(sql, (user_id, article_id))
+            self.db.commit()
+            cursor.close()
+            return False  # now it’s unsaved
+        else:
+            # Not saved → add
+            cursor = self.db.cursor()
+            sql = "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())"
+            cursor.execute(sql, (user_id, article_id))
+            self.db.commit()
+            cursor.close()
+            return True  # now it’s saved
+
+    def report_article(self, user_id, article_id, author_id, optional_comment=""):
+        cursor = self.db.cursor()
+        sql = """
+            INSERT INTO ReportedArticle (articleID, author, userID, optionalComment, reported_at, reportStatus)
+            VALUES (%s, %s, %s, %s, NOW(), 'pending')
+        """
+        cursor.execute(sql, (article_id, author_id, user_id, optional_comment))
         self.db.commit()
         cursor.close()

@@ -114,25 +114,106 @@ def dashboard():
     user_type = str(session.get("userType", "")).lower()
 
     if user_type == "premium":
-        return render_template("premium_homepage.html")
+        recommended_articles = article_controller.get_recommended_articles(session["userID"])
+        return render_template("premium_homepage.html", recommended_articles=recommended_articles)
 
-    headline = article_controller.get_headline()
-    latest_news = article_controller.get_latest(3)
+    # Free user
+    headline = None
+    latest_news = []
 
-    # ADD THESE TWO LINES HERE
-    print("HEADLINE =", headline)
-    print("LATEST =", latest_news)
+    try:
+        headline = article_controller.get_headline()
+    except Exception as e:
+        print("Error fetching headline:", e)
+
+    try:
+        latest_news = article_controller.get_latest(3)
+    except Exception as e:
+        print("Error fetching latest news:", e)
 
     return render_template(
         "free_homepage.html", headline=headline, latest_news=latest_news
     )
 
-
-@app.route("/article")
-def article_detail():
+# Article detail page
+@app.route("/article/<int:article_id>")
+def article_detail(article_id):
     if "userID" not in session:
         return redirect(url_for("login"))
-    return render_template("article_detail.html")
+
+    user_id = session["userID"]
+    article = article_controller.get_article(article_id)  # must fetch username, categoryName, featured_image
+    comments = article_controller.get_comments_for_article(article_id)
+    is_saved = article_controller.is_article_saved(user_id, article_id)
+
+    return render_template(
+        "article_detail.html",
+        article=article,
+        comments=comments,
+        is_saved=is_saved,
+        is_premium=(session.get("userType","").lower() == "premium")
+    )
+
+# Add comment route
+@app.route("/add_comment", methods=["POST"])
+def add_comment_route():
+    if "userID" not in session:
+        return redirect(url_for("login"))
+
+    article_id = request.form.get("articleID")
+    comment_text = request.form.get("commentText")
+    user_id = session["userID"]
+
+    article_controller.add_comment(user_id, article_id, comment_text)
+
+    # redirect back to the same article page
+    return redirect(url_for("article_detail", article_id=article_id))
+
+
+# Save article route (for premium users)
+@app.route("/saved_articles", methods=["POST"])
+def save_article():
+    if "userID" not in session:
+        return redirect(url_for("login"))
+    if session.get("userType", "").lower() != "premium":
+        return redirect(url_for("dashboard"))
+
+    article_id = request.form.get("articleID")
+    user_id = session["userID"]
+
+    # TODO: call your controller function to save article in Favourite table
+    article_controller.save_article(user_id, article_id)
+
+    flash("Article saved successfully!", "success")
+    return redirect(request.referrer)  # go back to the article page
+
+
+@app.route("/toggle_save_article", methods=["POST"])
+def toggle_save_article():
+    if "userID" not in session:
+        return redirect(url_for("login"))
+
+    article_id = request.form.get("articleID")
+    user_id = session["userID"]
+    article_controller.toggle_save_article(user_id, article_id)  # toggles saved/unsaved
+    return redirect(request.referrer)
+
+
+# Report article route
+@app.route("/report_article", methods=["POST"])
+def report_article():
+    if "userID" not in session:
+        return redirect(url_for("login"))
+
+    article_id = request.form.get("articleID")
+    author_id = request.form.get("authorID")
+    user_id = session["userID"]
+    optional_comment = request.form.get("optionalComment", "")
+
+    article_controller.report_article(user_id, article_id, author_id, optional_comment)
+
+    flash("Article reported successfully!", "success")
+    return redirect(request.referrer)
 
 
 # My Articles Route

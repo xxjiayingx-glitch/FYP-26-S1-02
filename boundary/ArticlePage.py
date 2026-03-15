@@ -5,7 +5,6 @@ comment_bp = Blueprint('comment', __name__)
 
 @comment_bp.route("/add_comment", methods=["POST"])
 def add_comment_route():
-
     articleID = request.form["articleID"]
     commentText = request.form["commentText"]
     userID = session["userID"]

@@ -21,39 +21,25 @@
     </div>
 
     <div class="card-grid">
+        {% for article in recommended_articles %}
         <div class="news-card">
+            {% if article.verified %}
             <span class="badge badge-verified">Verified Publisher Badge</span>
-            <h3>Global News Credibility Review</h3>
-            <div class="news-meta">Category: World | 12 Mar 2026</div>
-            <p>Premium users can access extended metadata, credibility signals, and deeper fact-checking review output.</p>
+            {% endif %}
+            <h3>{{ article.articleTitle }}</h3>
+            <div class="news-meta">Category: {{ article.categoryName }} | {{ article.created_at.strftime('%d %b %Y') }}</div>
+            <p>{{ article.summary }}</p>
             <div class="card-actions">
-                <a class="btn" href="{{ url_for('article_detail') }}">View Article</a>
+                <a class="btn" href="{{ url_for('article_detail', article_id=article.articleID) }}">View Article</a>
+                {% if session.get('userType', '').lower() == 'premium' %}
                 <button class="btn">Save Article</button>
+                {% endif %}
                 <button class="btn btn-danger">Report Article</button>
             </div>
         </div>
-
-        <div class="news-card">
-            <h3>Priority AI Article Review Summary</h3>
-            <div class="news-meta">Category: AI | 11 Mar 2026</div>
-            <p>See recommended content based on your activity and premium-level review priority features.</p>
-            <div class="card-actions">
-                <a class="btn" href="{{ url_for('article_detail') }}">View Article</a>
-                <button class="btn">Save Article</button>
-                <button class="btn btn-danger">Report Article</button>
-            </div>
-        </div>
-
-        <div class="news-card">
-            <h3>Editorial Transparency in Modern News</h3>
-            <div class="news-meta">Category: Media | 10 Mar 2026</div>
-            <p>Understand article performance and review whether a publisher has credibility indicators attached.</p>
-            <div class="card-actions">
-                <a class="btn" href="{{ url_for('article_detail') }}">View Article</a>
-                <button class="btn">Save Article</button>
-                <button class="btn btn-danger">Report Article</button>
-            </div>
-        </div>
+        {% else %}
+        <p>No recommended articles at the moment.</p>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

@@ -6,6 +6,7 @@
 
 <div class="hero-box">
     <p class="muted">Registered User</p>
+
     {% if headline %}
         <h1>{{ headline.articleTitle }}</h1>
         <p>
@@ -13,7 +14,7 @@
         </p>
 
         <div class="card-actions">
-            <a class="btn" href="{{ url_for('article_detail', articleID=headline.articleID) }}">Read More</a>
+            <a class="btn" href="{{ url_for('article_detail', article_id=headline.articleID) }}">Read More</a>
         </div>
     {% else %}
         <h1>No headline news available</h1>
@@ -50,8 +51,14 @@
                 </p>
 
                 <div class="card-actions">
-                    <a class="btn" href="{{ url_for('article_detail', articleID=article.articleID) }}">View Article</a>
-                    <button class="btn btn-danger">Report Article</button>
+                    <a class="btn" href="{{ url_for('article_detail', article_id=article.articleID) }}">View Article</a>
+
+                    <!-- Report Article Form -->
+                    <form action="{{ url_for('report_article') }}" method="post" style="display:inline;">
+                        <input type="hidden" name="articleID" value="{{ article.articleID }}">
+                        <input type="hidden" name="authorID" value="{{ article.created_by }}">
+                        <button type="submit" class="btn btn-danger">Report Article</button>
+                    </form>
                 </div>
             </div>
             {% endfor %}
