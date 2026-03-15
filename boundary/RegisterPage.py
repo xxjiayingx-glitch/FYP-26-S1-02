@@ -9,13 +9,15 @@ registerCTL = RegisterController()
 def register():
 
     if request.method == "POST":
-
+        firstName = request.form["firstName"]
+        lastName = request.form["lastName"]
+        phone = request.form["phone"]
         username = request.form["username"]
         email = request.form["email"]
         password = request.form["password"]
         retypePassword = request.form["retypePassword"]
 
-        result = registerCTL.register(username, email, password, retypePassword)
+        result = registerCTL.register(firstName, lastName, phone, username, email, password, retypePassword)
 
         if result["success"]:
             return redirect(url_for("login.login"))

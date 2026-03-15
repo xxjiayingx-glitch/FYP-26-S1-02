@@ -2,7 +2,7 @@ from entity.db_connection import get_db_connection
 
 class RegisterController:
 
-    def register(self, username, email, password, retypePassword):
+    def register(self, firstName, lastName, phone, username, email, password, retypePassword):
 
         # Check password length
         if len(password) < 10:
@@ -27,11 +27,11 @@ class RegisterController:
 
         # Insert new user
         insert_query = """
-        INSERT INTO UserAccount (username, email, pwd, userType, accountStatus)
-        VALUES (%s, %s, %s, 'free', 'active')
+        INSERT INTO UserAccount (username, email, pwd, first_name, last_name, phone, userType, accountStatus, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, 'free', 'active', NOW())
         """
 
-        cursor.execute(insert_query, (username, email, password))
+        cursor.execute(insert_query, (username, email, password, firstName, lastName, phone))
         conn.commit()
 
         cursor.close()
