@@ -9,24 +9,28 @@ def unreg_home():
 
     user_type = session.get("userType")
 
-    if user_type is None:
-        # Get headline article
-        headline = articleCTL.get_home_headline()
-    
-    # Get latest 3 articles
-    latest_articles = []
-    if headline:
-        latest_articles = articleCTL.get_home_latest_articles(limit=3, offset=0, exclude_id=headline['articleID'])
-    else:
-        latest_articles = articleCTL.get_home_latest_articles(limit=3, offset=0)        
-    
     if user_type == "free":
         return render_template("free_homepage.html")
 
     if user_type == "premium":
         return render_template("premium_homepage.html")
 
-    return render_template("Unregistered/UnregHome.html", headline=headline, articles=latest_articles)
+    # Unregistered users
+    headline = articleCTL.get_home_headline()
+
+    if headline:
+        latest_articles = articleCTL.get_home_latest_articles(
+            limit=3, offset=0, exclude_id=headline['articleID']
+        )
+    else:
+        latest_articles = articleCTL.get_home_latest_articles(limit=3, offset=0)
+
+    return render_template(
+        "Unregistered/UnregHome.html",
+        headline=headline,
+        articles=latest_articles
+    )
+
 @home_bp.route("/load_more_articles")
 def load_more_articles():
     """
