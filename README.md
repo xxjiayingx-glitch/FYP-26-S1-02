@@ -25,3 +25,8 @@ http://127.0.0.1:5000
 ## HOW TO INSTALL TEXTBLOB ##
 pip install textblob
 python -m textblob.download_corpora
+
+## HOW TO INSTALL TORCH ##
+pip install transformers torch
+pip install --upgrade transformers
+pip install --upgrade torch

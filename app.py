@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+from flask import Flask, render_template, request, redirect, session, url_for, flash ,jsonify  
 import mysql.connector
 import os
 from werkzeug.utils import secure_filename
+from transformers import pipeline
 
+# Blueprints 
 from boundary.LoginPage import login_bp
 from boundary.UpdateProfilePage import profile_bp
 from boundary.SearchPage import article_bp
@@ -22,7 +24,11 @@ from boundary.EditCompanyProfilePage import edit_company_profile_bp
 from boundary.EditSubscriptionPlansPage import edit_subscription_plans_bp
 from boundary.WebAdminAPI import web_admin_api_bp
 
+# Controllers 
 from control.ArticleController import ArticleController
+article_controller = ArticleController()
+
+# Flask App 
 app = Flask(__name__)
 app.secret_key = "secretkey"
 
@@ -263,7 +269,54 @@ def insight():
     if session.get("userType", "").lower() != "premium":
         return redirect(url_for("dashboard"))
 
-    return render_template("insight.html")
+    user_id = session.get("userID")
+    article_id = request.args.get("article_id")
+
+    articles = article_controller.get_my_articles(user_id)
+
+    selected_article = None
+
+    if article_id:
+        try:
+            article_id = int(article_id)
+            selected_article = article_controller.get_article_insight(article_id)
+        except ValueError:
+            selected_article = None
+
+    # Auto-show first article if none selected
+    if not selected_article and articles:
+        selected_article = article_controller.get_article_insight(articles[0]['articleID'])
+
+    return render_template(
+        "insight.html",
+        articles=articles,
+        selected_article=selected_article
+    )
+
+
+@app.route("/generate_ai_review_ajax/<int:article_id>")
+def generate_ai_review_ajax(article_id):
+    # Use your ArticleController method
+    article = article_controller.get_article_insight(article_id)
+
+    if not article:
+        return jsonify({"success": False, "message": "Article not found"})
+
+    # If AI review already exists, return it
+    if article.get("aiReview"):
+        review = article["aiReview"]
+    else:
+        try:
+            # Replace with your real AI logic
+            review = f"This is an AI summary for '{article['articleTitle']}'"
+
+            # Save AI review in DB
+            article_controller.save_ai_review(article_id, review)
+
+        except Exception as e:
+            return jsonify({"success": False, "message": str(e)})
+
+    return jsonify({"success": True, "review": review})
 
 
 @app.route("/logout")

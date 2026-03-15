@@ -1,13 +1,16 @@
+# control/ArticleController.py
 from entity.Article import Article
+from db_connection import connect_db  # this should work now
 
 class ArticleController:
 
     def __init__(self):
         self.article_entity = Article()
+        self.db = connect_db()  
 
     def get_articles(self):
         return self.article_entity.get_all_articles()
-
+    
     def search(self, keyword):
         return self.article_entity.search_articles(keyword)
 
@@ -16,10 +19,10 @@ class ArticleController:
 
     def get_categories(self):
         return self.article_entity.get_categories()
-
+    
     def get_my_articles(self, user_id):
         return self.article_entity.get_my_articles(user_id)
-
+    
     def create_article(self, user_id, title, category_id, content, status, featured_image=None):
         article_id = self.article_entity.insert_article(user_id, title, category_id, content, status)
         if article_id and featured_image:
@@ -37,3 +40,37 @@ class ArticleController:
 
     def search_my_articles(self, user_id, keyword):
         return self.article_entity.search_my_articles(user_id, keyword)
+    
+    def get_article(self, article_id):
+        return self.article_entity.get_article(article_id)
+
+    def get_article_insight(self, article_id):
+        cursor = self.db.cursor(dictionary=True)
+        query = """
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                a.credibilityScore,
+                a.reviewPriority,
+                a.updated_at,
+                a.aiReview,
+                IFNULL(an.views,0) as views,
+                IFNULL(an.likes,0) as likes,
+                IFNULL(an.shares,0) as shares
+            FROM Article a
+            LEFT JOIN ArticleAnalytics an
+            ON a.articleID = an.articleID
+            WHERE a.articleID = %s
+        """
+        cursor.execute(query, (article_id,))
+        article = cursor.fetchone()
+        cursor.close()
+        return article
+
+    def save_ai_review(self, article_id, review_text):
+        cursor = self.db.cursor()
+        sql = "UPDATE Article SET aiReview = %s WHERE articleID = %s"
+        cursor.execute(sql, (review_text, article_id))
+        self.db.commit()
+        cursor.close()

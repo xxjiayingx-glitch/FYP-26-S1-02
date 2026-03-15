@@ -1,199 +1,150 @@
 {% extends "master.html" %}
 
+{% block title %}Article Insights{% endblock %}
+
 {% block content %}
 
 <style>
-
-.container{
-    width:80%;
-    margin:auto;
-}
-
-h2{
-    margin-bottom:30px;
-}
-
-.section{
-    margin-top:40px;
-    text-align:center;
-}
-
-.box{
-    background:#eeeeee;
-    padding:25px;
-    width:350px;
-    margin:auto;
-    border-radius:6px;
-}
-
-.performance-table{
-    margin:auto;
-    border-collapse:collapse;
-}
-
-.performance-table th,
-.performance-table td{
-    padding:10px 30px;
-    border-right:1px solid #aaa;
-}
-
-.performance-table th:last-child,
-.performance-table td:last-child{
-    border-right:none;
-}
-
-.review-box{
-    background:#eeeeee;
-    padding:25px;
-    width:500px;
-    margin:auto;
-    border-radius:6px;
-    text-align:left;
-}
-
-.actions{
-    margin-top:15px;
-}
-
-.btn{
-    padding:10px 25px;
-    margin:8px;
-    background:#4c7bd9;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
-
-.btn:hover{
-    background:#355db5;
-}
-
-.article-select{
-    margin-bottom:30px;
-}
-
+/* Your existing CSS remains the same */
+.container{ width:80%; margin:auto; }
+h2{ margin-bottom:30px; }
+.section{ margin-top:40px; text-align:center; }
+.box{ background:#eeeeee; padding:25px; width:350px; margin:auto; border-radius:6px; }
+.performance-table{ margin:auto; border-collapse:collapse; }
+.performance-table th, .performance-table td{ padding:10px 30px; border-right:1px solid #aaa; }
+.performance-table th:last-child, .performance-table td:last-child{ border-right:none; }
+.review-box{ background:#eeeeee; padding:25px; width:500px; margin:auto; border-radius:6px; text-align:left; }
+.actions{ margin-top:15px; }
+.btn{ padding:10px 25px; margin:8px; background:#4c7bd9; color:white; border:none; border-radius:5px; cursor:pointer; }
+.btn:hover{ background:#355db5; }
+.article-select{ margin-bottom:30px; }
+.flash-message{ text-align:center; margin-bottom:20px; color:red; font-weight:bold; }
 </style>
-
 
 <div class="container">
 
 <h2>Article Insights</h2>
 
+<!-- Flash messages -->
+<div id="flash-container">
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+</div>
 
-<!-- ARTICLE DROPDOWN -->
-
-<form method="GET" action="/insight" class="article-select">
-
+<!-- Article Selection -->
+<form method="GET" action="{{ url_for('insight') }}" class="article-select">
 <label><b>Select Article:</b></label>
-
-<select name="article_id" onchange="this.form.submit()">
-
-<option>Select your Article</option>
-
-{% for article in articles %}
-<option value="{{article.id}}"
-{% if selected_article and selected_article.id == article.id %}
-selected
-{% endif %}
->
-{{article.title}}
-</option>
-{% endfor %}
-
+<select name="article_id">
+    <option>Select your Article</option>
+    {% for article in articles %}
+    <option value="{{article.articleID}}" {% if selected_article and selected_article.articleID == article.articleID %}selected{% endif %}>
+        {{article.articleTitle}}
+    </option>
+    {% endfor %}
 </select>
-
 </form>
-
 
 {% if selected_article %}
 
-<!-- PERFORMANCE -->
-
+<!-- Overview Performance -->
 <div class="section">
-
 <h3>Overview Performance</h3>
-
 <div class="box">
-
 <table class="performance-table">
-
+<tr><th>Views</th><th>Likes</th><th>Shares</th></tr>
 <tr>
-<th>Views</th>
-<th>Likes</th>
-<th>Shares</th>
+<td>{{selected_article.views or 0}}</td>
+<td>{{selected_article.likes or 0}}</td>
+<td>{{selected_article.shares or 0}}</td>
 </tr>
-
-<tr>
-<td>{{selected_article.views}}</td>
-<td>{{selected_article.likes}}</td>
-<td>{{selected_article.shares}}</td>
-</tr>
-
 </table>
-
+</div>
 </div>
 
-</div>
-
-
-
-<!-- CREDIBILITY -->
-
+<!-- Credibility Analysis -->
 <div class="section">
-
 <h3>Credibility Analysis</h3>
-
 <div class="box">
-
-<p><b>Credibility Score:</b> {{selected_article.credibility_score}} / 100</p>
-
+<p><b>Credibility Score:</b> {{selected_article.credibilityScore}} / 100</p>
 <p><b>Article Last Updated:</b> {{selected_article.updated_at}}</p>
-
+</div>
 </div>
 
-</div>
-
-
-
-<!-- AI REVIEW -->
-
+<!-- Priority AI Article Review -->
 <div class="section">
-
 <h3>Priority AI Article Review</h3>
-
-<div class="review-box">
-
-{{selected_article.ai_review}}
-
+<div class="review-box" id="ai-review-box">
+<p id="review-text">Loading AI summary...</p>
+</div>
 </div>
 
-</div>
-
-
-
-<!-- ACTIONS -->
-
+<!-- Article Action -->
 <div class="section">
-
 <h3>Article Action</h3>
-
 <div class="actions">
-
-<a href="/view_article/{{selected_article.id}}">
-<button class="btn">View Article</button>
-</a>
-
-<a href="/edit_article/{{selected_article.id}}">
-<button class="btn">Edit Article</button>
-</a>
-
+<a href="/article/{{selected_article.articleID}}" class="btn">View Article</a>
+<a href="/edit_article/{{selected_article.articleID}}" class="btn">Edit Article</a>
 </div>
-
 </div>
 
 {% endif %}
 
 </div>
+
+<!-- JavaScript: Background AI fetch -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const select = document.querySelector("select[name='article_id']");
+    const reviewText = document.getElementById("review-text");
+
+    if (!select || !reviewText) return; // safety check
+
+    // Function to fetch AI review asynchronously
+    function fetchAIReview(articleId) {
+        if (!articleId || articleId === "Select your Article") {
+            reviewText.textContent = "No article selected.";
+            return;
+        }
+
+        reviewText.textContent = "Generating AI summary...";
+
+        // Use fetch to get the review
+        fetch(`/generate_ai_review_ajax/${articleId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    reviewText.textContent = data.review;
+                } else {
+                    reviewText.textContent = "Error: " + data.message;
+                }
+            })
+            .catch(err => {
+                reviewText.textContent = "Error calling AI review API.";
+                console.error(err);
+            });
+    }
+
+    // Fetch review on page load if article is already selected
+    const initialArticleId = select.value;
+    if (initialArticleId && initialArticleId !== "Select your Article") {
+        fetchAIReview(initialArticleId);
+    }
+
+    // Fetch review whenever the user selects a new article
+    select.addEventListener("change", function() {
+        // Update the page instantly, then fetch in background
+        const articleId = this.value;
+        reviewText.textContent = "Loading AI summary...";
+        fetchAIReview(articleId);
+    });
+
+});
+</script>
 
 {% endblock %}
