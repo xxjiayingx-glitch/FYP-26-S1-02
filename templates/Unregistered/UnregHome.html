@@ -39,7 +39,7 @@
 
       <div class="headline-image">
         <img
-          src="{{ url_for('static', filename='uploads/' + headline['imageURL']) }}"
+          src="{{ url_for('static', filename='uploads/' + (headline['imageURL'] or 'placeholder.png')) }}"
           alt="{{ headline['articleTitle'] }}"
         />
       </div>
@@ -51,7 +51,7 @@
 
         <div class="news-card">
           <img
-            src="{{ url_for('static', filename='uploads/' + article['imageURL']) }}"
+            src="{{ url_for('static', filename='uploads/' + (article['imageURL'] or 'placeholder.png')) }}"
             alt="{{ article['articleTitle'] }}"
           />
           <h5 class="news-title">{{ article['articleTitle'] }}</h5>
