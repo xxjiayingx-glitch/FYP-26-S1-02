@@ -124,6 +124,27 @@ def free_homepage():
         search_query=search_query
     )
 
+@app.route("/premium_homepage", methods=["GET", "POST"])
+def premium_homepage():
+    user_id = session.get("userID")
+    search_query = request.args.get("q")  # optional for GET search
+
+    # Headline article
+    headline = article_controller.get_headline()
+
+    # Recommended articles (custom logic for premium users)
+    recommended_articles = article_controller.get_latest(limit=6)
+    # Latest news (general latest articles)
+    latest_news = article_controller.get_latest(limit=4)
+
+    return render_template(
+        "premium_homepage.html",
+        headline=headline,
+        recommended_articles=recommended_articles,
+        latest_news=latest_news,
+        search_query=search_query
+    )
+
 @app.route("/dashboard")
 def dashboard():
     if "userID" not in session:
@@ -142,8 +163,7 @@ def dashboard():
             "premium_homepage.html",
             headline=headline,
             latest_news=latest_news,
-            my_articles=my_articles,
-            testimonials=testimonials
+            my_articles=my_articles
         )
 
     return render_template(

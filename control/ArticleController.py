@@ -242,3 +242,5 @@ class ArticleController:
 
     def get_testimonials(self, limit=2):
         return self.article_entity.get_latest_testimonials(limit)
+
+    
