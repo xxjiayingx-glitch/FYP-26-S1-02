@@ -59,9 +59,13 @@ class Article:
         cursor = conn.cursor()
 
         sql = """
-        SELECT * FROM Article
-        WHERE articleStatus = 'published'
-        ORDER BY created_at DESC
+        SELECT a.*, c.categoryName, ai.imageURL, u.username
+        FROM Article a
+        LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+        LEFT JOIN UserAccount u ON a.created_by = u.userID
+        WHERE a.articleStatus = 'published'
+        ORDER BY a.created_at DESC
         LIMIT 1
         """
 
@@ -76,11 +80,15 @@ class Article:
         cursor = conn.cursor()
 
         sql = """
-        SELECT * FROM Article
-        WHERE articleStatus = 'published'
-        ORDER BY created_at DESC
-        LIMIT 1, %s
-        """
+            SELECT a.*, c.categoryName, ai.imageURL, u.username
+            FROM Article a
+            LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN UserAccount u ON a.created_by = u.userID
+            WHERE a.articleStatus = 'published'
+            ORDER BY a.created_at DESC
+            LIMIT 1, %s
+        """        
         cursor.execute(sql, (limit,))
         articles = cursor.fetchall()
 
@@ -170,7 +178,7 @@ class Article:
         SELECT a.*, ai.imageURL
         FROM Article a
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-        WHERE a.articleStatus = 'Active'
+        WHERE a.articleStatus = 'published'
         ORDER BY a.created_at DESC
         LIMIT 1
         """
@@ -188,7 +196,7 @@ class Article:
         SELECT a.*, ai.imageURL
         FROM Article a
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-        WHERE a.articleStatus = 'Active'
+        WHERE a.articleStatus = 'published'
         """
         params = []
 
@@ -203,6 +211,23 @@ class Article:
         articles = cursor.fetchall()
         conn.close()
         return articles
+
+    def get_latest_testimonials(self, limit=2):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        sql = """
+        SELECT t.*, u.username
+        FROM Testimonial t
+        LEFT JOIN UserAccount u ON t.userID = u.userID
+        ORDER BY t.created_at DESC
+        LIMIT %s
+        """
+        cursor.execute(sql, (limit,))
+        testimonials = cursor.fetchall()
+
+        conn.close()
+        return testimonials
 
     @staticmethod
     def get_total_articles():

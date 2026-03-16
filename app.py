@@ -78,8 +78,11 @@ def unreghome():
     return render_template("Unregistered/UnregHome.html")
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def login():
+    if "userID" in session:
+        return redirect(url_for("dashboard"))
+
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
@@ -103,7 +106,6 @@ def login():
 
     return render_template("login.html")
 
-
 article_controller = ArticleController()
 
 @app.route("/dashboard")
@@ -111,15 +113,30 @@ def dashboard():
     if "userID" not in session:
         return redirect(url_for("login"))
 
+    user_id = session.get("userID")
     user_type = str(session.get("userType", "")).lower()
 
-    if user_type == "premium":
-        recommended_articles = article_controller.get_recommended_articles(session["userID"])
-        return render_template("premium_homepage.html", recommended_articles=recommended_articles)
+    headline = article_controller.get_headline()
+    latest_news = article_controller.get_latest(3)
+    my_articles = article_controller.get_my_articles(user_id)
+    testimonials = article_controller.get_testimonials(2)
 
-    # Free user
-    headline = None
-    latest_news = []
+    if user_type == "premium":
+        return render_template(
+            "premium_homepage.html",
+            headline=headline,
+            latest_news=latest_news,
+            my_articles=my_articles,
+            testimonials=testimonials
+        )
+
+    return render_template(
+        "free_homepage.html",
+        headline=headline,
+        latest_news=latest_news,
+        my_articles=my_articles,
+        testimonials=testimonials
+    )
 
     try:
         headline = article_controller.get_headline()

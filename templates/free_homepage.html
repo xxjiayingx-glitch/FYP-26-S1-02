@@ -5,25 +5,7 @@
 {% block content %}
 
 <div class="hero-box">
-    <p class="muted">Registered User</p>
-
-    {% if headline %}
-        <h1>{{ headline.articleTitle }}</h1>
-        <p>
-            {{ headline.content[:220] }}{% if headline.content|length > 220 %}...{% endif %}
-        </p>
-
-        <div class="card-actions">
-            <a class="btn" href="{{ url_for('article_detail', article_id=headline.articleID) }}">Read More</a>
-        </div>
-    {% else %}
-        <h1>No headline news available</h1>
-        <p>Please add published articles into the database.</p>
-    {% endif %}
-</div>
-
-<div class="section-box">
-    <h2 class="section-title">Latest News + Testimonials</h2>
+    <h2 class="section-title">Latest News</h2>
 
     <div class="search-bar">
         <form method="POST" action="/search" style="display:flex; gap:10px; width:100%;">
@@ -31,36 +13,78 @@
             <button class="btn" type="submit">Search</button>
         </form>
     </div>
+</div>
 
+<div class="section-box">
+    <h2 class="section-title">My Articles</h2>
+
+    {% if my_articles %}
+        <div class="articles-grid">
+            {% for article in my_articles %}
+                <div class="article-card">
+                    {% if article.imageURL %}
+                        <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="Article Image" class="article-img">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/default.jpg') }}" alt="Default Image" class="article-img">
+                    {% endif %}
+
+                    <div class="article-content">
+                        <h3 class="article-title">{{ article.articleTitle }}</h3>
+
+                        <p class="article-desc">
+                            {{ article.content[:100] }}{% if article.content|length > 100 %}...{% endif %}
+                        </p>
+
+                        <div class="article-meta">
+                            <span><strong>Status:</strong> {{ article.articleStatus }}</span>
+                            <span><strong>Category:</strong> {{ article.categoryName if article.categoryName else 'N/A' }}</span>
+                            <span><strong>Created:</strong> {{ article.created_at }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-message">You have not created any articles yet.</p>
+    {% endif %}
+</div>
+
+<div class="section-box">
+    <h2 class="section-title">Latest News + Testimonials</h2>
     <div class="card-grid">
         {% if latest_news %}
             {% for article in latest_news %}
-            <div class="news-card">
-                <h3>{{ article.articleTitle }}</h3>
-
-                <div class="news-meta">
-                    {% if article.articleStatus %}
-                        Status: {{ article.articleStatus }}
+                <div class="news-card">
+                    {% if article.imageURL %}
+                        <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="Article Image" class="news-card-img">
                     {% else %}
-                        Latest Article
+                        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Default Image" class="news-card-img">
                     {% endif %}
+
+                    <h3>{{ article.articleTitle }}</h3>
+
+                    <div class="news-meta">
+                        {% if article.articleStatus %}
+                            Status: {{ article.articleStatus }}
+                        {% else %}
+                            Latest Article
+                        {% endif %}
+                    </div>
+
+                    <p>
+                        {{ article.content[:140] }}{% if article.content|length > 140 %}...{% endif %}
+                    </p>
+
+                    <div class="card-actions">
+                        <a class="btn" href="{{ url_for('article_detail', article_id=article.articleID) }}">View Article</a>
+
+                        <form action="{{ url_for('report_article') }}" method="post" style="display:inline;">
+                            <input type="hidden" name="articleID" value="{{ article.articleID }}">
+                            <input type="hidden" name="authorID" value="{{ article.created_by }}">
+                            <button type="submit" class="btn btn-danger">Report Article</button>
+                        </form>
+                    </div>
                 </div>
-
-                <p>
-                    {{ article.content[:140] }}{% if article.content|length > 140 %}...{% endif %}
-                </p>
-
-                <div class="card-actions">
-                    <a class="btn" href="{{ url_for('article_detail', article_id=article.articleID) }}">View Article</a>
-
-                    <!-- Report Article Form -->
-                    <form action="{{ url_for('report_article') }}" method="post" style="display:inline;">
-                        <input type="hidden" name="articleID" value="{{ article.articleID }}">
-                        <input type="hidden" name="authorID" value="{{ article.created_by }}">
-                        <button type="submit" class="btn btn-danger">Report Article</button>
-                    </form>
-                </div>
-            </div>
             {% endfor %}
         {% else %}
             <p>No latest news available.</p>
@@ -70,17 +94,19 @@
 
 <div class="section-box">
     <h2 class="section-title">Latest Testimonials</h2>
-    <div class="testimonial-grid">
-        <div class="feature-card">
-            <h3>Helpful and Easy to Use</h3>
-            <p>“The platform is simple and makes article checking much easier for me.”</p>
-            <p class="muted">- Free User</p>
-        </div>
 
-        <div class="feature-card">
-            <h3>Useful for Daily Reading</h3>
-            <p>“I like that I can browse the latest news and report suspicious content quickly.”</p>
-        </div>
+    <div class="testimonial-grid">
+        {% if testimonials %}
+            {% for testimonial in testimonials %}
+                <div class="feature-card">
+                    <h3>User Feedback</h3>
+                    <p>“{{ testimonial.comment }}”</p>
+                    <p class="muted">- {{ testimonial.username if testimonial.username else 'Anonymous User' }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No testimonials available.</p>
+        {% endif %}
     </div>
 </div>
 

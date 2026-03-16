@@ -229,7 +229,7 @@ class ArticleController:
             self.db.commit()
             cursor.close()
             return True  # now it’s saved
-
+    
     def report_article(self, user_id, article_id, author_id, optional_comment=""):
         cursor = self.db.cursor()
         sql = """
@@ -239,3 +239,6 @@ class ArticleController:
         cursor.execute(sql, (article_id, author_id, user_id, optional_comment))
         self.db.commit()
         cursor.close()
+
+    def get_testimonials(self, limit=2):
+        return self.article_entity.get_latest_testimonials(limit)
