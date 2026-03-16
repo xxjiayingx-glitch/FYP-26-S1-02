@@ -117,9 +117,9 @@ def dashboard():
     user_type = str(session.get("userType", "")).lower()
 
     headline = article_controller.get_headline()
-    latest_news = article_controller.get_latest(3)
+    latest_news = article_controller.get_latest(4)
     my_articles = article_controller.get_my_articles(user_id)
-    testimonials = article_controller.get_testimonials(2)
+    testimonials = article_controller.get_testimonials(6)
 
     if user_type == "premium":
         return render_template(
@@ -144,7 +144,7 @@ def dashboard():
         print("Error fetching headline:", e)
 
     try:
-        latest_news = article_controller.get_latest(3)
+        latest_news = article_controller.get_latest(4)
     except Exception as e:
         print("Error fetching latest news:", e)
 

@@ -32,13 +32,13 @@ class ArticleController:
     def get_headline(self):
         return self.article_entity.get_headline_article()
 
-    def get_latest(self, limit=3):
+    def get_latest(self, limit=5):
         return self.article_entity.get_latest_articles(limit)
     
     def get_home_headline(self):
         return self.article_entity.get_home_headline_article()
 
-    def get_home_latest_articles(self, limit=3, offset=0, exclude_id=None):
+    def get_home_latest_articles(self, limit=5, offset=0, exclude_id=None):
         return self.article_entity.get_home_latest_articles(limit, offset, exclude_id)
 
     def delete_article(self, article_id):
@@ -147,7 +147,7 @@ class ArticleController:
     def get_recommended_articles(self, user_id):
         """
         Fetch recommended articles for the given user.
-        For now, we just return the latest 3 articles as a placeholder.
+        For now, we just return the latest 5 articles as a placeholder.
         """
         cursor = self.db.cursor(dictionary=True)
         query = """
@@ -158,7 +158,7 @@ class ArticleController:
             JOIN ArticleCategory c ON a.categoryID = c.categoryID
             WHERE a.articleStatus = 'published'
             ORDER BY a.created_at DESC
-            LIMIT 3
+            LIMIT 5
         """
         cursor.execute(query)
         articles = cursor.fetchall()

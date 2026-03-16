@@ -20,6 +20,139 @@ a:hover {
     margin: auto;
 }
 
+/* ===== FEATURED ARTICLE ===== */
+.featured-news {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin: 40px 5%;
+}
+
+.featured-left {
+    flex: 1.2;
+}
+
+.featured-right {
+    flex: 1;
+}
+
+.featured-right img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.featured-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.featured-desc {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.read-more {
+    color: #4f94b8;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.read-more:hover {
+    text-decoration: underline;
+}
+
+/* ===== LATEST NEWS GRID ===== */
+.latest-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin: 0 5% 50px 5%;
+}
+
+.news-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.news-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.news-card h4 {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.news-card p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* ===== TESTIMONIAL GRID ===== */
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin: 20px 5%;
+}
+
+.testimonial-card {
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.testimonial-user {
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+
+    .latest-grid,
+    .testimonial-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .featured-news {
+        flex-direction: column;
+    }
+
+    .latest-grid,
+    .testimonial-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+
+    .latest-grid,
+    .testimonial-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .featured-title {
+        font-size: 22px;
+    }
+}
+
 /* ===== Navigation Bar ===== */
 
 .topbar {

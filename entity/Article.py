@@ -75,7 +75,7 @@ class Article:
         conn.close()
         return article
 
-    def get_latest_articles(self, limit=3):
+    def get_latest_articles(self, limit=4):
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -188,7 +188,7 @@ class Article:
         conn.close()
         return article
 
-    def get_home_latest_articles(self, limit=3, offset=0, exclude_id=None):
+    def get_home_latest_articles(self, limit=4, offset=0, exclude_id=None):
         conn = get_db_connection()
         cursor = conn.cursor()
 
