@@ -1,36 +1,20 @@
-from entity.subscription_entity import get_subscription
+from entity.Subscription import Subscription
 
 class SubscriptionCTL:
     def __init__(self):
-        self.subscription_plan_entity = SubscriptionPlan()
+        self.subscription_plan_entity = Subscription()
 
-    def fetchAllSubscription(self):
-        subscriptionListing = self.subscription_plan_entity.fetchAllSubscription()
-        return subscriptionListing
+    def getSubscriptionPlans(self):
 
+        plans = self.subscription_plan_entity.get_all_plans(self)
 
-@UnregisteredUser.route("/api/subscription", methods=["GET"])
-def fetchAllSubscription():
-    subscriptionCTL = SubscriptionCTL()
-    try:
-        subscriptionListing = subscriptionCTL.fetchAllSubscription()
+        if not plans:
+            return {
+                "success": False,
+                "plans": []
+            }
 
-        if subscriptionListing:
-            return jsonify(subscriptionListing), 200
-        else:
-            return (
-                jsonify({
-                    "status": "error",
-                    "message": "No subscription plans found"
-                }),
-                404,
-            )
-
-    except Exception as e:
-        return (
-            jsonify({
-                "status": "error",
-                "message": str(e),
-            }),
-            500,
-        )
+        return {
+            "success": True,
+            "plans": plans
+        }
