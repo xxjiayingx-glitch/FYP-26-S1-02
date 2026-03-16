@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daily Scoop</title>
-    <link rel="stylesheet" href="../../static/css/Unregistered/UnregHome.css" />
+    <link rel="stylesheet" href="../../static/css/Unregistered/UnregCompanyProf.css" />
   </head>
 
   <body>
@@ -26,23 +26,34 @@
     </nav>
     </header>
 
-    <main>
+    <main> 
+      {% if profile %}
       <h1 class="section-title">Our Company</h1>
 
       <div class="company-card">
-        <img src="images/companyprofile.jpg" alt="Company image">
+        <div class="company-image">
+          <img src="{{ url_for('static', filename='uploads/A1.png') }}" alt="Company image">
+        </div>
 
         <div class="card-text">
           <h2>Introduction</h2>
-          <p>
-            Daily Scoop News is a multi-user news platform built for both readers and creators. 
-            We empower users to explore, publish, and engage with news in real time — fostering 
-            an active and dynamic community. With AI-assisted fact-checking, we ensure the content 
-            you read is credible and trustworthy. Backed by robust administrative tools and platform 
-            moderation, Daily Scoop News delivers a reliable, interactive, and well-governed space 
-            where quality journalism thrives.
-          </p>
+          
+          <p>{{ profile.description }}</p>
+
+          <h2>Mission</h2>
+          <p>{{ profile.mission }}</p>
+
+          <h2>Vision</h2>
+          <p>{{ profile.vision }}</p>
+
+          <h3>Contact</h3>
+          <p>Email: {{ profile.contactEmail }}</p>
+          <p>Phone: {{ profile.contactPhone }}</p>
         </div>
+       
+        {% else %}
+          <h1 class="section-title">Company Information Not Available</h1>
+        {% endif %}
       </div>
     </main>
 

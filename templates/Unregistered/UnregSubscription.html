@@ -4,20 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daily Scoop</title>
-    <link rel="stylesheet" href="../../static/css/Unregistered/UnregSubscription.css" />
+    <link
+      rel="stylesheet"
+      href="../../static/css/Unregistered/UnregSubscription.css"
+    />
   </head>
 
   <header class="navbar">
     <div class="logo">
       <a href="{{ url_for('home.unreg_home') }}">
-         <h1>Daily Scoop</h1>
+        <h1>Daily Scoop</h1>
         <h1>News System</h1>
       </a>
     </div>
 
-     <nav class="navLinks">
-      <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
-      <a href="{{ url_for('home.unreg_home') }}#product-feature">Product Feature</a>
+    <nav class="navLinks">
+      <a href="{{ url_for('companyprofile.unreg_companyprof') }}"
+        >Company Profile</a
+      >
+      <a href="{{ url_for('home.unreg_home') }}#product-feature"
+        >Product Feature</a
+      >
       <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
       <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
       <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
@@ -34,55 +41,29 @@
       </p>
 
       <div class="pricing-container">
-        <!-- Basic Plan -->
-        <div class="plan-card highlight">
-          <h3>Basic Plan</h3>
-          <p class="user-type">For Unregistered User</p>
+        {% if plans %} {% for plan in plans %}
 
-          <div class="price">$0 <span>/ month</span></div>
+        <div class="plan-card {% if loop.index == 1 %}highlight{% endif %}">
+          <h3>{{ plan.planName }}</h3>
+
+          <div class="price">
+            ${{ plan.price }} <span>/ {{ plan.billingCycle }}</span>
+          </div>
 
           <ul class="features">
-            <li>✔ View Article</li>
-            <li>✔ Browse Trending / Top Article</li>
+            {% for feature in plan.planDescription.split(',') %}
+            <li>✔ {{ feature.strip() }}</li>
+            {% endfor %}
           </ul>
         </div>
 
-        <!-- Free Plan -->
-        <div class="plan-card">
-          <h3>Free Plan</h3>
-          <p class="user-type">For Free Registered User</p>
+        {% endfor %} {% else %}
 
-          <div class="price">$0 <span>/ month</span></div>
+        <p class="no-plan-message">
+          No subscription plans available at the moment.
+        </p>
 
-          <ul class="features">
-            <li>✔ Manage Profile</li>
-            <li>✔ View Article</li>
-            <li>✔ Search Article</li>
-            <li>✔ Comment on Article</li>
-            <li>✔ Report Article</li>
-            <li>✔ Create Article</li>
-            <li>✔ Edit Article</li>
-            <li>✔ Delete Article</li>
-            <li>✔ View Article Status</li>
-          </ul>
-        </div>
-
-        <!-- Premium Plan -->
-        <div class="plan-card">
-          <h3>Premium Plan</h3>
-          <p class="user-type">For Premium Registered User</p>
-
-          <div class="price">$10 <span>/ month</span></div>
-
-          <ul class="features">
-            <li>✔ All the Free Plan features</li>
-            <li>✔ Save Article</li>
-            <li>✔ AI Priority Review</li>
-            <li>✔ Article Analytics</li>
-            <li>✔ Personalized Recommendations</li>
-            <li>✔ Verified Publisher Badge</li>
-          </ul>
-        </div>
+        {% endif %}
       </div>
     </section>
   </body>

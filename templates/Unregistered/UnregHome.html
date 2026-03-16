@@ -29,44 +29,47 @@
 
   <body>
     <section class="headline">
-      <div class="headline-text">
-        {% if headline %}
-        <h1 class="headline-title">{{ headline['articleTitle'] }}</h1>
+      <div class="container">
+        <div class="headline-text">
+          {% if headline %}
+          <h1 class="headline-title">{{ headline['articleTitle'] }}</h1>
 
-        <p class="headline-description">{{ headline['content'][:200] }}...</p>
+          <p class="headline-description">{{ headline['content'][:200] }}...</p>
 
-        <a href="#" class="headline-link">read more.....</a>
+          <a href="#" class="headline-link">read more.....</a>
+        </div>
+
+        <div class="headline-image">
+          <img
+            src="{{ url_for('static', filename='uploads/' + (headline['imageURL'] or 'placeholder.png')) }}"
+            alt="{{ headline['articleTitle'] }}"
+          />
+        </div>
+        {% else %}
+        <p class="no-headline">No headline available</p>
+        {% endif %}
       </div>
-
-      <div class="headline-image">
-        <img
-          src="{{ url_for('static', filename='uploads/' + (headline['imageURL'] or 'placeholder.png')) }}"
-          alt="{{ headline['articleTitle'] }}"
-        />
-      </div>
-      {% else %}
-      <p class="no-headline">No headline available</p>
-      {% endif %}
     </section>
 
     <section id="articles" class="news">
-      <div class="news-grid" id="latest-articles">
-        {% if articles %} {% for article in articles %}
+      <div class="container">
+        <div class="news-grid" id="latest-articles">
+          {% if articles %} {% for article in articles %}
 
-        <div class="news-card">
-          <img
-            src="{{ url_for('static', filename='uploads/' + (article['imageURL'] or 'placeholder.png')) }}"
-            alt="{{ article['articleTitle'] }}"
-          />
-          <h5 class="news-title">{{ article['articleTitle'] }}</h5>
-          <p class="news-para">{{ article['content'][:150] }}...</p>
+          <div class="news-card">
+            <img
+              src="{{ url_for('static', filename='uploads/' + (article['imageURL'] or 'placeholder.png')) }}"
+              alt="{{ article['articleTitle'] }}"
+            />
+            <h5 class="news-title">{{ article['articleTitle'] }}</h5>
+            <p class="news-para">{{ article['content'][:150] }}...</p>
+          </div>
+          {% endfor %} {% else %}
+          <p class="no-articles">
+            No articles available at the moment. Please check back later.
+          </p>
+          {% endif %}
         </div>
-        {% endfor %} {% else %}
-        <p class="no-articles">
-          No articles available at the moment. Please check back later.
-        </p>
-        {% endif %}
-
         <div class="news-btn">
           <button
             class="view-more-articles"
@@ -79,132 +82,161 @@
       </div>
     </section>
 
-    <section class="testimonials">
+    <section class="testimonials" id="testimonials">
       <h1 class="testimonial-title">Testimonials</h1>
       <h2 class="testimonial-desc">Here's what people are saying</h2>
-      <div class="testimonial-grid">
-        <div class="testimonial-card">
-          <!-- <h4>Carl</h4>
-          <p>★★★★★</p>
-          <p>
-            A reliable news platform with interesting articles and a great
-            reading experience.
-          </p>
+      <div class="container">
+        <div class="testimonial-grid">
+          {% if testimonials %} {% for t in testimonials %}
+          <div class="testimonial-card">
+            <h4>{{ t.username }}</h4>
+            <p>{{ t.stars }}</p>
+            <p>{{ t.comment }}</p>
+          </div>
+          {% endfor %} {% else %}
+          <p>No testimonials available yet.</p>
+          {% endif %}
         </div>
-
-        <div class="testimonial-card">
-          <h4>Sally</h4>
-          <p>★★★★★</p>
-          <p>
-            As a premium user, I enjoy the analytics insights for my articles.
-          </p>
-        </div>
-
-        <div class="testimonial-card">
-          <h4>Clara</h4>
-          <p>★★★★☆</p>
-          <p>Overall the platform is good but the free tier could improve.</p>
-        </div>
-
-       
-        <div class="testimonial-card hidden">
-          <h4>Jason</h4>
-          <p>★★★★★</p>
-          <p>Very easy to navigate and the articles are informative.</p>
-        </div>
-
-        <div class="testimonial-card hidden">
-          <h4>Anna</h4>
-          <p>★★★★★</p>
-          <p>I love the clean design and simple layout.</p>
-        </div>
-
-        <div class="testimonial-card hidden">
-          <h4>David</h4>
-          <p>★★★★☆</p>
-          <p>Great content but would like more technology news.</p>
-        </div>
-        <div class="testimonial-card hidden">
-          <h4>James</h4>
-          <p>★★★★★</p>
-          <p>Very easy to navigate and the articles are informative.</p>
-        </div>
-
-        <div class="testimonial-card hidden">
-          <h4>Ben</h4>
-          <p>★★★★★</p>
-          <p>I love the clean design and simple layout.</p>
-        </div>
-
-        <div class="testimonial-card hidden">
-          <h4>Goliath</h4>
-          <p>★★★★☆</p>
-          <p>Great content but would like more technology news.</p>
-        </div> -->
-
-        <br />
         <div class="testimonial-btn">
-          <button class="view-more" onclick="showMore(this)">View More</button>
+          <button
+            class="view-more-testimonials"
+            data-section="testimonials"
+            onclick="loadMoreTestimonials(this)"
+          >
+            View More
+          </button>
         </div>
       </div>
     </section>
 
     <section id="product-feature" class="feature">
-      <h1 class="features-title">Product Feature</h1>
-      <!-- <div class="features-grid">
-        <img src="images/fourth.jpg" alt="Add Comments" />
-        <img src="images/fifth.jpg" alt="View Articles" />
-        <img src="images/sixth.jpg" alt="Post Articles" />
-        <img src="images/seventh.jpg" alt="View Testimonials" />
+      <div class="container">
+        <h1 class="features-title">Product Feature</h1>
+        <div class="features-grid" id="prodfeatures">
+          {% if features %} {% for f in features %}
+          <div class="feature-card">
+            <h4>{{ f.featureName }}</h4>
 
-        <img src="images/feature5.jpg" class="hidden" alt="Add Comments" />
-        <img src="images/feature6.jpg" class="hidden" alt="Add Comments" />
-        <img src="images/feature7.jpg" class="hidden" alt="Add Comments" />
-        <img src="images/feature8.jpg" class="hidden" alt="Add Comments" />
+            <div class="feature-img">
+              <img
+                src="{{ url_for('static', filename='uploads/' + f.featureImage) }}"
+                alt="{{ f.featureName }}"
+              />
+            </div>
 
-        <br />
-        <div class="product-features-btn">
-          <button class="view-more" onclick="showMore(this)">View More</button>
+            <p>{{ f.featureDescription }}</p>
+          </div>
+          {% endfor %} {% else %}
+          <p>No product features available yet.</p>
+          {% endif %}
         </div>
-      </div> -->
+
+        <div class="product-features-btn">
+          <button
+            class="view-more-features"
+            data-section="features"
+            onclick="loadMoreFeatures(this)"
+          >
+            View More
+          </button>
+        </div>
+      </div>
     </section>
 
     <script>
-      function showMore(button) {
-      let section = button.closest("section");
-      let hiddenItems = section.querySelectorAll(".hidden");
-      hiddenItems.forEach(function (item) {
-        item.style.display = "block";
-        item.classList.remove("hidden");
-      });
-      }
-
-      //let articleOffset = {{ articles|length if articles is defined else 0 }};
-      let articleOffset = articles?.length ?? 0;
+      // Script to show more latest articles
+      let articleOffset = 4;
       const articleLimit = 6;
 
       function loadMoreArticles(button) {
-      fetch(`/load_more_articles?offset=${articleOffset}&limit=${articleLimit}`)
-        .then(res => res.json())
-        .then(data => {
-          const container = document.getElementById('latest-articles');
-          data.forEach(article => {
-            const card = document.createElement('div');
-            card.classList.add('news-card');
-            card.innerHTML = `
+        fetch(
+          `/load_more_articles?offset=${articleOffset}&limit=${articleLimit}`,
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            const container = document.getElementById("latest-articles");
+            data.forEach((article) => {
+              const card = document.createElement("div");
+              card.classList.add("news-card");
+              card.innerHTML = `
               <img src="/static/uploads/${article.imageURL}" alt="${article.articleTitle}">
               <h5 class="news-title">${article.articleTitle}</h5>
               <p class="news-para">${article.content}...</p>
             `;
-            container.appendChild(card);
+              container.appendChild(card);
+            });
+
+            articleOffset += data.length;
+
+            if (data.length < articleLimit) {
+              button.style.display = "none";
+            }
           });
+      }
 
-          articleOffset += data.length;
+      // Script to show more testimonials
+      let testimonialOffset = 3;
 
-          if (data.length < articleLimit) {
-            button.style.display = 'none';
-          }
-        });
+      function loadMoreTestimonials() {
+        fetch(`/load-more-testimonials?offset=${testimonialOffset}`)
+          .then((response) => response.json())
+          .then((data) => {
+            const grid = document.querySelector(".testimonial-grid");
+
+            data.forEach((t) => {
+              const card = document.createElement("div");
+              card.className = "testimonial-card";
+
+              card.innerHTML = `
+            <h4>${t.username}</h4>
+            <p>${t.stars}</p>
+            <p>${t.comment}</p>
+          `;
+
+              grid.appendChild(card);
+            });
+
+            testimonialOffset += data.length; // increment offset by number loaded
+
+            // hide button if no more testimonials
+            if (data.length < 6) {
+              document.querySelector(".view-more-testimonials").style.display =
+                "none";
+            }
+          });
+      }
+
+      // Script to show more product features
+      let featureOffset = 4;
+      const featureLimit = 4;
+
+      function loadMoreFeatures(button) {
+        fetch(
+          `/load_more_features?offset=${featureOffset}&limit=${featureLimit}`,
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            const container = document.getElementById("prodfeatures");
+
+            data.forEach((feature) => {
+              const card = document.createElement("div");
+              card.classList.add("feature-card");
+
+              card.innerHTML = `
+                <h4>${feature.featureName}</h4>
+                <img src="/static/images/${feature.featureImage}" width="230" height="120">
+                <p>${feature.featureDescription}</p>
+              `;
+
+              container.appendChild(card);
+            });
+
+            featureOffset += data.length;
+
+            if (data.length < featureLimit) {
+              button.style.display = "none";
+            }
+          });
       }
     </script>
   </body>

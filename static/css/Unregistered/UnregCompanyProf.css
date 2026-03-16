@@ -40,6 +40,36 @@
   text-decoration: underline;
 }
 
+/* Body */
+.company-card {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start; 
+    margin: 40px 0;
+}
+
+.company-image {
+    width: 800px;
+    height: 550px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.company-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.card-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 /* Footer section*/
 .footer {
   display: flex;

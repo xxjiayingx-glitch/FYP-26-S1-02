@@ -1,5 +1,6 @@
 from entity.db_connection import get_db_connection
 
+
 class Subscription:
 
     @staticmethod
@@ -24,8 +25,30 @@ class Subscription:
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) AS active_subscriptions FROM Subscription WHERE status = 'Active'")
+            cursor.execute(
+                "SELECT COUNT(*) AS active_subscriptions FROM Subscription WHERE status = 'Active'"
+            )
             result = cursor.fetchone()
             return result["active_subscriptions"]
         finally:
             conn.close()
+
+    @staticmethod
+    def get_all_plans(self):
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+        SELECT planID, planName, planDescription, price, billingCycle
+        FROM SubscriptionPlan
+        WHERE planStatus = 'Active'
+        """
+
+        cursor.execute(query)
+        plans = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return plans

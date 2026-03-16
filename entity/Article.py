@@ -183,7 +183,7 @@ class Article:
         SELECT a.*, ai.imageURL
         FROM Article a
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-        WHERE a.articleStatus = 'published'
+        WHERE a.articleStatus = 'Active'
         ORDER BY a.created_at DESC
         LIMIT 1
         """
@@ -198,21 +198,26 @@ class Article:
         cursor = conn.cursor()
 
         sql = """
-        SELECT a.*, ai.imageURL
+        SELECT a.articleID, a.articleTitle, a.content, ai.imageURL
         FROM Article a
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-        WHERE a.articleStatus = 'published'
+        WHERE a.articleStatus = 'Active'
         """
+
         params = []
 
         if exclude_id:
             sql += " AND a.articleID != %s"
             params.append(exclude_id)
 
-        sql += " ORDER BY a.created_at DESC LIMIT %s OFFSET %s"
+        sql += """
+        ORDER BY a.created_at DESC
+        LIMIT %s OFFSET %s
+        """
+
         params.extend([limit, offset])
 
-        cursor.execute(sql, tuple(params))
+        cursor.execute(sql, params)
         articles = cursor.fetchall()
         conn.close()
         return articles
