@@ -119,9 +119,9 @@
 
             <div class="feature-img">
               <img
-                src="{{ url_for('static', filename='uploads/' + (f['featureImage'] or 'placeholder.png')) }}"
-              alt="{{ f['featureName'] }}"
-                />
+                src="{{ url_for('static', filename='uploads/' + f.featureImage) }}"
+                alt="{{ f.featureName }}"
+              />
             </div>
 
             <p>{{ f.featureDescription }}</p>
