@@ -20,6 +20,48 @@ a:hover {
     margin: auto;
 }
 
+/* ===== Search Bar on Top ===== */
+.search-bar-container {
+    width: 90%;
+    margin: 15px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-bar-container input[type="text"] {
+    width: 100%;
+    max-width: 500px;
+    padding: 10px 40px 10px 15px;
+    /* leave space for icon */
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 16px;
+    outline: none;
+}
+
+.search-bar-container button {
+    position: relative;
+    top: -28px;
+    left: -35px;
+    /* overlay button on input */
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 18px;
+    color: #4f94b8;
+}
+
+.search-bar-container button:hover {
+    color: #2a6db3;
+}
+
+/* ===== Search Icon ===== */
+.search-bar-container button i {
+    pointer-events: none;
+    /* click passes to button */
+}
+
 /* ===== FEATURED ARTICLE ===== */
 .featured-news {
     display: flex;

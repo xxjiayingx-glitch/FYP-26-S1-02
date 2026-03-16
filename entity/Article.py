@@ -15,13 +15,18 @@ class Article:
         cursor = conn.cursor()
 
         sql = """
-        SELECT * FROM Article
-        WHERE articleTitle LIKE %s
-        ORDER BY created_at DESC
+        SELECT a.*, c.categoryName, ai.imageURL, u.username
+        FROM Article a
+        LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+        LEFT JOIN UserAccount u ON a.created_by = u.userID
+        WHERE a.articleTitle LIKE %s OR a.content LIKE %s
+        AND a.articleStatus = 'published'
+        ORDER BY a.created_at DESC
         """
-        cursor.execute(sql, ("%" + keyword + "%",))
+        keyword_param = f"%{keyword}%"
+        cursor.execute(sql, (keyword_param, keyword_param))
         articles = cursor.fetchall()
-
         conn.close()
         return articles
 

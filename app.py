@@ -77,7 +77,6 @@ db = mysql.connector.connect(
 def unreghome():
     return render_template("Unregistered/UnregHome.html")
 
-
 @app.route("/", methods=["GET", "POST"])
 def login():
     if "userID" in session:
@@ -107,6 +106,23 @@ def login():
     return render_template("login.html")
 
 article_controller = ArticleController()
+
+@app.route("/free_homepage", methods=["GET", "POST"])
+def free_homepage():
+    search_query = request.args.get("q")  # get query from URL
+    if search_query:
+        latest_news = article_controller.search(search_query)  # use your search function
+    else:
+        latest_news = article_controller.get_latest(limit=4)
+    
+    testimonials = article_controller.get_testimonials()
+    
+    return render_template(
+        "free_homepage.html",
+        latest_news=latest_news,
+        testimonials=testimonials,
+        search_query=search_query
+    )
 
 @app.route("/dashboard")
 def dashboard():
