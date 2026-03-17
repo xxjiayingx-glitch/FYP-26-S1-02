@@ -1,12 +1,12 @@
 # db_connection.py
 
-import mysql.connector
+import pymysql
 
-def connect_db():
-    connection = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="news_system"
+def get_db_connection():
+    return pymysql.connect(
+        host="news-system.clcguooacqgr.ap-southeast-1.rds.amazonaws.com",
+        user="admin",
+        password="DailyscoopNews",
+        database="news_system",
+        cursorclass=pymysql.cursors.DictCursor
     )
-    return connection
