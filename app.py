@@ -73,9 +73,9 @@ db = mysql.connector.connect(
     host="localhost", user="root", password="", database="news_system"
 )
 
-@app.route("/")
-def unreghome():
-    return render_template("Unregistered/UnregHome.html")
+#@app.route("/")
+#def unreghome():
+#    return render_template("Unregistered/UnregHome.html")
 
 @app.route("/", methods=["GET", "POST"])
 def login():

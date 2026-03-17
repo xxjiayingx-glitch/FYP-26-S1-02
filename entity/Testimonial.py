@@ -51,7 +51,9 @@ class TestimonialEntity:
         cursor.close()
         conn.close()
 
-    def getHomeTestimonial(self, offset=0, limit=3):
+    @staticmethod
+    def getHomeTestimonial(offset=0, limit=3):
+    #def getHomeTestimonial(self, offset=0, limit=3):
         conn = get_connection()
         cursor = conn.cursor()
 
