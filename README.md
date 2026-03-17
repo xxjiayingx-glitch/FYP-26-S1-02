@@ -10,6 +10,7 @@ pip install mysql-connector-python
 3. It is put in github alr. 
 —> cd C:\Users\babyc\Documents\GitHub\FYP-26-S1-02
 —> python create_database.py
+—> python update_schema.py
 —> expected output: All tables created successfully!
 
 4. open XAMPP → phpMyAdmin 
