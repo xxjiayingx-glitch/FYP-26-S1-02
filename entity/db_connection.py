@@ -1,15 +1,12 @@
+# db_connection.py
+
 import pymysql
 
 def get_db_connection():
-
-    connection = pymysql.connect(
-        host="localhost",
-        user="root",
-        password="",
+    return pymysql.connect(
+        host="news-system.clcguooacqgr.ap-southeast-1.rds.amazonaws.com",
+        user="admin",
+        password="DailyscoopNews",
         database="news_system",
-        cursorclass=pymysql.cursors.DictCursor,
-        charset="utf8mb4",
-        autocommit=True
+        cursorclass=pymysql.cursors.DictCursor
     )
-
-    return connection

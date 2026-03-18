@@ -1,12 +1,12 @@
 # control/ArticleController.py
 from entity.Article import Article
-from db_connection import connect_db  # this should work now
+from db_connection import get_db_connection  
 
 class ArticleController:
 
     def __init__(self):
         self.article_entity = Article()
-        self.db = connect_db()  
+        self.db = get_db_connection()  
 
     def get_articles(self):
         return self.article_entity.get_all_articles()

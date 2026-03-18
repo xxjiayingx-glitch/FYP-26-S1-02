@@ -1,7 +1,7 @@
-from entity.db_connection import connect_db
+from entity.db_connection import get_db_connection
 
 def report_article(articleID, userID, reason):
-    conn = connect_db()
+    conn = get_db_connection()
     try:
         cursor = conn.cursor()
         query = """

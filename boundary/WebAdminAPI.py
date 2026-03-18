@@ -4,7 +4,7 @@ from datetime import datetime
 
 web_admin_api_bp = Blueprint("web_admin_api", __name__)
 
-def connect_db():
+def get_db_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
@@ -16,7 +16,7 @@ def connect_db():
 
 @web_admin_api_bp.route("/admin/company-profile", methods=["GET"])
 def get_company_profile():
-    conn = connect_db()
+    conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("SELECT * FROM CompanyProfile ORDER BY profileID ASC LIMIT 1")
@@ -40,7 +40,7 @@ def update_company_profile():
 
     updated_by = session.get("userID")
 
-    conn = connect_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT profileID FROM CompanyProfile ORDER BY profileID ASC LIMIT 1")
@@ -97,7 +97,7 @@ def update_company_profile():
 
 @web_admin_api_bp.route("/admin/subscription-plan", methods=["GET"])
 def get_subscription_plan():
-    conn = connect_db()
+    conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("SELECT * FROM SubscriptionPlan ORDER BY planID ASC LIMIT 1")
@@ -118,7 +118,7 @@ def update_subscription_plan():
     billing_cycle = data.get("billingCycle")
     plan_status = data.get("planStatus")
 
-    conn = connect_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT planID FROM SubscriptionPlan ORDER BY planID ASC LIMIT 1")

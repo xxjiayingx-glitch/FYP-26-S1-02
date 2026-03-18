@@ -3,7 +3,7 @@ import mysql.connector
 
 category_bp = Blueprint("category_api", __name__)
 
-def connect_db():
+def get_db_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
@@ -14,7 +14,7 @@ def connect_db():
 
 @category_bp.route("/admin/categories", methods=["GET"])
 def get_categories():
-    conn = connect_db()
+    conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("SELECT * FROM ArticleCategory")
@@ -31,7 +31,7 @@ def add_category():
     data = request.json
     name = data.get("categoryName")
 
-    conn = connect_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -51,7 +51,7 @@ def update_category(id):
     data = request.json
     name = data.get("categoryName")
 
-    conn = connect_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -68,7 +68,7 @@ def update_category(id):
 
 @category_bp.route("/admin/category/<int:id>", methods=["DELETE"])
 def delete_category(id):
-    conn = connect_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute(
