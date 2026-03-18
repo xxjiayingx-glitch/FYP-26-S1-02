@@ -257,7 +257,7 @@
                 News System
             </a>
 
-            {% if session.get("userType", "").strip().lower() == "premium" %}
+            {% if session.get("userType", "").strip().lower() == "premium user" %}
             <span class="premium-badge">
                 <i class="fa-solid fa-crown"></i> PREMIUM
             </span>
@@ -273,7 +273,7 @@
             <a href="{{ url_for('my_articles') }}">My Articles</a>
             <a href="{{ url_for('profile') }}">My Profile</a>
             <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
-            {% if session.get("userType","").lower() == "premium" %}
+            {% if session.get("userType","").lower() == "premium user" %}
                 <a href="{{ url_for('insight') }}">Insights</a>
             {% endif %}
             <a href="{{ url_for('logout') }}">Log Out</a>
