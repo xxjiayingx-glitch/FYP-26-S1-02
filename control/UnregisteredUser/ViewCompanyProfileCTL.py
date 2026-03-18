@@ -1,42 +1,23 @@
-from flask import jsonify, request
-from flask_cors import cross_origin
-from control.entities.CompanyProfile import CompanyProfile
-from control.db import get_database
-from control.routes.UnregisteredUser_routes import UnregisteredUser
+from entity.db_connection import get_db_connection
 
+class CompanyProfileController:
 
-class ViewCompanyProfileCTL:
-    def __init__(self):
-        self.companyProfile_entity = CompanyProfile()
+    def getCompanyProfile(self):
 
-    def viewCompanyProfile(self, companyID):
-        companyProfileList = self.companyProfile_entity.viewCompanyProfile(companyID)
-        return companyProfileList
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
+        query = """
+        SELECT companyName, description, mission, vision, contactEmail, contactPhone
+        FROM CompanyProfile
+        ORDER BY updated_at DESC
+        LIMIT 1
+        """
 
-@UnregisteredUser.route("/api/company-profile", methods=["GET"])
-def viewCompanyProfile():
-    companyID = int(request.args.get("companyID"))
-    viewCompanyProfileCTL = ViewCompanyProfileCTL()
-    try:
-        companyProfileList = viewCompanyProfileCTL.viewCompanyProfile(companyID)
+        cursor.execute(query)
+        profile = cursor.fetchone()
 
-        if companyProfileList:
-            return jsonify(companyProfileList), 200
-        else:
-            return (
-                jsonify({
-                    "status": "error",
-                    "message": "No company profile found"
-                }),
-                404,
-            )
+        cursor.close()
+        conn.close()
 
-    except Exception as e:
-        return (
-            jsonify({
-                "status": "error",
-                "message": str(e),
-            }),
-            500,
-        )
+        return profile

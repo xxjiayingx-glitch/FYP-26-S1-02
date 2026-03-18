@@ -19,10 +19,7 @@
             <select id="category" name="category" required style="width: 100%; padding: 8px;">
                 <option value="">-- Select Category --</option>
                 {% for cat in categories %}
-                    <option value="{{ cat.categoryID }}"
-                        {% if request.form.category == cat.categoryID|string %}selected{% endif %}>
-                        {{ cat.categoryName }}
-                    </option>
+                    <option value="{{ cat.categoryID }}">{{ cat.categoryName }}</option>
                 {% endfor %}
             </select>
         </div>

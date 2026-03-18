@@ -1,27 +1,6 @@
 from entity.db_connection import get_db_connection
-# import bcrypt
 
 class UserAccount:
-    # def login(self, email, pwd):
-    #     conn = get_db_connection()
-    #     cursor = conn.cursor()
-
-    #     sql = "SELECT * FROM UserAccount WHERE email = %s"
-    #     cursor.execute(sql, (email,))
-    #     user = cursor.fetchone()
-
-    #     cursor.close()
-    #     conn.close()
-
-    #     if not user:
-    #         return None
-
-    #     stored_hash = user["pwd"]
-
-    #     if bcrypt.checkpw(pwd.encode("utf-8"), stored_hash.encode("utf-8")):
-    #         return user
-
-    #     return None
     def login(self,email,pwd):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -34,6 +13,53 @@ class UserAccount:
 
         return user
 
+
+    def get_profile(self,userID):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        sql = "SELECT * FROM UserAccount WHERE userID=%s"
+        cursor.execute(sql,(userID,))
+
+        user = cursor.fetchone()
+        conn.close()
+
+        return user
+
+
+    @staticmethod
+    def update_profile(userID, first_name, last_name, email, username, phone, gender, dateOfBirth, interests):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            UPDATE UserAccount
+            SET first_name = %s,
+                last_name = %s,
+                email = %s,
+                username = %s,
+                phone = %s,
+                gender = %s,
+                dateOfBirth = %s,
+                interests = %s,
+                updated_at = NOW()
+            WHERE userID = %s
+        """
+        cursor.execute(query, (
+            first_name,
+            last_name,
+            email,
+            username,
+            phone,
+            gender,
+            dateOfBirth,
+            interests,
+            userID
+        ))
+
+        conn.commit()
+        conn.close()
+        
     @staticmethod
     def get_system_admin():
         conn = get_db_connection()
@@ -241,7 +267,7 @@ class UserAccount:
         cursor = conn.cursor()
 
         cursor.execute(
-            "UPDATE UserAccount SET profile_pic=%s WHERE userID=%s",
+            "UPDATE UserAccount SET profileImage = %s, updated_at = NOW() WHERE userID = %s",
             (filename, userID)
         )
 

@@ -57,4 +57,3 @@ class AdminDashboardControl:
         UserAccount.update_profile_image(admin["userID"], unique_filename)
 
         return {"success": True, "message": "Profile picture updated successfully."}
-    

@@ -1,45 +1,87 @@
 {% extends "master.html" %}
-
 {% block title %}Premium User Home{% endblock %}
-
 {% block content %}
-<div class="hero-box">
-    <span class="badge badge-premium">Premium User</span>
-    <h2>Welcome, {{ session.get('username', 'User') }}</h2>
-    <p>Your premium plan includes article recommendations, saved articles, verified publisher badge support, and article insights tools.</p>
-    <div class="card-actions">
-        <a class="btn" href="{{ url_for('insight') }}">Go to Insights</a>
-        <a class="btn" href="{{ url_for('saved_articles') }}">Saved Articles</a>
+<!-- SEARCH ARTICLE -->
+<div class="search-bar-container" style="margin-bottom:30px;">
+    <form method="get" action="{{ url_for('premium_homepage') }}">
+        <input type="text" name="q" placeholder="Search articles..." value="{{ search_query or '' }}">
+        <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
+</div>
+<!-- FEATURED ARTICLE -->
+{% if latest_news %}
+<div class="featured-news" style="margin-bottom:40px;">
+    {% set featured = latest_news[0] %}
+    <div class="featured-left">
+        <h1 class="featured-title">{{ featured.articleTitle }}</h1>
+        <p class="featured-desc">
+            {{ featured.content[:170] }}{% if featured.content|length > 170 %}...{% endif %}
+        </p>
+        <a class="read-more" href="{{ url_for('article_detail', article_id=featured.articleID) }}">
+            Read more......
+        </a>
+    </div>
+    <div class="featured-right">
+        {% if featured.imageURL %}
+        <img src="{{ url_for('static', filename='uploads/' + featured.imageURL) }}" alt="Featured Article">
+        {% else %}
+        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+        {% endif %}
     </div>
 </div>
-
-<div class="section-box">
-    <h2 class="section-title">Recommended for You + Latest News</h2>
-    <div class="search-bar">
-        <input type="text" placeholder="Search articles by title or keyword">
-        <button class="btn">Search</button>
-    </div>
-
-    <div class="card-grid">
+{% endif %}
+<!-- RECOMMENDED ARTICLES -->
+<h2 class="recommended-title" style="margin-bottom:15px;">Recommended Articles</h2>
+<div class="recommended-grid" style="margin-bottom:60px;">
+    {% if recommended_articles %}
         {% for article in recommended_articles %}
         <div class="news-card">
-            {% if article.verified %}
-            <span class="badge badge-verified">Verified Publisher Badge</span>
+            {% if article.imageURL %}
+            <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="Article Image">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
             {% endif %}
-            <h3>{{ article.articleTitle }}</h3>
-            <div class="news-meta">Category: {{ article.categoryName }} | {{ article.created_at.strftime('%d %b %Y') }}</div>
-            <p>{{ article.summary }}</p>
-            <div class="card-actions">
-                <a class="btn" href="{{ url_for('article_detail', article_id=article.articleID) }}">View Article</a>
-                {% if session.get('userType', '').lower() == 'premium' %}
-                <button class="btn">Save Article</button>
-                {% endif %}
-                <button class="btn btn-danger">Report Article</button>
-            </div>
+            <h4>{{ article.articleTitle }}</h4>
+            <p>
+                {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
+            </p>
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                Read more......
+            </a>
+            {% if article.verified %}
+            <span class="badge badge-verified" style="margin-top:5px;">Verified Publisher Badge</span>
+            {% endif %}
         </div>
-        {% else %}
-        <p>No recommended articles at the moment.</p>
         {% endfor %}
-    </div>
+    {% else %}
+        <p>No recommended articles for now.</p>
+    {% endif %}
+</div>
+<!-- LATEST NEWS -->
+<h2 class="latest-title" style="margin-bottom:15px;">Latest News</h2>
+<div class="latest-grid">
+    {% if latest_news|length > 1 %}
+        {% for article in latest_news[1:5] %}  {# show 4 articles after featured #}
+        <div class="news-card">
+            {% if article.imageURL %}
+            <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="Article Image">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+            {% endif %}
+            <h4>{{ article.articleTitle }}</h4>
+            <p>
+                {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
+            </p>
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                Read more......
+            </a>
+            {% if article.verified %}
+            <span class="badge badge-verified" style="margin-top:5px;">Verified Publisher Badge</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No latest news available.</p>
+    {% endif %}
 </div>
 {% endblock %}

@@ -32,5 +32,5 @@ def upload_profile_picture():
     file = request.files.get("profileImage")
 
     result = control.upload_profile_picture(file)
-
+    
     return redirect(url_for("admin_dashboard.admin_dashboard"))

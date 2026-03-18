@@ -45,10 +45,10 @@ class TestimonialEntity:
         cursor.close()
         conn.close()
 
+
     def getHomeTestimonial(self, offset=0, limit=3):
         conn = get_db_connection()
         cursor = conn.cursor()
-
         cursor.execute("""
             SELECT t.testimonial_ID, u.username, t.rating, t.comment, t.created_at
             FROM UserAccount u

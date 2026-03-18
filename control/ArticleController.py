@@ -13,9 +13,6 @@ class ArticleController:
     def search(self, keyword):
         return self.article_entity.search_articles(keyword)
 
-    def get_article(self, id):
-        return self.article_entity.get_article(id)
-
     def get_categories(self):
         return self.article_entity.get_categories()
     
@@ -31,9 +28,9 @@ class ArticleController:
     def get_headline(self):
         return self.article_entity.get_headline_article()
 
-    def get_latest(self, limit=5):
-        return self.article_entity.get_latest_articles(limit)
-    
+    def get_latest_articles_by_category(self, limit=6):
+        return self.article_entity.get_latest_articles_by_category(limit)
+
     def get_home_headline(self):
         return self.article_entity.get_home_headline_article()
 
@@ -54,10 +51,12 @@ class ArticleController:
                 a.articleID,
                 a.articleTitle,
                 a.content,
+                a.categoryID,
+                a.articleStatus,
                 a.created_at,
                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
                 c.categoryName,
-                a.created_by,  
+                a.created_by,
                 ai.imageURL AS featured_image
             FROM Article a
             JOIN UserAccount u ON a.created_by = u.userID

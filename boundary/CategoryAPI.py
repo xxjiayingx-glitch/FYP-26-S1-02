@@ -3,8 +3,6 @@ from entity.db_connection import get_db_connection
 
 category_bp = Blueprint("category_api", __name__)
 
-
-
 @category_bp.route("/admin/categories", methods=["GET"])
 def get_categories():
     conn = get_db_connection()

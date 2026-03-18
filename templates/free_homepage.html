@@ -4,6 +4,14 @@
 
 {% block content %}
 
+<!-- SEARCH ARTICLE -->
+<div class="search-bar-container">
+    <form method="get" action="{{ url_for('free_homepage') }}">
+        <input type="text" name="q" placeholder="Search articles..." value="{{ search_query or '' }}">
+        <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
+</div>
+
 <!-- FEATURED ARTICLE -->
 {% if latest_news %}
 <div class="featured-news">

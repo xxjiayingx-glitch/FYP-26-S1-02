@@ -44,11 +44,11 @@
             <nav class="menu">
                 <a href="/admin/dashboard"><span class="menu-icon"></span><span class="menu-text">Dashboard</span></a>
                 <a href="/admin/user-accounts" class="active"><span class="menu-icon"></span><span class="menu-text">User Accounts</span></a>
-                <a href="#"><span class="menu-icon"></span><span class="menu-text">Article Reported</span></a>
-                <a href="#"><span class="menu-icon"></span><span class="menu-text">Category Management</span></a>
-                <a href="#"><span class="menu-icon"></span><span class="menu-text">Webpage Management</span></a>
+                <a href="/admin/article-reported"><span class="menu-icon"></span><span class="menu-text">Article Reported</span></a>
+                <a href="/admin/category-management"><span class="menu-icon"></span><span class="menu-text">Category Management</span></a>
+                <a href="/admin/webpage-management"><span class="menu-icon"></span><span class="menu-text">Webpage Management</span></a>
                 <a href="#"><span class="menu-icon"></span><span class="menu-text">System Monitoring</span></a>
-                <a href="#"><span class="menu-icon"></span><span class="menu-text">Auto-Publish Rules</span></a>
+                <a href="/admin/auto-publish-rules"><span class="menu-icon"></span><span class="menu-text">Auto-Publish Rules</span></a>
             </nav>
         </aside>
 
@@ -102,17 +102,14 @@
                         <button type="submit" class="action-btn">Delete</button>
                     </form>
 
-                    {% if user.userType == 'System Admin' %}
+                    {% if user.userType == 'system admin' %}
                          <span class="admin-protected">Protected</span>
-                    {% elif user.accountStatus == 'Suspended' %}
+                    {% elif user.accountStatus == 'suspended' %}
                         <form action="/admin/user-accounts/{{ user.userID }}/status" method="POST">
                             <input type="hidden" name="action" value="unsuspend">
                             <button type="submit" class="action-btn">Unsuspend</button>
                         </form>
                     {% else %}
-                        <!-- <form action="/admin/user-accounts/{{ user.userID }}/suspend" method="POST">
-                            <button type="submit" class="action-btn">Suspend</button>
-                        </form> -->
                         <form action="/admin/user-accounts/{{ user.userID }}/status" method="POST">
                             <input type="hidden" name="action" value="suspend">
                             <button type="submit" class="action-btn">Suspend</button>

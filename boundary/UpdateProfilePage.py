@@ -2,19 +2,20 @@ import os
 from flask import request, redirect, session, url_for, current_app
 from flask import Blueprint, flash, render_template, request, redirect, session
 from control.UpdateProfileCTL import UpdateProfileCTL
+from werkzeug.utils import secure_filename
 
 profile_bp = Blueprint("profile", __name__)
 
 
 @profile_bp.route("/profile")
 def profile_page():
+    if "userID" not in session:
+        return redirect(url_for("login"))
 
-    user = session.get("user")
+    user = UserAccount().get_profile(session["userID"])
+    user["selected_interests"] = user["interests"].split(",") if user.get("interests") else []
 
-    return render_template(
-        "profile.html",
-        user=user
-    )
+    return render_template("profile.html", user=user)
 
 
 @profile_bp.route("/update", methods=["POST"])
@@ -22,8 +23,7 @@ def update_profile():
 
     UpdateProfileCTL.update_profile(
         session["userID"],
-        request.form,
-        request.files
+        request.form
     )
 
     flash("Profile updated successfully")

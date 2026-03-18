@@ -352,3 +352,32 @@ th {
         overflow-x: auto;
     }
 }
+
+.form-card{
+    max-width:600px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    margin-bottom:18px;
+}
+
+.form-group label{
+    font-weight:600;
+    margin-bottom:6px;
+}
+
+.form-group input,
+.form-group textarea{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    font-size:14px;
+}
+
+.form-group textarea{
+    min-height:80px;
+    resize:vertical;
+}

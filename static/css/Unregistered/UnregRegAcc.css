@@ -23,7 +23,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  background-color: #83c6ff;
+  background-color: #c4def4;
 }
 
 .logo h1 {
@@ -176,7 +176,7 @@ form {
 
 /* ── Footer ── */
 .footer {
-  background-color: #83c6ff;
+  background-color: #a9c3d8;
   font-family: "Inknut Antiqua", serif;
   width: 100%;
 }
