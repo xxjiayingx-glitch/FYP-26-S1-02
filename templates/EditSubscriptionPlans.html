@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Edit Subscription Plans</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="brand">Daily Scoop News System</div>
+
+    <div class="top-right">
+        <div class="avatar-top">
+            <img src="{{ url_for('static', filename='images/profile/default.png') }}">
+        </div>
+
+        <span>Hi, {{ session['username'] }}</span>
+        <a href="/logout">Logout</a>
+    </div>
+</header>
+
+
+<div class="layout">
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="profile-box">
+        <div class="avatar-wrapper">
+            <div class="avatar">
+                <img src="{{ url_for('static', filename='images/profile/default.png') }}">
+            </div>
+        </div>
+
+        <div class="profile-info">
+            <div class="username">{{ session['username'] }}</div>
+            <div class="role">System Admin</div>
+        </div>
+    </div>
+
+    <nav class="menu">
+
+        <a href="{{ url_for('admin_dashboard.admin_dashboard') }}">
+            <span class="menu-text">Dashboard</span>
+        </a>
+
+        <a href="/admin/user-accounts">
+            <span class="menu-text">User Accounts</span>
+        </a>
+
+        <a href="/admin/article-reported">
+            <span class="menu-text">Article Reported</span>
+        </a>
+
+        <a href="/admin/category-management">
+            <span class="menu-text">Category Management</span>
+        </a>
+
+        <a href="/admin/webpage-management" class="active">
+            <span class="menu-text">Webpage Management</span>
+        </a>
+
+        <a href="/admin/system-monitoring">
+            <span class="menu-text">System Monitoring</span>
+        </a>
+
+        <a href="/admin/auto-publish-rules">
+            <span class="menu-text">Auto-Publish Rules</span>
+        </a>
+
+    </nav>
+
+</aside>
+
+
+<main class="content">
+
+<button class="hamburger" id="toggleSidebar">☰</button>
+
+<h1>Edit Subscription Plans Section</h1>
+
+<div class="card form-card">
+
+    <div class="form-group">
+        <label>Plan Name</label>
+        <input id="planName">
+    </div>
+
+    <div class="form-group">
+        <label>Plan Description</label>
+        <textarea id="planDescription"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Price</label>
+        <input id="price">
+    </div>
+
+    <div class="form-group">
+        <label>Billing Cycle</label>
+        <input id="billingCycle">
+    </div>
+
+    <div class="form-group">
+        <label>Plan Status</label>
+        <input id="planStatus">
+    </div>
+
+    <div style="margin-top:30px;">
+        <button class="secondary-btn"
+            onclick="window.location.href='/admin/webpage-management'">
+            Cancel
+        </button>
+
+        <button class="primary-btn"
+            onclick="saveSubscriptionPlan()">
+            Save Changes
+        </button>
+    </div>
+
+</div>
+
+</main>
+</div>
+
+
+<script>
+const toggleButton = document.getElementById("toggleSidebar");
+const sidebar = document.getElementById("sidebar");
+
+toggleButton.addEventListener("click", function () {
+    sidebar.classList.toggle("collapsed");
+});
+
+window.onload = loadSubscriptionPlan;
+
+function loadSubscriptionPlan(){
+    fetch("http://127.0.0.1:5000/admin/subscription-plan")
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("planName").value = data.planName || "";
+        document.getElementById("planDescription").value = data.planDescription || "";
+        document.getElementById("price").value = data.price || "";
+        document.getElementById("billingCycle").value = data.billingCycle || "";
+        document.getElementById("planStatus").value = data.planStatus || "";
+    });
+}
+
+function saveSubscriptionPlan(){
+    fetch("http://127.0.0.1:5000/admin/subscription-plan", {
+        method:"PUT",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            planName: document.getElementById("planName").value,
+            planDescription: document.getElementById("planDescription").value,
+            price: document.getElementById("price").value,
+            billingCycle: document.getElementById("billingCycle").value,
+            planStatus: document.getElementById("planStatus").value
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        alert(data.message);
+        window.location.href="/admin/webpage-management";
+    });
+}
+</script>
+
+</body>
+</html>

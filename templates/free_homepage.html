@@ -1,0 +1,84 @@
+{% extends "master.html" %}
+
+{% block title %}Free User Home{% endblock %}
+
+{% block content %}
+
+<!-- FEATURED ARTICLE -->
+{% if latest_news %}
+<div class="featured-news">
+    {% set featured = latest_news[0] %}
+
+    <div class="featured-left">
+        <h1 class="featured-title">{{ featured.articleTitle }}</h1>
+        <p class="featured-desc">
+            {{ featured.content[:170] }}{% if featured.content|length > 170 %}...{% endif %}
+        </p>
+        <a class="read-more" href="{{ url_for('article_detail', article_id=featured.articleID) }}">
+            Read more......
+        </a>
+    </div>
+
+    <div class="featured-right">
+        {% if featured.imageURL %}
+        <img src="{{ url_for('static', filename='uploads/' + featured.imageURL) }}">
+        {% else %}
+        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+
+<!-- LATEST NEWS -->
+<h3 class="latest-title">Latest News</h3>
+
+<div class="latest-grid">
+    {% if latest_news|length > 1 %}
+        {% for article in latest_news[1:5] %}  {# show 4 articles after featured #}
+        <div class="news-card">
+
+            {% if article.imageURL %}
+            <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
+            {% endif %}
+
+            <h4>{{ article.articleTitle }}</h4>
+
+            <p>
+                {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
+            </p>
+
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                Read more......
+            </a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No latest news available.</p>
+    {% endif %}
+</div>
+
+
+<!-- TESTIMONIALS -->
+<div class="testimonial-section">
+    <h2>Testimonials</h2>
+    <p class="testimonial-sub">Here's what people are saying</p>
+
+    <div class="testimonial-grid">
+        {% if testimonials %}
+            {% for testimonial in testimonials %}
+            <div class="testimonial-card">
+                <p>{{ testimonial.comment }}</p>
+                <p class="testimonial-user">{{ testimonial.username if testimonial.username else "Anonymous User" }}</p>
+                <div class="stars">★ ★ ★ ★ ★</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No testimonials available.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

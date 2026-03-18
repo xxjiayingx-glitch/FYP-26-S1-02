@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Daily Scoop News System{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+        }
+
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background:#f3f3f3;
+            color:#000;
+        }
+
+        a{
+            text-decoration:none;
+            color:inherit;
+        }
+
+        /* TOP NAVBAR */
+        .topbar{
+            background:#c4def4;
+            min-height:95px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:14px 32px;
+        }
+
+        .brand-wrap{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .brand{
+            font-weight:900;
+            font-size:28px;
+            line-height:0.95;
+            color:#000;
+            cursor:pointer;
+        }
+
+        .premium-badge{
+            font-size:11px;
+            font-weight:700;
+            letter-spacing:1px;
+
+            padding:4px 10px;
+
+            background:#ffeaa7;
+            color:#7a5600;
+
+            border-radius:20px;
+
+            display:flex;
+            align-items:center;
+            gap:5px;
+
+            margin-left:12px;
+        }
+        .nav-links{
+            display:flex;
+            gap:28px;
+            align-items:center;
+            font-size:11px;
+            font-weight:700;
+            color:#111;
+        }
+
+        .nav-links a:hover{
+            text-decoration:underline;
+        }
+
+        /* MAIN CONTENT */
+        .page-wrapper{
+            min-height:calc(100vh - 90px - 190px);
+            padding:30px 28px;
+        }
+
+        /* FOOTER */
+        .footer{
+            background:#a9c3d8;
+            border-top:6px solid #4f94b8;
+            padding:30px 40px;
+        }
+
+        .footer-container{
+            display:flex;
+            justify-content:space-between;
+        }
+
+        .footer-left{
+            width:50%;
+            padding-right:40px;
+        }
+
+        .footer-right{
+            width:50%;
+            padding-left:40px;
+            border-left:2px solid #6e7d87;
+        }
+
+        .footer h2{
+            font-family: Georgia, serif;
+            font-size:26px;
+        }
+
+        .footer-line{
+            border-bottom:2px solid #6e7d87;
+            margin:10px 0 20px;
+        }
+
+        .footer p{
+            font-size:13px;
+            max-width:300px;
+            margin-bottom:40px;
+        }
+
+        .social-icons{
+            display:flex;
+            gap:15px;
+            font-size:18px;
+        }
+
+        .footer-links{
+            display:flex;
+            justify-content:space-between;
+            max-width:450px;
+        }
+
+        .footer-links div{
+            display:flex;
+            flex-direction:column;
+            gap:15px;
+        }
+
+        .footer-links a{
+            font-size:13px;
+            color:#000;
+            text-decoration:none;
+        }
+
+        .footer-links a:hover{
+            text-decoration:underline;
+        }
+
+        /* optional content helpers */
+        .content-card{
+            background:#fff;
+            border:1px solid #d9d9d9;
+            padding:20px;
+        }
+
+        /* ===== Testimonial Carousel Helper ===== */
+        .testimonial-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .testimonial-container {
+            display: flex;
+            gap: 20px;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .testimonial-card {
+            flex: 0 0 calc(16.66% - 15px); /* 6 per view */
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.08);
+            transition:0.25s;
+        }
+
+        .testimonial-card:hover {
+            transform:translateY(-5px);
+            box-shadow:0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 40%;
+            z-index: 10;
+            background:#4f94b8;
+            border:none;
+            color:white;
+            padding:10px 14px;
+            cursor:pointer;
+            border-radius:50%;
+        }
+
+        .slider-btn:hover {
+            background:#3c7fa0;
+        }
+
+        .prev { left:5px; }
+        .next { right:5px; }
+
+        @media (max-width: 1024px){
+            .testimonial-card {
+                flex: 0 0 calc(33.33% - 15px); /* 3 per view */
+            }
+        }
+
+        @media (max-width: 768px){
+            .testimonial-card {
+                flex: 0 0 calc(50% - 12px); /* 2 per view */
+            }
+
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+                gap:15px;
+            }
+
+            .nav-links{
+                flex-wrap:wrap;
+                gap:14px;
+            }
+
+            .footer-inner{
+                grid-template-columns:1fr;
+            }
+
+            .footer-box.left{
+                border-right:none;
+                border-bottom:2px solid #6e7d87;
+                padding-bottom:20px;
+            }
+        }
+
+        @media (max-width: 480px){
+            .testimonial-card {
+                flex: 0 0 calc(100% - 10px); /* 1 per view on mobile */
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <header class="topbar">
+        <div class="brand-wrap">
+
+            <a href="{{ url_for('dashboard') }}" class="brand">
+                Daily Scoop<br>
+                News System
+            </a>
+
+            {% if session.get("userType", "").strip().lower() == "premium" %}
+            <span class="premium-badge">
+                <i class="fa-solid fa-crown"></i> PREMIUM
+            </span>
+            {% endif %}
+
+        </div>
+
+        <nav class="nav-links">
+            <span class="user-icon">
+                <i class="fa-regular fa-user"></i>
+                Hi, {{ session.get('username','User') }}
+            </span>
+            <a href="{{ url_for('my_articles') }}">My Articles</a>
+            <a href="{{ url_for('profile') }}">My Profile</a>
+            <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+            {% if session.get("userType","").lower() == "premium" %}
+                <a href="{{ url_for('insight') }}">Insights</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}">Log Out</a>
+        </nav>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="page-wrapper">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        <div class="footer-container">
+
+            <!-- LEFT SIDE -->
+            <div class="footer-left">
+
+                <h2>Daily Scoop News</h2>
+                <div class="footer-line"></div>
+
+                <p>
+                    Delivering reliable and AI-powered news to keep readers
+                    informed with credible and up-to-date stories.
+                </p>
+
+                <div class="social-icons">
+                    <i class="fa-brands fa-instagram"></i>
+                    <i class="fa-brands fa-linkedin"></i>
+                    <i class="fa-brands fa-x-twitter"></i>
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT SIDE -->
+            <div class="footer-right">
+
+                <h2>Social Links</h2>
+                <div class="footer-line"></div>
+
+                <div class="footer-links">
+
+                    <div>
+                        <a href="#">Contact Us</a>
+                        <a href="#">About Us</a>
+                        <a href="#">Need help? Reach us here.</a>
+                    </div>
+
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Advertise with us</a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>

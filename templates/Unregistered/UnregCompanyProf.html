@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Scoop</title>
+    <link rel="stylesheet" href="../../static/css/Unregistered/UnregCompanyProf.css" />
+  </head>
+
+  <body>
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <div class="logo">
+      <a href="{{ url_for('home.unreg_home') }}">
+          <h1>Daily Scoop</h1>
+          <h1>News System</h1>
+        </a>
+      </div>
+       <nav class="navLinks">
+      <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
+      <a href="{{ url_for('home.unreg_home') }}#product-feature">Product Feature</a>
+      <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
+      <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
+      <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+      <a href="{{ url_for('login.login') }}">Log In</a>
+    </nav>
+    </header>
+
+    <main> 
+      {% if profile %}
+      <h1 class="section-title">Our Company</h1>
+
+      <div class="company-card">
+        <div class="company-image">
+          <img src="{{ url_for('static', filename='uploads/A1.png') }}" alt="Company image">
+        </div>
+
+        <div class="card-text">
+          <h2>Introduction</h2>
+          
+          <p>{{ profile.description }}</p>
+
+          <h2>Mission</h2>
+          <p>{{ profile.mission }}</p>
+
+          <h2>Vision</h2>
+          <p>{{ profile.vision }}</p>
+
+          <h3>Contact</h3>
+          <p>Email: {{ profile.contactEmail }}</p>
+          <p>Phone: {{ profile.contactPhone }}</p>
+        </div>
+       
+        {% else %}
+          <h1 class="section-title">Company Information Not Available</h1>
+        {% endif %}
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-brand">
+          <h3 class="footer-title">Daily Scoop News</h3>
+          <p class="footer-description">
+            Delivering reliable and AI-powered news to keep readers informed
+            with credible and up-to-date stories.
+          </p>
+          <div class="footer-social">
+            <a href="https://facebook.com" target="_blank" class="footer-social-icon facebook" rel="noopener">f</a>
+            <a href="https://linkedin.com"  target="_blank" class="footer-social-icon linkedin"  rel="noopener">in</a>
+            <a href="https://x.com"         target="_blank" class="footer-social-icon twitter"   rel="noopener">𝕏</a>
+          </div>
+        </div>
+
+        <div class="footer-links-section">
+          <h4 class="footer-links-title">Social Links</h4>
+          <div class="footer-links">
+            <a href="/contact"       class="footer-link">Contact Us</a>
+            <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+            <a href="/about"         class="footer-link">About Us</a>
+            <a href="/terms"         class="footer-link">Terms &amp; Conditions</a>
+            <a href="/support"       class="footer-link">Need help? Reach us here.</a>
+            <a href="/advertise"     class="footer-link">Advertise with us</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

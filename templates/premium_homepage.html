@@ -1,0 +1,45 @@
+{% extends "master.html" %}
+
+{% block title %}Premium User Home{% endblock %}
+
+{% block content %}
+<div class="hero-box">
+    <span class="badge badge-premium">Premium User</span>
+    <h2>Welcome, {{ session.get('username', 'User') }}</h2>
+    <p>Your premium plan includes article recommendations, saved articles, verified publisher badge support, and article insights tools.</p>
+    <div class="card-actions">
+        <a class="btn" href="{{ url_for('insight') }}">Go to Insights</a>
+        <a class="btn" href="{{ url_for('saved_articles') }}">Saved Articles</a>
+    </div>
+</div>
+
+<div class="section-box">
+    <h2 class="section-title">Recommended for You + Latest News</h2>
+    <div class="search-bar">
+        <input type="text" placeholder="Search articles by title or keyword">
+        <button class="btn">Search</button>
+    </div>
+
+    <div class="card-grid">
+        {% for article in recommended_articles %}
+        <div class="news-card">
+            {% if article.verified %}
+            <span class="badge badge-verified">Verified Publisher Badge</span>
+            {% endif %}
+            <h3>{{ article.articleTitle }}</h3>
+            <div class="news-meta">Category: {{ article.categoryName }} | {{ article.created_at.strftime('%d %b %Y') }}</div>
+            <p>{{ article.summary }}</p>
+            <div class="card-actions">
+                <a class="btn" href="{{ url_for('article_detail', article_id=article.articleID) }}">View Article</a>
+                {% if session.get('userType', '').lower() == 'premium' %}
+                <button class="btn">Save Article</button>
+                {% endif %}
+                <button class="btn btn-danger">Report Article</button>
+            </div>
+        </div>
+        {% else %}
+        <p>No recommended articles at the moment.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

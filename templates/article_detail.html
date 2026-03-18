@@ -1,0 +1,137 @@
+{% extends "master.html" %}
+
+{% block title %}{{ article.articleTitle }}{% endblock %}
+
+{% block content %}
+<div class="article-container" style="max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.08);">
+
+    <!-- Article Title -->
+    <h1 style="margin-bottom:15px;">{{ article.articleTitle }}</h1>
+
+    <!-- Featured Image -->
+    {% if article.featured_image %}
+        <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}" 
+             alt="Article Image" 
+             style="width:100%; max-height:400px; object-fit:cover; margin-bottom:20px;">
+    {% endif %}
+
+    <!-- Metadata -->
+    <div style="color:gray; font-size:0.9em; margin-bottom:20px; display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
+        <span>Published On: {{ article.created_at.strftime('%d %b %Y') if article.created_at else '' }}</span>
+        <span>|</span>
+        <span>Author: {{ article.full_name }}</span>
+        <span>|</span>
+        <span>Category: {{ article.categoryName }}</span>
+    </div>
+
+    <!-- Article Content -->
+    <div style="margin-bottom:20px; white-space:pre-line;">
+        {{ article.content | safe }}
+    </div>
+
+    <!-- Save / Report Buttons -->
+    <div style="display:flex; gap:15px; margin-bottom:30px;">
+        {% if is_premium %}
+        <!-- Save / Unlike Article -->
+        <form action="{{ url_for('toggle_save_article') }}" method="post" style="display:inline;">
+            <input type="hidden" name="articleID" value="{{ article.articleID }}">
+            <button type="submit" style="background:none; border:none; cursor:pointer; font-size:1.1em;">
+                {% if is_saved %}
+                    <i class="fa-solid fa-heart" style="color:#e74c3c;"></i> Saved
+                {% else %}
+                    <i class="fa-regular fa-heart"></i> Save Article
+                {% endif %}
+            </button>
+        </form>
+        {% endif %}
+
+        <!-- Report Article Button -->
+        <button type="button" class="btn btn-danger report-btn"
+                data-article-id="{{ article.articleID }}"
+                data-author-id="{{ article.created_by }}">
+            <i class="fa-solid fa-flag"></i> Report Article
+        </button>
+
+        <!-- Report Modal -->
+        <div id="reportModal-{{ article.articleID }}" class="report-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
+            <div style="background:#fff; padding:20px; border-radius:8px; width:400px; position:relative;">
+                <h3>Report Article</h3>
+                <p>Are you sure you want to report this article?</p>
+
+                <form id="reportForm-{{ article.articleID }}" method="post" action="{{ url_for('report_article') }}">
+                    <input type="hidden" name="articleID" id="reportArticleID-{{ article.articleID }}">
+                    <input type="hidden" name="authorID" id="reportAuthorID-{{ article.articleID }}">
+
+                    <label for="optionalComment-{{ article.articleID }}">Optional Reason:</label>
+                    <textarea name="optionalComment" id="optionalComment-{{ article.articleID }}" placeholder="Provide additional information..." 
+                            style="width:100%; height:80px; margin-bottom:10px; padding:5px;"></textarea>
+
+                    <div style="display:flex; justify-content:flex-end; gap:10px;">
+                        <button type="button" class="cancel-report-btn" data-article-id="{{ article.articleID }}">Cancel</button>
+                        <button type="submit" style="background:#e74c3c; color:#fff; border:none; padding:6px 12px; border-radius:5px;">Report</button>
+                    </div>
+                </form>
+
+                <!-- Close icon -->
+                <span class="close-report-modal" data-article-id="{{ article.articleID }}" style="position:absolute; top:10px; right:12px; cursor:pointer;">✖</span>
+            </div>
+        </div>
+
+        <!-- JS to handle report modal -->
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Open report modal
+            document.querySelectorAll('.report-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const articleID = btn.dataset.articleId;
+                    const authorID = btn.dataset.authorId;
+                    const modal = document.getElementById('reportModal-' + articleID);
+                    modal.style.display = 'flex';
+
+                    // Fill hidden inputs
+                    document.getElementById('reportArticleID-' + articleID).value = articleID;
+                    document.getElementById('reportAuthorID-' + articleID).value = authorID;
+                });
+            });
+
+            // Close report modal on cancel or X
+            document.querySelectorAll('.cancel-report-btn, .close-report-modal').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const articleID = btn.dataset.articleId;
+                    const modal = document.getElementById('reportModal-' + articleID);
+                    modal.style.display = 'none';
+                });
+            });
+        });
+        </script>
+    </div>
+
+    <!-- Comments Section -->
+    <div style="background:#eef3ff; padding:20px; border-radius:8px;">
+        <h3>Comments</h3>
+
+        <!-- Scrollable comments list -->
+        <div style="max-height:250px; overflow-y:auto; margin-bottom:20px;">
+            {% for comment in comments %}
+                <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #d0d0d0;">
+                    <strong>{{ comment.username }}</strong> on {{ comment.created_at.strftime('%b %d, %Y %H:%M') if comment.created_at else '' }}:
+                    <p style="margin:5px 0;">{{ comment.commentText }}</p>
+                </div>
+            {% else %}
+                <p>No comments yet.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Comment Form -->
+        <form action="{{ url_for('add_comment_route') }}" method="post">
+            <input type="hidden" name="articleID" value="{{ article.articleID }}">
+            <textarea name="commentText" placeholder="Write a comment..." required 
+                      style="width:100%; height:80px; padding:10px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px;"></textarea>
+            <button type="submit" style="background:#3498db; color:#fff; padding:8px 16px; border:none; border-radius:5px; cursor:pointer;">
+                Submit Comment
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

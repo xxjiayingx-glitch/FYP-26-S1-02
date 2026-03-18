@@ -1,0 +1,243 @@
+{% extends "master.html" %}
+{% block title %}Testimonials{% endblock %}
+
+{% block content %}
+
+<style>
+.testimonial-wrapper {
+    position: relative;
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 20px 60px 20px;
+    background: #f9fafb;
+    border-radius: 12px;
+}
+
+.testimonial-title {
+    text-align: center;
+    font-size: 38px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: #1f3a5f;
+}
+
+.testimonial-subtitle {
+    text-align: center;
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 50px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.testimonial-slider {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.testimonial-page {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 25px;
+    min-width: 100%;
+}
+
+.testimonial-card {
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition:0.25s;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
+
+.testimonial-header {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:14px;
+}
+
+.avatar {
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    background:#4f94b8;
+    color:white;
+    font-weight:bold;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:18px;
+}
+
+.stars {
+    color: #f7b500;
+    font-size:14px;
+}
+
+.testimonial-comment {
+    margin-top:8px;
+    font-size:14px;
+    line-height:1.6;
+    color:#333;
+    flex-grow:1;
+}
+
+.testimonial-date {
+    font-size:12px;
+    color:#888;
+    margin-top:12px;
+    text-align: right;
+}
+
+.quote-icon {
+    color:#4f94b8;
+    margin-right:6px;
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #4f94b8;
+    border: none;
+    color: white;
+    padding: 16px 20px;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 10;
+    font-size: 22px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: 0.2s;
+}
+
+.slider-btn:hover {
+    background: #3c7fa0;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.prev { left: -10px; }
+.next { right: -10px; }
+
+.create-btn-container {
+    text-align:center;
+    margin-top:40px;
+}
+
+.create-btn {
+    background:#4f94b8;
+    color:white;
+    padding:12px 25px;
+    border-radius:6px;
+    font-weight:bold;
+    text-decoration:none;
+    transition: 0.2s;
+}
+
+.create-btn:hover {
+    background:#3c7fa0;
+}
+</style>
+
+<div class="testimonial-wrapper">
+
+    <h1 class="testimonial-title">Testimonials</h1>
+    <p class="testimonial-subtitle">See what our readers are saying about Daily Scoop News System. Your feedback motivates us!</p>
+
+    <!-- Slider Buttons -->
+    <button class="slider-btn prev"><i class="fa-solid fa-chevron-left"></i></button>
+    <button class="slider-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+
+    <!-- Testimonial Pages -->
+    <div class="testimonial-slider">
+        {% for i in range(0, testimonials|length, 6) %}
+        <div class="testimonial-page">
+            {% for t in testimonials[i:i+6] %}
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="avatar">{{ t.username[0] }}</div>
+                    <div>
+                        <strong>{{ t.username }}</strong>
+                        <div class="stars">{{ t.stars }}</div>
+                    </div>
+                </div>
+                <p class="testimonial-comment">
+                    <i class="fa-solid fa-quote-left quote-icon"></i>
+                    {{ t.comment }}
+                </p>
+                <p class="testimonial-date">{{ t.created_at }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if user_logged_in %}
+    <div class="create-btn-container">
+        <a href="{{ url_for('testimonial.create_testimonial') }}" class="create-btn">Create New Testimonial</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+const slider = document.querySelector(".testimonial-slider");
+const prevBtn = document.querySelector(".prev");
+const nextBtn = document.querySelector(".next");
+const wrapper = document.querySelector(".testimonial-wrapper");
+
+let pageIndex = 0;
+const totalPages = slider.children.length;
+let autoSlide;
+
+// Function to update slider position
+function updateSlider() {
+    slider.style.transform = `translateX(-${pageIndex * 100}%)`;
+}
+
+// Arrow button events
+nextBtn.addEventListener("click", () => {
+    pageIndex = (pageIndex + 1) % totalPages;
+    updateSlider();
+});
+
+prevBtn.addEventListener("click", () => {
+    pageIndex = (pageIndex - 1 + totalPages) % totalPages;
+    updateSlider();
+});
+
+// Auto-slide function
+function startAutoSlide() {
+    autoSlide = setInterval(() => {
+        pageIndex = (pageIndex + 1) % totalPages;
+        updateSlider();
+    }, 5000);
+}
+
+// Stop auto-slide
+function stopAutoSlide() {
+    clearInterval(autoSlide);
+}
+
+// Start auto-slide initially
+startAutoSlide();
+
+// Pause on hover
+wrapper.addEventListener("mouseenter", stopAutoSlide);
+wrapper.addEventListener("mouseleave", startAutoSlide);
+
+// Update on resize
+window.addEventListener("resize", updateSlider);
+</script>
+
+{% endblock %}

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Login - Daily Scoop</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<style>
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background:#f3f3f3;
+}
+
+/* HEADER BAR */
+.login-header{
+    background:#c4def4;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 40px;
+}
+
+.brand{
+    font-weight:900;
+    font-size:28px;
+    line-height:1;
+}
+
+/* NAV LINKS */
+.nav-links{
+    display:flex;
+    gap:30px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.nav-links a{
+    text-decoration:none;
+    color:#000;
+}
+
+/* LOGIN SECTION */
+.login-wrapper{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:70vh;
+}
+
+.login-card{
+    width:340px;
+    text-align:center;
+    background:white;
+    padding:30px;
+    border-radius:8px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.login-card h2{
+    margin-bottom:10px;
+}
+
+.login-card p{
+    font-size:13px;
+    margin-bottom:20px;
+}
+
+/* INPUTS */
+.login-card label{
+    font-size:12px;
+    display:block;
+    text-align:left;
+    margin-bottom:3px;
+}
+
+.login-card input{
+    width:100%;
+    padding:8px;
+    margin-bottom:12px;
+    border:1px solid #ccc;
+    border-radius:4px;
+}
+
+/* FORGOT PASSWORD */
+.forgot{
+    font-size:11px;
+    text-align:right;
+    margin-top:-8px;
+    margin-bottom:10px;
+}
+
+.forgot a{
+    color:#2a5bd7;
+}
+
+/* LOGIN BUTTON */
+.login-btn{
+    width:100%;
+    padding:9px;
+    background:#3d5c2e;
+    color:white;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+}
+
+.login-btn:hover{
+    background:#2e4723;
+}
+
+/* SIGNUP */
+.signup{
+    margin-top:25px;
+    font-size:12px;
+}
+
+.signup a{
+    color:#2a5bd7;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="login-header">
+
+<a href="{{ url_for('home.unreg_home') }}" class="brand">
+Daily Scoop<br>
+News System
+</a>
+
+<div class="nav-links">
+<a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
+<a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+</div>
+</div>
+
+<!-- LOGIN FORM -->
+<div class="login-wrapper">
+
+<div class="login-card">
+
+<h2>Welcome back!</h2>
+<p>Login</p>
+
+<form method="POST">
+
+<label>Email address</label>
+<input type="email" name="email" required>
+
+<label>Password</label>
+<input type="password" name="password" required>
+
+<div class="forgot">
+<a href="#">Forgot password</a>
+</div>
+
+<button type="submit" class="login-btn">Login</button>
+
+</form>
+
+<div class="signup">
+Don't have an account?
+<a href="{{ url_for('register.register') }}">Sign Up</a>
+</div>
+
+{% if error %}
+<p style="color:red;margin-top:10px;">{{ error }}</p>
+{% endif %}
+
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Scoop</title>
+    <link
+      rel="stylesheet"
+      href="../../static/css/Unregistered/UnregSubscription.css"
+    />
+  </head>
+
+  <header class="navbar">
+    <div class="logo">
+      <a href="{{ url_for('home.unreg_home') }}">
+        <h1>Daily Scoop</h1>
+        <h1>News System</h1>
+      </a>
+    </div>
+
+    <nav class="navLinks">
+      <a href="{{ url_for('companyprofile.unreg_companyprof') }}"
+        >Company Profile</a
+      >
+      <a href="{{ url_for('home.unreg_home') }}#product-feature"
+        >Product Feature</a
+      >
+      <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
+      <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
+      <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+      <a href="{{ url_for('login.login') }}">Log In</a>
+    </nav>
+  </header>
+
+  <body>
+    <section class="pricing">
+      <h2 class="pricing-title">Plans and Pricing</h2>
+      <p class="pricing-subtitle">
+        No shady charges, no unexpected shocks! Stick to one flat fee, month
+        after month | No money surprises!
+      </p>
+
+      <div class="pricing-container">
+        {% if plans %} {% for plan in plans %}
+
+        <div class="plan-card {% if loop.index == 1 %}highlight{% endif %}">
+          <h3>{{ plan.planName }}</h3>
+
+          <div class="price">
+            ${{ plan.price }} <span>/ {{ plan.billingCycle }}</span>
+          </div>
+
+          <ul class="features">
+            {% for feature in plan.planDescription.split(',') %}
+            <li>✔ {{ feature.strip() }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        {% endfor %} {% else %}
+
+        <p class="no-plan-message">
+          No subscription plans available at the moment.
+        </p>
+
+        {% endif %}
+      </div>
+    </section>
+  </body>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <!-- Brand Section -->
+      <div class="footer-brand">
+        <h3 class="footer-title">Daily Scoop News</h3>
+
+        <p class="footer-description">
+          Delivering reliable and AI-powered news to keep readers informed with
+          credible and up-to-date stories.
+        </p>
+
+        <div class="footer-social">
+          <a
+            href="https://facebook.com"
+            target="_blank"
+            class="footer-social-icon facebook"
+            rel="noopener"
+            >f</a
+          >
+
+          <a
+            href="https://linkedin.com"
+            target="_blank"
+            class="footer-social-icon linkedin"
+            rel="noopener"
+            >in</a
+          >
+
+          <a
+            href="https://x.com"
+            target="_blank"
+            class="footer-social-icon twitter"
+            rel="noopener"
+            >in</a
+          >
+        </div>
+      </div>
+
+      <!-- Links Section -->
+      <div class="footer-links-section">
+        <h4 class="footer-links-title">Social Links</h4>
+
+        <div class="footer-links">
+          <a href="/contact" class="footer-link">Contact Us</a>
+          <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+          <a href="/about" class="footer-link">About Us</a>
+          <a href="/terms" class="footer-link">Terms & Conditions</a>
+          <a href="/support" class="footer-link">Need help? Reach us here.</a>
+          <a href="/advertise" class="footer-link">Advertise with us</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</html>

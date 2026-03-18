@@ -1,0 +1,155 @@
+{% extends "master.html" %}
+{% block title %}Add Testimonial{% endblock %}
+
+{% block content %}
+
+<style>
+.add-testimonial-container {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 30px 25px;
+    background: #f9fafb;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.add-testimonial-container h2 {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 800;
+    color: #1f3a5f;
+    margin-bottom: 25px;
+}
+
+.add-testimonial-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.add-testimonial-container label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.star-container {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    justify-content: flex-start;
+    font-size: 28px;
+}
+
+.star {
+    color: #ccc;
+    transition: color 0.2s;
+}
+
+.star.hovered,
+.star.selected {
+    color: #f7b500;
+}
+
+.add-testimonial-container textarea {
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: vertical;
+    transition: border 0.2s;
+}
+
+.add-testimonial-container textarea:focus {
+    outline: none;
+    border-color: #4f94b8;
+    box-shadow: 0 0 5px rgba(79, 148, 184, 0.4);
+}
+
+.add-testimonial-container button {
+    padding: 12px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+    background: #4f94b8;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.add-testimonial-container button:hover {
+    background: #3c7fa0;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+    .add-testimonial-container {
+        padding: 20px 15px;
+    }
+
+    .add-testimonial-container h2 {
+        font-size: 28px;
+    }
+}
+</style>
+
+<div class="add-testimonial-container">
+    <h2>Add Your Testimonial</h2>
+    <form method="POST">
+        <label for="rating">Rating:</label>
+        <div class="star-container" id="starContainer">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+        </div>
+        <!-- Hidden input to store selected rating -->
+        <input type="hidden" name="rating" id="rating" required>
+
+        <label for="comment">Comment:</label>
+        <textarea name="comment" id="comment" required placeholder="Write your feedback here..."></textarea>
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+<script>
+const stars = document.querySelectorAll(".star");
+const ratingInput = document.getElementById("rating");
+let selectedRating = 0;
+
+stars.forEach(star => {
+    // Hover effect
+    star.addEventListener("mouseover", () => {
+        const val = parseInt(star.dataset.value);
+        highlightStars(val);
+    });
+
+    star.addEventListener("mouseout", () => {
+        highlightStars(selectedRating);
+    });
+
+    // Click to select
+    star.addEventListener("click", () => {
+        selectedRating = parseInt(star.dataset.value);
+        ratingInput.value = selectedRating;
+        highlightStars(selectedRating);
+    });
+});
+
+function highlightStars(rating) {
+    stars.forEach(star => {
+        const val = parseInt(star.dataset.value);
+        if (val <= rating) {
+            star.classList.add("selected");
+        } else {
+            star.classList.remove("selected");
+        }
+    });
+}
+</script>
+
+{% endblock %}

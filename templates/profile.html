@@ -1,0 +1,227 @@
+{% extends "master.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+
+<div class="profile-page">
+
+<h2 class="page-title">Manage Profile</h2>
+
+<div class="profile-layout">
+
+<!-- LEFT SIDEBAR -->
+<div class="profile-sidebar">
+
+<div class="profile-avatar">
+<img src="{{ url_for('static', filename='img/default-user.png') }}">
+<h3>{{ user.username }}</h3>
+<p>@{{ user.username }}</p>
+</div>
+
+<div class="profile-menu">
+<ul>
+<li>👤 Profile Information</li>
+<li>⭐ Subscription Plan</li>
+<li>🔒 Security</li>
+</ul>
+</div>
+
+</div>
+
+
+<!-- RIGHT CONTENT -->
+<!-- PROFILE INFO -->
+<div class="profile-box">
+
+<h3 class="section-title">Profile Information</h3>
+<div class="profile-avatar">
+
+    <div class="avatar-wrapper">
+        <img src="{{ url_for('static', filename='uploads/' + (user.profile_pic if user.profile_pic else 'default.png')) }}" 
+             class="profile-img">
+
+        <!-- Edit Photo Button -->
+        <label for="profileUpload" class="edit-photo-btn">
+            Edit Photo
+        </label>
+
+        <form method="POST" action="/profile/upload-photo" enctype="multipart/form-data">
+            <input type="file" id="profileUpload" name="profile_pic" hidden onchange="this.form.submit()">
+        </form>
+    </div>
+
+    <h3>{{ user.username }}</h3>
+    <p>@{{ user.username }}</p>
+
+</div>
+
+<div class="profile-content">
+<form method="POST" action="/profile/update">
+
+<div class="form-row">
+<label>First Name</label>
+<input type="text" name="firstName">
+</div>
+
+<div class="form-row">
+<label>Last Name</label>
+<input type="text" name="lastName">
+</div>
+
+<div class="form-row">
+<label>Email</label>
+<input type="email" name="email">
+</div>
+
+<div class="form-row">
+<label>Username</label>
+<input type="text" name="username">
+</div>
+
+<div class="form-row">
+<label>Phone</label>
+<input type="text" name="phone">
+</div>
+
+<div class="form-row">
+<label>Age</label>
+<select name="age">
+<option>Select your age</option>
+{% for i in range(18,70) %}
+<option value="{{i}}">{{i}}</option>
+{% endfor %}
+</select>
+</div>
+
+<div class="form-row">
+<label>Gender</label>
+
+<label class="gender-option">
+<input type="radio" name="gender" value="Male">
+<span>Male</span>
+</label>
+
+<label class="gender-option">
+<input type="radio" name="gender" value="Female">
+<span>Female</span>
+</label>
+
+</div>
+
+<div class="form-row">
+<label>Your Interest</label>
+<input type="text" name="interest">
+</div>
+
+<div class="form-row">
+<label>Select Your Interest</label>
+
+<div class="checkbox-grid">
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Technology">
+<span>Technology</span>
+</label>
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Politics">
+<span>Politics</span>
+</label>
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Sports">
+<span>Sports</span>
+</label>
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Education">
+<span>Education</span>
+</label>
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Art">
+<span>Art</span>
+</label>
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Health">
+<span>Health</span>
+</label>
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Parenting">
+<span>Parenting</span>
+</label>
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Entertainment">
+<span>Entertainment</span>
+</label>
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Business">
+<span>Business</span>
+</label>
+
+<label class="interest-item">
+<input type="checkbox" name="interest" value="Government">
+<span>Government</span>
+</label>
+
+</div>
+</div>
+
+<button class="btn">Edit Profile</button>
+
+</form>
+
+</div>
+
+
+<!-- SUBSCRIPTION PLAN -->
+<div class="profile-box">
+
+<h3 class="section-title">Subscription Plan</h3>
+
+<label>Current Plan</label>
+<input type="text" value="{{ user.userType }}" disabled>
+
+<label>Status</label>
+<input type="text" value="Active" disabled>
+
+<label>Expired Date</label>
+<input type="text" value="-" disabled>
+
+<div class="button-row">
+<a href="/subscription" class="btn">View Plan</a>
+</div>
+
+</div>
+
+
+<!-- SECURITY -->
+<div class="profile-box">
+
+<h3 class="section-title">Security</h3>
+
+<form method="POST">
+
+<label>Password</label>
+<input type="password" name="password">
+
+<label>New Password</label>
+<input type="password" name="new_password">
+
+<div class="button-row">
+<button class="btn">Change Password</button>
+</div>
+
+</form>
+
+</div>
+
+</div>
+</div>
+</div>
+
+{% endblock %}
