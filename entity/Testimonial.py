@@ -1,15 +1,9 @@
-import mysql.connector
-def get_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="news_system"
-    )
+from entity.db_connection import get_db_connection
+
 class TestimonialEntity:
     @staticmethod
     def getAllTestimonials():
-        conn = get_connection()
+        conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -40,7 +34,7 @@ class TestimonialEntity:
     
     @staticmethod
     def insertTestimonial(user_id, rating, comment, semantic_score, combined_score):
-        conn = get_connection()
+        conn = get_db_connection()
         cursor = conn.cursor()
         query = """
             INSERT INTO Testimonial (userID, rating, comment, semanticScore, combinedScore, created_at)
@@ -51,12 +45,10 @@ class TestimonialEntity:
         cursor.close()
         conn.close()
 
-    @staticmethod
-    def getHomeTestimonial(offset=0, limit=3):
-    #def getHomeTestimonial(self, offset=0, limit=3):
-        conn = get_connection()
-        cursor = conn.cursor()
 
+    def getHomeTestimonial(self, offset=0, limit=3):
+        conn = get_db_connection()
+        cursor = conn.cursor()
         cursor.execute("""
             SELECT t.testimonial_ID, u.username, t.rating, t.comment, t.created_at
             FROM UserAccount u

@@ -1,6 +1,38 @@
 from entity.db_connection import get_db_connection
 
 class Article:
+    @staticmethod
+    def get_total_articles():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) AS total_articles FROM Article")
+        result = cursor.fetchone()
+        conn.close()
+        return result["total_articles"]
+    
+    @staticmethod
+    def updateStatus(articleID, action):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        if action == "suspend":
+            new_status = "Suspended"
+        elif action == "unsuspend":
+            new_status = "Active"
+        else:
+            conn.close()
+            return False
+        
+        cursor.execute("""
+            UPDATE Article SET articleStatus = %s WHERE articleID = %s 
+        """, (new_status, articleID))
+
+        conn.commit()
+        updated = cursor.rowcount > 0
+        conn.close()
+
+        return updated
+    
     def get_all_articles(self):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -48,7 +80,8 @@ class Article:
         return articles
 
     def get_article(self, articleID):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         query = """
             SELECT 
                 a.articleID,
@@ -69,7 +102,7 @@ class Article:
             ORDER BY ai.uploaded_at ASC
             LIMIT 1
         """
-        cursor.execute(query, (article_id,))
+        cursor.execute(query, (articleID,))
         article = cursor.fetchone()
         cursor.close()
         return article

@@ -19,7 +19,11 @@ def login():
             session["userID"] = user["userID"]
             session["username"] = user["username"]
             session["userType"] = user["userType"]
+            session["profileImage"] = user["profileImage"]
 
-            return redirect("/dashboard")
+            if user["userType"] == "system admin":
+                return redirect("/admin/dashboard")
+            else:
+                return redirect("/dashboard")
 
     return render_template("login.html")

@@ -6,7 +6,6 @@ class ArticleController:
 
     def __init__(self):
         self.article_entity = Article()
-        self.db = get_db_connection()  
 
     def get_articles(self):
         return self.article_entity.get_all_articles()
@@ -45,7 +44,8 @@ class ArticleController:
         return self.article_entity.search_my_articles(user_id, keyword)
     
     def get_article(self, article_id):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         query = """
             SELECT 
                 a.articleID,
@@ -69,10 +69,12 @@ class ArticleController:
         cursor.execute(query, (article_id,))
         article = cursor.fetchone()
         cursor.close()
+        conn.close()
         return article
 
     def update_article(self, article_id, title, category_id, content, status, featured_image=None):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         # Update article basic info
         sql = """
             UPDATE Article
@@ -100,19 +102,25 @@ class ArticleController:
                 insert_sql = "INSERT INTO ArticleImage (articleID, imageURL, uploaded_at) VALUES (%s, %s, NOW())"
                 cursor.execute(insert_sql, (article_id, featured_image))
 
-        self.db.commit()
+        conn.commit()
         cursor.close()
+        conn.close()
 
+        
     def get_article_images(self, article_id):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         sql = "SELECT imageURL FROM ArticleImage WHERE articleID=%s ORDER BY uploaded_at ASC"
         cursor.execute(sql, (article_id,))
         images = cursor.fetchall()
         cursor.close()
+        conn.close()
         return [img['imageURL'] for img in images]
+    
 
     def get_article_insight(self, article_id):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         query = """
             SELECT 
                 a.articleID,
@@ -132,21 +140,25 @@ class ArticleController:
         cursor.execute(query, (article_id,))
         article = cursor.fetchone()
         cursor.close()
+        conn.close()
         return article
 
     def save_ai_review(self, article_id, review_text):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         sql = "UPDATE Article SET aiReview = %s WHERE articleID = %s"
         cursor.execute(sql, (review_text, article_id))
-        self.db.commit()
+        conn.commit()
         cursor.close()
+        conn.close()
 
     def get_recommended_articles(self, user_id):
         """
         Fetch recommended articles for the given user.
         For now, we just return the latest 5 articles as a placeholder.
         """
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         query = """
             SELECT a.articleID, a.articleTitle, a.content AS summary, c.categoryName,
                 a.created_at, u.username
@@ -160,6 +172,7 @@ class ArticleController:
         cursor.execute(query)
         articles = cursor.fetchall()
         cursor.close()
+        conn.close()
 
         # Add featured_image key if missing
         for article in articles:
@@ -170,7 +183,8 @@ class ArticleController:
     
     # Fetch approved comments for an article
     def get_comments_for_article(self, article_id):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         sql = """
             SELECT c.commentID, c.commentText, c.created_at, u.username
             FROM Comment c
@@ -181,21 +195,25 @@ class ArticleController:
         cursor.execute(sql, (article_id,))
         comments = cursor.fetchall()
         cursor.close()
+        conn.close()
         return comments
 
     # Add a new comment
     def add_comment(self, user_id, article_id, comment_text):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         sql = """
             INSERT INTO Comment (articleID, userID, commentText, created_at, commentStatus)
             VALUES (%s, %s, %s, NOW(), 'approved')
         """
         cursor.execute(sql, (article_id, user_id, comment_text))
-        self.db.commit()
+        conn.commit()
         cursor.close()
+        conn.close()
 
     def is_article_saved(self, user_id, article_id):
-        cursor = self.db.cursor()  # use dictionary cursor
+        conn = get_db_connection()
+        cursor = conn.cursor() 
         sql = "SELECT 1 FROM Favourite WHERE userID=%s AND articleID=%s LIMIT 1"
         cursor.execute(sql, (user_id, article_id))
         result = cursor.fetchone()  # fetch just one row
@@ -203,41 +221,44 @@ class ArticleController:
         return bool(result)
     
     def save_article(self, user_id, article_id):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         sql = "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())"
         cursor.execute(sql, (user_id, article_id))
         self.db.commit()
         cursor.close()
 
     def toggle_save_article(self, user_id, article_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
         if self.is_article_saved(user_id, article_id):
             # Already saved → remove
-            cursor = self.db.cursor()
             sql = "DELETE FROM Favourite WHERE userID=%s AND articleID=%s"
             cursor.execute(sql, (user_id, article_id))
-            self.db.commit()
+            conn.commit()
             cursor.close()
+            conn.close()
             return False  # now it’s unsaved
         else:
             # Not saved → add
-            cursor = self.db.cursor()
             sql = "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())"
             cursor.execute(sql, (user_id, article_id))
-            self.db.commit()
+            conn.commit()
             cursor.close()
+            conn.close()
             return True  # now it’s saved
     
     def report_article(self, user_id, article_id, author_id, optional_comment=""):
-        cursor = self.db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         sql = """
             INSERT INTO ReportedArticle (articleID, author, userID, optionalComment, reported_at, reportStatus)
             VALUES (%s, %s, %s, %s, NOW(), 'pending')
         """
         cursor.execute(sql, (article_id, author_id, user_id, optional_comment))
-        self.db.commit()
+        conn.commit()
         cursor.close()
+        conn.close()
 
     def get_testimonials(self, limit=2):
         return self.article_entity.get_latest_testimonials(limit)
-
-    

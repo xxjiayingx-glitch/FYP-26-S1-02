@@ -1,23 +1,15 @@
 from flask import Blueprint, request, jsonify, session
-import mysql.connector
+from entity.db_connection import get_db_connection
 from datetime import datetime
 
 web_admin_api_bp = Blueprint("web_admin_api", __name__)
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="news_system"
-    )
 
 # ---------------- COMPANY PROFILE ----------------
 
 @web_admin_api_bp.route("/admin/company-profile", methods=["GET"])
 def get_company_profile():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM CompanyProfile ORDER BY profileID ASC LIMIT 1")
     result = cursor.fetchone()
@@ -98,7 +90,7 @@ def update_company_profile():
 @web_admin_api_bp.route("/admin/subscription-plan", methods=["GET"])
 def get_subscription_plan():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM SubscriptionPlan ORDER BY planID ASC LIMIT 1")
     result = cursor.fetchone()
