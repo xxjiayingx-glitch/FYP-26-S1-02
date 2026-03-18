@@ -1,8 +1,15 @@
 from entity.db_connection import get_db_connection
 
-
 class Subscription:
-
+    @staticmethod
+    def get_active_subscriptions():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) AS active_subscriptions FROM Subscription WHERE status = 'active'")
+        result = cursor.fetchone()
+        conn.close()
+        return result["active_subscriptions"]
+    
     @staticmethod
     def get_subscription(userID):
         """

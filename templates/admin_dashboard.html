@@ -18,7 +18,7 @@
                 {% endif %}
             </div>
             <span>Hi, {{ admin.username }}</span>
-            <a href="#">Logout</a>
+            <a href="{{ url_for('login.login') }}">Logout</a>
         </div>
     </header>
 
@@ -67,15 +67,15 @@
                     <span class="menu-icon"></span>
                     <span class="menu-text">User Accounts</span>
                 </a>
-                <a href="#">
+                <a href="/admin/article-reported">
                     <span class="menu-icon"></span>
                     <span class="menu-text">Article Reported</span>
                 </a>
-                <a href="#">
+                <a href="/admin/category-management">
                     <span class="menu-icon"></span>
                     <span class="menu-text">Category Management</span>
                 </a>
-                <a href="#">
+                <a href="/admin/webpage-management">
                     <span class="menu-icon"></span>
                     <span class="menu-text">Webpage Management</span>
                 </a>
@@ -83,7 +83,7 @@
                     <span class="menu-icon"></span>
                     <span class="menu-text">System Monitoring</span>
                 </a>
-                <a href="#">
+                <a href="/admin/auto-publish-rules">
                     <span class="menu-icon"></span>
                     <span class="menu-text">Auto-Publish Rules</span>
                 </a>
@@ -139,8 +139,16 @@
                             <tr>
                                 <td>{{ report.reportID }}</td>
                                 <td>{{ report.articleTitle }}</td>
-                                <td>{{ report.report_date }}</td>
-                                <td>{{ report.report_count }}</td>
+
+                                <td>
+                                    {% if report.latestReportDate %}
+                                        {{ report.latestReportDate.strftime('%d/%m/%Y') if report.latestReportDate.__class__.__name__ == 'datetime' else report.latestReportDate }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+
+                                <td>{{ report.totalReports }}</td>
                             </tr>
                             {% endfor %}
                         {% else %}
@@ -151,7 +159,7 @@
                     </tbody>
                 </table>
 
-                <button class="primary-btn">Review Now</button>
+                <a class="primary-btn" href="/admin/article-reported">Review Now</a>
             </section>
 
             <section class="activity-section">

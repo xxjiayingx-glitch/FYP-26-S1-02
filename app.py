@@ -10,13 +10,15 @@ from flask import (
 )
 import os
 from werkzeug.utils import secure_filename
-from transformers import pipeline
-
-#Connection
 from entity.db_connection import get_db_connection
 
-# Blueprints
+from boundary.AdminDashboardPage import admin_dashboard_bp
+from boundary.ViewUsersPage import view_users_bp
 from boundary.LoginPage import login_bp
+from boundary.UserDetailsPage import user_details_bp
+from boundary.ArticleReportedPage import article_reported_bp
+from boundary.ReviewArticlePage import review_article_bp
+from boundary.AutoPublishSettingPage import auto_publish_bp
 from boundary.UpdateProfilePage import profile_bp
 from boundary.SearchPage import article_bp
 from boundary.ArticlePage import comment_bp
@@ -26,7 +28,6 @@ from boundary.HomePage import home_bp
 from boundary.CompanyProfilePage import companyprof_bp
 from boundary.UnregSubscriptionPage import unregSub_bp
 from boundary.RegisterPage import register_bp
-from boundary.AdminDashboardPage import admin_dashboard_bp
 from boundary.CategoryManagementPage import category_management_bp
 from boundary.ArticleCategoryPage import article_category_page_bp
 from boundary.CategoryAPI import category_bp
@@ -37,7 +38,6 @@ from boundary.WebAdminAPI import web_admin_api_bp
 
 # Controllers
 from control.ArticleController import ArticleController
-
 article_controller = ArticleController()
 
 # Flask App
@@ -45,7 +45,13 @@ app = Flask(__name__)
 app.secret_key = "secretkey"
 
 # Register Blueprints
+app.register_blueprint(admin_dashboard_bp)
+app.register_blueprint(view_users_bp)
 app.register_blueprint(login_bp)
+app.register_blueprint(user_details_bp)
+app.register_blueprint(article_reported_bp)
+app.register_blueprint(review_article_bp)
+app.register_blueprint(auto_publish_bp)
 app.register_blueprint(profile_bp, url_prefix="/profile")
 app.register_blueprint(article_bp, url_prefix="/articles")
 app.register_blueprint(comment_bp, url_prefix="/comments")
@@ -55,7 +61,6 @@ app.register_blueprint(home_bp)
 app.register_blueprint(companyprof_bp, url_prefix="/company")
 app.register_blueprint(unregSub_bp, url_prefix="/subscribe")
 app.register_blueprint(register_bp)
-app.register_blueprint(admin_dashboard_bp, url_prefix="/admin")
 app.register_blueprint(category_management_bp)
 app.register_blueprint(article_category_page_bp)
 app.register_blueprint(category_bp)
@@ -64,17 +69,17 @@ app.register_blueprint(edit_company_profile_bp)
 app.register_blueprint(edit_subscription_plans_bp)
 app.register_blueprint(web_admin_api_bp)
 
+
 # Image File Size
-app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+
 # Upload image
 app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-
-
-#@app.route("/")
-#def unreghome():
-#    return render_template("Unregistered/UnregHome.html")
+# @app.route("/")
+# def unreghome():
+#     return render_template("Unregistered/UnregHome.html")
 
 @app.route("/", methods=["GET", "POST"])
 def login():

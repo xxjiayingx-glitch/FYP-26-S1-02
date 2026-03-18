@@ -1,14 +1,11 @@
-from entity.User import UserEntity
+from entity.UserAccount import UserAccount
 
 class AuthController:
 
     def __init__(self):
-        self.user_entity = UserEntity()
+        self.user_entity = UserAccount()
 
     def login(self,email,pwd):
+        return self.user_entity.login(email,pwd)
 
-        user = self.user_entity.login(email,pwd)
-
-        if user:
-            return user
-        return None
+   

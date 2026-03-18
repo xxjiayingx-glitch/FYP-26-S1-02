@@ -1,16 +1,7 @@
 from flask import Blueprint, request, jsonify
-import mysql.connector
+from entity.db_connection import get_db_connection
 
 category_bp = Blueprint("category_api", __name__)
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="news_system"
-    )
-
 
 @category_bp.route("/admin/categories", methods=["GET"])
 def get_categories():

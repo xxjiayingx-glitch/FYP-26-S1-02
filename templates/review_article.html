@@ -1,0 +1,30 @@
+<h2>{{ report.articleTitle }}</h2>
+
+<p>Article Status: {{ report.articleStatus }}</p>
+
+<p>Report Status: {{ report.reportStatus }}</p>
+
+<p>Credibility Score: {{ report.credibilityScore }}</p>
+
+<p>Reason: {{ report.reason }}</p>
+
+<p>Image:</p>
+{% if report.imageURL  %}
+    <img src="{{ url_for('static', filename='uploads/' ~ report.imageURL) }}">
+{% else  %}
+    -
+{% endif  %}
+
+<p>Content: {{ report.content }}</p>
+
+{% if report.articleStatus == 'Active' %}
+    <form action="/admin/article-reported/{{ report.articleID }}/status" method="POST">
+        <input type="hidden" name="action" value="suspend">
+        <button type="submit" class="action-btn">Suspend</button>
+    </form>
+{% else %}
+     <form action="/admin/article-reported/{{ report.articleID }}/status" method="POST">
+        <input type="hidden" name="action" value="unsuspend">
+        <button type="submit" class="action-btn">Unsuspend</button>
+    </form>
+{% endif %}
