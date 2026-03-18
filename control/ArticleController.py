@@ -1,6 +1,6 @@
 # control/ArticleController.py
 from entity.Article import Article
-from db_connection import get_db_connection  
+from entity.db_connection import get_db_connection
 
 class ArticleController:
 
@@ -13,9 +13,6 @@ class ArticleController:
     
     def search(self, keyword):
         return self.article_entity.search_articles(keyword)
-
-    def get_article(self, id):
-        return self.article_entity.get_article(id)
 
     def get_categories(self):
         return self.article_entity.get_categories()
@@ -32,9 +29,9 @@ class ArticleController:
     def get_headline(self):
         return self.article_entity.get_headline_article()
 
-    def get_latest(self, limit=5):
-        return self.article_entity.get_latest_articles(limit)
-    
+    def get_latest_articles_by_category(self, limit=6):
+        return self.article_entity.get_latest_articles_by_category(limit)
+
     def get_home_headline(self):
         return self.article_entity.get_home_headline_article()
 
@@ -48,16 +45,18 @@ class ArticleController:
         return self.article_entity.search_my_articles(user_id, keyword)
     
     def get_article(self, article_id):
-        cursor = self.db.cursor(dictionary=True)
+        cursor = self.db.cursor()
         query = """
             SELECT 
                 a.articleID,
                 a.articleTitle,
                 a.content,
+                a.categoryID,
+                a.articleStatus,
                 a.created_at,
                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
                 c.categoryName,
-                a.created_by,  
+                a.created_by,
                 ai.imageURL AS featured_image
             FROM Article a
             JOIN UserAccount u ON a.created_by = u.userID
@@ -104,18 +103,16 @@ class ArticleController:
         self.db.commit()
         cursor.close()
 
-        
     def get_article_images(self, article_id):
-        cursor = self.db.cursor(dictionary=True)
+        cursor = self.db.cursor()
         sql = "SELECT imageURL FROM ArticleImage WHERE articleID=%s ORDER BY uploaded_at ASC"
         cursor.execute(sql, (article_id,))
         images = cursor.fetchall()
         cursor.close()
         return [img['imageURL'] for img in images]
-    
 
     def get_article_insight(self, article_id):
-        cursor = self.db.cursor(dictionary=True)
+        cursor = self.db.cursor()
         query = """
             SELECT 
                 a.articleID,
@@ -149,7 +146,7 @@ class ArticleController:
         Fetch recommended articles for the given user.
         For now, we just return the latest 5 articles as a placeholder.
         """
-        cursor = self.db.cursor(dictionary=True)
+        cursor = self.db.cursor()
         query = """
             SELECT a.articleID, a.articleTitle, a.content AS summary, c.categoryName,
                 a.created_at, u.username
@@ -173,7 +170,7 @@ class ArticleController:
     
     # Fetch approved comments for an article
     def get_comments_for_article(self, article_id):
-        cursor = self.db.cursor(dictionary=True)
+        cursor = self.db.cursor()
         sql = """
             SELECT c.commentID, c.commentText, c.created_at, u.username
             FROM Comment c
@@ -198,7 +195,7 @@ class ArticleController:
         cursor.close()
 
     def is_article_saved(self, user_id, article_id):
-        cursor = self.db.cursor(dictionary=True)  # use dictionary cursor
+        cursor = self.db.cursor()  # use dictionary cursor
         sql = "SELECT 1 FROM Favourite WHERE userID=%s AND articleID=%s LIMIT 1"
         cursor.execute(sql, (user_id, article_id))
         result = cursor.fetchone()  # fetch just one row

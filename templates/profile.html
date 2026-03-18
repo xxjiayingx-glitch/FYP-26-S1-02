@@ -2,226 +2,182 @@
 {% block title %}My Profile{% endblock %}
 
 {% block content %}
-
 <div class="profile-page">
-
-<h2 class="page-title">Manage Profile</h2>
-
-<div class="profile-layout">
-
-<!-- LEFT SIDEBAR -->
-<div class="profile-sidebar">
-
-<div class="profile-avatar">
-<img src="{{ url_for('static', filename='img/default-user.png') }}">
-<h3>{{ user.username }}</h3>
-<p>@{{ user.username }}</p>
-</div>
-
-<div class="profile-menu">
-<ul>
-<li>👤 Profile Information</li>
-<li>⭐ Subscription Plan</li>
-<li>🔒 Security</li>
-</ul>
-</div>
-
-</div>
-
-
-<!-- RIGHT CONTENT -->
-<!-- PROFILE INFO -->
-<div class="profile-box">
-
-<h3 class="section-title">Profile Information</h3>
-<div class="profile-avatar">
-
-    <div class="avatar-wrapper">
-        <img src="{{ url_for('static', filename='uploads/' + (user.profile_pic if user.profile_pic else 'default.png')) }}" 
-             class="profile-img">
-
-        <!-- Edit Photo Button -->
-        <label for="profileUpload" class="edit-photo-btn">
-            Edit Photo
-        </label>
-
-        <form method="POST" action="/profile/upload-photo" enctype="multipart/form-data">
-            <input type="file" id="profileUpload" name="profile_pic" hidden onchange="this.form.submit()">
-        </form>
+    <div class="profile-header">
+        <h1>My Profile</h1>
+        <p>Manage your personal information, subscription, and account security.</p>
     </div>
 
-    <h3>{{ user.username }}</h3>
-    <p>@{{ user.username }}</p>
+    <div class="profile-layout">
 
+        <!-- LEFT SIDEBAR -->
+        <aside class="profile-sidebar">
+            <div class="sidebar-avatar-wrap">
+                <img
+                    src="{{ url_for('static', filename='uploads/' + (user.profileImage if user.profileImage else 'default.png')) }}"
+                    alt="Profile Photo"
+                    class="sidebar-avatar"
+                >
+
+                <form method="POST" action="/profile/upload-photo" enctype="multipart/form-data" class="photo-form">
+                    <label for="profileUploadSidebar" class="edit-photo-btn">Change Photo</label>
+                    <input type="file" id="profileUploadSidebar" name="profile_pic" hidden onchange="this.form.submit()">
+                </form>
+                <div class="profile-top-text">
+                    <h3>{{ user.username or 'User' }}</h3>
+                    <p>@{{ user.username or 'username' }}</p>
+                </div>
+
+            </div>
+
+            <ul class="profile-menu">
+                <li><a href="#profile-info">👤 Profile Information</a></li>
+                <li><a href="#subscription-plan">⭐ Subscription Plan</a></li>
+                <li><a href="#security-settings">🔒 Security</a></li>
+            </ul>
+        </aside>
+
+        <!-- RIGHT CONTENT -->
+        <div class="profile-main">
+
+            <!-- PROFILE INFO -->
+            <section class="profile-card" id="profile-info">
+                <div class="card-header">
+                    <h2>Profile Information</h2>
+                    <p>Update your personal details and preferences.</p>
+                </div>
+
+
+                <form method="POST" action="/profile/update" class="profile-form">
+                    <div class="form-grid">
+                        <div class="form-row">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="firstName" value="{{ user.first_name or '' }}">
+                        </div>
+
+                        <div class="form-row">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" value="{{ user.last_name or '' }}">
+                        </div>
+
+                        <div class="form-row">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" value="{{ user.email or '' }}">
+                        </div>
+
+                        <div class="form-row">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" value="{{ user.username or '' }}">
+                        </div>
+
+                        <div class="form-row">
+                            <label for="phone">Phone</label>
+                            <input type="text" id="phone" name="phone" value="{{ user.phone or '' }}">
+                        </div>
+
+                        <div class="form-row">
+                            <label for="dateOfBirth">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="dateOfBirth" value="{{ user.dateOfBirth if user.dateOfBirth else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Gender</label>
+                        <div class="gender-group">
+                            <label class="gender-option">
+                                <input type="radio" name="gender" value="Male" {% if user.gender == 'Male' %}checked{% endif %}>
+                                <span>Male</span>
+                            </label>
+
+                            <label class="gender-option">
+                                <input type="radio" name="gender" value="Female" {% if user.gender == 'Female' %}checked{% endif %}>
+                                <span>Female</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row full-width">
+                        <label>Select Your Interests</label>
+                        <div class="checkbox-grid">
+                            {% set selected_interests = user.selected_interests if user.selected_interests else [] %}
+
+                            {% for item in ['Technology', 'Politics', 'Sports', 'Education', 'Art', 'Health', 'Parenting', 'Entertainment', 'Business', 'Government'] %}
+                            <label class="interest-item">
+                                <input type="checkbox" name="interests" value="{{ item }}"
+                                       {% if item in selected_interests %}checked{% endif %}>
+                                <span>{{ item }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- SUBSCRIPTION -->
+            <section class="profile-card" id="subscription-plan">
+                <div class="card-header">
+                    <h2>Subscription Plan</h2>
+                    <p>View your current plan and account status.</p>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-box">
+                        <span class="info-label">Current Plan</span>
+                        <span class="info-value">{{ user.userType or 'Free' }}</span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Status</span>
+                        <span class="info-value">Active</span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Expiry Date</span>
+                        <span class="info-value">{{ user.expire_date or '-' }}</span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/subscription" class="btn-primary">View Plan</a>
+                </div>
+            </section>
+
+            <!-- SECURITY -->
+            <section class="profile-card" id="security-settings">
+                <div class="card-header">
+                    <h2>Security</h2>
+                    <p>Change your password to keep your account secure.</p>
+                </div>
+
+                <form method="POST" action="/profile/change-password" class="profile-form">
+                    <div class="form-grid single-column">
+                        <div class="form-row">
+                            <label for="current_password">Current Password</label>
+                            <input type="password" id="current_password" name="current_password">
+                        </div>
+
+                        <div class="form-row">
+                            <label for="new_password">New Password</label>
+                            <input type="password" id="new_password" name="new_password">
+                        </div>
+
+                        <div class="form-row">
+                            <label for="confirm_password">Confirm New Password</label>
+                            <input type="password" id="confirm_password" name="confirm_password">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Change Password</button>
+                    </div>
+                </form>
+            </section>
+
+        </div>
+    </div>
 </div>
-
-<div class="profile-content">
-<form method="POST" action="/profile/update">
-
-<div class="form-row">
-<label>First Name</label>
-<input type="text" name="firstName">
-</div>
-
-<div class="form-row">
-<label>Last Name</label>
-<input type="text" name="lastName">
-</div>
-
-<div class="form-row">
-<label>Email</label>
-<input type="email" name="email">
-</div>
-
-<div class="form-row">
-<label>Username</label>
-<input type="text" name="username">
-</div>
-
-<div class="form-row">
-<label>Phone</label>
-<input type="text" name="phone">
-</div>
-
-<div class="form-row">
-<label>Age</label>
-<select name="age">
-<option>Select your age</option>
-{% for i in range(18,70) %}
-<option value="{{i}}">{{i}}</option>
-{% endfor %}
-</select>
-</div>
-
-<div class="form-row">
-<label>Gender</label>
-
-<label class="gender-option">
-<input type="radio" name="gender" value="Male">
-<span>Male</span>
-</label>
-
-<label class="gender-option">
-<input type="radio" name="gender" value="Female">
-<span>Female</span>
-</label>
-
-</div>
-
-<div class="form-row">
-<label>Your Interest</label>
-<input type="text" name="interest">
-</div>
-
-<div class="form-row">
-<label>Select Your Interest</label>
-
-<div class="checkbox-grid">
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Technology">
-<span>Technology</span>
-</label>
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Politics">
-<span>Politics</span>
-</label>
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Sports">
-<span>Sports</span>
-</label>
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Education">
-<span>Education</span>
-</label>
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Art">
-<span>Art</span>
-</label>
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Health">
-<span>Health</span>
-</label>
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Parenting">
-<span>Parenting</span>
-</label>
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Entertainment">
-<span>Entertainment</span>
-</label>
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Business">
-<span>Business</span>
-</label>
-
-<label class="interest-item">
-<input type="checkbox" name="interest" value="Government">
-<span>Government</span>
-</label>
-
-</div>
-</div>
-
-<button class="btn">Edit Profile</button>
-
-</form>
-
-</div>
-
-
-<!-- SUBSCRIPTION PLAN -->
-<div class="profile-box">
-
-<h3 class="section-title">Subscription Plan</h3>
-
-<label>Current Plan</label>
-<input type="text" value="{{ user.userType }}" disabled>
-
-<label>Status</label>
-<input type="text" value="Active" disabled>
-
-<label>Expired Date</label>
-<input type="text" value="-" disabled>
-
-<div class="button-row">
-<a href="/subscription" class="btn">View Plan</a>
-</div>
-
-</div>
-
-
-<!-- SECURITY -->
-<div class="profile-box">
-
-<h3 class="section-title">Security</h3>
-
-<form method="POST">
-
-<label>Password</label>
-<input type="password" name="password">
-
-<label>New Password</label>
-<input type="password" name="new_password">
-
-<div class="button-row">
-<button class="btn">Change Password</button>
-</div>
-
-</form>
-
-</div>
-
-</div>
-</div>
-</div>
-
 {% endblock %}

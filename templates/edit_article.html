@@ -15,9 +15,8 @@
             <label for="category"><strong>Category:</strong></label><br>
             <select id="category" name="category" required style="width: 100%; padding: 8px;">
                 {% for cat in categories %}
-                    <option value="{{ cat.categoryID }}" {% if article.categoryID == cat.categoryID %}selected{% endif %}>
-                        {{ cat.categoryName }}
-                    </option>
+                        <option value="{{ cat.categoryID }}" {% if article.categoryID|string == cat.categoryID|string %}selected{% endif %}>                        {{ cat.categoryName }}
+                        </option>
                 {% endfor %}
             </select>
         </div>
@@ -38,9 +37,8 @@
         <div style="margin-bottom: 15px;">
             <label for="status"><strong>Status:</strong></label><br>
             <select id="status" name="status" required style="width: 100%; padding: 8px;">
-                <option value="draft" {% if article.articleStatus == 'draft' %}selected{% endif %}>Draft</option>
-                <option value="published" {% if article.articleStatus == 'published' %}selected{% endif %}>Published</option>
-            </select>
+            <option value="draft" {% if article.articleStatus|string == 'draft' %}selected{% endif %}>Draft</option>
+            <option value="published" {% if article.articleStatus|string == 'published' %}selected{% endif %}>Published</option>            </select>
         </div>
 
         <!-- Buttons -->

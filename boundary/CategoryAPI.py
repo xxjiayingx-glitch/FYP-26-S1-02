@@ -15,7 +15,7 @@ def get_db_connection():
 @category_bp.route("/admin/categories", methods=["GET"])
 def get_categories():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM ArticleCategory")
     result = cursor.fetchall()

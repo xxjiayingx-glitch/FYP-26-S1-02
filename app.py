@@ -8,10 +8,12 @@ from flask import (
     flash,
     jsonify,
 )
-import mysql.connector
 import os
 from werkzeug.utils import secure_filename
 from transformers import pipeline
+
+#Connection
+from entity.db_connection import get_db_connection
 
 # Blueprints
 from boundary.LoginPage import login_bp
@@ -68,10 +70,7 @@ app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
 app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# MySQL connection
-db = mysql.connector.connect(
-    host="localhost", user="root", password="", database="news_system"
-)
+
 
 #@app.route("/")
 #def unreghome():
@@ -86,7 +85,8 @@ def login():
         email = request.form["email"]
         password = request.form["password"]
 
-        cursor = db.cursor(dictionary=True)
+        conn = get_db_connection()
+        cursor = conn.cursor()        
         query = """
             SELECT * FROM UserAccount
             WHERE email = %s AND pwd = %s AND accountStatus = 'active'
@@ -94,6 +94,7 @@ def login():
         cursor.execute(query, (email, password))
         user = cursor.fetchone()
         cursor.close()
+        conn.close()
 
         if user:
             session["userID"] = user["userID"]
@@ -105,7 +106,6 @@ def login():
 
     return render_template("login.html")
 
-article_controller = ArticleController()
 
 @app.route("/free_homepage", methods=["GET", "POST"])
 def free_homepage():
@@ -113,7 +113,7 @@ def free_homepage():
     if search_query:
         latest_news = article_controller.search(search_query)  # use your search function
     else:
-        latest_news = article_controller.get_latest(limit=4)
+        latest_news = article_controller.get_latest_articles_by_category(6)
     
     testimonials = article_controller.get_testimonials()
     
@@ -133,10 +133,9 @@ def premium_homepage():
     headline = article_controller.get_headline()
 
     # Recommended articles (custom logic for premium users)
-    recommended_articles = article_controller.get_latest(limit=6)
+    recommended_articles = article_controller.get_latest_articles_by_category(6)
     # Latest news (general latest articles)
-    latest_news = article_controller.get_latest(limit=4)
-
+    latest_news = article_controller.get_latest_articles_by_category(6)
     return render_template(
         "premium_homepage.html",
         headline=headline,
@@ -154,7 +153,7 @@ def dashboard():
     user_type = str(session.get("userType", "")).lower()
 
     headline = article_controller.get_headline()
-    latest_news = article_controller.get_latest(4)
+    latest_news = article_controller.get_latest_articles_by_category(6)
     my_articles = article_controller.get_my_articles(user_id)
     testimonials = article_controller.get_testimonials(6)
 
@@ -174,19 +173,6 @@ def dashboard():
         testimonials=testimonials
     )
 
-    try:
-        headline = article_controller.get_headline()
-    except Exception as e:
-        print("Error fetching headline:", e)
-
-    try:
-        latest_news = article_controller.get_latest(4)
-    except Exception as e:
-        print("Error fetching latest news:", e)
-
-    return render_template(
-        "free_homepage.html", headline=headline, latest_news=latest_news
-    )
 
 # Article detail page
 @app.route("/article/<int:article_id>")
@@ -339,17 +325,22 @@ def edit_article(article_id):
         category_id = request.form.get("category")
         content = request.form.get("content")
         status = request.form.get("status")
+
         featured_image = request.files.get("featured_image")
+        image_filename = None
+
+        if featured_image and featured_image.filename:
+            image_filename = secure_filename(featured_image.filename)
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
+            featured_image.save(save_path)
 
         article_controller.update_article(
-            article_id, title, category_id, content, status, featured_image
+            article_id, title, category_id, content, status, image_filename
         )
         flash("Article updated successfully!", "success")
         return redirect(url_for("my_articles"))
 
     return render_template("edit_article.html", article=article, categories=categories)
-
-
 # Delete Article Route
 @app.route("/delete_article/<int:article_id>", methods=["GET"])
 def delete_article(article_id):
@@ -373,20 +364,152 @@ def profile():
     if "userID" not in session:
         return redirect(url_for("login"))
 
-    user = {
-        "userID": session.get("userID"),
-        "username": session.get("username"),
-        "userType": session.get("userType"),
-    }
+    user_id = session.get("userID")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = """
+            SELECT userID, username, userType, first_name, last_name, email, phone,
+                gender, dateOfBirth, profileImage
+            FROM UserAccount
+            WHERE userID = %s
+        """    
+    cursor.execute(query, (user_id,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not user:
+        return redirect(url_for("login"))
+
 
     return render_template("profile.html", user=user)
 
+
+
+#save profile
+@app.route("/profile/update", methods=["POST"])
+def update_profile():
+    if "userID" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session.get("userID")
+
+    first_name = request.form.get("firstName")
+    last_name = request.form.get("lastName")
+    email = request.form.get("email")
+    username = request.form.get("username")
+    phone = request.form.get("phone")
+    gender = request.form.get("gender")
+    date_of_birth = request.form.get("dateOfBirth")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        UPDATE UserAccount
+        SET first_name = %s,
+            last_name = %s,
+            email = %s,
+            username = %s,
+            phone = %s,
+            gender = %s,
+            dateOfBirth = %s,
+            updated_at = NOW()
+        WHERE userID = %s
+    """
+    cursor.execute(query, (
+        first_name,
+        last_name,
+        email,
+        username,
+        phone,
+        gender,
+        date_of_birth if date_of_birth else None,
+        user_id
+    ))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    session["username"] = username
+
+    flash("Profile updated successfully!", "success")
+    return redirect(url_for("profile"))
+
+#upload profile photo
+@app.route("/profile/upload-photo", methods=["POST"])
+def upload_profile_photo():
+    if "userID" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session.get("userID")
+    profile_pic = request.files.get("profile_pic")
+
+    if profile_pic and profile_pic.filename:
+        filename = secure_filename(profile_pic.filename)
+        save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        profile_pic.save(save_path)
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE UserAccount SET profileImage = %s, updated_at = NOW() WHERE userID = %s",
+            (filename, user_id)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        flash("Profile photo updated successfully!", "success")
+
+    return redirect(url_for("profile"))
+
+#change password route
+@app.route("/profile/change-password", methods=["POST"])
+def change_password():
+    if "userID" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session.get("userID")
+    current_password = request.form.get("current_password")
+    new_password = request.form.get("new_password")
+    confirm_password = request.form.get("confirm_password")
+
+    if not new_password or new_password != confirm_password:
+        flash("New passwords do not match.", "error")
+        return redirect(url_for("profile"))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT pwd FROM UserAccount WHERE userID = %s", (user_id,))
+    user = cursor.fetchone()
+
+    if not user or user["pwd"] != current_password:
+        cursor.close()
+        conn.close()
+        flash("Current password is incorrect.", "error")
+        return redirect(url_for("profile"))
+
+    cursor.execute(
+        "UPDATE UserAccount SET pwd = %s WHERE userID = %s",
+        (new_password, user_id)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash("Password changed successfully!", "success")
+    return redirect(url_for("profile"))
 
 @app.route("/subscription")
 def subscription():
     if "userID" not in session:
         return redirect(url_for("login"))
     return render_template("subscription.html")
+
 
 
 # @app.route("/testimonial")

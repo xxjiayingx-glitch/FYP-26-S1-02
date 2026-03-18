@@ -28,21 +28,35 @@ class UserAccount:
 
 
     @staticmethod
-    def update_profile(userID, firstName, lastName, email, phone, age, gender):
+    def update_profile(userID, first_name, last_name, email, username, phone, gender, dateOfBirth, interests):
         conn = get_db_connection()
         cursor = conn.cursor()
 
         query = """
-        UPDATE user
-        SET firstName=%s,
-            lastName=%s,
-            email=%s,
-            phone=%s,
-            age=%s,
-            gender=%s
-        WHERE userID=%s
+            UPDATE UserAccount
+            SET first_name = %s,
+                last_name = %s,
+                email = %s,
+                username = %s,
+                phone = %s,
+                gender = %s,
+                dateOfBirth = %s,
+                interests = %s,
+                updated_at = NOW()
+            WHERE userID = %s
         """
-        cursor.execute(query, (firstName, lastName, email, phone, age, gender, userID))
+        cursor.execute(query, (
+            first_name,
+            last_name,
+            email,
+            username,
+            phone,
+            gender,
+            dateOfBirth,
+            interests,
+            userID
+        ))
+
         conn.commit()
         conn.close()
         
@@ -69,24 +83,14 @@ class UserAccount:
         conn.close()
         return result["total_users"]
 
+    
     @staticmethod
-    def update_profile_image(user_id, filename):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE UserAccount
-            SET profileImage = %s
-            WHERE userID = %s
-        """, (filename, user_id))
-        conn.commit()
-        conn.close()
-
     def update_photo(userID, filename):
         conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute(
-            "UPDATE UserAccount SET profile_pic=%s WHERE userID=%s",
+            "UPDATE UserAccount SET profileImage = %s, updated_at = NOW() WHERE userID = %s",
             (filename, userID)
         )
 

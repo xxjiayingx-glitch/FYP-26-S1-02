@@ -4,24 +4,29 @@ class UpdateProfileCTL:
 
     @staticmethod
     def update_profile(userID, form):
-
-        firstName = form.get("firstName")
-        lastName = form.get("lastName")
+        first_name = form.get("firstName")
+        last_name = form.get("lastName")
         email = form.get("email")
+        username = form.get("username")
         phone = form.get("phone")
-        age = form.get("age")
         gender = form.get("gender")
+        dateOfBirth = form.get("dateOfBirth")
+
+        interests_list = form.getlist("interests")
+        interests = ",".join(interests_list)
 
         UserAccount.update_profile(
             userID,
-            firstName,
-            lastName,
+            first_name,
+            last_name,
             email,
+            username,
             phone,
-            age,
-            gender
+            gender,
+            dateOfBirth,
+            interests
         )
 
     @staticmethod
     def update_profile_photo(userID, filename):
-        UserAccount.update_photo(userID, filename)
+        UserAccount.update_profile_image(userID, filename)

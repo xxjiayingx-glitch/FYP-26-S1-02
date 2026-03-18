@@ -10,7 +10,7 @@ class Subscription:
         """
         conn = get_db_connection()
         try:
-            cursor = conn.cursor(dictionary=True)
+            cursor = conn.cursor()
             query = "SELECT * FROM Subscription WHERE userID=%s"
             cursor.execute(query, (userID,))
             return cursor.fetchone()
