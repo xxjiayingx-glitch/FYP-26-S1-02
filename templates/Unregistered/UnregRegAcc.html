@@ -1,192 +1,165 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Daily Scoop</title>
-    <link
-      rel="stylesheet"
-      href="../../static/css/Unregistered/UnregRegAcc.css"
-    />
-  </head>
 
-  <body>
-    <header class="navbar">
-      <div class="logo">
-        <a href="{{ url_for('home.unreg_home') }}">
-          <h1>Daily Scoop</h1>
-          <h1>News System</h1>
-        </a>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Scoop</title>
+  <link rel="stylesheet" href="../../static/css/Unregistered/UnregRegAcc.css" />
+</head>
 
-      <nav class="navLinks">
-        <a href="{{ url_for('companyprofile.unreg_companyprof') }}"
-          >Company Profile</a
-        >
-        <a href="{{ url_for('home.unreg_home') }}#product-feature"
-          >Product Feature</a
-        >
-        <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
-        <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
-        <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
-        <a href="{{ url_for('login.login') }}">Log In</a>
-      </nav>
-    </header>
+<body>
+  <header class="navbar">
+    <div class="logo">
+      <a href="{{ url_for('home.unreg_home') }}">
+        <h1>Daily Scoop</h1>
+        <h1>News System</h1>
+      </a>
+    </div>
 
-    <main class="page-content">
-      <div class="form-container">
-        <h2>Welcome!</h2>
-        <p>Sign Up</p>
+    <nav class="navLinks">
+      <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
+      <a href="{{ url_for('home.unreg_home') }}#product-feature">Product Feature</a>
+      <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
+      <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
+      <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+      <a href="{{ url_for('login.login') }}">Log In</a>
+    </nav>
+  </header>
 
-        <!-- Success Message -->
-        {% if success %}
-        <p style="color: green">{{ success }}</p>
+  <main class="page-content">
+    <div class="form-container">
+      <h2>Welcome!</h2>
+      <p>Sign Up</p>
 
-        <script>
-          setTimeout(function () {
-            window.location.href = "{{ url_for('login.login') }}";
-          }, 2000); // 2 seconds delay
-        </script>
+      <!-- Success Message -->
+      {% if success %}
+      <p style="color: green">{{ success }}</p>
 
-        {% endif %} 
-        
-        <!-- Error Message -->
-        {% if error %}
-        <p style="color: red">{{ error }}</p>
-        {% endif %}
-        <form action="{{ url_for('register.register') }}" method="POST">
-          <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              placeholder="First Name"
-            />
-          </div>
+      <script>
+        setTimeout(function () {
+          window.location.href = "{{ url_for('login.login') }}";
+        }, 2000); // 2 seconds delay
+      </script>
 
-          <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              placeholder="Last Name"
-            />
-          </div>
+      {% endif %}
 
-          <div class="form-group">
-            <label for="email">Email address</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter your email"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="phone">Phone</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              placeholder="Enter your phone number"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              placeholder="Enter your username"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Password"
-            />
-            <small>Minimum 10 Characters</small>
-          </div>
-
-          <div class="form-group">
-            <label for="retypePassword">Retype Password</label>
-            <input
-              type="password"
-              id="retypePassword"
-              name="retypePassword"
-              placeholder="Retype"
-            />
-          </div>
-
-          <button type="submit" class="signup-btn">Sign Up</button>
-        </form>
-
-        <p class="signin-link">
-          Have an account? <a href="{{ url_for('login.login') }}">Sign In</a>
-        </p>
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-container">
-        <!-- Brand Section -->
-        <div class="footer-brand">
-          <h3 class="footer-title">Daily Scoop News</h3>
-
-          <p class="footer-description">
-            Delivering reliable and AI-powered news to keep readers informed
-            with credible and up-to-date stories.
-          </p>
-
-          <div class="footer-social">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              class="footer-social-icon facebook"
-              rel="noopener"
-              >f</a
-            >
-
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              class="footer-social-icon linkedin"
-              rel="noopener"
-              >in</a
-            >
-
-            <a
-              href="https://x.com"
-              target="_blank"
-              class="footer-social-icon twitter"
-              rel="noopener"
-              >X</a
-            >
-          </div>
+      <!-- Error Message -->
+      {% if error %}
+      <p style="color: red">{{ error }}</p>
+      {% endif %}
+      <form action="{{ url_for('register.register') }}" method="POST">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" placeholder="First Name" />
         </div>
 
-        <!-- Links Section -->
-        <div class="footer-links-section">
-          <h4 class="footer-links-title">Social Links</h4>
-
-          <div class="footer-links">
-            <a href="/contact" class="footer-link">Contact Us</a>
-            <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
-            <a href="/about" class="footer-link">About Us</a>
-            <a href="/terms" class="footer-link">Terms &amp; Conditions</a>
-            <a href="/support" class="footer-link">Need help? Reach us here.</a>
-            <a href="/advertise" class="footer-link">Advertise with us</a>
-          </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" placeholder="Last Name" />
         </div>
+
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" />
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter your username" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Password" />
+          <small>Minimum 10 Characters</small>
+        </div>
+
+        <div class="form-group">
+          <label for="retypePassword">Retype Password</label>
+          <input type="password" id="retypePassword" name="retypePassword" placeholder="Retype" />
+        </div>
+
+        <div class="form-row full-width">
+          <label>Select Your Interests (Min 1, Max 5)</label>
+          <div class="checkbox-grid">
+            {% for item in ['Technology', 'Politics', 'Sports', 'Education', 'Art', 'Health', 'Parenting',
+            'Entertainment', 'Business', 'Government'] %}
+            <label class="interest-item">
+              <input type="checkbox" name="interests" value="{{ item }}" class="interest-checkbox">
+              <span>{{ item }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          <span id="interestError" style="display:none; color:red;"></span>
+
+        </div>
+
+        <button type="submit" class="signup-btn">Sign Up</button>
+      </form>
+
+      <p class="signin-link">
+        Have an account? <a href="{{ url_for('login.login') }}">Sign In</a>
+      </p>
+    </div>
+  </main>
+  <script>
+    document.querySelector("form").addEventListener("submit", function (e) {
+      const checked = document.querySelectorAll(".interest-checkbox:checked");
+      const error = document.getElementById("interestError");
+
+      if (checked.length < 1) {
+        e.preventDefault();
+        error.innerText = "Select at least 1 interest";
+        error.style.display = "block";
+      }
+      else if (checked.length > 5) {
+        e.preventDefault();
+        error.innerText = "Maximum 5 interests allowed";
+        error.style.display = "block";
+      }
+    });
+  </script>
+</body>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- Brand Section -->
+    <div class="footer-brand">
+      <h3 class="footer-title">Daily Scoop News</h3>
+
+      <p class="footer-description">
+        Delivering reliable and AI-powered news to keep readers informed
+        with credible and up-to-date stories.
+      </p>
+
+      <div class="footer-social">
+        <a href="https://facebook.com" target="_blank" class="footer-social-icon facebook" rel="noopener">f</a>
+
+        <a href="https://linkedin.com" target="_blank" class="footer-social-icon linkedin" rel="noopener">in</a>
+
+        <a href="https://x.com" target="_blank" class="footer-social-icon twitter" rel="noopener">X</a>
       </div>
-    </footer>
-  </body>
+    </div>
+
+    <!-- Links Section -->
+    <div class="footer-links-section">
+      <h4 class="footer-links-title">Social Links</h4>
+
+      <div class="footer-links">
+        <a href="/contact" class="footer-link">Contact Us</a>
+        <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+        <a href="/about" class="footer-link">About Us</a>
+        <a href="/terms" class="footer-link">Terms &amp; Conditions</a>
+        <a href="/support" class="footer-link">Need help? Reach us here.</a>
+        <a href="/advertise" class="footer-link">Advertise with us</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
 </html>

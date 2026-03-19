@@ -11,6 +11,8 @@ from flask import (
 from dotenv import load_dotenv
 load_dotenv()
 import os
+from dotenv import load_dotenv
+load_dotenv()
 from werkzeug.utils import secure_filename
 from entity.db_connection import get_db_connection
 

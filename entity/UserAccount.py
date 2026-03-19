@@ -273,3 +273,94 @@ class UserAccount:
 
         conn.commit()
         conn.close()
+
+    #####################################
+    
+    def find_by_email(self, email):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM UserAccount WHERE email = %s", (email,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+
+    def find_by_username(self, username):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM UserAccount WHERE username = %s", (username,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    
+    def register_user(self, username, email, password, firstName, lastName, phone, token):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        insert_query = """
+        INSERT INTO UserAccount (username, email, pwd, first_name, last_name, phone, userType, accountStatus, verificationToken, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, 'free user', 'pending', %s, NOW())
+        """
+        cursor.execute(insert_query, (username, email, password, firstName, lastName, phone, token))
+        conn.commit()
+
+        new_user_id = cursor.lastrowid  # ← grab the new userID right after insert
+
+        cursor.close()
+        conn.close()
+        return new_user_id
+
+    def get_category_ids_by_names(self, category_names):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        format_strings = ','.join(['%s'] * len(category_names))
+        cursor.execute(
+            f"SELECT categoryID FROM ArticleCategory WHERE categoryName IN ({format_strings})",
+            tuple(category_names)
+        )
+        ids = [row['categoryID'] for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+        return ids
+    
+    def save_category_interests(self, user_id, category_ids):
+       
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        values = [(user_id, cat_id) for cat_id in category_ids]
+        cursor.executemany(
+            "INSERT INTO UserCategoryInterest (userID, categoryID) VALUES (%s, %s)",
+            values
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def find_by_token(self, token):
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("SELECT * FROM UserAccount WHERE verificationToken=%s", (token,))
+        user = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+        return user
+    
+    def verify_user(self, token):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE UserAccount
+            SET accountStatus='active', verificationToken=NULL
+            WHERE verificationToken=%s
+        """, (token,))
+
+        conn.commit()
+
+        cursor.close()
+        conn.close()

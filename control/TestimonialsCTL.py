@@ -33,7 +33,7 @@ class TestimonialController:
         TestimonialEntity.insertTestimonial(user_id, rating, comment, semantic_score, combined_score)
 
     @staticmethod
-    def getHomeTestimonials(offset=0, limit=6):
+    def getHomeTestimonials(offset, limit):
         testimonials = TestimonialEntity.getHomeTestimonial(offset, limit)
 
         filtered_testimonials = []

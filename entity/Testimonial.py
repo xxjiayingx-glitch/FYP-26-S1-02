@@ -46,11 +46,12 @@ class TestimonialEntity:
         conn.close()
 
 
-    def getHomeTestimonial(self, offset=0, limit=3):
+    @staticmethod
+    def getHomeTestimonial(offset=0, limit=3):
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT t.testimonial_ID, u.username, t.rating, t.comment, t.created_at
+            SELECT u.username, t.rating, t.comment, t.created_at
             FROM UserAccount u
             JOIN Testimonial t ON u.userID = t.userID
             WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
@@ -67,12 +68,13 @@ class TestimonialEntity:
 
         for row in rows:
             results.append({
-                "testimonial_ID": row["testimonial_ID"],
                 "username": row["username"],
                 "rating": row["rating"],
                 "comment": row["comment"],
                 "created_at": row["created_at"],
                 "stars": "★" * row["rating"] + "☆" * (5 - row["rating"])
             })
+            
 
         return results
+        

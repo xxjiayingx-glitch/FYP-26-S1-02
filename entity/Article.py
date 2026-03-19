@@ -236,13 +236,15 @@ class Article:
         cursor = conn.cursor()
 
         sql = """
-        SELECT a.*, ai.imageURL, c.categoryName, u.username
+        SELECT a.*, c.categoryName, ai.imageURL, u.username,
+            IFNULL(an.views, 0) AS views
         FROM Article a
-        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
         LEFT JOIN UserAccount u ON a.created_by = u.userID
+        LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
         WHERE a.articleStatus = 'published'
-        ORDER BY a.created_at DESC
+        ORDER BY IFNULL(an.views, 0) DESC, a.created_at DESC
         LIMIT 1
         """
 

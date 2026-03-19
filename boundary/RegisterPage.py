@@ -16,14 +16,15 @@ def register():
         email = request.form["email"]
         password = request.form["password"]
         retypePassword = request.form["retypePassword"]
+        interests = request.form.getlist("interests")
 
         result = registerCTL.register(
-            firstName, lastName, phone, username, email, password, retypePassword
+            firstName, lastName, phone, username, email, password, retypePassword, interests=interests
         )
 
         if result["success"]:
             return render_template(
-                "Unregistered/UnregRegAcc.html", success=result["message"]
+                "Unregistered/UnregRegAcc.html", success="Registration successful! Please check your email to verify your account."
             )
 
         return render_template("Unregistered/UnregRegAcc.html", error=result["message"])
