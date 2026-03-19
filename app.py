@@ -481,43 +481,6 @@ def upload_profile_photo():
 
     return redirect(url_for("profile"))
 
-#change password route
-@app.route("/profile/change-password", methods=["POST"])
-def change_password():
-    if "userID" not in session:
-        return redirect(url_for("login"))
-
-    user_id = session.get("userID")
-    current_password = request.form.get("current_password")
-    new_password = request.form.get("new_password")
-    confirm_password = request.form.get("confirm_password")
-
-    if not new_password or new_password != confirm_password:
-        flash("New passwords do not match.", "error")
-        return redirect(url_for("profile"))
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT pwd FROM UserAccount WHERE userID = %s", (user_id,))
-    user = cursor.fetchone()
-
-    if not user or user["pwd"] != current_password:
-        cursor.close()
-        conn.close()
-        flash("Current password is incorrect.", "error")
-        return redirect(url_for("profile"))
-
-    cursor.execute(
-        "UPDATE UserAccount SET pwd = %s WHERE userID = %s",
-        (new_password, user_id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    flash("Password changed successfully!", "success")
-    return redirect(url_for("profile"))
 
 @app.route("/subscription")
 def subscription():

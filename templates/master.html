@@ -441,6 +441,17 @@
         }
     </style>
 </head>
+<script>
+    setTimeout(() => {
+        document.querySelectorAll(".toast-message").forEach(toast => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateX(20px)";
+            toast.style.transition = "0.3s ease";
+
+            setTimeout(() => toast.remove(), 300);
+        });
+    }, 3000);
+</script>
 <body>
 
     <!-- TOP NAVBAR -->
@@ -489,6 +500,20 @@
     <main class="page-wrapper">
         {% block content %}{% endblock %}
     </main>
+    
+    <!--Toast popup-->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="toast-container">
+                {% for category, message in messages %}
+                    <div class="toast-message toast-{{ category if category else 'success' }}">
+                        <span>{{ message }}</span>
+                        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
     <!-- FOOTER -->
     <footer class="footer">
