@@ -151,14 +151,21 @@ def free_homepage():
 def premium_homepage():
     user_id = session.get("userID")
     search_query = request.args.get("q")
+    
     # Top viewed articles
     top_viewed = article_controller.get_top_viewed_articles(limit=5)
-    # User interest category top articles (example: pick first category from saved articles)
+    
+    # User interest category top articles
     saved_articles = article_controller.get_user_saved_articles(user_id, limit=5)
     user_top_category_id = saved_articles[0]["categoryID"] if saved_articles else None
     category_top_articles = article_controller.get_top_articles_by_category(user_top_category_id, limit=5) if user_top_category_id else []
+    
     # Latest articles
     latest_articles = article_controller.get_latest_articles_by_category(limit=6)
+    # ✅ Map imageURL → featured_image
+    for article in latest_articles:
+        article["featured_image"] = article.get("imageURL")
+    
     return render_template(
         "premium_homepage.html",
         search_query=search_query,
