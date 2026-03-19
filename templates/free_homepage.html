@@ -6,9 +6,25 @@
 
 <!-- SEARCH ARTICLE -->
 <div class="search-bar-container">
-    <form method="get" action="{{ url_for('free_homepage') }}">
-        <input type="text" name="q" placeholder="Search articles..." value="{{ search_query or '' }}">
-        <button type="submit"><i class="fa fa-search"></i></button>
+    <form method="get" action="{{ url_for('free_homepage') }}" class="search-form">
+
+        <div class="search-wrapper">
+            <i class="fa fa-search search-icon"></i>
+
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Search articles..."
+                value="{{ search_query or '' }}"
+                class="search-input-modern"
+                required
+            >
+
+            <button type="submit" class="search-btn-modern">
+                Search
+            </button>
+        </div>
+
     </form>
 </div>
 

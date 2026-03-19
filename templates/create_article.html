@@ -1,57 +1,102 @@
 {% extends "master.html" %}
 
+{% block title %}Create Article{% endblock %}
+
 {% block content %}
-<div class="create-article-container" style="max-width: 800px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-    <h2>Create New Article</h2>
+<div class="create-article-page">
+    <div class="create-article-card">
+        <h1 class="create-article-title">Create Your Own Article</h1>
 
-    <form method="POST" enctype="multipart/form-data">
-        <!-- Title -->
-        <div style="margin-bottom: 15px;">
-            <label for="title"><strong>Title:</strong></label><br>
-            <input type="text" id="title" name="title" required 
-                   value="{{ request.form.title or '' }}" 
-                   style="width: 100%; padding: 8px;"/>
-        </div>
+        <form method="POST" enctype="multipart/form-data" class="create-article-form">
+            
+            <!-- Title -->
+            <div class="create-form-row">
+                <label for="title">Title:</label>
+                <input 
+                    type="text" 
+                    id="title" 
+                    name="title" 
+                    required
+                    placeholder="Enter your article title"
+                    value="{{ request.form.title or '' }}"
+                >
+            </div>
 
-        <!-- Category -->
-        <div style="margin-bottom: 15px;">
-            <label for="category"><strong>Category:</strong></label><br>
-            <select id="category" name="category" required style="width: 100%; padding: 8px;">
-                <option value="">-- Select Category --</option>
-                {% for cat in categories %}
-                    <option value="{{ cat.categoryID }}">{{ cat.categoryName }}</option>
-                {% endfor %}
-            </select>
-        </div>
+            <!-- Category -->
+            <div class="create-form-row">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="" disabled {% if not request.form.category %}selected{% endif %}>
+                        Select your article category
+                    </option>
+                    {% for cat in categories %}
+                        <option 
+                            value="{{ cat.categoryID }}"
+                            {% if request.form.category == cat.categoryID|string %}selected{% endif %}
+                        >
+                            {{ cat.categoryName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <!-- Content -->
-        <div style="margin-bottom: 15px;">
-            <label for="content"><strong>Content:</strong></label><br>
-            <textarea id="content" name="content" rows="10" required 
-                      style="width: 100%; padding: 8px;">{{ request.form.content or '' }}</textarea>
-        </div>
+            <!-- Content -->
+            <div class="create-form-row">
+                <label for="content">Content:</label>
+                <textarea 
+                    id="content" 
+                    name="content" 
+                    rows="12" 
+                    required
+                    placeholder="Enter your full article content"
+                >{{ request.form.content or '' }}</textarea>
+            </div>
 
-        <!-- Featured Image -->
-        <div style="margin-bottom: 15px;">
-            <label for="featured_image"><strong>Upload Featured Image:</strong></label><br>
-            <input type="file" id="featured_image" name="featured_image" accept="image/*"/>
-        </div>
+            <!-- Featured Image -->
+            <div class="create-form-row">
+                <label for="featured_image">Upload Featured Image:</label>
+                <input 
+                    type="file" 
+                    id="featured_image" 
+                    name="featured_image" 
+                    accept="image/*"
+                    required
+                >
+            </div>
 
-        <!-- Status -->
-        <div style="margin-bottom: 15px;">
-            <label for="status"><strong>Status:</strong></label><br>
-            <select id="status" name="status" required style="width: 100%; padding: 8px;">
-                <option value="draft" {% if request.form.status == 'draft' %}selected{% endif %}>Draft</option>
-                <option value="published" {% if request.form.status == 'published' %}selected{% endif %}>Published</option>
-            </select>
-        </div>
+            <!-- AI Fact Check Score -->
+            <div class="create-form-row">
+                <label for="ai_score">AI Fact Checking Score:</label>
+                <input 
+                    type="text" 
+                    id="ai_score" 
+                    name="ai_score"
+                    class="ai-score-input"
+                    placeholder="This score will be generated automatically by AI after submission"
+                    value="{{ ai_score if ai_score is defined else '' }}"
+                    readonly
+                >
+                <small class="field-note">
+                    This score is automatically generated by the AI fact-checking system.
+                </small>
+            </div>
 
-        <!-- Buttons -->
-        <div style="margin-top: 20px;">
-            <a href="{{ url_for('my_articles') }}" class="btn-cancel" 
-               style="padding: 10px 20px; margin-right: 10px; background: #ccc; color: black; text-decoration: none; border-radius: 5px;">Cancel</a>
-            <button type="submit" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px;">Submit</button>
-        </div>
-    </form>
+
+            <!-- Buttons -->
+            <div class="create-form-actions">
+                <a href="{{ url_for('my_articles') }}" class="create-btn cancel-create-btn">
+                    Cancel
+                </a>
+
+                <button type="submit" class="create-btn draft-create-btn" name="submit_action" value="draft">
+                    Draft
+                </button>
+
+                <button type="submit" class="create-btn publish-create-btn" name="submit_action" value="published">
+                    Published
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
