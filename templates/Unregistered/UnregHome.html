@@ -193,10 +193,13 @@
           data.forEach((article) => {
             const card = document.createElement("div");
             card.classList.add("news-card");
+
+            const articleDetailBase = "{{ url_for('article_detail', article_id=0) }}".replace('/0', '/');
             card.innerHTML = `
               <img src="/static/uploads/${article.imageURL}" alt="${article.articleTitle}">
               <h5 class="news-title">${article.articleTitle}</h5>
               <p class="news-para">${article.content}...</p>
+              <a class="read-more" href="${articleDetailBase}${article.articleID}">Read more......</a>
             `;
             container.appendChild(card);
           });
