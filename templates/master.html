@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Daily Scoop News System{% endblock %}</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
     <style>
         *{
             box-sizing:border-box;
@@ -16,7 +18,7 @@
         body{
             font-family: Arial, Helvetica, sans-serif;
             background:#f3f3f3;
-            color:#000;
+            color:#111;
         }
 
         a{
@@ -24,172 +26,252 @@
             color:inherit;
         }
 
-        /* TOP NAVBAR */
+        /* =========================
+           TOP NAVBAR
+        ========================= */
         .topbar{
             background:#c4def4;
-            min-height:95px;
+            min-height:105px;
             display:flex;
             justify-content:space-between;
             align-items:center;
-            padding:14px 32px;
+            padding:18px 42px;
+            gap:30px;
+            border-bottom:1px solid rgba(0,0,0,0.06);
         }
 
         .brand-wrap{
             display:flex;
             align-items:center;
-            gap:10px;
+            gap:14px;
+            flex-shrink:0;
         }
 
         .brand{
             font-weight:900;
-            font-size:28px;
-            line-height:0.95;
-            color:#000;
+            font-size:32px;
+            line-height:1;
+            color:#1f3a5f;
             cursor:pointer;
+            letter-spacing:-0.5px;
+            text-decoration: none;
+            transition: all 0.3s ease; 
+        }
+
+        .brand:hover{
+            color:#3f8ec4;   /* lighter blue glow */
+            text-decoration: none;
+
+            text-shadow:
+                0 0 6px rgba(63,142,196,0.35),
+                0 0 12px rgba(63,142,196,0.25);
+
+            transform: scale(1.03);
+        }
+
+        .brand:active{
+            transform: scale(0.98);
         }
 
         .premium-badge{
-            font-size:11px;
-            font-weight:700;
+            font-size:12px;
+            font-weight:800;
             letter-spacing:1px;
-
-            padding:4px 10px;
-
+            padding:7px 14px;
             background:#ffeaa7;
             color:#7a5600;
-
-            border-radius:20px;
-
+            border-radius:999px;
             display:flex;
             align-items:center;
-            gap:5px;
-
-            margin-left:12px;
+            gap:6px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.08);
         }
+
         .nav-links{
             display:flex;
-            gap:28px;
             align-items:center;
-            font-size:11px;
+            justify-content:flex-end;
+            gap:14px;
+            flex-wrap:wrap;
+        }
+
+        .nav-links a,
+        .nav-links .user-icon{
+            font-size:16px;
             font-weight:700;
             color:#111;
+            white-space:nowrap;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            line-height:1.2;
+        }
+
+        .nav-links a{
+            padding:10px 16px;
+            border-radius:999px;
+            transition:all 0.2s ease;
         }
 
         .nav-links a:hover{
-            text-decoration:underline;
+            background:rgba(255,255,255,0.55);
+            color:#2f6f95;
+            text-decoration: none; 
         }
 
-        /* MAIN CONTENT */
+        .user-icon{
+            background:rgba(255,255,255,0.45);
+            padding:10px 16px;
+            border-radius:999px;
+        }
+
+        /* Optional special button look for logout */
+        .nav-links a:last-child{
+            background:#111;
+            color:#fff;
+        }
+
+        .nav-links a:last-child:hover{
+            background:#2f6f95;
+            color:#fff;
+        }
+
+        /* =========================
+           MAIN CONTENT
+        ========================= */
         .page-wrapper{
-            min-height:calc(100vh - 90px - 190px);
-            padding:30px 28px;
+            min-height:calc(100vh - 105px - 240px);
+            padding:32px 28px;
         }
 
-        /* FOOTER */
+        /* optional content helper */
+        .content-card{
+            background:#fff;
+            border:1px solid #d9d9d9;
+            padding:20px;
+            border-radius:18px;
+            box-shadow:0 6px 18px rgba(0,0,0,0.05);
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
         .footer{
             background:#a9c3d8;
             border-top:6px solid #4f94b8;
-            padding:30px 40px;
+            padding:55px 60px;
+            margin-top:40px;
         }
 
         .footer-container{
             display:flex;
             justify-content:space-between;
+            align-items:flex-start;
+            gap:90px;
         }
 
         .footer-left{
-            width:50%;
-            padding-right:40px;
+            flex:1.1;
+            max-width:560px;
         }
 
-        .footer-right{
-            width:50%;
-            padding-left:40px;
-            border-left:2px solid #6e7d87;
-        }
-
-        .footer h2{
+        .footer-left h2{
             font-family: Georgia, serif;
-            font-size:26px;
+            font-size:34px;
+            color:#111;
+            margin-bottom:10px;
         }
 
         .footer-line{
             border-bottom:2px solid #6e7d87;
-            margin:10px 0 20px;
+            width:85%;
+            margin:12px 0 24px;
         }
 
-        .footer p{
-            font-size:13px;
-            max-width:300px;
-            margin-bottom:40px;
+        .footer-left p{
+            font-size:18px;
+            line-height:1.65;
+            margin-bottom:34px;
+            max-width:430px;
         }
 
         .social-icons{
             display:flex;
-            gap:15px;
-            font-size:18px;
+            gap:22px;
+            font-size:22px;
+        }
+
+        .social-icons i{
+            cursor:pointer;
+            transition:transform 0.2s ease, color 0.2s ease;
+        }
+
+        .social-icons i:hover{
+            color:#2f6f95;
+            transform:translateY(-2px);
         }
 
         .footer-links{
+            flex:1;
             display:flex;
             justify-content:space-between;
-            max-width:450px;
+            gap:70px;
+            padding-top:8px;
         }
 
         .footer-links div{
             display:flex;
             flex-direction:column;
-            gap:15px;
+            gap:20px;
+            min-width:220px;
         }
 
         .footer-links a{
-            font-size:13px;
-            color:#000;
-            text-decoration:none;
+            font-size:18px;
+            color:#111;
+            transition:all 0.2s ease;
+            line-height:1.4;
         }
 
         .footer-links a:hover{
-            text-decoration:underline;
+            color:#2f6f95;
+            transform:translateX(2px);
+            text-decoration: none; 
         }
 
-        /* optional content helpers */
-        .content-card{
-            background:#fff;
-            border:1px solid #d9d9d9;
-            padding:20px;
+        /* =========================
+           TESTIMONIAL CAROUSEL HELPER
+        ========================= */
+        .testimonial-wrapper{
+            position:relative;
+            width:100%;
+            overflow:hidden;
         }
 
-        /* ===== Testimonial Carousel Helper ===== */
-        .testimonial-wrapper {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
+        .testimonial-container{
+            display:flex;
+            gap:20px;
+            transition:transform 0.4s ease-in-out;
         }
 
-        .testimonial-container {
-            display: flex;
-            gap: 20px;
-            transition: transform 0.4s ease-in-out;
-        }
-
-        .testimonial-card {
-            flex: 0 0 calc(16.66% - 15px); /* 6 per view */
+        .testimonial-card{
+            flex:0 0 calc(16.66% - 15px);
             background:white;
             padding:20px;
-            border-radius:12px;
+            border-radius:16px;
             box-shadow:0 4px 12px rgba(0,0,0,0.08);
             transition:0.25s;
         }
 
-        .testimonial-card:hover {
+        .testimonial-card:hover{
             transform:translateY(-5px);
             box-shadow:0 10px 25px rgba(0,0,0,0.15);
         }
 
-        .slider-btn {
-            position: absolute;
-            top: 40%;
-            z-index: 10;
+        .slider-btn{
+            position:absolute;
+            top:40%;
+            z-index:10;
             background:#4f94b8;
             border:none;
             color:white;
@@ -198,52 +280,165 @@
             border-radius:50%;
         }
 
-        .slider-btn:hover {
+        .slider-btn:hover{
             background:#3c7fa0;
         }
 
-        .prev { left:5px; }
-        .next { right:5px; }
+        .prev{
+            left:5px;
+        }
 
+        .next{
+            right:5px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
         @media (max-width: 1024px){
-            .testimonial-card {
-                flex: 0 0 calc(33.33% - 15px); /* 3 per view */
+            .testimonial-card{
+                flex:0 0 calc(33.33% - 15px);
+            }
+
+            .topbar{
+                padding:18px 26px;
+            }
+
+            .brand{
+                font-size:28px;
+            }
+
+            .nav-links a,
+            .nav-links .user-icon{
+                font-size:15px;
+            }
+
+            .footer{
+                padding:45px 35px;
+            }
+
+            .footer-container{
+                gap:50px;
+            }
+
+            .footer-links{
+                gap:40px;
+            }
+
+            .footer-links div{
+                min-width:170px;
             }
         }
 
         @media (max-width: 768px){
-            .testimonial-card {
-                flex: 0 0 calc(50% - 12px); /* 2 per view */
+            .testimonial-card{
+                flex:0 0 calc(50% - 12px);
             }
 
             .topbar{
                 flex-direction:column;
                 align-items:flex-start;
-                gap:15px;
+                padding:20px;
+                gap:18px;
+            }
+
+            .brand-wrap{
+                flex-wrap:wrap;
+            }
+
+            .brand{
+                font-size:26px;
             }
 
             .nav-links{
-                flex-wrap:wrap;
+                width:100%;
+                justify-content:flex-start;
+                gap:12px;
+            }
+
+            .nav-links a,
+            .nav-links .user-icon{
+                font-size:14px;
+            }
+
+            .nav-links a{
+                padding:9px 14px;
+            }
+
+            .page-wrapper{
+                padding:24px 18px;
+            }
+
+            .footer{
+                padding:38px 22px;
+            }
+
+            .footer-container{
+                flex-direction:column;
+                gap:35px;
+            }
+
+            .footer-left{
+                max-width:100%;
+            }
+
+            .footer-left h2{
+                font-size:28px;
+            }
+
+            .footer-line{
+                width:100%;
+            }
+
+            .footer-left p{
+                font-size:18px;
+                max-width:100%;
+            }
+
+            .footer-links{
+                width:100%;
+                flex-direction:column;
+                gap:24px;
+            }
+
+            .footer-links div{
                 gap:14px;
-            }
-
-            .footer-inner{
-                grid-template-columns:1fr;
-            }
-
-            .footer-box.left{
-                border-right:none;
-                border-bottom:2px solid #6e7d87;
-                padding-bottom:20px;
+                min-width:unset;
             }
         }
 
         @media (max-width: 480px){
-            .testimonial-card {
-                flex: 0 0 calc(100% - 10px); /* 1 per view on mobile */
+            .testimonial-card{
+                flex:0 0 calc(100% - 10px);
+            }
+
+            .brand{
+                font-size:22px;
+            }
+
+            .premium-badge{
+                font-size:11px;
+                padding:6px 12px;
+            }
+
+            .nav-links a,
+            .nav-links .user-icon{
+                font-size:13px;
+            }
+
+            .footer-left h2{
+                font-size:24px;
+            }
+
+            .footer-left p,
+            .footer-links a{
+                font-size:16px;
+            }
+
+            .social-icons{
+                font-size:20px;
             }
         }
-
     </style>
 </head>
 <body>
@@ -251,7 +446,6 @@
     <!-- TOP NAVBAR -->
     <header class="topbar">
         <div class="brand-wrap">
-
             <a href="{% if session.get('userID') %}{{ url_for('dashboard') }}{% else %}{{ url_for('home.unreg_home') }}{% endif %}" class="brand">
                 Daily Scoop<br>
                 News System
@@ -262,41 +456,33 @@
                 <i class="fa-solid fa-crown"></i> PREMIUM
             </span>
             {% endif %}
-
         </div>
 
-    <nav class="nav-links">
+        <nav class="nav-links">
+            {% if session.get("userID") %}
+                <span class="user-icon">
+                    <i class="fa-regular fa-user"></i>
+                    Hi, {{ session.get('username','User') }}
+                </span>
 
-        {% if session.get("userID") %}
-            <!-- ✅ Logged-in users -->
+                <a href="{{ url_for('my_articles') }}">My Articles</a>
+                <a href="{{ url_for('profile') }}">My Profile</a>
+                <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
 
-            <span class="user-icon">
-                <i class="fa-regular fa-user"></i>
-                Hi, {{ session.get('username','User') }}
-            </span>
+                {% if session.get("userType","").lower() == "premium user" %}
+                    <a href="{{ url_for('insight') }}">Insights</a>
+                {% endif %}
 
-            <a href="{{ url_for('my_articles') }}">My Articles</a>
-            <a href="{{ url_for('profile') }}">My Profile</a>
-            <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+                <a href="{{ url_for('logout') }}">Log Out</a>
 
-            {% if session.get("userType","").lower() == "premium user" %}
-                <a href="{{ url_for('insight') }}">Insights</a>
+            {% else %}
+                <a href="{{ url_for('home.unreg_home') }}">Home</a>
+                <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
+                <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
+                <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+                <a href="{{ url_for('login.login') }}">Log In</a>
             {% endif %}
-
-            <a href="{{ url_for('logout') }}">Log Out</a>
-
-        {% else %}
-            <!-- ✅ Unregistered users -->
-
-            <a href="{{ url_for('home.unreg_home') }}">Home</a>
-            <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
-            <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
-            <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
-            <a href="{{ url_for('login.login') }}">Log In</a>
-
-        {% endif %}
-
-    </nav>
+        </nav>
     </header>
 
     <!-- PAGE CONTENT -->
@@ -306,12 +492,10 @@
 
     <!-- FOOTER -->
     <footer class="footer">
-
         <div class="footer-container">
 
-            <!-- LEFT SIDE -->
+            <!-- LEFT -->
             <div class="footer-left">
-
                 <h2>Daily Scoop News</h2>
                 <div class="footer-line"></div>
 
@@ -324,15 +508,11 @@
                     <i class="fa-brands fa-instagram"></i>
                     <i class="fa-brands fa-linkedin"></i>
                     <i class="fa-brands fa-x-twitter"></i>
-
                 </div>
-
             </div>
 
-
-            <!-- RIGHT SIDE -->
+            <!-- RIGHT -->
             <div class="footer-links">
-
                 <div>
                     <a href="{{ url_for('info', page='contact') }}">Contact Us</a>
                     <a href="{{ url_for('info', page='about') }}">About Us</a>
@@ -341,18 +521,11 @@
 
                 <div>
                     <a href="{{ url_for('info', page='privacy') }}">Privacy Policy</a>
-                    <a href="{{ url_for('info', page='terms') }}">Terms & Conditions</a>
+                    <a href="{{ url_for('info', page='terms') }}">Terms &amp; Conditions</a>
                     <a href="{{ url_for('info', page='advertise') }}">Advertise with us</a>
                 </div>
-
-        </div>
-
-                </div>
-
             </div>
-
         </div>
-
     </footer>
 
 </body>
