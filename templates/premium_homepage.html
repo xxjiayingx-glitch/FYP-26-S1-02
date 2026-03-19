@@ -3,12 +3,29 @@
 {% block title %}Premium User Home{% endblock %}
 {% block content %}
 <!-- SEARCH ARTICLE -->
-<div class="search-bar-container" style="margin-bottom:30px;">
-    <form method="get" action="{{ url_for('premium_homepage') }}">
-        <input type="text" name="q" placeholder="Search articles..." value="{{ search_query or '' }}">
-        <button type="submit"><i class="fa fa-search"></i></button>
+<div class="search-bar-container">
+    <form method="get" action="{{ url_for('premium_homepage') }}" class="search-form">
+
+        <div class="search-wrapper">
+            <i class="fa fa-search search-icon"></i>
+
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Search articles/categories..."
+                value="{{ search_query or '' }}"
+                class="search-input-modern"
+                required
+            >
+
+            <button type="submit" class="search-btn-modern">
+                Search
+            </button>
+        </div>
+
     </form>
 </div>
+
 <!-- TOP VIEWED ARTICLE AS HEADER -->
 {% if top_viewed %}
 <div class="featured-news" style="margin-bottom:40px;">
@@ -31,6 +48,8 @@
     </div>
 </div>
 {% endif %}
+
+
 <!-- CATEGORY TOP ARTICLES -->
 <h2 style="margin-bottom:15px;">Articles from Your Favorite Category</h2>
 <div class="article-grid" style="margin-bottom:40px;">

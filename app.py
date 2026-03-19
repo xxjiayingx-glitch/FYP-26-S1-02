@@ -132,7 +132,9 @@ def login():
 # Free Registered User Homepage 
 @app.route("/free_homepage", methods=["GET", "POST"])
 def free_homepage():
+    user_id = session.get("userID")
     search_query = request.args.get("q")  # get query from URL
+    
     if search_query:
         latest_news = article_controller.search(search_query)  # use your search function
     else:
@@ -146,7 +148,6 @@ def free_homepage():
         search_query=search_query
     )
 
-# Premium Registered User Homepage 
 @app.route("/premium_homepage", methods=["GET", "POST"])
 def premium_homepage():
     user_id = session.get("userID")
@@ -159,10 +160,14 @@ def premium_homepage():
     saved_articles = article_controller.get_user_saved_articles(user_id, limit=5)
     user_top_category_id = saved_articles[0]["categoryID"] if saved_articles else None
     category_top_articles = article_controller.get_top_articles_by_category(user_top_category_id, limit=5) if user_top_category_id else []
-    
+
     # Latest articles
-    latest_articles = article_controller.get_latest_articles_by_category(limit=6)
-    # ✅ Map imageURL → featured_image
+    if search_query:
+        latest_articles = article_controller.search(search_query)  # ✅ use search
+    else:
+        latest_articles = article_controller.get_latest_articles_by_category(limit=6)
+
+    # Map imageURL → featured_image
     for article in latest_articles:
         article["featured_image"] = article.get("imageURL")
     
@@ -290,7 +295,7 @@ def my_articles():
 # Create Article Route
 @app.route("/create_article", methods=["GET", "POST"])
 def create_article():
-    user_id = session.get("userID")  # match your login session key
+    user_id = session.get("userID")
     if not user_id:
         return redirect(url_for("login"))
 
@@ -298,7 +303,12 @@ def create_article():
         title = request.form.get("title")
         category_id = request.form.get("category")
         content = request.form.get("content")
-        status = request.form.get("status")
+        
+        # Use the button pressed to determine status
+        status = request.form.get("submit_action")  # 'draft' or 'published'
+        if not status:
+            status = "draft"  # fallback default
+
         featured_image = request.files.get("featured_image")
         image_filename = None
 
@@ -307,10 +317,11 @@ def create_article():
             save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
             featured_image.save(save_path)
 
-        # create article
+        # Insert article
         article_controller.create_article(
             user_id, title, category_id, content, status, image_filename
         )
+
         flash("Article created successfully!", "success")
         return redirect(url_for("my_articles"))
 
