@@ -88,13 +88,12 @@
                     const modal = document.getElementById('reportModal-' + articleID);
                     modal.style.display = 'flex';
 
-                    // Fill hidden inputs
                     document.getElementById('reportArticleID-' + articleID).value = articleID;
                     document.getElementById('reportAuthorID-' + articleID).value = authorID;
                 });
             });
 
-            // Close report modal on cancel or X
+            // Close report modal
             document.querySelectorAll('.cancel-report-btn, .close-report-modal').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const articleID = btn.dataset.articleId;
@@ -123,7 +122,7 @@
         </div>
 
         <!-- Comment Form -->
-         {% if session.get('user_id') %}
+        {% if session.get('userID') %}
         <form action="{{ url_for('add_comment_route') }}" method="post">
             <input type="hidden" name="articleID" value="{{ article.articleID }}">
             <textarea name="commentText" placeholder="Write a comment..." required 
@@ -132,6 +131,7 @@
                 Submit Comment
             </button>
         </form>
+        {% endif %}
     </div>
 
 </div>

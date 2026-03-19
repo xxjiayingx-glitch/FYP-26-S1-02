@@ -1,3 +1,4 @@
+
 {% extends "master.html" %}
 {% block title %}Premium User Home{% endblock %}
 {% block content %}
@@ -8,80 +9,86 @@
         <button type="submit"><i class="fa fa-search"></i></button>
     </form>
 </div>
-<!-- FEATURED ARTICLE -->
-{% if latest_news %}
+<!-- TOP VIEWED ARTICLE AS HEADER -->
+{% if top_viewed %}
 <div class="featured-news" style="margin-bottom:40px;">
-    {% set featured = latest_news[0] %}
+    {% set featured = top_viewed[0] %}
     <div class="featured-left">
         <h1 class="featured-title">{{ featured.articleTitle }}</h1>
         <p class="featured-desc">
             {{ featured.content[:170] }}{% if featured.content|length > 170 %}...{% endif %}
         </p>
         <a class="read-more" href="{{ url_for('article_detail', article_id=featured.articleID) }}">
-            Read more......
+            Read more...
         </a>
     </div>
     <div class="featured-right">
-        {% if featured.imageURL %}
-        <img src="{{ url_for('static', filename='uploads/' + featured.imageURL) }}" alt="Featured Article">
+        {% if featured.featured_image %}
+        <img src="{{ url_for('static', filename='uploads/' + featured.featured_image) }}" alt="Top Viewed Article">
         {% else %}
         <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
         {% endif %}
     </div>
 </div>
 {% endif %}
-<!-- RECOMMENDED ARTICLES -->
-<h2 class="recommended-title" style="margin-bottom:15px;">Recommended Articles</h2>
-<div class="recommended-grid" style="margin-bottom:60px;">
-    {% if recommended_articles %}
-        {% for article in recommended_articles %}
+<!-- CATEGORY TOP ARTICLES -->
+<h2 style="margin-bottom:15px;">Articles from Your Favorite Category</h2>
+<div class="article-grid" style="margin-bottom:40px;">
+    {% if category_top_articles %}
+        {% for article in category_top_articles %}
         <div class="news-card">
-            {% if article.imageURL %}
-            <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="Article Image">
+            {% if article.featured_image %}
+            <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
             {% else %}
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
             {% endif %}
             <h4>{{ article.articleTitle }}</h4>
-            <p>
-                {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
-            </p>
-            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
-                Read more......
-            </a>
-            {% if article.verified %}
-            <span class="badge badge-verified" style="margin-top:5px;">Verified Publisher Badge</span>
-            {% endif %}
+            <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">Read more...</a>
         </div>
         {% endfor %}
     {% else %}
-        <p>No recommended articles for now.</p>
+        <p>No articles in your favorite category yet.</p>
     {% endif %}
 </div>
-<!-- LATEST NEWS -->
-<h2 class="latest-title" style="margin-bottom:15px;">Latest News</h2>
-<div class="latest-grid">
-    {% if latest_news|length > 1 %}
-        {% for article in latest_news[1:5] %}  {# show 4 articles after featured #}
+<!-- USER SAVED ARTICLES -->
+<h2 style="margin-bottom:15px;">Your Saved Articles</h2>
+<div class="article-grid" style="margin-bottom:40px;">
+    {% if saved_articles %}
+        {% for article in saved_articles %}
         <div class="news-card">
-            {% if article.imageURL %}
-            <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="Article Image">
+            {% if article.featured_image %}
+            <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
             {% else %}
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
             {% endif %}
             <h4>{{ article.articleTitle }}</h4>
-            <p>
-                {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
-            </p>
-            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
-                Read more......
-            </a>
-            {% if article.verified %}
-            <span class="badge badge-verified" style="margin-top:5px;">Verified Publisher Badge</span>
-            {% endif %}
+            <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">Read more...</a>
         </div>
         {% endfor %}
     {% else %}
-        <p>No latest news available.</p>
+        <p>You have not saved any articles yet.</p>
+    {% endif %}
+</div>
+<!-- LATEST ARTICLES -->
+<h2 style="margin-bottom:15px;">Latest Articles</h2>
+<div class="article-grid">
+    {% if latest_articles %}
+        {% for article in latest_articles %}
+        <div class="news-card">
+            {% if article.featured_image %}
+            <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+            {% endif %}
+            <h4>{{ article.articleTitle }}</h4>
+            <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">Read more...</a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No latest articles available.</p>
     {% endif %}
 </div>
 {% endblock %}

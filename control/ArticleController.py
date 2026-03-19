@@ -212,41 +212,51 @@ class ArticleController:
         conn.close()
 
     def is_article_saved(self, user_id, article_id):
+        """
+        Check if a given article is already saved by the user.
+        Returns True if saved, False otherwise.
+        """
         conn = get_db_connection()
-        cursor = conn.cursor() 
-        sql = "SELECT 1 FROM Favourite WHERE userID=%s AND articleID=%s LIMIT 1"
-        cursor.execute(sql, (user_id, article_id))
-        result = cursor.fetchone()  # fetch just one row
-        cursor.close()
-        return bool(result)
+        cursor = conn.cursor()
+        try:
+            sql = "SELECT 1 FROM Favourite WHERE userID=%s AND articleID=%s LIMIT 1"
+            cursor.execute(sql, (user_id, article_id))
+            result = cursor.fetchone()  # fetch just one row
+            return bool(result)
+        finally:
+            cursor.close()
+            conn.close()
     
     def save_article(self, user_id, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
-        sql = "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())"
-        cursor.execute(sql, (user_id, article_id))
-        self.db.commit()
-        cursor.close()
+        try:
+            sql = "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())"
+            cursor.execute(sql, (user_id, article_id))
+            conn.commit() 
+        finally:
+            cursor.close()
+            conn.close()
 
     def toggle_save_article(self, user_id, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
-        if self.is_article_saved(user_id, article_id):
-            # Already saved → remove
-            sql = "DELETE FROM Favourite WHERE userID=%s AND articleID=%s"
-            cursor.execute(sql, (user_id, article_id))
-            conn.commit()
+        try:
+            if self.is_article_saved(user_id, article_id):
+                # Already saved → remove
+                sql = "DELETE FROM Favourite WHERE userID=%s AND articleID=%s"
+                cursor.execute(sql, (user_id, article_id))
+                conn.commit()
+                return False  # now unsaved
+            else:
+                # Not saved → add
+                sql = "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())"
+                cursor.execute(sql, (user_id, article_id))
+                conn.commit()
+                return True  # now saved
+        finally:
             cursor.close()
             conn.close()
-            return False  # now it’s unsaved
-        else:
-            # Not saved → add
-            sql = "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())"
-            cursor.execute(sql, (user_id, article_id))
-            conn.commit()
-            cursor.close()
-            conn.close()
-            return True  # now it’s saved
     
     def report_article(self, user_id, article_id, author_id, optional_comment=""):
         conn = get_db_connection()
@@ -262,3 +272,65 @@ class ArticleController:
 
     def get_testimonials(self, limit=2):
         return self.article_entity.get_latest_testimonials(limit)
+
+    def get_top_viewed_articles(self, limit=5):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT a.articleID, a.articleTitle, a.content, c.categoryName, u.username,
+                IFNULL(ai.imageURL, NULL) AS featured_image, IFNULL(an.views,0) AS views
+            FROM Article a
+            JOIN UserAccount u ON a.created_by = u.userID
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+            WHERE a.articleStatus = 'published'
+            ORDER BY views DESC
+            LIMIT %s
+        """
+        cursor.execute(query, (limit,))
+        articles = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return articles
+    
+    def get_top_articles_by_category(self, category_id, limit=5):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT a.articleID, a.articleTitle, a.content, u.username,
+                IFNULL(ai.imageURL, NULL) AS featured_image, IFNULL(an.views,0) AS views
+            FROM Article a
+            JOIN UserAccount u ON a.created_by = u.userID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+            WHERE a.articleStatus = 'published' AND a.categoryID = %s
+            ORDER BY views DESC
+            LIMIT %s
+        """
+        cursor.execute(query, (category_id, limit))
+        articles = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return articles
+    
+    def get_user_saved_articles(self, user_id, limit=5):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT a.articleID, a.articleTitle, a.content, c.categoryID, c.categoryName, u.username,
+                IFNULL(ai.imageURL, NULL) AS featured_image
+            FROM Favourite f
+            JOIN Article a ON f.articleID = a.articleID
+            JOIN UserAccount u ON a.created_by = u.userID
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            WHERE f.userID = %s AND a.articleStatus = 'published'
+            ORDER BY f.saved_at DESC
+            LIMIT %s
+        """
+        cursor.execute(query, (user_id, limit))
+        articles = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return articles

@@ -122,7 +122,7 @@ def login():
 
     return render_template("login.html")
 
-
+# Free Registered User Homepage 
 @app.route("/free_homepage", methods=["GET", "POST"])
 def free_homepage():
     search_query = request.args.get("q")  # get query from URL
@@ -139,24 +139,28 @@ def free_homepage():
         search_query=search_query
     )
 
+# Premium Registered User Homepage 
 @app.route("/premium_homepage", methods=["GET", "POST"])
 def premium_homepage():
     user_id = session.get("userID")
-    search_query = request.args.get("q") 
-
-    # Headline article
-    headline = article_controller.get_headline()
-    # Recommended articles (custom logic for premium users)
-    recommended_articles = article_controller.get_latest_articles_by_category(6)
-    # Latest news (general latest articles)
-    latest_news = article_controller.get_latest_articles_by_category(6)
+    search_query = request.args.get("q")
+    # Top viewed articles
+    top_viewed = article_controller.get_top_viewed_articles(limit=5)
+    # User interest category top articles (example: pick first category from saved articles)
+    saved_articles = article_controller.get_user_saved_articles(user_id, limit=5)
+    user_top_category_id = saved_articles[0]["categoryID"] if saved_articles else None
+    category_top_articles = article_controller.get_top_articles_by_category(user_top_category_id, limit=5) if user_top_category_id else []
+    # Latest articles
+    latest_articles = article_controller.get_latest_articles_by_category(limit=6)
     return render_template(
         "premium_homepage.html",
-        headline=headline,
-        recommended_articles=recommended_articles,
-        latest_news=latest_news,
-        search_query=search_query
+        search_query=search_query,
+        top_viewed=top_viewed,
+        category_top_articles=category_top_articles,
+        saved_articles=saved_articles,
+        latest_articles=latest_articles
     )
+
 
 @app.route("/dashboard")
 def dashboard():
@@ -177,16 +181,23 @@ def article_detail(article_id):
         return redirect(url_for("login"))
 
     user_id = session["userID"]
-    article = article_controller.get_article(article_id)  # must fetch username, categoryName, featured_image
+    article = article_controller.get_article(article_id)
     comments = article_controller.get_comments_for_article(article_id)
     is_saved = article_controller.is_article_saved(user_id, article_id)
+
+    # Robust premium check
+    user_type = session.get("userType", "").strip().lower()
+    is_premium = "premium" in user_type  # <- key fix
+
+    # Debugging
+    print(f"[DEBUG] userID={user_id}, userType={user_type}, is_premium={is_premium}, is_saved={is_saved}")
 
     return render_template(
         "article_detail.html",
         article=article,
         comments=comments,
         is_saved=is_saved,
-        is_premium=(session.get("userType","").lower() == "premium")
+        is_premium=is_premium
     )
 
 # Add comment route
@@ -206,22 +217,6 @@ def add_comment_route():
 
 
 # Save article route (for premium users)
-@app.route("/saved_articles", methods=["POST"])
-def save_article():
-    if "userID" not in session:
-        return redirect(url_for("login"))
-
-    if "premium" not in session.get("userType", "").lower():
-        return redirect(url_for("dashboard"))
-
-    article_id = request.form.get("articleID")
-    user_id = session["userID"]
-    article_controller.save_article(user_id, article_id)
-
-    flash("Article saved successfully!", "success")
-    return redirect(request.referrer) 
-
-
 @app.route("/toggle_save_article", methods=["POST"])
 def toggle_save_article():
     if "userID" not in session:
@@ -232,7 +227,15 @@ def toggle_save_article():
 
     article_id = request.form.get("articleID")
     user_id = session["userID"]
-    article_controller.toggle_save_article(user_id, article_id)
+
+    # This handles save/unsave automatically
+    now_saved = article_controller.toggle_save_article(user_id, article_id)
+
+    if now_saved:
+        flash("Article saved successfully!", "success")
+    else:
+        flash("Article removed from saved list.", "info")
+
     return redirect(request.referrer)
 
 
@@ -381,10 +384,8 @@ def profile():
 
     if not user:
         return redirect(url_for("login"))
-
-
+    
     return render_template("profile.html", user=user)
-
 
 
 #save profile
@@ -510,14 +511,11 @@ def subscription():
         return redirect(url_for("login"))
     return render_template("subscription.html")
 
-
-
 # @app.route("/testimonial")
 # def testimonial():
 #     if "userID" not in session:
 #         return redirect(url_for("login"))
 #     return render_template("testimonial.html")
-
 
 @app.route("/saved-articles")
 def saved_articles():
