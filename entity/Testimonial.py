@@ -23,11 +23,11 @@ class TestimonialEntity:
 
         for row in rows:
             testimonials.append({
-                "username": row[0],
-                "rating": row[1],
-                "comment": row[2],
-                "created_at": row[3],
-                "stars": "★" * row[1] + "☆" * (5 - row[1])
+                "username": row["username"],
+                "rating": row["rating"],
+                "comment": row["comment"],
+                "created_at": row["created_at"],
+                "stars": "★" * row["rating"] + "☆" * (5 - row["rating"])
             })
 
         return testimonials
@@ -67,12 +67,12 @@ class TestimonialEntity:
 
         for row in rows:
             results.append({
-                "testimonial_ID": row[0],
-                "username": row[1],
-                "rating": row[2],
-                "comment": row[3],
-                "created_at": row[4],
-                "stars": "★" * row[2] + "☆" * (5 - row[2])
+                "testimonial_ID": row["testimonial_ID"],
+                "username": row["username"],
+                "rating": row["rating"],
+                "comment": row["comment"],
+                "created_at": row["created_at"],
+                "stars": "★" * row["rating"] + "☆" * (5 - row["rating"])
             })
 
         return results
