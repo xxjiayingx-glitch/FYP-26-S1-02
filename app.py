@@ -81,6 +81,13 @@ app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
+@app.route('/info/<page>')
+def info(page):
+    valid_pages = ['contact', 'about', 'help', 'privacy', 'terms', 'advertise']
+    if page not in valid_pages:
+        return "Page not found", 404
+    return render_template('info.html', page=page)
+
 # Login
 @app.route("/", methods=["GET", "POST"])
 def login():

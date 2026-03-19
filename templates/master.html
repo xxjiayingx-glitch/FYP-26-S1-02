@@ -252,7 +252,7 @@
     <header class="topbar">
         <div class="brand-wrap">
 
-            <a href="{{ url_for('dashboard') }}" class="brand">
+            <a href="{% if session.get('userID') %}{{ url_for('dashboard') }}{% else %}{{ url_for('home.unreg_home') }}{% endif %}" class="brand">
                 Daily Scoop<br>
                 News System
             </a>
@@ -265,19 +265,38 @@
 
         </div>
 
-        <nav class="nav-links">
+    <nav class="nav-links">
+
+        {% if session.get("userID") %}
+            <!-- ✅ Logged-in users -->
+
             <span class="user-icon">
                 <i class="fa-regular fa-user"></i>
                 Hi, {{ session.get('username','User') }}
             </span>
+
             <a href="{{ url_for('my_articles') }}">My Articles</a>
             <a href="{{ url_for('profile') }}">My Profile</a>
             <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+
             {% if session.get("userType","").lower() == "premium user" %}
                 <a href="{{ url_for('insight') }}">Insights</a>
             {% endif %}
+
             <a href="{{ url_for('logout') }}">Log Out</a>
-        </nav>
+
+        {% else %}
+            <!-- ✅ Unregistered users -->
+
+            <a href="{{ url_for('home.unreg_home') }}">Home</a>
+            <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
+            <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
+            <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+            <a href="{{ url_for('login.login') }}">Log In</a>
+
+        {% endif %}
+
+    </nav>
     </header>
 
     <!-- PAGE CONTENT -->
@@ -312,24 +331,21 @@
 
 
             <!-- RIGHT SIDE -->
-            <div class="footer-right">
+            <div class="footer-links">
 
-                <h2>Social Links</h2>
-                <div class="footer-line"></div>
+                <div>
+                    <a href="{{ url_for('info', page='contact') }}">Contact Us</a>
+                    <a href="{{ url_for('info', page='about') }}">About Us</a>
+                    <a href="{{ url_for('info', page='help') }}">Need help? Reach us here.</a>
+                </div>
 
-                <div class="footer-links">
+                <div>
+                    <a href="{{ url_for('info', page='privacy') }}">Privacy Policy</a>
+                    <a href="{{ url_for('info', page='terms') }}">Terms & Conditions</a>
+                    <a href="{{ url_for('info', page='advertise') }}">Advertise with us</a>
+                </div>
 
-                    <div>
-                        <a href="#">Contact Us</a>
-                        <a href="#">About Us</a>
-                        <a href="#">Need help? Reach us here.</a>
-                    </div>
-
-                    <div>
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Terms & Conditions</a>
-                        <a href="#">Advertise with us</a>
-                    </div>
+        </div>
 
                 </div>
 

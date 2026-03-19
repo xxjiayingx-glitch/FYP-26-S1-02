@@ -301,13 +301,15 @@
       <h4 class="footer-links-title">Social Links</h4>
 
       <div class="footer-links">
-        <a href="/contact" class="footer-link">Contact Us</a>
-        <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
-        <a href="/about" class="footer-link">About Us</a>
-        <a href="/terms" class="footer-link">Terms & Conditions</a>
-        <a href="/support" class="footer-link">Need help? Reach us here.</a>
-        <a href="/advertise" class="footer-link">Advertise with us</a>
+        <a href="{{ url_for('info', page='contact') }}">Contact Us</a>
+        <a href="{{ url_for('info', page='privacy') }}">Privacy Policy</a>
+        <a href="{{ url_for('info', page='about') }}">About Us</a>
+        <a href="{{ url_for('info', page='terms') }}">Terms & Conditions</a>
+        <a href="{{ url_for('info', page='help') }}">Need help? Reach us here.</a>
+        <a href="{{ url_for('info', page='advertise') }}">Advertise with us</a>
       </div>
+
+      
     </div>
   </div>
 </footer>
