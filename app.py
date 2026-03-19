@@ -79,21 +79,22 @@ app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# @app.route("/")
-# def unreghome():
-#     return render_template("Unregistered/UnregHome.html")
-
+# Login
 @app.route("/", methods=["GET", "POST"])
 def login():
     if "userID" in session:
-        return redirect(url_for("dashboard"))
+        # redirect based on user type
+        if session.get("userType", "").lower() == "premium":
+            return redirect(url_for("premium_homepage"))
+        else:
+            return redirect(url_for("free_homepage"))
 
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
 
         conn = get_db_connection()
-        cursor = conn.cursor()        
+        cursor = conn.cursor()
         query = """
             SELECT * FROM UserAccount
             WHERE email = %s AND pwd = %s AND accountStatus = 'active'
@@ -104,10 +105,16 @@ def login():
         conn.close()
 
         if user:
+            # set session
             session["userID"] = user["userID"]
             session["username"] = user["username"]
-            session["userType"] = user["userType"]
-            return redirect(url_for("dashboard"))
+            session["userType"] = user["userType"].lower().strip()
+
+            # redirect based on user type
+            if "premium" in session.get("userType", "").lower():
+                return redirect(url_for("premium_homepage"))
+            else:
+                return redirect(url_for("free_homepage"))
 
         return render_template("login.html", error="Invalid email or password")
 
@@ -121,7 +128,6 @@ def free_homepage():
         latest_news = article_controller.search(search_query)  # use your search function
     else:
         latest_news = article_controller.get_latest_articles_by_category(6)
-    
     testimonials = article_controller.get_testimonials()
     
     return render_template(
@@ -134,11 +140,10 @@ def free_homepage():
 @app.route("/premium_homepage", methods=["GET", "POST"])
 def premium_homepage():
     user_id = session.get("userID")
-    search_query = request.args.get("q")  # optional for GET search
+    search_query = request.args.get("q") 
 
     # Headline article
     headline = article_controller.get_headline()
-
     # Recommended articles (custom logic for premium users)
     recommended_articles = article_controller.get_latest_articles_by_category(6)
     # Latest news (general latest articles)
@@ -156,30 +161,12 @@ def dashboard():
     if "userID" not in session:
         return redirect(url_for("login"))
 
-    user_id = session.get("userID")
-    user_type = str(session.get("userType", "")).lower()
+    user_type = session.get("userType", "").lower()
 
-    headline = article_controller.get_headline()
-    latest_news = article_controller.get_latest_articles_by_category(6)
-    my_articles = article_controller.get_my_articles(user_id)
-    testimonials = article_controller.get_testimonials(6)
-
-    if user_type == "premium":
-        return render_template(
-            "premium_homepage.html",
-            headline=headline,
-            latest_news=latest_news,
-            my_articles=my_articles
-        )
-
-    return render_template(
-        "free_homepage.html",
-        headline=headline,
-        latest_news=latest_news,
-        my_articles=my_articles,
-        testimonials=testimonials
-    )
-
+    if "premium" in user_type:
+        return redirect(url_for("premium_homepage"))
+    else:
+        return redirect(url_for("free_homepage"))
 
 # Article detail page
 @app.route("/article/<int:article_id>")
@@ -221,17 +208,16 @@ def add_comment_route():
 def save_article():
     if "userID" not in session:
         return redirect(url_for("login"))
-    if session.get("userType", "").lower() != "premium":
+
+    if "premium" not in session.get("userType", "").lower():
         return redirect(url_for("dashboard"))
 
     article_id = request.form.get("articleID")
     user_id = session["userID"]
-
-    # TODO: call your controller function to save article in Favourite table
     article_controller.save_article(user_id, article_id)
 
     flash("Article saved successfully!", "success")
-    return redirect(request.referrer)  # go back to the article page
+    return redirect(request.referrer) 
 
 
 @app.route("/toggle_save_article", methods=["POST"])
@@ -239,9 +225,12 @@ def toggle_save_article():
     if "userID" not in session:
         return redirect(url_for("login"))
 
+    if "premium" not in session.get("userType", "").lower():
+        return redirect(url_for("dashboard"))
+
     article_id = request.form.get("articleID")
     user_id = session["userID"]
-    article_controller.toggle_save_article(user_id, article_id)  # toggles saved/unsaved
+    article_controller.toggle_save_article(user_id, article_id)
     return redirect(request.referrer)
 
 
@@ -348,6 +337,8 @@ def edit_article(article_id):
         return redirect(url_for("my_articles"))
 
     return render_template("edit_article.html", article=article, categories=categories)
+
+
 # Delete Article Route
 @app.route("/delete_article/<int:article_id>", methods=["GET"])
 def delete_article(article_id):
@@ -530,10 +521,8 @@ def subscription():
 def saved_articles():
     if "userID" not in session:
         return redirect(url_for("login"))
-
-    if session.get("userType", "").lower() != "premium":
+    if "premium" not in session.get("userType", "").lower():
         return redirect(url_for("dashboard"))
-
     return render_template("saved_articles.html")
 
 
@@ -541,15 +530,12 @@ def saved_articles():
 def insight():
     if "userID" not in session:
         return redirect(url_for("login"))
-
-    if session.get("userType", "").lower() != "premium":
+    if "premium" not in session.get("userType", "").lower():
         return redirect(url_for("dashboard"))
-
+    
     user_id = session.get("userID")
     article_id = request.args.get("article_id")
-
     articles = article_controller.get_my_articles(user_id)
-
     selected_article = None
 
     if article_id:
