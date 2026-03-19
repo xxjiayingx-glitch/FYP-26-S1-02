@@ -6,32 +6,115 @@
 
 {% block content %}
 
+<div class="content-card" style="max-width:900px; margin:auto;">
+
 {% if page == 'contact' %}
-    <h1>Contact Us</h1>
-    <p>Email: example@email.com</p>
+    <h1 style="margin-bottom:15px;">Contact Us</h1>
+
+    <p style="margin-bottom:20px;">
+        If you have any questions, feedback, or need support, feel free to reach out to us through the following:
+    </p>
+
+    <div style="line-height:1.8;">
+        <p><strong>Email:</strong><br> support@dailyscoop.com</p>
+        <p><strong>Phone:</strong><br> +65 9123 4567</p>
+        <p><strong>Address:</strong><br> Singapore</p>
+    </div>
 
 {% elif page == 'about' %}
-    <h1>About Us</h1>
-    <p>We are a news platform.</p>
+    <h1 style="margin-bottom:15px;">About Us</h1>
+
+    <p style="margin-bottom:15px;">
+        <strong>Daily Scoop News System</strong> is an AI-powered news platform designed to deliver reliable, 
+        up-to-date, and credible news content to our users.
+    </p>
+
+    <p style="margin-bottom:15px;">
+        Our platform allows users to explore articles, assess credibility, and engage with content through 
+        comments, reporting features, and personalized recommendations.
+    </p>
+
+    <p style="margin-bottom:20px;">
+        Premium users gain access to enhanced features, including in-depth article insights, saved articles, 
+        and advanced credibility analysis tools.
+    </p>
+
+    <h2 style="margin-bottom:10px;">Introduction</h2>
+    <p style="margin-bottom:15px;">
+        A trusted news platform delivering accurate, timely, and diverse content across technology, politics, 
+        health, and more.
+    </p>
+
+    <h2 style="margin-bottom:10px;">Mission</h2>
+    <p style="margin-bottom:15px;">
+        To inform and empower readers with reliable, unbiased news that matters to their daily lives.
+    </p>
+
+    <h2 style="margin-bottom:10px;">Vision</h2>
+    <p style="margin-bottom:0;">
+        To become the go-to digital news source where every voice and story is heard with integrity.
+    </p>
 
 {% elif page == 'help' %}
-    <h1>Help</h1>
-    <p>How can we assist you?</p>
+    <h1 style="margin-bottom:15px;">Help &amp; Support</h1>
+    <p style="margin-bottom:15px;">
+        Need help using our system? Here are some common guides:
+    </p>
+
+    <ul style="padding-left:20px; margin-bottom:15px;">
+        <li style="margin-bottom:8px;">How to create and manage articles</li>
+        <li style="margin-bottom:8px;">How to upgrade to a premium plan</li>
+        <li style="margin-bottom:8px;">How to report inappropriate content</li>
+        <li style="margin-bottom:8px;">How to reset your password</li>
+    </ul>
+
+    <p>If you still need assistance, please contact our support team.</p>
 
 {% elif page == 'privacy' %}
-    <h1>Privacy Policy</h1>
-    <p>Your privacy matters.</p>
+    <h1 style="margin-bottom:15px;">Privacy Policy</h1>
+
+    <p style="margin-bottom:15px;">
+        We are committed to protecting your personal information. Any data collected, such as your name, 
+        email, and activity within the platform, will be used solely to enhance and improve your user experience.
+    </p>
+
+    <p style="margin-bottom:0;">
+        We do not share your personal data with third parties without your explicit consent.
+    </p>
 
 {% elif page == 'terms' %}
-    <h1>Terms & Conditions</h1>
-    <p>These are our terms.</p>
+    <h1 style="margin-bottom:15px;">Terms&nbsp;&amp;&nbsp;Conditions</h1>
+
+    <p style="margin-bottom:15px;">
+        By using <strong>Daily Scoop News System</strong>, you agree to comply with the following rules and guidelines:
+    </p>
+
+    <ul style="padding-left:20px; margin-bottom:15px;">
+        <li style="margin-bottom:8px;">Do not post harmful, misleading, or false content</li>
+        <li style="margin-bottom:8px;">Respect other users when commenting or interacting</li>
+        <li style="margin-bottom:8px;">Do not abuse or misuse the reporting system</li>
+    </ul>
+
+    <p style="margin-bottom:0;">
+        We reserve the right to suspend or terminate accounts that violate these terms.
+    </p>
 
 {% elif page == 'advertise' %}
-    <h1>Advertise</h1>
-    <p>Partner with us.</p>
+    <h1 style="margin-bottom:15px;">Advertise With Us</h1>
+
+    <p style="margin-bottom:15px;">
+        Reach a wide audience by advertising on our platform. We offer targeted placements and premium exposure 
+        to help your brand stand out.
+    </p>
+
+    <p style="margin-bottom:0;">
+        For partnership opportunities, contact us at <strong>ads@dailyscoop.com</strong>.
+    </p>
 
 {% else %}
     <h1>Page Not Found</h1>
 {% endif %}
+
+</div>
 
 {% endblock %}
