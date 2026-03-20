@@ -24,7 +24,8 @@ def register():
 
         if result["success"]:
             return render_template(
-                "Unregistered/UnregRegAcc.html", success="Registration successful! Please check your email to verify your account."
+                "Unregistered/UnregRegAcc.html", 
+                success="Registration successful! Please check your email to verify your account."
             )
 
         return render_template("Unregistered/UnregRegAcc.html", error=result["message"])
