@@ -139,10 +139,8 @@ def free_homepage():
 
     # Top viewed (HEADER)
     top_viewed = article_controller.get_top_viewed_articles(limit=5)
-    for article in top_viewed:
-        article["featured_image"] = article.get("imageURL") or "placeholder.png"
 
-    # Category-based (can be generic for free users)
+    # User interest category top articles
     categories = article_controller.get_categories()
     category_top_articles = []
 
@@ -151,13 +149,14 @@ def free_homepage():
         category_id = categories[0]["categoryID"]
         category_top_articles = article_controller.get_top_articles_by_category(category_id, limit=5)
 
-    # Latest articles / Search
+    # Latest articles
     if search_query:
-        latest_articles = article_controller.search(search_query)
+        latest_articles = article_controller.search(search_query) 
     else:
         latest_articles = article_controller.get_latest_articles_by_category(limit=6)
+
     for article in latest_articles:
-        article["featured_image"] = article.get("imageURL") or "placeholder.png"
+            article["featured_image"] = article.get("imageURL")
 
     return render_template(
         "free_homepage.html",
@@ -183,7 +182,7 @@ def premium_homepage():
 
     # Latest articles
     if search_query:
-        latest_articles = article_controller.search(search_query)  # ✅ use search
+        latest_articles = article_controller.search(search_query) 
     else:
         latest_articles = article_controller.get_latest_articles_by_category(limit=6)
 

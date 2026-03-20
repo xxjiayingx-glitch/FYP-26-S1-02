@@ -37,12 +37,11 @@
             Read more...
         </a>
     </div>
-
     <div class="featured-right">
-        {% if featured.imageURL %}
-        <img src="{{ url_for('static', filename='uploads/' + featured.imageURL) }}">
+        {% if featured.featured_image %}
+        <img src="{{ url_for('static', filename='uploads/' + featured.featured_image) }}" alt="Top Viewed Article">
         {% else %}
-        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
+        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
         {% endif %}
     </div>
 </div>
