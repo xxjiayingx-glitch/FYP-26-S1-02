@@ -21,7 +21,7 @@ body {
   font-weight: 800;
   font-family: Inter;
   margin: 0;
-  color: #000000;
+  color: #1f3a5f;
 }
 
 .logo a {
@@ -58,11 +58,31 @@ html {
   padding: 0 20px;
 }
 
-.featured-news {
+/* .featured-news {
   display: flex;
   justify-content: space-between;
   gap: 30px;
   margin: 40px 5%;
+} */
+.featured-news {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* vertical alignment */
+  gap: 20px;
+  margin: 40px 5%;
+}
+.headline-views {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #000;
+  margin: 10px 0; /* space between description and link */
+}
+
+.headline-views svg {
+  margin-right: 5px;
+  width: 16px;
+  height: 16px;
 }
 
 .featured-left {
@@ -225,16 +245,13 @@ html {
   cursor: pointer;
 }
 
-/* .testimonial-title {
-  text-align: center;
-  font-size: 48px;
-}
+
 
 .testimonial-desc {
   text-align: center;
   color: grey;
   font-size: 20px;
-} */
+} 
 
 .testimonial-grid {
   display: grid;
@@ -261,6 +278,8 @@ html {
   gap: 20px;
 }
 
+.latest-title,
+.testimonial-title,
 .features-title {
   display: flex;
   justify-content: center;

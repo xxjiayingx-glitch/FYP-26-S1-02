@@ -45,6 +45,16 @@
             Read more......
           </a>
         </div>
+        <!-- View count -->
+        <div class="headline-views">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
+            stroke-width="1.5" viewBox="0 0 16 16">
+            <path
+              d="M1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8a13.133 13.133 0 0 1-1.66 2.043C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z" />
+            <circle cx="8" cy="8" r="3" />
+          </svg>
+          <span>{{ headline.views }}</span>
+        </div>
 
         <div class="featured-right">
           {% if headline.imageURL %}
@@ -127,7 +137,7 @@
   </section>
 
   <section class="testimonials" id="testimonials">
-    <h2>Testimonials</h2>
+    <h2 class="testimonial-title">Testimonials</h2>
     <p class="testimonial-desc">Here's what people are saying</p>
     <div class="container">
 
@@ -221,7 +231,7 @@
         .then((data) => {
           const grid = document.querySelector(".testimonial-grid");
 
-          data.forEach((t) => {
+          data.testimonials.forEach((t) => {
             const card = document.createElement("div");
             card.className = "testimonial-card";
 
@@ -234,12 +244,11 @@
             grid.appendChild(card);
           });
 
-          testimonialOffset += data.length; // increment offset by number loaded
+          testimonialOffset += data.testimonials.length; // increment offset by number loaded
 
           // hide button if no more testimonials
-          if (data.length < 6) {
-            document.querySelector(".view-more-testimonials").style.display =
-              "none";
+          if (!data.has_more) {
+            document.querySelector(".view-more-testimonials").style.display = "none";
           }
         });
     }
@@ -256,7 +265,7 @@
         .then((data) => {
           const container = document.getElementById("prodfeatures");
 
-          data.forEach((feature) => {
+          data.features.forEach((feature) => {
             const card = document.createElement("div");
             card.classList.add("feature-card");
 
@@ -269,9 +278,9 @@
             container.appendChild(card);
           });
 
-          featureOffset += data.length;
+          featureOffset += data.features.length;
 
-          if (data.length < featureLimit) {
+          if (!data.has_more) {
             button.style.display = "none";
           }
         });
@@ -312,7 +321,7 @@
         <a href="{{ url_for('info', page='advertise') }}">Advertise with us</a>
       </div>
 
-      
+
     </div>
   </div>
 </footer>

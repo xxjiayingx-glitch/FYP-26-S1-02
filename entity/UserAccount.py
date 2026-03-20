@@ -381,6 +381,10 @@ class UserAccount:
             WHERE verificationToken = %s
         """, (token,))
 
+        success = cursor.rowcount > 0  # True if a matching token was found and updated
+
         conn.commit()
         cursor.close()
         conn.close()
+
+        return success

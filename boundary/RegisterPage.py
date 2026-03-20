@@ -30,3 +30,14 @@ def register():
         return render_template("Unregistered/UnregRegAcc.html", error=result["message"])
 
     return render_template("Unregistered/UnregRegAcc.html")
+
+@register_bp.route("/verify", methods=["GET"])
+def verify():
+    token = request.args.get("token")
+    if not token:
+        return render_template("Unregistered/UnregRegAcc.html", error="Missing token")
+
+    success = registerCTL.user_entity.verify_user(token)
+    if success:
+        return render_template("login.html", success="Account verified! You can now log in.")
+    return render_template("Unregistered/UnregRegAcc.html", error="Invalid or expired verification link.")
