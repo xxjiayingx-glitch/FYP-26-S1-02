@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from werkzeug.utils import secure_filename
 from entity.db_connection import get_db_connection
+from routes.fact_check_routes import fact_check_bp
 
 from boundary.AdminDashboardPage import admin_dashboard_bp
 from boundary.ViewUsersPage import view_users_bp
@@ -72,6 +73,7 @@ app.register_blueprint(webpage_management_bp)
 app.register_blueprint(edit_company_profile_bp)
 app.register_blueprint(edit_subscription_plans_bp)
 app.register_blueprint(web_admin_api_bp)
+app.register_blueprint(fact_check_bp)
 
 
 # Image File Size
