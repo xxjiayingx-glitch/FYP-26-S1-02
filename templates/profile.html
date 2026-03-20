@@ -98,13 +98,16 @@
 
                     <div class="form-row full-width">
                         <label>Select Your Interests</label>
-                        <div class="checkbox-grid">
-                            {% set selected_interests = user.selected_interests if user.selected_interests else [] %}
 
+                        <div class="checkbox-grid">
                             {% for item in ['Technology', 'Politics', 'Sports', 'Education', 'Art', 'Health', 'Parenting', 'Entertainment', 'Business', 'Government'] %}
                             <label class="interest-item">
-                                <input type="checkbox" name="interests" value="{{ item }}"
-                                       {% if item in selected_interests %}checked{% endif %}>
+                                <input
+                                    type="checkbox"
+                                    name="interests[]"
+                                    value="{{ item }}"
+                                    {% if item|lower in user["selected_interests"] %}checked="checked"{% endif %}
+                                >
                                 <span>{{ item }}</span>
                             </label>
                             {% endfor %}
@@ -180,4 +183,20 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const checkboxes = document.querySelectorAll('input[name="interests[]"]');
+
+    checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", function () {
+            const checked = document.querySelectorAll('input[name="interests[]"]:checked');
+
+            if (checked.length > 5) {
+                this.checked = false;
+                alert("You can select a maximum of 5 interests only.");
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

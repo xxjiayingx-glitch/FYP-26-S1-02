@@ -7,8 +7,7 @@ from entity.UserAccount import UserAccount
 
 profile_bp = Blueprint("profile", __name__)
 
-
-@profile_bp.route("/profile")
+@profile_bp.route("/")
 def profile_page():
     if "userID" not in session:
         return redirect(url_for("login.login"))
@@ -19,29 +18,39 @@ def profile_page():
         flash("User profile not found.")
         return redirect(url_for("login.login"))
 
-    user["selected_interests"] = user["interests"].split(",") if user.get("interests") else []
-    print("Session userID:", session.get("userID"))
-    print("Raw interests from DB:", user.get("interests"))
+    user["selected_interests"] = [
+        i.strip().lower()
+        for i in user["interests"].split(",")
+    ] if user.get("interests") else []
 
-    user["selected_interests"] = user["interests"].split(",") if user.get("interests") else []
+    session["user"] = user
 
-    print("Selected interests list:", user["selected_interests"])
     return render_template("profile.html", user=user)
-
 
 @profile_bp.route("/update", methods=["POST"])
 def update_profile():
     if "userID" not in session:
         return redirect(url_for("login.login"))
 
-    UpdateProfileCTL.update_profile(
-        session["userID"],
-        request.form
-    )
+    try:
+        UpdateProfileCTL.update_profile(
+            session["userID"],
+            request.form
+        )
 
-    flash("Profile updated successfully")
+        updated_user = UserAccount().get_profile(session["userID"])
+        if updated_user:
+            updated_user["selected_interests"] = [
+                i.strip().lower()
+                for i in updated_user["interests"].split(",")
+            ] if updated_user.get("interests") else []
+            session["user"] = updated_user
+
+        flash("Profile updated successfully")
+    except ValueError as e:
+        flash(str(e))
+
     return redirect(url_for("profile.profile_page"))
-
 
 @profile_bp.route("/change-password", methods=["POST"])
 def change_password():
@@ -69,7 +78,6 @@ def change_password():
     flash("Password updated successfully")
     return redirect(url_for("profile.profile_page"))
 
-
 @profile_bp.route("/upload-photo", methods=["POST"])
 def upload_photo():
     if "userID" not in session:
@@ -86,6 +94,14 @@ def upload_photo():
             session["userID"],
             filename
         )
+
+        updated_user = UserAccount().get_profile(session["userID"])
+        if updated_user:
+            updated_user["selected_interests"] = [
+                i.strip().lower()
+                for i in updated_user["interests"].split(",")
+            ] if updated_user.get("interests") else []
+            session["user"] = updated_user
 
         flash("Profile photo updated successfully.")
     else:
