@@ -34,6 +34,9 @@
                 <li><a href="#profile-info">👤 Profile Information</a></li>
                 <li><a href="#subscription-plan">⭐ Subscription Plan</a></li>
                 <li><a href="#security-settings">🔒 Security</a></li>
+                {% if user.userType and 'premium' in user.userType|lower %}
+                <li><a href="#verified-badge">✔ Verified Badge</a></li>
+                {% endif %}
             </ul>
         </aside>
 
@@ -147,7 +150,51 @@
                 <div class="form-actions">
                     <a href="{{ url_for('subscription.subscription_page') }}" class="btn-primary">View Plan</a>                </div>
             </section>
+            <!-- Verify  -->
+            {% if user.userType and 'premium' in user.userType|lower %}
+            <section class="profile-card" id="verified-badge">
+                <div class="card-header">
+                    <h2>Verified Publisher Badge</h2>
+                    <p>Apply for verification to increase your credibility as a publisher.</p>
+                </div>
 
+                <div class="info-grid">
+                    <div class="info-box">
+                        <span class="info-label">Current Status</span>
+                        <span class="info-value">
+                            {% if user.get('verifiedBadgeStatus') %}
+                                {{ user.verifiedBadgeStatus }}
+                            {% else %}
+                                Not Applied
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Badge</span>
+                        <span class="info-value">
+                            {% if user.get('isVerifiedPublisher') == 1 %}
+                                Verified
+                            {% else %}
+                                Not Verified
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    {% if user.get('isVerifiedPublisher') == 1 %}
+                        <button type="button" class="btn-primary" disabled>Already Verified</button>
+                    {% elif user.get('verifiedBadgeStatus') == 'Pending' %}
+                        <button type="button" class="btn-primary" disabled>Application Pending</button>
+                    {% else %}
+                        <form method="POST" action="/profile/apply-verified-badge">
+                            <button type="submit" class="btn-primary">Apply for Verification</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </section>
+            {% endif %}
             <!-- SECURITY -->
             <section class="profile-card" id="security-settings">
                 <div class="card-header">

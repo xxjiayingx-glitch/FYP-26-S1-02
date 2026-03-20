@@ -285,15 +285,22 @@ def my_articles():
         return redirect(url_for("login"))
 
     keyword = request.args.get("keyword", "").strip()
+    category_id = request.args.get("category_id", "").strip()
 
-    if keyword:
-        articles = article_controller.search_my_articles(user_id, keyword)
+    categories = article_controller.get_categories()
+
+    if keyword or category_id:
+        articles = article_controller.search_my_articles(user_id, keyword, category_id)
     else:
         articles = article_controller.get_my_articles(user_id)
 
-    return render_template("my_articles.html", articles=articles, keyword=keyword)
-
-
+    return render_template(
+        "my_articles.html",
+        articles=articles,
+        keyword=keyword,
+        category_id=category_id,
+        categories=categories
+    )
 # Create Article Route
 @app.route("/create_article", methods=["GET", "POST"])
 def create_article():

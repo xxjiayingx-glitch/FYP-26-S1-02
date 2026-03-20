@@ -40,8 +40,8 @@ class ArticleController:
     def delete_article(self, article_id):
         return self.article_entity.delete_article(article_id)
 
-    def search_my_articles(self, user_id, keyword):
-        return self.article_entity.search_my_articles(user_id, keyword)
+    def search_my_articles(self, user_id, keyword="", category_id=""):
+        return self.article_entity.search_my_articles(user_id, keyword, category_id)
     
     def get_article(self, article_id):
         conn = get_db_connection()

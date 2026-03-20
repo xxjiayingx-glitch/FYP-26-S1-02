@@ -101,6 +101,76 @@ class UserAccount:
 
         conn.commit()
         conn.close()
+    
+    @staticmethod
+    def apply_verified_badge(userID):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE UserAccount
+            SET verifiedBadgeStatus = 'Pending',
+                updated_at = NOW()
+            WHERE userID = %s
+            AND LOWER(userType) LIKE %s
+            AND (verifiedBadgeStatus IS NULL OR verifiedBadgeStatus = 'Rejected')
+        """, (userID, "%premium%"))
+
+        conn.commit()
+        success = cursor.rowcount > 0
+        conn.close()
+        return success    
+    
+    @staticmethod
+    def approve_verified_badge(userID):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE UserAccount
+            SET isVerifiedPublisher = 1,
+                verifiedBadgeStatus = 'Approved',
+                updated_at = NOW()
+            WHERE userID = %s
+        """, (userID,))
+
+        conn.commit()
+        success = cursor.rowcount > 0
+        conn.close()
+        return success
+
+    @staticmethod
+    def reject_verified_badge(userID):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE UserAccount
+            SET isVerifiedPublisher = 0,
+                verifiedBadgeStatus = 'Rejected',
+                updated_at = NOW()
+            WHERE userID = %s
+        """, (userID,))
+
+        conn.commit()
+        success = cursor.rowcount > 0
+        conn.close()
+        return success
+
+    @staticmethod
+    def get_pending_verified_badge_requests():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT userID, username, first_name, last_name, email, userType, verifiedBadgeStatus
+            FROM UserAccount
+            WHERE verifiedBadgeStatus = 'Pending'
+            ORDER BY updated_at DESC, userID DESC
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        return rows
     # ==============================
     # ADMIN / USER MANAGEMENT
     # ==============================

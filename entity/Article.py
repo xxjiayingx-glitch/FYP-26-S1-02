@@ -212,25 +212,53 @@ class Article:
         conn.commit()
         conn.close()
 
-    def search_my_articles(self, user_id, keyword):
+    def search_my_articles(self, user_id, keyword="", category_id=""):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        sql = """
-        SELECT a.*, c.categoryName, ai.imageURL
-        FROM Article a
-        LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
-        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-        WHERE a.created_by = %s
-        AND a.articleTitle LIKE %s
-        ORDER BY a.created_at DESC
+        query = """
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                a.created_at,
+                a.articleStatus,
+                a.categoryID,
+                ac.categoryName,
+                ai.imageURL
+            FROM Article a
+            LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            WHERE a.created_by = %s
         """
-        cursor.execute(sql, (user_id, "%" + keyword + "%"))
+        params = [user_id]
+
+        if keyword:
+            query += """
+                AND (
+                    LOWER(a.articleTitle) LIKE LOWER(%s)
+                    OR LOWER(a.content) LIKE LOWER(%s)
+                    OR LOWER(ac.categoryName) LIKE LOWER(%s)
+                )
+            """
+            like_keyword = f"%{keyword}%"
+            params.extend([like_keyword, like_keyword, like_keyword])
+
+        if category_id:
+            query += " AND a.categoryID = %s"
+            params.append(category_id)
+
+        query += " ORDER BY a.created_at DESC"
+
+        print("SEARCH QUERY:", query)
+        print("SEARCH PARAMS:", params)
+
+        cursor.execute(query, params)
         articles = cursor.fetchall()
-
         conn.close()
-        return articles
 
+        return articles
+    
     def get_home_headline_article(self):
         conn = get_db_connection()
         cursor = conn.cursor()

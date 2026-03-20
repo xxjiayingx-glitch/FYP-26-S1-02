@@ -52,3 +52,24 @@ class UpdateProfileCTL:
             raise ValueError("Current password is incorrect.")
 
         UserAccount.update_password(userID, new_password)
+
+    @staticmethod
+    def apply_verified_badge(userID):
+        user = UserAccount().get_profile(userID)
+
+        if not user:
+            raise ValueError("User not found.")
+
+        if "premium" not in user["userType"].lower():
+            raise ValueError("Only premium users can apply for verification.")
+
+        if user.get("isVerifiedPublisher") == 1:
+            raise ValueError("You are already a verified publisher.")
+
+        if user.get("verifiedBadgeStatus") == "Pending":
+            raise ValueError("Your verification application is already pending.")
+
+        success = UserAccount.apply_verified_badge(userID)
+
+        if not success:
+            raise ValueError("Unable to submit verification request.")

@@ -111,3 +111,25 @@ def upload_photo():
         flash("No file selected.")
 
     return redirect(url_for("profile.profile_page"))
+
+@profile_bp.route("/apply-verified-badge", methods=["POST"])
+def apply_verified_badge():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    try:
+        UpdateProfileCTL.apply_verified_badge(session["userID"])
+
+        updated_user = UserAccount().get_profile(session["userID"])
+        if updated_user:
+            updated_user["selected_interests"] = [
+                i.strip().lower()
+                for i in updated_user["interests"].split(",")
+            ] if updated_user.get("interests") else []
+            session["user"] = updated_user
+
+        flash("Verification request submitted successfully.")
+    except ValueError as e:
+        flash(str(e))
+
+    return redirect(url_for("profile.profile_page"))
