@@ -69,13 +69,16 @@ def change_password():
         flash("New password and confirm password do not match.")
         return redirect(url_for("profile.profile_page"))
 
-    UpdateProfileCTL.change_password(
-        session["userID"],
-        current_password,
-        new_password
-    )
+    try:
+        UpdateProfileCTL.change_password(
+            session["userID"],
+            current_password,
+            new_password
+        )
+        flash("Password updated successfully.")
+    except ValueError as e:
+        flash(str(e))
 
-    flash("Password updated successfully")
     return redirect(url_for("profile.profile_page"))
 
 @profile_bp.route("/upload-photo", methods=["POST"])

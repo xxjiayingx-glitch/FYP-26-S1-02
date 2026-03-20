@@ -86,6 +86,21 @@ class UserAccount:
         conn.commit()
         conn.close()
 
+    @staticmethod
+    def update_password(userID, new_password):
+        """Update user's password."""
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE UserAccount
+            SET pwd = %s,
+                updated_at = NOW()
+            WHERE userID = %s
+        """, (new_password, userID))
+
+        conn.commit()
+        conn.close()
     # ==============================
     # ADMIN / USER MANAGEMENT
     # ==============================

@@ -392,11 +392,6 @@ def delete_article(article_id):
 
 
 
-@app.route("/subscription")
-def subscription():
-    if "userID" not in session:
-        return redirect(url_for("login"))
-    return render_template("subscription.html")
 
 # @app.route("/testimonial")
 # def testimonial():
