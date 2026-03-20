@@ -41,13 +41,13 @@
           window.location.href = "{{ url_for('login.login') }}";
         }, 2000); // 2 seconds delay
       </script>
-
       {% endif %}
 
       <!-- Error Message -->
       {% if error %}
       <p style="color: red">{{ error }}</p>
       {% endif %}
+
       <form action="{{ url_for('register.register') }}" method="POST">
         <div class="form-group">
           <label for="firstName">First Name</label>

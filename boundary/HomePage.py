@@ -80,10 +80,15 @@ def load_more_testimonials():
     offset = int(request.args.get("offset", 3))  # default 3
     limit = 6
 
-    testimonials = testimonialCTL.getHomeTestimonials(offset=offset, limit=limit)
+    testimonials = testimonialCTL.getHomeTestimonials(offset=offset, limit=limit + 1)
 
-    return jsonify(testimonials)
+    has_more = len(testimonials) > limit
+    testimonials = testimonials[:limit]
 
+    return jsonify({
+        "testimonials": testimonials,
+        "has_more": has_more
+    })
 # Function for getting more product features 
 @home_bp.route("/load_more_features")
 def load_more_features():
@@ -91,9 +96,15 @@ def load_more_features():
     offset = request.args.get("offset", type=int)
     limit = request.args.get("limit", type=int)
 
-    features = featuresCTL.get_features(offset=offset, limit=limit)
-    
-    return jsonify(features)
+    features = featuresCTL.get_features(offset=offset, limit=limit + 1)
+
+    has_more = len(features) > limit
+    features = features[:limit]
+
+    return jsonify({
+        "features": features,
+        "has_more": has_more
+    })
 
 @home_bp.route("/article/<int:article_id>")
 def unreg_article_detail(article_id):

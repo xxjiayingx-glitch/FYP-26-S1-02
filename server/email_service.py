@@ -1,30 +1,34 @@
-import boto3
+import base64
 import os
+from email.message import EmailMessage
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+FROM_EMAIL = "dailyscoopnewssys@gmail.com"  
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TOKEN_PATH = os.path.join(BASE_DIR, "token.json")
 
 def send_verification_email(email, token):
-    ses = boto3.client(
-        'ses',
-        region_name=os.getenv("AWS_REGION"),
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
-    )
-    print(ses)
+    """Send account verification email with token link."""
+    creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
+    service = build("gmail", "v1", credentials=creds)
 
-    verification_link = f"http://localhost:5000/verify/{token}"
+    # Change to hosted link
+    verification_link = f"http://127.0.0.1:5000/verify?token={token}"
 
-    ses.send_email(
-        Source=os.getenv("SES_SENDER_EMAIL"),
-        Destination={'ToAddresses': [email]},
-        Message={
-            'Subject': {'Data': 'Verify your account'},
-            'Body': {
-                'Html': {
-                    'Data': f"""
-                    <h2>Verify your account</h2>
-                    <a href="{verification_link}">Verify Account</a>
-                    """
-                }
-            }
-        }
+    message = EmailMessage()
+    message.set_content(
+        f"Hi!\n\nPlease verify your account by clicking the link below:\n{verification_link}\n\nThank you!"
     )
-    print(ses.get_send_quota())
+
+    message["To"] = email
+    message["From"] = FROM_EMAIL
+    message["Subject"] = "Account Verification"
+
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+    service.users().messages().send(
+        userId="me",
+        body={"raw": encoded_message}
+    ).execute()
