@@ -94,3 +94,19 @@ def load_more_features():
     features = featuresCTL.get_features(offset=offset, limit=limit)
     
     return jsonify(features)
+
+@home_bp.route("/article/<int:article_id>")
+def unreg_article_detail(article_id):
+    article = articleCTL.get_article(article_id)
+    if not article:
+        return "Article not found", 404
+
+    comments = articleCTL.get_comments_for_article(article_id)
+
+    return render_template(
+        "article_detail.html",
+        article=article,
+        comments=comments,
+        is_saved=False,
+        is_premium=False
+    )

@@ -41,7 +41,7 @@
             %}
           </p>
 
-          <a class="read-more" href="{{ url_for('article_detail', article_id=headline.articleID) }}">
+          <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=headline.articleID) }}">
             Read more......
           </a>
         </div>
@@ -108,7 +108,7 @@
         <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" /> {% endif %}
         <h4 class="news-title">{{ article['articleTitle'] }}</h4>
         <p class="news-para">{{ article['content'][:120] }}...</p>
-        <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+        <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=article.articleID) }}">
           Read more......
         </a>
       </div>
@@ -194,7 +194,7 @@
             const card = document.createElement("div");
             card.classList.add("news-card");
 
-            const articleDetailBase = "{{ url_for('article_detail', article_id=0) }}".replace('/0', '/');
+            const articleDetailBase = "{{ url_for('home.unreg_article_detail', article_id=0) }}".replace('/0', '/');
             card.innerHTML = `
               <img src="/static/uploads/${article.imageURL}" alt="${article.articleTitle}">
               <h5 class="news-title">${article.articleTitle}</h5>
