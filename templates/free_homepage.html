@@ -1,13 +1,11 @@
 {% extends "master.html" %}
-
 {% block title %}Free User Home{% endblock %}
 
 {% block content %}
 
-<!-- SEARCH ARTICLE -->
+<!-- SEARCH -->
 <div class="search-bar-container">
     <form method="get" action="{{ url_for('free_homepage') }}" class="search-form">
-
         <div class="search-wrapper">
             <i class="fa fa-search search-icon"></i>
 
@@ -17,29 +15,26 @@
                 placeholder="Search articles/categories..."
                 value="{{ search_query or '' }}"
                 class="search-input-modern"
-                required
             >
 
             <button type="submit" class="search-btn-modern">
                 Search
             </button>
         </div>
-
     </form>
 </div>
 
-<!-- FEATURED ARTICLE -->
-{% if latest_news %}
-<div class="featured-news">
-    {% set featured = latest_news[0] %}
-
+<!-- TOP VIEWED ARTICLE -->
+{% if top_viewed %}
+<div class="featured-news" style="margin-bottom:40px;">
+    {% set featured = top_viewed[0] %}
     <div class="featured-left">
         <h1 class="featured-title">{{ featured.articleTitle }}</h1>
         <p class="featured-desc">
             {{ featured.content[:170] }}{% if featured.content|length > 170 %}...{% endif %}
         </p>
         <a class="read-more" href="{{ url_for('article_detail', article_id=featured.articleID) }}">
-            Read more......
+            Read more...
         </a>
     </div>
 
@@ -53,20 +48,14 @@
 </div>
 {% endif %}
 
-
-<!-- LATEST NEWS -->
-<h3 class="latest-title">Latest News</h3>
-
-<div class="latest-grid">
-    {% if latest_news|length > 1 %}
-        {% for article in latest_news[1:5] %}  {# show 4 articles after featured #}
+<!-- CATEGORY ARTICLES -->
+<h2 style="margin-bottom:15px;">Articles From Your Favorite Category</h2>
+<div class="article-grid" style="margin-bottom:40px;">
+    {% if category_top_articles %}
+        {% for article in category_top_articles %}
         <div class="news-card">
 
-            {% if article.imageURL %}
-            <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}">
-            {% else %}
-            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
-            {% endif %}
+            <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
 
             <h4>{{ article.articleTitle }}</h4>
 
@@ -75,34 +64,34 @@
             </p>
 
             <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
-                Read more......
+                Read more...
             </a>
         </div>
         {% endfor %}
     {% else %}
-        <p>No latest news available.</p>
+        <p>No popular articles available.</p>
     {% endif %}
 </div>
 
-
-<!-- TESTIMONIALS -->
-<div class="testimonial-section">
-    <h2>Testimonials</h2>
-    <p class="testimonial-sub">Here's what people are saying</p>
-
-    <div class="testimonial-grid">
-        {% if testimonials %}
-            {% for testimonial in testimonials %}
-            <div class="testimonial-card">
-                <p>{{ testimonial.comment }}</p>
-                <p class="testimonial-user">{{ testimonial.username if testimonial.username else "Anonymous User" }}</p>
-                <div class="stars">★ ★ ★ ★ ★</div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p>No testimonials available.</p>
-        {% endif %}
-    </div>
+<!-- LATEST ARTICLES -->
+<h2 style="margin-bottom:15px;">Latest Articles</h2>
+<div class="article-grid">
+    {% if latest_articles %}
+        {% for article in latest_articles %}
+        <div class="news-card">
+            <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+            <h4>{{ article.articleTitle }}</h4>
+            <p>
+                {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
+            </p>
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                Read more...
+            </a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No latest articles available.</p>
+    {% endif %}
 </div>
 
 {% endblock %}

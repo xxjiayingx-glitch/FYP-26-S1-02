@@ -135,20 +135,38 @@ def login():
 @app.route("/free_homepage", methods=["GET", "POST"])
 def free_homepage():
     user_id = session.get("userID")
-    search_query = request.args.get("q")  # get query from URL
-    
+    search_query = request.args.get("q")
+
+    # Top viewed (HEADER)
+    top_viewed = article_controller.get_top_viewed_articles(limit=5)
+    for article in top_viewed:
+        article["featured_image"] = article.get("imageURL") or "placeholder.png"
+
+    # Category-based (can be generic for free users)
+    categories = article_controller.get_categories()
+    category_top_articles = []
+
+    if categories:
+        # Just pick first category OR trending category
+        category_id = categories[0]["categoryID"]
+        category_top_articles = article_controller.get_top_articles_by_category(category_id, limit=5)
+
+    # Latest articles / Search
     if search_query:
-        latest_news = article_controller.search(search_query)  # use your search function
+        latest_articles = article_controller.search(search_query)
     else:
-        latest_news = article_controller.get_latest_articles_by_category(6)
-    testimonials = article_controller.get_testimonials()
-    
+        latest_articles = article_controller.get_latest_articles_by_category(limit=6)
+    for article in latest_articles:
+        article["featured_image"] = article.get("imageURL") or "placeholder.png"
+
     return render_template(
         "free_homepage.html",
-        latest_news=latest_news,
-        testimonials=testimonials,
-        search_query=search_query
+        search_query=search_query,
+        top_viewed=top_viewed,
+        category_top_articles=category_top_articles,
+        latest_articles=latest_articles
     )
+
 
 @app.route("/premium_homepage", methods=["GET", "POST"])
 def premium_homepage():
