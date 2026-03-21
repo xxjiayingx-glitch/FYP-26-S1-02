@@ -33,6 +33,10 @@ jobs:
         id: version
         run: echo "label=deploy-${GITHUB_SHA::7}-$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
+      - name: Debug bucket format
+        run: |
+          printf '[%s]\n' "${{ secrets.EB_S3_BUCKET }}"
+
       - name: Upload ZIP to S3
         run: |
           aws s3 cp deploy.zip "s3://${{ secrets.EB_S3_BUCKET }}/${{ steps.version.outputs.label }}.zip"
