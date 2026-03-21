@@ -121,6 +121,9 @@ def login():
             session["username"] = user["username"]
             session["userType"] = user["userType"].lower().strip()
 
+            print("[LOGIN DEBUG] Session:", session)
+            print("[LOGIN DEBUG] Session after login:", session)
+
             # redirect based on user type
             if "premium" in session.get("userType", "").lower():
                 return redirect(url_for("premium_homepage"))
@@ -215,20 +218,18 @@ def dashboard():
 # Article detail page
 @app.route("/article/<int:article_id>")
 def article_detail(article_id):
-    if "userID" not in session:
-        return redirect(url_for("login"))
-
-    user_id = session["userID"]
+    print("[ARTICLE DEBUG] SESSION:", session)  # Debug: check what userType is
+    user_id = session.get("userID")
     article = article_controller.get_article(article_id)
     comments = article_controller.get_comments_for_article(article_id)
+
+    # Safely check if the article is saved
     is_saved = article_controller.is_article_saved(user_id, article_id)
 
-    # Ensure we detect premium users
+    # Make premium check robust
     user_type = session.get("userType", "").strip().lower()
-    is_premium = user_type == "premium"
-
-    # Debug
-    print(f"[DEBUG] userID={user_id}, userType={user_type}, is_premium={is_premium}, is_saved={is_saved}")
+    is_premium = "premium" in user_type
+    print(f"[ARTICLE DEBUG] is_premium={is_premium}")
 
     return render_template(
         "article_detail.html",
@@ -237,7 +238,7 @@ def article_detail(article_id):
         is_saved=is_saved,
         is_premium=is_premium
     )
-
+    
 # Add comment route
 @app.route("/add_comment", methods=["POST"])
 def add_comment_route():
@@ -258,23 +259,21 @@ def add_comment_route():
 @app.route("/toggle_save_article", methods=["POST"])
 def toggle_save_article():
     if "userID" not in session:
-        return redirect(url_for("login"))
+        return jsonify({"status": "error", "message": "Not logged in"}), 403
 
     if session.get("userType", "").strip().lower() != "premium":
-        flash("Only premium users can save articles.", "error")
-        return redirect(url_for("dashboard"))
+        return jsonify({"status": "error", "message": "Only premium users can save articles"}), 403
 
     article_id = request.form.get("articleID")
     user_id = session["userID"]
 
+    # toggle_save_article returns True if saved, False if unsaved
     now_saved = article_controller.toggle_save_article(user_id, article_id)
 
     if now_saved:
-        flash("Article saved successfully!", "success")
+        return jsonify({"status": "saved"})
     else:
-        flash("Article removed from saved list.", "info")
-
-    return redirect(request.referrer)
+        return jsonify({"status": "unsaved"})
 
 
 # Report article route

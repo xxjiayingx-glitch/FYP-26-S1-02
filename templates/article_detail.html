@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% set is_premium = True %}
 
 {% block title %}{{ article.articleTitle }}{% endblock %}
 
@@ -33,18 +34,17 @@
     <div style="display:flex; gap:15px; margin-bottom:30px;">
         <!-- Save / Unlike Article -->
         {% if is_premium %}
-        <form action="{{ url_for('toggle_save_article') }}" method="post" style="display:inline;">
-            <input type="hidden" name="articleID" value="{{ article.articleID }}">
-            <button type="submit" 
-                    style="background:none; border:none; cursor:pointer; font-size:1.1em; padding:0;">
-                {% if is_saved %}
-                    <!-- Use text fallback if icons fail -->
-                    <span style="color:#e74c3c;">❤️ Saved</span>
-                {% else %}
-                    <span>🤍 Save Article</span>
-                {% endif %}
-            </button>
-        </form>
+        <button id="save-btn-{{ article.articleID }}" 
+                class="save-btn" 
+                data-article-id="{{ article.articleID }}" 
+                style="background:none; border:none; cursor:pointer; font-size:1.5em; display:flex; align-items:center; gap:5px;">
+            
+            {% if is_saved %}
+                <span class="heart saved">❤️</span> <span class="save-text">Saved</span>
+            {% else %}
+                <span class="heart">🤍</span> <span class="save-text">Save Article</span>
+            {% endif %}
+        </button>
         {% endif %}
 
         <!-- Report Article Button -->
@@ -78,40 +78,11 @@
                 <span class="close-report-modal" data-article-id="{{ article.articleID }}" style="position:absolute; top:10px; right:12px; cursor:pointer;">✖</span>
             </div>
         </div>
-
-        <!-- JS to handle report modal -->
-        <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Open report modal
-            document.querySelectorAll('.report-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const articleID = btn.dataset.articleId;
-                    const authorID = btn.dataset.authorId;
-                    const modal = document.getElementById('reportModal-' + articleID);
-                    modal.style.display = 'flex';
-
-                    document.getElementById('reportArticleID-' + articleID).value = articleID;
-                    document.getElementById('reportAuthorID-' + articleID).value = authorID;
-                });
-            });
-
-            // Close report modal
-            document.querySelectorAll('.cancel-report-btn, .close-report-modal').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const articleID = btn.dataset.articleId;
-                    const modal = document.getElementById('reportModal-' + articleID);
-                    modal.style.display = 'none';
-                });
-            });
-        });
-        </script>
     </div>
 
     <!-- Comments Section -->
     <div style="background:#eef3ff; padding:20px; border-radius:8px;">
         <h3>Comments</h3>
-
-        <!-- Scrollable comments list -->
         <div style="max-height:250px; overflow-y:auto; margin-bottom:20px;">
             {% for comment in comments %}
                 <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #d0d0d0;">
@@ -123,7 +94,6 @@
             {% endfor %}
         </div>
 
-        <!-- Comment Form -->
         {% if session.get('userID') %}
         <form action="{{ url_for('add_comment_route') }}" method="post">
             <input type="hidden" name="articleID" value="{{ article.articleID }}">
@@ -137,4 +107,75 @@
     </div>
 
 </div>
+
+<!-- JS -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Save/Unsaved toggle
+    document.querySelectorAll('.save-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const articleID = btn.dataset.articleId;
+
+            const formData = new FormData();
+            formData.append('articleID', articleID);
+
+            fetch("{{ url_for('toggle_save_article') }}", {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin' 
+            })
+            .then(response => response.json())
+            .then(data => {
+                const heart = btn.querySelector('.heart');
+                const text = btn.querySelector('.save-text');
+
+                if (data.status === 'saved') {
+                    heart.textContent = '❤️';
+                    heart.classList.add('saved');
+                    text.textContent = 'Saved';
+                } else if (data.status === 'unsaved') {
+                    heart.textContent = '🤍';
+                    heart.classList.remove('saved');
+                    text.textContent = 'Save Article';
+                } else {
+                    alert(data.message || "Error saving article");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to toggle save. Try again.");
+            });
+        });
+    });
+
+    // Report Modal
+    document.querySelectorAll('.report-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const articleID = btn.dataset.articleId;
+            const authorID = btn.dataset.authorId;
+            const modal = document.getElementById('reportModal-' + articleID);
+            modal.style.display = 'flex';
+            document.getElementById('reportArticleID-' + articleID).value = articleID;
+            document.getElementById('reportAuthorID-' + articleID).value = authorID;
+        });
+    });
+
+    document.querySelectorAll('.cancel-report-btn, .close-report-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const articleID = btn.dataset.articleId;
+            const modal = document.getElementById('reportModal-' + articleID);
+            modal.style.display = 'none';
+        });
+    });
+});
+</script>
+
+<style>
+/* Heart styling */
+.heart.saved {
+    color: #e74c3c;
+}
+</style>
+
 {% endblock %}
