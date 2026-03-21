@@ -35,7 +35,7 @@ jobs:
 
       - name: Upload ZIP to S3
         run: |
-          aws s3 cp deploy.zip s3://${{ secrets.EB_S3_BUCKET }}/${{ steps.version.outputs.label }}.zip
+          aws s3 cp deploy.zip "s3://${{ secrets.EB_S3_BUCKET }}/${{ steps.version.outputs.label }}.zip"
 
       - name: Create Elastic Beanstalk application version
         run: |
