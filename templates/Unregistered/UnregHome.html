@@ -145,9 +145,9 @@
         {% if testimonials %}
         {% for t in testimonials %}
         <div class="testimonial-card">
-          <p>{{ t.comment }}</p>
           <p class="testimonial-user">{{ t.username if t.username else "Anonymous User" }}</p>
           <div class="stars">{{ t.stars }}</div>
+          <p>{{ t.comment }}</p>
         </div>
         {% endfor %} {% else %}
         <p>No testimonials available.</p>
