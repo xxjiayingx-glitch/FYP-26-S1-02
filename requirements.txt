@@ -35,3 +35,7 @@ python-dotenv
 boto3
 spacy
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+google-auth
