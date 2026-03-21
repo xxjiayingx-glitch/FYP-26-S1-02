@@ -1,10 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-right: 40px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 20px;  
+    }
+
+    .btn {
+        width: 100px;
+        padding: 10px 20px;
+        border-radius: 8px; 
+        border: none;
+        background-color: #cfd4ff;
+        color: rgb(10, 10, 10);
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        cursor: pointer;
+    }
+
+    .back-btn {
+
+        text-decoration: None;
+        background: #e3e5f6;
+        color: black;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+}
+</style>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Admin Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_accounts.css') }}">
 </head>
 <body>
     <header class="topbar">
@@ -96,95 +136,60 @@
 
         <main class="content" id="mainContent">
             <button class="hamburger" id="toggleSidebar">☰</button>
-            <h1>System Admin's Dashboard</h1>
-
-            <section class="stats-grid">
-                <div class="card">
-                    <h3>Total Users</h3>
-                    <p class="number">{{ stats.total_users }}</p>
-                    <span class="positive">N/A</span>
+            <section class="page-header">
+                <div>
+                    <h1>Verified Badge Requests</h2>
+                    <p>Approve Or Reject Requests</p>
                 </div>
-
-                <div class="card">
-                    <h3>Active Subscriptions</h3>
-                    <p class="number">{{ stats.active_subscriptions }}</p>
-                    <span class="negative">N/A</span>
-                </div>
-
-                <div class="card">
-                    <h3>Reported Articles</h3>
-                    <p class="number">{{ stats.reported_articles }}</p>
-                    <span class="negative">N/A</span>
-                </div>
-
-                <div class="card">
-                    <h3>Total Articles</h3>
-                    <p class="number">{{ stats.total_articles }}</p>
-                    <span class="positive">N/A</span>
-                </div>
+                <a class="back-btn"href="/admin/dashboard">Back</a>
             </section>
-
-            <section class="review-section">
-                <h2 class="action-title">Action needed !</h2>
-                <h3 class="subheading">⚠ Reported Articles Needing Review</h3>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Report On</th>
-                            <th>Report Count</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if reported_list %}
-                            {% for report in reported_list %}
+            
+            <section class="table-section">
+                    {% if requests %}
+                    <table class="user-table">
+                        <thead>
                             <tr>
-                                <td>{{ report.reportID }}</td>
-                                <td>{{ report.articleTitle }}</td>
+                                <th>User ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Qualifying Articles</th>
+                                <th>Published Articles</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for user in requests %}
+                            <tr>
+                                <td>{{ user.userID }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.qualifying_articles }}</td>
+                                <td>{{ user.total_published_articles }}</td>
 
                                 <td>
-                                    {% if report.latestReportDate %}
-                                        {{ report.latestReportDate.strftime('%d/%m/%Y') if report.latestReportDate.__class__.__name__ == 'datetime' else report.latestReportDate }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
+                                    <div class="action-buttons">
+                                        <form method="POST" action="/admin/verified-approve/{{ user.userID }}" style="display:inline;">
+                                            <button class="btn">Approve</button>
+                                        </form>
 
-                                <td>{{ report.totalReports }}</td>
+                                        <form method="POST" action="/admin/verified-reject/{{ user.userID }}" style="display:inline;">
+                                            <button class="btn">Reject</button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                             {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="4">No reported articles for review.</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
 
-                <a class="primary-btn" href="/admin/article-reported">Review Now</a>
-            </section>
-
-            <section class="activity-section">
-                <h2>Recent Activity</h2>
-
-                {% if recent_logs %}
-                    <div class="activity-list">
-                        {% for log in recent_logs %}
-                            <div class="activity-item">
-                                {{ log.action }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p>No recent activity found.</p>
-                {% endif %}
-
-                <button class="primary-btn">View More</button>
+                    {% else %}
+                    <p>No pending requests.</p>
+                    {% endif %}
             </section>
         </main>
     </div>
+
     <script>
         const toggleButton = document.getElementById("toggleSidebar");
         const sidebar = document.getElementById("sidebar");
@@ -195,3 +200,5 @@
     </script>
 </body>
 </html>
+
+ 

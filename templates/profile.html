@@ -1,6 +1,7 @@
 {% extends "master.html" %}
 {% block title %}My Profile{% endblock %}
 
+
 {% block content %}
 <div class="profile-page">
     <div class="profile-header">
@@ -180,17 +181,44 @@
                             {% endif %}
                         </span>
                     </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Eligibility Progress</span>
+                        <span class="info-value">
+                            {{ eligible_article_count }}/5 qualifying articles
+                        </span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Requirement</span>
+                        <span class="info-value">
+                            Published articles with AI fact-check score ≥ 90
+                        </span>
+                    </div>
                 </div>
 
                 <div class="form-actions">
                     {% if user.get('isVerifiedPublisher') == 1 %}
-                        <button type="button" class="btn-primary" disabled>Already Verified</button>
+                        <button type="button" class="btn" disabled>Already Verified</button>
+
                     {% elif user.get('verifiedBadgeStatus') == 'Pending' %}
-                        <button type="button" class="btn-primary" disabled>Application Pending</button>
-                    {% else %}
+                        <button type="button" class="btn" disabled>Application Pending</button>
+
+                    {% elif eligible_article_count >= 5 %}
                         <form method="POST" action="/profile/apply-verified-badge">
                             <button type="submit" class="btn-primary">Apply for Verification</button>
                         </form>
+
+                    {% else %}
+                        <button type="button" class="btn" disabled>Not Eligible Yet</button>
+                    {% endif %}
+
+                    {% if eligible_article_count < 5 
+                        and user.get('isVerifiedPublisher') != 1 
+                        and user.get('verifiedBadgeStatus') != 'Pending' %}
+                        <p class="eligibility-note">
+                            You need {{ 5 - eligible_article_count }} more qualifying article(s) to apply.
+                        </p>
                     {% endif %}
                 </div>
             </section>

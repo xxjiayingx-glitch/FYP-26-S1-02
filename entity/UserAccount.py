@@ -163,14 +163,26 @@ class UserAccount:
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT userID, username, first_name, last_name, email, userType, verifiedBadgeStatus
-            FROM UserAccount
-            WHERE verifiedBadgeStatus = 'Pending'
-            ORDER BY updated_at DESC, userID DESC
+            SELECT 
+                u.userID,
+                u.username,
+                u.email,
+                COUNT(CASE 
+                    WHEN a.articleStatus = 'Published' THEN 1 
+                END) AS total_published_articles,
+                COUNT(CASE 
+                    WHEN a.articleStatus = 'Published' AND a.credibilityScore >= 90 THEN 1 
+                END) AS qualifying_articles
+            FROM UserAccount u
+            LEFT JOIN Article a ON u.userID = a.created_by
+            WHERE u.verifiedBadgeStatus = 'Pending'
+            GROUP BY u.userID, u.username, u.email
+            ORDER BY u.userID ASC
         """)
-        rows = cursor.fetchall()
+
+        requests = cursor.fetchall()
         conn.close()
-        return rows
+        return requests
     # ==============================
     # ADMIN / USER MANAGEMENT
     # ==============================
@@ -309,6 +321,22 @@ class UserAccount:
         updated = cursor.rowcount > 0
         conn.close()
 
+        return updated
+    
+    @staticmethod
+    def update_verified_status(user_id, is_verified):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE UserAccount
+            SET isVerified = %s
+            WHERE userID = %s
+        """, (is_verified, user_id))
+
+        conn.commit()
+        updated = cursor.rowcount > 0
+        conn.close()
         return updated
 
     # ==============================

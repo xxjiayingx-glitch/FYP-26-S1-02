@@ -40,6 +40,7 @@ from boundary.WebpageManagementPage import webpage_management_bp
 from boundary.EditCompanyProfilePage import edit_company_profile_bp
 from boundary.EditSubscriptionPlansPage import edit_subscription_plans_bp
 from boundary.WebAdminAPI import web_admin_api_bp
+from boundary.AdminVerifyBadgePage import admin_verified_bp
 
 # Controllers
 from control.ArticleController import ArticleController
@@ -74,6 +75,7 @@ app.register_blueprint(edit_company_profile_bp)
 app.register_blueprint(edit_subscription_plans_bp)
 app.register_blueprint(web_admin_api_bp)
 app.register_blueprint(fact_check_bp)
+app.register_blueprint(admin_verified_bp)
 
 
 # Image File Size

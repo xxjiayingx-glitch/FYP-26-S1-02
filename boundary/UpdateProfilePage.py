@@ -25,7 +25,9 @@ def profile_page():
 
     session["user"] = user
 
-    return render_template("profile.html", user=user)
+    eligible_article_count = UpdateProfileCTL.verify_count(session["userID"])
+
+    return render_template("profile.html", user=user, eligible_article_count=eligible_article_count)
 
 @profile_bp.route("/update", methods=["POST"])
 def update_profile():

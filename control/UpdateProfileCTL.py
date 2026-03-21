@@ -1,4 +1,5 @@
 from entity.UserAccount import UserAccount
+from entity.Article import Article
 
 class UpdateProfileCTL:
 
@@ -69,7 +70,18 @@ class UpdateProfileCTL:
         if user.get("verifiedBadgeStatus") == "Pending":
             raise ValueError("Your verification application is already pending.")
 
+        eligible_article_count = UserAccount.count_eligible_verified_articles(userID)
+
+        if eligible_article_count < 5:
+            raise ValueError(
+                "You need at least 5 published articles with AI fact-check scores of 90 or above to apply."
+            )
+
         success = UserAccount.apply_verified_badge(userID)
 
         if not success:
             raise ValueError("Unable to submit verification request.")
+        
+    @staticmethod
+    def verify_count(userID):
+        return Article.count_eligible_verified_articles(userID)
