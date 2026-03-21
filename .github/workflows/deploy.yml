@@ -50,6 +50,10 @@ jobs:
 
       - name: Deploy to Elastic Beanstalk environment
         run: |
-          aws elasticbeanstalk update-environment \
-            --environment-name "${{ secrets.EB_ENVIRONMENT_NAME }}" \
-            --version-label "${{ steps.version.outputs.label }}"
+          for i in 1 2 3 4 5; do
+            aws elasticbeanstalk update-environment \
+              --environment-name "${{ secrets.EB_ENVIRONMENT_NAME }}" \
+              --version-label "${{ steps.version.outputs.label }}" && break
+            echo "Deploy failed due to throttling. Retrying in 20 seconds..."
+            sleep 20
+          done
