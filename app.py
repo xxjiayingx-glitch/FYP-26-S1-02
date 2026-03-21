@@ -11,8 +11,6 @@ from flask import (
 from dotenv import load_dotenv
 load_dotenv()
 import os
-from dotenv import load_dotenv
-load_dotenv()
 from werkzeug.utils import secure_filename
 from entity.db_connection import get_db_connection
 from routes.fact_check_routes import fact_check_bp
@@ -225,11 +223,11 @@ def article_detail(article_id):
     comments = article_controller.get_comments_for_article(article_id)
     is_saved = article_controller.is_article_saved(user_id, article_id)
 
-    # Robust premium check
+    # Ensure we detect premium users
     user_type = session.get("userType", "").strip().lower()
-    is_premium = "premium" in user_type  # <- key fix
+    is_premium = user_type == "premium"
 
-    # Debugging
+    # Debug
     print(f"[DEBUG] userID={user_id}, userType={user_type}, is_premium={is_premium}, is_saved={is_saved}")
 
     return render_template(
@@ -262,13 +260,13 @@ def toggle_save_article():
     if "userID" not in session:
         return redirect(url_for("login"))
 
-    if "premium" not in session.get("userType", "").lower():
+    if session.get("userType", "").strip().lower() != "premium":
+        flash("Only premium users can save articles.", "error")
         return redirect(url_for("dashboard"))
 
     article_id = request.form.get("articleID")
     user_id = session["userID"]
 
-    # This handles save/unsave automatically
     now_saved = article_controller.toggle_save_article(user_id, article_id)
 
     if now_saved:
