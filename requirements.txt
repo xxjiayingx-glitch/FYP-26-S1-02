@@ -6,6 +6,7 @@ click==8.1.8
 filelock==3.19.1
 Flask==3.1.3
 fsspec==2025.10.0
+gunicorn
 hf-xet==1.4.2
 huggingface_hub==0.36.2
 idna==3.11
