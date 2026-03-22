@@ -1,127 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Category Management</title>
+{% extends "admin_base.html" %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
-</head>
+{% block content %}
 
-<body>
+<h1>Category Management</h1>
 
-<header class="topbar">
-    <div class="brand">Daily Scoop News System</div>
+<div class="card">
+    <h3>Article Category</h3>
+    <p>Manage article categories</p>
 
-    <div class="top-right">
-        <div class="avatar-top">
-            <img src="{{ url_for('static', filename='images/profile/default.png') }}">
-        </div>
-
-        <span>Hi, {{ session['username'] }}</span>
-        <a href="/logout">Logout</a>
-    </div>
-</header>
-
-
-<div class="layout">
-
-    <!-- ⭐⭐⭐ SIDEBAR 完全照她的 -->
-    <aside class="sidebar" id="sidebar">
-
-        <div class="profile-box">
-            <div class="avatar-wrapper">
-                <div class="avatar">
-                    <img src="{{ url_for('static', filename='images/profile/default.png') }}">
-                </div>
-            </div>
-
-            <div class="profile-info">
-                <div class="username">{{ session['username'] }}</div>
-                <div class="role">System Admin</div>
-            </div>
-        </div>
-
-        <nav class="menu">
-
-            <a href="{{ url_for('admin_dashboard.admin_dashboard') }}">
-                <span class="menu-icon"></span>
-                <span class="menu-text">Dashboard</span>
-            </a>
-
-            <a href="/admin/user-accounts">
-                <span class="menu-icon"></span>
-                <span class="menu-text">User Accounts</span>
-            </a>
-
-            <a href="/admin/article-reported">
-                <span class="menu-icon"></span>
-                <span class="menu-text">Article Reported</span>
-            </a>
-
-            <a href="/admin/category-management" class="active">
-                <span class="menu-icon"></span>
-                <span class="menu-text">Category Management</span>
-            </a>
-
-            <a href="/admin/webpage-management">
-                <span class="menu-icon"></span>
-                <span class="menu-text">Webpage Management</span>
-            </a>
-
-            <a href="/admin/system-monitoring">
-                <span class="menu-icon"></span>
-                <span class="menu-text">System Monitoring</span>
-            </a>
-
-            <a href="/admin/auto-publish-rules">
-                <span class="menu-icon"></span>
-                <span class="menu-text">Auto-Publish Rules</span>
-            </a>
-
-        </nav>
-    </aside>
-
-
-    <!-- ⭐ MAIN -->
-    <main class="content">
-
-        <button class="hamburger" id="toggleSidebar">☰</button>
-
-        <h1>Category Management</h1>
-
-        <div class="card">
-            <h3>Article Category</h3>
-            <p>Manage article categories</p>
-
-            <button class="primary-btn"
-                    onclick="window.location.href='/admin/article-category'">
-                View
-            </button>
-        </div>
-
-        <div class="card">
-            <h3>Report Category</h3>
-            <p>Manage report categories</p>
-
-            <button class="primary-btn">
-                View
-            </button>
-        </div>
-
-    </main>
-
+    <button class="primary-btn"
+            onclick="window.location.href='/admin/article-category'">
+        View
+    </button>
 </div>
 
+<div class="card">
+    <h3>Report Category</h3>
+    <p>Manage report categories</p>
 
-<script>
-const toggleButton = document.getElementById("toggleSidebar");
-const sidebar = document.getElementById("sidebar");
+    <button class="primary-btn"
+            onclick="window.location.href='/admin/report-category'">
+        View
+    </button>
+</div>
 
-toggleButton.addEventListener("click", function () {
-    sidebar.classList.toggle("collapsed");
-});
-</script>
-
-</body>
-</html>
+{% endblock %}
