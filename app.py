@@ -39,7 +39,7 @@ from boundary.EditCompanyProfilePage import edit_company_profile_bp
 from boundary.EditSubscriptionPlansPage import edit_subscription_plans_bp
 from boundary.WebAdminAPI import web_admin_api_bp
 from boundary.AdminVerifyBadgePage import admin_verified_bp
-from boundary.AdminViewLogsPage import system_monitoring_bp
+#from boundary.AdminViewLogsPage import system_monitoring_bp
 
 # Controllers
 from control.ArticleController import ArticleController
