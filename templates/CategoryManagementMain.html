@@ -1,27 +1,99 @@
 {% extends "admin_base.html" %}
-
 {% block content %}
 
-<h1>Category Management</h1>
+<style>
 
-<div class="card">
-    <h3>Article Category</h3>
-    <p>Manage article categories</p>
+.category-main-wrapper{
+    padding:40px;
+}
 
-    <button class="primary-btn"
-            onclick="window.location.href='/admin/article-category-page'"
-        View
-    </button>
-</div>
+.page-title{
+    font-size:34px;
+    font-weight:700;
+    margin-bottom:30px;
+}
 
-<div class="card">
-    <h3>Report Category</h3>
-    <p>Manage report categories</p>
+.category-card-wrapper{
+    display:flex;
+    gap:30px;
+}
 
-    <button class="primary-btn"
-            onclick="window.location.href='/admin/report-category'">
-        View
-    </button>
+.category-card{
+    width:280px;
+    background:white;
+    border-radius:16px;
+    padding:28px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.08);
+    transition:0.25s;
+}
+
+.category-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 12px 30px rgba(0,0,0,0.12);
+}
+
+.category-card h3{
+    font-size:22px;
+    margin-bottom:6px;
+}
+
+.category-card p{
+    color:#777;
+    margin-bottom:20px;
+}
+
+.view-btn{
+    background:#4A6CF7;
+    border:none;
+    color:white;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.view-btn:hover{
+    background:#3b5de0;
+}
+
+</style>
+
+
+<div class="category-main-wrapper">
+
+    <h1 class="page-title">Category Management</h1>
+
+    <div class="category-card-wrapper">
+
+        <div class="category-card">
+
+            <h3>Article Category</h3>
+            <p>Manage article categories</p>
+
+            <button 
+                class="view-btn"
+                onclick="window.location.href='{{ url_for('article_category_page_bp.article_category_page_view') }}'">
+                View
+            </button>
+
+        </div>
+
+
+        <div class="category-card">
+
+            <h3>Report Category</h3>
+            <p>Manage report categories</p>
+
+            <button 
+                class="view-btn"
+                onclick="window.location.href='/admin/report-category'">
+                View
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
 
 {% endblock %}
