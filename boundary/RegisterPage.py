@@ -1,9 +1,14 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from control.RegisterCTL import RegisterController
+from entity.Article import Article
 
 register_bp = Blueprint("register", __name__)
 
 registerCTL = RegisterController()
+
+article_entity = Article()
+def get_categories():
+    return article_entity.get_categories()
 
 @register_bp.route("/register", methods=["GET", "POST"])
 def register():
@@ -24,21 +29,22 @@ def register():
 
         if result["success"]:
             return render_template(
-                "Unregistered/UnregRegAcc.html", 
+                "Unregistered/UnregRegAcc.html",
+                categories=get_categories(), 
                 success="Registration successful! Please check your email to verify your account."
             )
 
-        return render_template("Unregistered/UnregRegAcc.html", error=result["message"])
+        return render_template("Unregistered/UnregRegAcc.html", categories=get_categories(), error=result["message"])
 
-    return render_template("Unregistered/UnregRegAcc.html")
+    return render_template("Unregistered/UnregRegAcc.html", categories=get_categories())
 
 @register_bp.route("/verify", methods=["GET"])
 def verify():
     token = request.args.get("token")
     if not token:
-        return render_template("Unregistered/UnregRegAcc.html", error="Missing token")
+        return render_template("Unregistered/UnregRegAcc.html", categories=get_categories(), error="Missing token")
 
     success = registerCTL.user_entity.verify_user(token)
     if success:
         return render_template("login.html", success="Account verified! You can now log in.")
-    return render_template("Unregistered/UnregRegAcc.html", error="Invalid or expired verification link.")
+    return render_template("Unregistered/UnregRegAcc.html", categories=get_categories(), error="Invalid or expired verification link.")

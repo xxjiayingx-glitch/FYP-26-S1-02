@@ -70,18 +70,27 @@
         </div>
 
         <div class="form-row full-width">
-          <label>Select Your Interests (Min 1, Max 5)</label>
-          <div class="checkbox-grid">
-            {% for item in ['Technology', 'Politics', 'Sports', 'Education', 'Art', 'Health', 'Parenting',
-            'Entertainment', 'Business', 'Government'] %}
-            <label class="interest-item">
-              <input type="checkbox" name="interests" value="{{ item }}" class="interest-checkbox">
-              <span>{{ item }}</span>
-            </label>
-            {% endfor %}
-          </div>
-          <span id="interestError" style="display:none; color:red;"></span>
+          <label>Select Your Interests (Min 1)</label>
 
+          <div class="interest-dropdown" id="interestDropdown">
+            <button type="button" class="interest-dropdown-trigger" id="interestTrigger"
+              onclick="toggleInterestDropdown()">
+              <span id="interestLabel">Select interests...</span>
+              <span class="dropdown-arrow">▾</span>
+            </button>
+
+            <div class="interest-dropdown-menu hidden" id="interestMenu">
+              {% for item in categories %}
+              <label class="interest-option">
+                <input type="checkbox" name="interests" value="{{ item.categoryName }}"
+                  class="interest-checkbox" onchange="updateInterestLabel()">
+                <span>{{ item.categoryName }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <span id="interestError" style="display:none; color:red;"></span>
         </div>
 
         <button type="submit" class="signup-btn">Sign Up</button>
@@ -127,19 +136,41 @@
     });
 
 
+    // Dropdown toggle
+    function toggleInterestDropdown() {
+      const menu = document.getElementById("interestMenu");
+      menu.classList.toggle("hidden");
+    }
+
+    // Update trigger label with selected interests
+    function updateInterestLabel() {
+      const checked = document.querySelectorAll(".interest-checkbox:checked");
+      const label = document.getElementById("interestLabel");
+      if (checked.length === 0) {
+        label.textContent = "Select interests...";
+      } else {
+        label.textContent = Array.from(checked).map(c => c.value).join(", ");
+      }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function (e) {
+      const dropdown = document.getElementById("interestDropdown");
+      if (!dropdown.contains(e.target)) {
+        document.getElementById("interestMenu").classList.add("hidden");
+      }
+    });
+
+    // Form validation
     document.querySelector("form").addEventListener("submit", function (e) {
       const checked = document.querySelectorAll(".interest-checkbox:checked");
       const error = document.getElementById("interestError");
-
       if (checked.length < 1) {
         e.preventDefault();
         error.innerText = "Select at least 1 interest";
         error.style.display = "block";
-      }
-      else if (checked.length > 5) {
-        e.preventDefault();
-        error.innerText = "Maximum 5 interests allowed";
-        error.style.display = "block";
+      } else {
+        error.style.display = "none";
       }
     });
   </script>
