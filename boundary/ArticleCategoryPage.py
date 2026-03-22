@@ -6,13 +6,17 @@ article_category_page_bp = Blueprint(
     template_folder="../templates"
 )
 
+
 @article_category_page_bp.route("/admin/article-category-page")
-def article_category_page():
+def article_category_page_view():
+
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
 
     admin = {
-        "username": "TEST ADMIN",
-        "profileImage": None,
-        "userType": "System Admin"
+        "username": session.get("username"),
+        "profileImage": session.get("profileImage"),
+        "userType": session.get("userType")
     }
 
     return render_template(
