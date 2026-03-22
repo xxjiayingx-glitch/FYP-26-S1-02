@@ -109,6 +109,8 @@ def load_more_features():
 @home_bp.route("/article/<int:article_id>")
 def unreg_article_detail(article_id):
     article = articleCTL.get_article(article_id)
+    articleCTL.increment_view_count(article_id)
+
     if not article:
         return "Article not found", 404
 

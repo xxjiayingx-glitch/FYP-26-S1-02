@@ -225,6 +225,7 @@ def article_detail(article_id):
     user_id = session.get("userID")
     article = article_controller.get_article(article_id)
     comments = article_controller.get_comments_for_article(article_id)
+    article_controller.increment_view_count(article_id)
 
     # Safely check if the article is saved
     is_saved = article_controller.is_article_saved(user_id, article_id)
@@ -413,10 +414,6 @@ def delete_article(article_id):
     article_controller.delete_article(article_id)
     flash("Article deleted successfully!", "success")
     return redirect(url_for("my_articles"))
-
-
-
-
 
 
 # @app.route("/testimonial")

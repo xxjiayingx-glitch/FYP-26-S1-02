@@ -17,3 +17,7 @@ venv/
 .venv/
 env/
 .env
+
+# Secrets
+server/credentials.json
+server/token.json

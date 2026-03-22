@@ -334,3 +334,30 @@ class ArticleController:
         cursor.close()
         conn.close()
         return articles
+    
+    def increment_view_count(self, article_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Check if record exists
+        cursor.execute("""
+            SELECT analyticsID FROM ArticleAnalytics WHERE articleID = %s
+        """, (article_id,))
+        result = cursor.fetchone()
+
+        if result:
+            cursor.execute("""
+                UPDATE ArticleAnalytics
+                SET views = views + 1,
+                    lastUpdated = NOW()
+                WHERE articleID = %s
+            """, (article_id,))
+        else:
+            cursor.execute("""
+                INSERT INTO ArticleAnalytics (articleID, views, likes, shares, lastUpdated)
+                VALUES (%s, 1, 0, 0, NOW())
+            """, (article_id,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()

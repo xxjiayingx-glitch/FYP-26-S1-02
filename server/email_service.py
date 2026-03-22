@@ -4,9 +4,15 @@ from email.message import EmailMessage
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
+from dotenv import load_dotenv
+load_dotenv()
+
+CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+FROM_EMAIL = os.getenv("FROM_EMAIL")
+BASE_URL = os.getenv("BASE_URL")
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-FROM_EMAIL = "dailyscoopnewssys@gmail.com"  
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TOKEN_PATH = os.path.join(BASE_DIR, "token.json")
@@ -25,7 +31,7 @@ def send_verification_email(email, token):
     service = build("gmail", "v1", credentials=creds)
 
     # Change 127.0.0.1:5000 to hosted site
-    verification_link = f"http://127.0.0.1:5000/verify?token={token}"
+    verification_link = f"{BASE_URL}/verify?token={token}"
 
     message = EmailMessage()
     message.set_content(

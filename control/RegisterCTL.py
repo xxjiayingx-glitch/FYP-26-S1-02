@@ -2,6 +2,7 @@ import re
 import secrets
 from entity.UserAccount import UserAccount
 from server.email_service import send_verification_email
+from werkzeug.security import generate_password_hash
 
 class RegisterController:
 
@@ -35,9 +36,11 @@ class RegisterController:
         # Generate verification token
         token = secrets.token_urlsafe(32)
 
+        hashed_pw = generate_password_hash(password)
+
         # Save user WITH token + unverified status
         new_user_id = self.user_entity.register_user(
-            username, email, password, firstName, lastName, phone, token
+            username, email, hashed_pw, firstName, lastName, phone, token
         )
 
         # --- Save category interests if provided ---
