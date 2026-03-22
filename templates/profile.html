@@ -101,22 +101,36 @@
                     </div>
 
                     <div class="form-row full-width">
-                        <label>Select Your Interests</label>
+                        <label for="interests">Select Your Interests (Max 5)</label>
 
-                        <div class="checkbox-grid">
+                        <select id="interests" name="interests[]" multiple>
                             {% for item in ['Technology', 'Politics', 'Sports', 'Education', 'Art', 'Health', 'Parenting', 'Entertainment', 'Business', 'Government'] %}
-                            <label class="interest-item">
-                                <input
-                                    type="checkbox"
-                                    name="interests[]"
-                                    value="{{ item }}"
-                                    {% if item|lower in user["selected_interests"] %}checked="checked"{% endif %}
-                                >
-                                <span>{{ item }}</span>
-                            </label>
+                            <option value="{{ item }}"
+                                {% if item.lower() in user.selected_interests %}selected{% endif %}>
+                                {{ item }}
+                            </option>
                             {% endfor %}
-                        </div>
+                        </select>
                     </div>
+
+                    <!-- Choices.js Init -->
+                    <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const interestsSelect = document.getElementById("interests");
+
+                        if (interestsSelect) {
+                            new Choices(interestsSelect, {
+                                removeItemButton: true,
+                                maxItemCount: 5,
+                                searchEnabled: true,
+                                placeholder: true,
+                                placeholderValue: 'Select up to 5 interests',
+                                noResultsText: 'No matching interests found',
+                                itemSelectText: '',
+                            });
+                        }
+                    });
+                    </script>
 
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">Save Changes</button>
@@ -257,20 +271,5 @@
         </div>
     </div>
 </div>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const checkboxes = document.querySelectorAll('input[name="interests[]"]');
 
-    checkboxes.forEach(function (checkbox) {
-        checkbox.addEventListener("change", function () {
-            const checked = document.querySelectorAll('input[name="interests[]"]:checked');
-
-            if (checked.length > 5) {
-                this.checked = false;
-                alert("You can select a maximum of 5 interests only.");
-            }
-        });
-    });
-});
-</script>
 {% endblock %}

@@ -1,9 +1,12 @@
 import os
+import uuid
+
 from flask import Blueprint, render_template, request, redirect, session, url_for, flash, current_app
 from werkzeug.utils import secure_filename
 
 from control.UpdateProfileCTL import UpdateProfileCTL
 from entity.UserAccount import UserAccount
+
 
 profile_bp = Blueprint("profile", __name__)
 
@@ -18,12 +21,12 @@ def profile_page():
         flash("User profile not found.")
         return redirect(url_for("login.login"))
 
+    interests_raw = user.get("interests") or ""
     user["selected_interests"] = [
         i.strip().lower()
-        for i in user["interests"].split(",")
-    ] if user.get("interests") else []
-
-    session["user"] = user
+        for i in interests_raw.split(",")
+        if i.strip()
+    ]
 
     eligible_article_count = UpdateProfileCTL.verify_count(session["userID"])
 
@@ -33,6 +36,12 @@ def profile_page():
 def update_profile():
     if "userID" not in session:
         return redirect(url_for("login.login"))
+
+    selected_interests = request.form.getlist("interests[]")
+
+    if len(selected_interests) > 5:
+        flash("You can select up to 5 interests only.")
+        return redirect(url_for("profile.profile_page"))
 
     try:
         UpdateProfileCTL.update_profile(
@@ -44,11 +53,13 @@ def update_profile():
         if updated_user:
             updated_user["selected_interests"] = [
                 i.strip().lower()
-                for i in updated_user["interests"].split(",")
-            ] if updated_user.get("interests") else []
+                for i in (updated_user.get("interests") or "").split(",")
+                if i.strip()
+            ]
             session["user"] = updated_user
 
         flash("Profile updated successfully")
+
     except ValueError as e:
         flash(str(e))
 
@@ -91,7 +102,7 @@ def upload_photo():
     file = request.files.get("profile_pic")
 
     if file and file.filename != "":
-        filename = secure_filename(file.filename)
+        filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
         path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
         file.save(path)
 
@@ -104,8 +115,9 @@ def upload_photo():
         if updated_user:
             updated_user["selected_interests"] = [
                 i.strip().lower()
-                for i in updated_user["interests"].split(",")
-            ] if updated_user.get("interests") else []
+                for i in (updated_user.get("interests") or "").split(",")
+                if i.strip()
+            ]
             session["user"] = updated_user
 
         flash("Profile photo updated successfully.")
@@ -126,8 +138,9 @@ def apply_verified_badge():
         if updated_user:
             updated_user["selected_interests"] = [
                 i.strip().lower()
-                for i in updated_user["interests"].split(",")
-            ] if updated_user.get("interests") else []
+                for i in (updated_user.get("interests") or "").split(",")
+                if i.strip()
+            ]
             session["user"] = updated_user
 
         flash("Verification request submitted successfully.")

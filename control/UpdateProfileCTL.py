@@ -1,5 +1,8 @@
+import hashlib, binascii, os
+
 from entity.UserAccount import UserAccount
 from entity.Article import Article
+from werkzeug.security import check_password_hash, generate_password_hash
 
 class UpdateProfileCTL:
 
@@ -15,16 +18,16 @@ class UpdateProfileCTL:
 
         interests_list = form.getlist("interests[]")
 
-        cleaned_interests = []
-        for item in interests_list:
-            item = item.strip()
-            if item and item not in cleaned_interests:
-                cleaned_interests.append(item)
+        cleaned_interests = list(dict.fromkeys(
+            item.strip().lower()
+            for item in interests_list
+            if item.strip()
+        ))
 
         if len(cleaned_interests) > 5:
             raise ValueError("You can select a maximum of 5 interests only.")
 
-        interests = ",".join(cleaned_interests)
+        interests = ",".join(cleaned_interests) if cleaned_interests else None
 
         UserAccount.update_profile(
             userID,
@@ -45,14 +48,48 @@ class UpdateProfileCTL:
     @staticmethod
     def change_password(userID, current_password, new_password):
         user = UserAccount().get_profile(userID)
-
         if not user:
             raise ValueError("User not found.")
 
-        if user["pwd"] != current_password:
+        stored_pw = user.get("pwd")
+        if not stored_pw:
+            raise ValueError("Password data is corrupted.")
+
+        try:
+            prefix, salt_b64, hash_hex = stored_pw.split('$')
+            _, N, r, p = prefix.split(':')
+            N, r, p = int(N), int(r), int(p)
+            salt = binascii.a2b_base64(salt_b64)
+            hash_bytes = bytes.fromhex(hash_hex)
+        except Exception as e:
+            raise ValueError(f"Stored password format is invalid: {e}")
+
+        # Verify current password by hashing and comparing
+        test_hash = hashlib.scrypt(
+            current_password.encode(),
+            salt=salt,
+            n=N, r=r, p=p,
+            dklen=len(hash_bytes)
+        )
+        if test_hash != hash_bytes:
             raise ValueError("Current password is incorrect.")
 
-        UserAccount.update_password(userID, new_password)
+        if len(new_password) < 6:
+            raise ValueError("Password must be at least 6 characters long.")
+
+        # Generate new hash for new password with new salt
+        new_salt = os.urandom(16)
+        new_hash_bytes = hashlib.scrypt(
+            new_password.encode(),
+            salt=new_salt,
+            n=N, r=r, p=p,
+            dklen=64
+        )
+        new_salt_b64 = binascii.b2a_base64(new_salt).decode().strip()
+        new_hash_hex = new_hash_bytes.hex()
+
+        stored_new = f"scrypt:{N}:{r}:{p}${new_salt_b64}${new_hash_hex}"
+        UserAccount.update_password(userID, stored_new)
 
     @staticmethod
     def apply_verified_badge(userID):
@@ -61,7 +98,9 @@ class UpdateProfileCTL:
         if not user:
             raise ValueError("User not found.")
 
-        if "premium" not in user["userType"].lower():
+        user_type = (user.get("userType") or "").lower()
+
+        if "premium" not in user_type:
             raise ValueError("Only premium users can apply for verification.")
 
         if user.get("isVerifiedPublisher") == 1:
