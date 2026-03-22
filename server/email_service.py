@@ -1,5 +1,6 @@
 import base64
 import os
+import json
 from email.message import EmailMessage
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -18,9 +19,19 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TOKEN_PATH = os.path.join(BASE_DIR, "token.json")
 
 def send_verification_email(email, token):
+    with open(TOKEN_PATH, "r") as f:
+        token_data = json.load(f)
     # Send account verification email with token link.
-    creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
-    
+    # creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
+    creds = Credentials(
+        token=token_data.get("token"),
+        refresh_token=token_data.get("refresh_token"),
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        scopes=SCOPES
+    )
+
     if creds.expired and creds.refresh_token:
         creds.refresh(Request())
 
@@ -31,7 +42,7 @@ def send_verification_email(email, token):
     service = build("gmail", "v1", credentials=creds)
 
     # Change 127.0.0.1:5000 to hosted site
-    verification_link = f"{BASE_URL}/verify?token={token}"
+    verification_link = f"{BASE_URL}verify?token={token}"
 
     message = EmailMessage()
     message.set_content(
@@ -43,7 +54,41 @@ def send_verification_email(email, token):
     message["Subject"] = "Account Verification"
 
     encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
-    service.users().messages().send(
-        userId="me",
-        body={"raw": encoded_message}
-    ).execute()
+    try:
+        service.users().messages().send(
+            userId="me",
+            body={"raw": encoded_message}
+        ).execute()
+        print("Email sent successfully")
+    except Exception as e:
+        print("Email failed", str(e))
+
+
+
+# Generating token file
+# from google_auth_oauthlib.flow import InstalledAppFlow
+
+# SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+
+# import os
+# from dotenv import load_dotenv
+# load_dotenv()
+
+# flow = InstalledAppFlow.from_client_config(
+#     {
+#         "installed": {
+#             "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+#             "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+#             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+#             "token_uri": "https://oauth2.googleapis.com/token"
+#         }
+#     },
+#     SCOPES
+# )
+
+# creds = flow.run_local_server(port=8080)
+
+# with open("token.json", "w") as token:
+#     token.write(creds.to_json())
+
+# print("✅ token.json generated")
