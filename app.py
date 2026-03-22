@@ -75,7 +75,7 @@ app.register_blueprint(edit_subscription_plans_bp)
 app.register_blueprint(web_admin_api_bp)
 app.register_blueprint(fact_check_bp)
 app.register_blueprint(admin_verified_bp)
-app.register_blueprint(system_monitoring_bp)
+#app.register_blueprint(system_monitoring_bp)
 
 # Image File Size
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
