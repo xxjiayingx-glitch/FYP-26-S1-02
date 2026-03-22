@@ -39,6 +39,7 @@ from boundary.EditCompanyProfilePage import edit_company_profile_bp
 from boundary.EditSubscriptionPlansPage import edit_subscription_plans_bp
 from boundary.WebAdminAPI import web_admin_api_bp
 from boundary.AdminVerifyBadgePage import admin_verified_bp
+from boundary.AdminViewLogsPage import system_monitoring_bp
 
 # Controllers
 from control.ArticleController import ArticleController
@@ -74,7 +75,7 @@ app.register_blueprint(edit_subscription_plans_bp)
 app.register_blueprint(web_admin_api_bp)
 app.register_blueprint(fact_check_bp)
 app.register_blueprint(admin_verified_bp)
-
+app.register_blueprint(system_monitoring_bp)
 
 # Image File Size
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
@@ -91,48 +92,48 @@ def info(page):
     return render_template('info.html', page=page)
 
 # Login
-@app.route("/", methods=["GET", "POST"])
-def login():
-    if "userID" in session:
-        # redirect based on user type
-        if session.get("userType", "").lower() == "premium":
-            return redirect(url_for("premium_homepage"))
-        else:
-            return redirect(url_for("free_homepage"))
+# @app.route("/", methods=["GET", "POST"])
+# def login():
+#     if "userID" in session:
+#         # redirect based on user type
+#         if session.get("userType", "").lower() == "premium":
+#             return redirect(url_for("premium_homepage"))
+#         else:
+#             return redirect(url_for("free_homepage"))
 
-    if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+#     if request.method == "POST":
+#         email = request.form["email"]
+#         password = request.form["password"]
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        query = """
-            SELECT * FROM UserAccount
-            WHERE email = %s AND pwd = %s AND accountStatus = 'active'
-        """
-        cursor.execute(query, (email, password))
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
+#         conn = get_db_connection()
+#         cursor = conn.cursor()
+#         query = """
+#             SELECT * FROM UserAccount
+#             WHERE email = %s AND pwd = %s AND accountStatus = 'active'
+#         """
+#         cursor.execute(query, (email, password))
+#         user = cursor.fetchone()
+#         cursor.close()
+#         conn.close()
 
-        if user:
-            # set session
-            session["userID"] = user["userID"]
-            session["username"] = user["username"]
-            session["userType"] = user["userType"].lower().strip()
+#         if user:
+#             # set session
+#             session["userID"] = user["userID"]
+#             session["username"] = user["username"]
+#             session["userType"] = user["userType"].lower().strip()
 
-            print("[LOGIN DEBUG] Session:", session)
-            print("[LOGIN DEBUG] Session after login:", session)
+#             print("[LOGIN DEBUG] Session:", session)
+#             print("[LOGIN DEBUG] Session after login:", session)
 
-            # redirect based on user type
-            if "premium" in session.get("userType", "").lower():
-                return redirect(url_for("premium_homepage"))
-            else:
-                return redirect(url_for("free_homepage"))
+#             # redirect based on user type
+#             if "premium" in session.get("userType", "").lower():
+#                 return redirect(url_for("premium_homepage"))
+#             else:
+#                 return redirect(url_for("free_homepage"))
 
-        return render_template("login.html", error="Invalid email or password")
+#         return render_template("login.html", error="Invalid email or password")
 
-    return render_template("login.html")
+#     return render_template("login.html")
 
 # Free Registered User Homepage 
 @app.route("/free_homepage", methods=["GET", "POST"])
@@ -489,7 +490,7 @@ def generate_ai_review_ajax(article_id):
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    return redirect(url_for("login.login"))
 
 
 if __name__ == "__main__":

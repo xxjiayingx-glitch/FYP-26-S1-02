@@ -1,5 +1,5 @@
 from entity.db_connection import get_db_connection
-
+from werkzeug.security import check_password_hash
 
 class UserAccount:
     """Handles user account login, profile, admin, and registration related database actions."""
@@ -8,17 +8,31 @@ class UserAccount:
     # AUTHENTICATION / LOGIN
     # ==============================
     def login(self, email, pwd):
-        """Check if user exists with the given email and password."""
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        sql = "SELECT * FROM UserAccount WHERE email = %s AND pwd = %s"
-        cursor.execute(sql, (email, pwd))
-
+        sql = "SELECT * FROM UserAccount WHERE email = %s"
+        cursor.execute(sql, (email,))
         user = cursor.fetchone()
+
+        cursor.close()
         conn.close()
 
-        return user
+        print("User found:", user)
+
+        if not user:
+            print("No user with that email")
+            return None
+
+        print("Stored hash:", user["pwd"])
+        print("Entered password:", pwd)
+
+        if check_password_hash(user["pwd"], pwd):
+            print("Password matched")
+            return user
+
+        print("Password did not match")
+        return None
 
     # ==============================
     # PROFILE
