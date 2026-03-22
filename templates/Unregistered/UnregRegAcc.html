@@ -144,13 +144,24 @@
     });
   </script>
 
+  <div id="flash-data"
+    data-success="{{ success or '' }}"
+    data-error="{{ error or '' }}">
+  </div>
   <script>
+     const flashEl = document.getElementById("flash-data");
+     const successMsg = flashEl.dataset.success;
+    const errorMsg = flashEl.dataset.error;
+    if (successMsg) showPopup(successMsg, "success");
+    else if (errorMsg) showPopup(errorMsg, "error");
+  </script>
+  <!-- <script>
     {% if success %}
     showPopup("{{ success }}", "success");
     {% elif error %}
     showPopup("{{ error }}", "error");
     {% endif %}
-  </script>
+  </script> -->
 </body>
 <footer class="footer">
   <div class="footer-container">
