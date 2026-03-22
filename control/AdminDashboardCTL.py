@@ -32,28 +32,26 @@ class AdminDashboardControl:
             "recent_logs": recent_logs
         }
     
-    def allowed_file(self, filename):
-        return "." in filename and filename.rsplit(".", 1)[1].lower() in self.ALLOWED_EXTENSIONS
+    # def allowed_file(self, filename):
+    #     return "." in filename and filename.rsplit(".", 1)[1].lower() in self.ALLOWED_EXTENSIONS
 
-    def upload_profile_picture(self, file):
-        admin = UserAccount.get_system_admin()
+    # def upload_profile_picture(self, file, user_id):
+    #     if not file or file.filename == "":
+    #         return {"success": False, "message": "No file selected."}
 
-        if not admin:
-            return {"success": False, "message": "System Admin not found."}
+    #     if not self.allowed_file(file.filename):
+    #         return {"success": False, "message": "Invalid file type."}
 
-        if not file or file.filename == "":
-            return {"success": False, "message": "No file selected."}
+    #     filename = secure_filename(file.filename)
+    #     unique_filename = f"{int(time.time())}_{filename}"
 
-        if not self.allowed_file(file.filename):
-            return {"success": False, "message": "Invalid file type."}
+    #     os.makedirs(self.UPLOAD_FOLDER, exist_ok=True)
+    #     file_path = os.path.join(self.UPLOAD_FOLDER, unique_filename)
+    #     file.save(file_path)
 
-        filename = secure_filename(file.filename)
-        unique_filename = f"{int(time.time())}_{filename}"
+    #     UserAccount.update_profile_image(user_id, unique_filename)
 
-        os.makedirs(self.UPLOAD_FOLDER, exist_ok=True)
-        file_path = os.path.join(self.UPLOAD_FOLDER, unique_filename)
-        file.save(file_path)
-
-        UserAccount.update_profile_image(admin["userID"], unique_filename)
-
-        return {"success": True, "message": "Profile picture updated successfully."}
+    #     return {
+    #         "success": True,
+    #         "filename": unique_filename
+    #     }

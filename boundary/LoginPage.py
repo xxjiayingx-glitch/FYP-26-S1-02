@@ -16,6 +16,7 @@ def login():
             session["userID"] = user["userID"]
             session["username"] = user["username"]
             session["userType"] = user["userType"]
+            session["profileImage"] = user["profileImage"]
 
             if user["userType"] == "system admin":
                 return redirect("/admin/dashboard")

@@ -14,3 +14,21 @@ class SystemLog:
         result = cursor.fetchall()
         conn.close()
         return result
+    
+    @staticmethod
+    def getAllLogs():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        sql = """
+            SELECT logID, accountID, action, targetID, targetType, created_at
+            FROM SystemLog
+            ORDER BY created_at DESC
+        """
+        cursor.execute(sql)
+        logs = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return logs

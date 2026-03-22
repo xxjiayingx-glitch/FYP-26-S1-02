@@ -52,4 +52,3 @@ class RegisterController:
             print("Failed to send verification email:", e)
         
         return {"success": True, "message": "Registration successful", "userID": new_user_id}
-
