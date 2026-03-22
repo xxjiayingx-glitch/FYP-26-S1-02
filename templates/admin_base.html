@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_base.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="topbar">
+        <div class="top-left">
+            <div class="brand">Daily Scoop News<br>System</div>
+        </div>
+
+        <div class="top-right">
+            <div class="avatar-top">
+                {% if admin and admin.profileImage %}
+                    <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
+                {% endif %}
+            </div>
+            <span>Hi, {{ admin.username if admin else 'Username' }}</span>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="profile-box">
+                <div class="profile-left">
+                    <div class="avatar">
+                        {% if admin and admin.profileImage %}
+                            <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
+                        {% endif %}
+                    </div>
+
+                    <form action="{{ url_for('admin_profile.upload_profile_picture') }}"
+                        method="POST"
+                        enctype="multipart/form-data"
+                        class="upload-form">
+                        <input type="file"
+                            name="profileImage"
+                            id="profileImageInput"
+                            accept=".png,.jpg,.jpeg,.webp"
+                            hidden
+                            onchange="this.form.submit()">
+
+                        <label for="profileImageInput" class="update-profile-link">
+                            Change Photo
+                        </label>
+                    </form>
+                </div>
+
+                <div class="profile-info">
+                    <div class="username">{{ admin.username }}</div>
+                    <div class="role">{{ admin.userType }}</div>
+                </div>
+            </div>
+
+            <nav class="menu">
+                <a href="/admin/dashboard" class="{% block dashboard_active %}{% endblock %}">
+                    <span class="menu-text">Dashboard</span>
+                </a>
+
+                <a href="/admin/user-accounts" class="{% block users_active %}{% endblock %}">
+                    <span class="menu-text">User Accounts</span>
+                </a>
+
+                <a href="/admin/reported-articles" class="{% block reports_active %}{% endblock %}">
+                    <span class="menu-text">Article Reported</span>
+                </a>
+
+                <a href="/admin/categories" class="{% block categories_active %}{% endblock %}">
+                    <span class="menu-text">Category Management</span>
+                </a>
+
+                <a href="/admin/webpage-management" class="{% block webpage_active %}{% endblock %}">
+                    <span class="menu-text">Webpage Management</span>
+                </a>
+
+                <a href="/admin/system-monitoring" class="{% block monitoring_active %}{% endblock %}">
+                    <span class="menu-text">System Monitoring</span>
+                </a>
+
+                <a href="/admin/auto-publish-rules" class="{% block auto_publish_active %}{% endblock %}">
+                    <span class="menu-text">Auto-Publish Rules</span>
+                </a>
+
+                <a href="/admin/verified-requests" class="{% block verified_active %}{% endblock %}">
+                    <span class="menu-text">Verified Badge Requests</span>
+                </a>
+            </nav>
+        </aside>
+
+        <button id="toggleSidebar" class="toggle-btn" type="button">☰</button>
+
+        <main class="content" id="mainContent">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        const toggleButton = document.getElementById("toggleSidebar");
+        const sidebar = document.getElementById("sidebar");
+
+        if (toggleButton && sidebar) {
+            toggleButton.addEventListener("click", function () {
+                sidebar.classList.toggle("collapsed");
+                toggleButton.style.left = sidebar.classList.contains("collapsed") ? "20px" : "270px";
+            });
+        }
+    </script>
+</body>
+</html>
