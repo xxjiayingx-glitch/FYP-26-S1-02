@@ -1,21 +1,17 @@
+
 {% extends "master.html" %}
 {% set is_premium = True %}
-
 {% block title %}{{ article.articleTitle }}{% endblock %}
-
 {% block content %}
 <div class="article-container" style="max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.08);">
-
     <!-- Article Title -->
     <h1 style="margin-bottom:15px;">{{ article.articleTitle }}</h1>
-
     <!-- Featured Image -->
     {% if article.featured_image %}
         <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}" 
              alt="Article Image" 
              style="width:100%; max-height:400px; object-fit:cover; margin-bottom:20px;">
     {% endif %}
-
     <!-- Metadata -->
     <div style="color:gray; font-size:0.9em; margin-bottom:20px; display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
         <span>Published On: {{ article.created_at.strftime('%d %b %Y') if article.created_at else '' }}</span>
@@ -24,12 +20,10 @@
         <span>|</span>
         <span>Category: {{ article.categoryName }}</span>
     </div>
-
     <!-- Article Content -->
     <div style="margin-bottom:20px; white-space:pre-line;">
         {{ article.content | safe }}
     </div>
-
     <!-- Save / Report Buttons -->
     <div style="display:flex; gap:15px; margin-bottom:30px;">
         <!-- Save / Unlike Article -->
@@ -46,40 +40,36 @@
             {% endif %}
         </button>
         {% endif %}
-
         <!-- Report Article Button -->
         <button type="button" class="btn btn-danger report-btn"
                 data-article-id="{{ article.articleID }}"
                 data-author-id="{{ article.created_by }}">
             <i class="fa-solid fa-flag"></i> Report Article
         </button>
-
         <!-- Report Modal -->
-        <div id="reportModal-{{ article.articleID }}" class="report-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
+        <div id="reportModal-{{ article.articleID }}" class="report-modal" 
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
             <div style="background:#fff; padding:20px; border-radius:8px; width:400px; position:relative;">
                 <h3>Report Article</h3>
-                <p>Are you sure you want to report this article?</p>
-
-                <form id="reportForm-{{ article.articleID }}" method="post" action="{{ url_for('report_article') }}">
-                    <input type="hidden" name="articleID" id="reportArticleID-{{ article.articleID }}">
-                    <input type="hidden" name="authorID" id="reportAuthorID-{{ article.articleID }}">
-
-                    <label for="optionalComment-{{ article.articleID }}">Optional Reason:</label>
-                    <textarea name="optionalComment" id="optionalComment-{{ article.articleID }}" placeholder="Provide additional information..." 
-                            style="width:100%; height:80px; margin-bottom:10px; padding:5px;"></textarea>
-
-                    <div style="display:flex; justify-content:flex-end; gap:10px;">
-                        <button type="button" class="cancel-report-btn" data-article-id="{{ article.articleID }}">Cancel</button>
-                        <button type="submit" style="background:#e74c3c; color:#fff; border:none; padding:6px 12px; border-radius:5px;">Report</button>
-                    </div>
+                <p>Please provide a reason for reporting this article (optional):</p>
+                <form id="reportForm-{{ article.articleID }}" method="post" action="{{ url_for('report_article_route', article_id=article.articleID) }}">
+                    <input type="hidden" name="articleID" value="{{ article.articleID }}">
+                    <input type="hidden" name="authorID" value="{{ article.created_by }}">
+                    <!-- Dropdown to select report category -->
+                    <select name="report_category_id" required>
+                        <option value="1">Spam</option>
+                        <option value="2">Offensive Content</option>
+                        <option value="3">False Information</option>
+                    </select>
+                    <!-- Optional comment -->
+                    <textarea name="optionalComment" placeholder="Provide more details..." style="width:100%; height:80px; margin-bottom:10px; padding:5px;"></textarea>
+                    <button type="submit" style="background:#e74c3c; color:#fff; border:none; padding:6px 12px; border-radius:5px;">Report</button>
                 </form>
-
                 <!-- Close icon -->
                 <span class="close-report-modal" data-article-id="{{ article.articleID }}" style="position:absolute; top:10px; right:12px; cursor:pointer;">✖</span>
             </div>
         </div>
     </div>
-
     <!-- Comments Section -->
     <div style="background:#eef3ff; padding:20px; border-radius:8px;">
         <h3>Comments</h3>
@@ -93,7 +83,6 @@
                 <p>No comments yet.</p>
             {% endfor %}
         </div>
-
         {% if session.get('userID') %}
         <form action="{{ url_for('add_comment_route') }}" method="post">
             <input type="hidden" name="articleID" value="{{ article.articleID }}">
@@ -105,9 +94,7 @@
         </form>
         {% endif %}
     </div>
-
 </div>
-
 <!-- JS -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -116,10 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             const articleID = btn.dataset.articleId;
-
             const formData = new FormData();
             formData.append('articleID', articleID);
-
             fetch("{{ url_for('toggle_save_article') }}", {
                 method: 'POST',
                 body: formData,
@@ -129,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 const heart = btn.querySelector('.heart');
                 const text = btn.querySelector('.save-text');
-
                 if (data.status === 'saved') {
                     heart.textContent = '❤️';
                     heart.classList.add('saved');
@@ -148,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
-
     // Report Modal
     document.querySelectorAll('.report-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -156,11 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const authorID = btn.dataset.authorId;
             const modal = document.getElementById('reportModal-' + articleID);
             modal.style.display = 'flex';
-            document.getElementById('reportArticleID-' + articleID).value = articleID;
-            document.getElementById('reportAuthorID-' + articleID).value = authorID;
         });
     });
-
+    // Close Report Modal
     document.querySelectorAll('.cancel-report-btn, .close-report-modal').forEach(btn => {
         btn.addEventListener('click', () => {
             const articleID = btn.dataset.articleId;
@@ -170,12 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
-
 <style>
 /* Heart styling */
 .heart.saved {
     color: #e74c3c;
 }
 </style>
-
 {% endblock %}

@@ -1,6 +1,7 @@
 # control/ArticleController.py
 from entity.Article import Article
 from entity.db_connection import get_db_connection
+from pymysql.cursors import DictCursor
 
 class ArticleController:
 
@@ -258,17 +259,78 @@ class ArticleController:
             cursor.close()
             conn.close()
     
-    def report_article(self, user_id, article_id, author_id, optional_comment=""):
+    
+    def get_article_by_id(self, article_id):
         conn = get_db_connection()
-        cursor = conn.cursor()
-        sql = """
-            INSERT INTO ReportedArticle (articleID, author, userID, optionalComment, reported_at, reportStatus)
-            VALUES (%s, %s, %s, %s, NOW(), 'pending')
+        cursor = conn.cursor(DictCursor)  # <--- important
+        query = """
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                c.categoryID,
+                c.categoryName,
+                CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                ai.imageURL AS featured_image
+            FROM Article a
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            JOIN UserAccount u ON a.created_by = u.userID
+            LEFT JOIN ArticleImage ai 
+                ON a.articleID = ai.articleID
+            WHERE a.articleID = %s
+            ORDER BY ai.uploaded_at ASC
+            LIMIT 1
         """
-        cursor.execute(sql, (article_id, author_id, user_id, optional_comment))
-        conn.commit()
+        cursor.execute(query, (article_id,))
+        row = cursor.fetchone()
         cursor.close()
         conn.close()
+        if not row:
+            return None
+        return {
+            'articleID': row['articleID'],
+            'articleTitle': row['articleTitle'],
+            'content': row['content'],
+            'categoryID': row['categoryID'],
+            'categoryName': row['categoryName'],
+            'full_name': row['full_name'],
+            'featured_image': row['featured_image']
+        }
+    
+    def is_valid_report_category(self, report_category_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT 1 
+            FROM ReportCategory 
+            WHERE reportCategoryID = %s AND categoryStatus = 'active'
+        """
+        cursor.execute(query, (report_category_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result is not None  # If a result is found, the category is valid
+ 
+    def report_article(self, article_id, user_id, optional_comment, report_category_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Check if the reportCategoryID exists and is active in the ReportCategory table
+        if not self.is_valid_report_category(report_category_id):
+            raise ValueError(f"Category ID {report_category_id} does not exist or is inactive in the ReportCategory table.")
+        # If category is valid, proceed to insert the report
+        try:
+            query = """
+                INSERT INTO ReportedArticle (articleID, userID, reportCategoryID, optionalComment, reported_at)
+                VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
+            """
+            cursor.execute(query, (article_id, user_id, report_category_id, optional_comment))
+            conn.commit()  # Commit the transaction to make the changes permanent
+        except Exception as e:
+            print(f"Error reporting article: {e}")
+            raise  # Reraise the error so it's logged and handled
+        finally:
+            cursor.close()
+            conn.close()
 
     def get_testimonials(self, limit=2):
         return self.article_entity.get_latest_testimonials(limit)

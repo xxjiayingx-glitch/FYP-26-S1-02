@@ -266,7 +266,10 @@ def toggle_save_article():
         return jsonify({"status": "error", "message": "Not logged in"}), 403
 
     if session.get("userType", "").strip().lower() != "premium":
-        return jsonify({"status": "error", "message": "Only premium users can save articles"}), 403
+        return jsonify({
+            "status": "error",
+            "message": "This SAVE feature is available for Premium users only. Upgrade to enjoy this feature."
+        }), 403
 
     article_id = request.form.get("articleID")
     user_id = session["userID"]
@@ -281,21 +284,36 @@ def toggle_save_article():
 
 
 # Report article route
-@app.route("/report_article", methods=["POST"])
-def report_article():
-    if "userID" not in session:
-        return redirect(url_for("login"))
-
-    article_id = request.form.get("articleID")
-    author_id = request.form.get("authorID")
-    user_id = session["userID"]
-    optional_comment = request.form.get("optionalComment", "")
-
-    article_controller.report_article(user_id, article_id, author_id, optional_comment)
-
+@app.route("/report_article/<int:article_id>", methods=["POST"])
+def report_article_route(article_id):
+    user_id = session.get("userID")  # Get the logged-in user ID from session
+    if not user_id:
+        flash("You need to be logged in to report an article.", "warning")
+        return redirect(url_for("login"))  # Redirect to login page if not logged in
+    
+    optional_comment = request.form.get('optionalComment', '')
+    report_category_id = request.form.get('report_category_id')  # Get the category ID from the form
+    
+    # Validate the report category
+    if not is_valid_report_category(report_category_id):
+        flash("Invalid or inactive category", "error")
+        return redirect(url_for('article_detail', article_id=article_id))
+    
+    # Report the article
+    article_controller.report_article(article_id, user_id, optional_comment, report_category_id)
+    
     flash("Article reported successfully!", "success")
-    return redirect(request.referrer)
+    return redirect(url_for('article_detail', article_id=article_id))
 
+def is_valid_report_category(report_category_id):
+    # Query the ReportCategory table to ensure the category exists and is active
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1 FROM ReportCategory WHERE reportCategoryID = %s AND categoryStatus = 'active'", (report_category_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result is not None
 
 # My Articles Route
 @app.route("/my_articles", methods=["GET"])

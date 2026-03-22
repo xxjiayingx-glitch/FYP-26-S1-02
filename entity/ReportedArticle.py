@@ -95,15 +95,15 @@ class ReportedArticle:
 
         return reportDetails
     
-    def report_article(self, articleID, userID, reason):
+    def report_article(articleID, userID, reason, reportCategoryID):
         conn = get_db_connection()
-        try:
-            cursor = conn.cursor()
-            query = """
-            INSERT INTO ReportedArticle(articleID,userID,optionalComment,reported_at)
-            VALUES(%s,%s,%s,NOW())
-            """
-            cursor.execute(query,(articleID,userID,reason))
-            conn.commit()
-        finally:
-            conn.close()
+        cursor = conn.cursor()
+        sql = """
+            INSERT INTO ReportedArticle
+            (articleID, userID, reportReason, reportCategoryID, reportDate)
+            VALUES (%s, %s, %s, %s, NOW())
+        """
+        cursor.execute(sql, (articleID, userID, reason, reportCategoryID))
+        conn.commit()
+        cursor.close()
+        conn.close()
