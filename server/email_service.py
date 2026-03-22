@@ -15,17 +15,19 @@ BASE_URL = os.getenv("BASE_URL")
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TOKEN_PATH = os.path.join(BASE_DIR, "token.json")
+# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# TOKEN_PATH = os.path.join(BASE_DIR, "token.json")
 
 def send_verification_email(email, token):
-    with open(TOKEN_PATH, "r") as f:
-        token_data = json.load(f)
+    token_info = json.loads(os.getenv("GMAIL_TOKEN"))
+
+    # with open(TOKEN_PATH, "r") as f:
+    #     token_data = json.load(f)
     # Send account verification email with token link.
     # creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
     creds = Credentials(
-        token=token_data.get("token"),
-        refresh_token=token_data.get("refresh_token"),
+        token=token_info.get("token"),
+        refresh_token=token_info.get("refresh_token"),
         token_uri="https://oauth2.googleapis.com/token",
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
@@ -36,8 +38,8 @@ def send_verification_email(email, token):
         creds.refresh(Request())
 
     # Save the updated token back to file
-    with open(TOKEN_PATH, "w") as token_file:
-        token_file.write(creds.to_json())
+    # with open(TOKEN_PATH, "w") as token_file:
+    #     token_file.write(creds.to_json())
     
     service = build("gmail", "v1", credentials=creds)
 
