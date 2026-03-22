@@ -180,11 +180,13 @@
     data-error="{{ error or '' }}">
   </div>
   <script>
-     const flashEl = document.getElementById("flash-data");
-     const successMsg = flashEl.dataset.success;
-    const errorMsg = flashEl.dataset.error;
-    if (successMsg) showPopup(successMsg, "success");
-    else if (errorMsg) showPopup(errorMsg, "error");
+    document.addEventListener("DOMContentLoaded", function () {
+        const flashEl = document.getElementById("flash-data");
+        const successMsg = flashEl.dataset.success;
+        const errorMsg = flashEl.dataset.error;
+        if (successMsg) showPopup(successMsg, "success");
+        else if (errorMsg) showPopup(errorMsg, "error");
+    });
   </script>
   <!-- <script>
     {% if success %}
