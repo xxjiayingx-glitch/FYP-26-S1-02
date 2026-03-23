@@ -47,22 +47,16 @@
         </div>
         <!-- View count -->
         <div class="headline-views">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
-            stroke-width="1.5" viewBox="0 0 16 16">
-            <path
-              d="M1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8a13.133 13.133 0 0 1-1.66 2.043C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z" />
-            <circle cx="8" cy="8" r="3" />
-          </svg>
-          <span>{{ headline.views }}</span>
+          <span>View: {{ headline.views }}</span>
         </div>
         <!-- Likes -->
         <div class="meta-item">
-          ❤️ <span>{{ headline.likes }}</span>
+          <span>Like: {{ headline.likes }}</span>
         </div>
 
         <!-- Credibility -->
         <div class="meta-item">
-          📝 <span>{{ "%.1f"|format(headline.credibilityScore) }}</span>
+          <span>Score: {{ "%.1f"|format(headline.credibilityScore) }}</span>
         </div>
 
         <div class="featured-right">
@@ -128,22 +122,16 @@
         <div class="title-row">
         <h4 class="news-title">{{ article['articleTitle'] }}</h4>
         <div class="article-views">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
-            stroke-width="1.5" viewBox="0 0 16 16">
-            <path
-              d="M1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8a13.133 13.133 0 0 1-1.66 2.043C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z" />
-            <circle cx="8" cy="8" r="3" />
-          </svg>
-          <span>{{ article.views }}</span>
+          <span>View: {{ article.views }}</span>
         </div>
         <!-- Likes -->
         <div class="meta-item">
-          ❤️ <span>{{ article.likes }}</span>
+          <span>Like: {{ article.likes }}</span>
         </div>
 
         <!-- Credibility -->
         <div class="meta-item">
-          📝 <span>{{ "%.1f"|format(article.credibilityScore) }}</span>
+          <span>Score: {{ "%.1f"|format(article.credibilityScore) }}</span>
         </div>
       </div>
         <p class="news-para">{{ article['content'][:120] }}...</p>
@@ -240,22 +228,16 @@
               <h5 class="news-title">${article.articleTitle}</h5>
               
               <div class="article-views">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
-                  stroke-width="1.5" viewBox="0 0 16 16">
-                  <path
-                    d="M1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8a13.133 13.133 0 0 1-1.66 2.043C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z" />
-                  <circle cx="8" cy="8" r="3" />
-                </svg>
-                <span>${article.views ?? 0}</span>
+                <span>View: ${article.views ?? 0}</span>
               </div>
               <!-- Likes -->
               <div class="meta-item">
-                ❤️ <span>${article.likes ?? 0}</span>
+                <span>Like: ${article.likes ?? 0}</span>
               </div>
 
               <!-- Credibility -->
               <div class="meta-item">
-                📝 <span>${(article.credibilityScore ?? 0).toFixed(1)}</span>
+                <span>Score: ${(article.credibilityScore ?? 0).toFixed(1)}</span>
               </div>
               </div>
               <p class="news-para">${article.content}...</p>
