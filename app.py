@@ -221,8 +221,8 @@ def dashboard():
 # Article detail page
 @app.route("/article/<int:article_id>")
 def article_detail(article_id):
-    print("[ARTICLE DEBUG] SESSION:", session)  # Debug: check what userType is
     user_id = session.get("userID")
+    
     article = article_controller.get_article(article_id)
     comments = article_controller.get_comments_for_article(article_id)
     article_controller.increment_view_count(article_id)
@@ -233,7 +233,6 @@ def article_detail(article_id):
     # Make premium check robust
     user_type = session.get("userType", "").strip().lower()
     is_premium = "premium" in user_type
-    print(f"[ARTICLE DEBUG] is_premium={is_premium}")
 
     return render_template(
         "article_detail.html",
@@ -263,12 +262,12 @@ def add_comment_route():
 @app.route("/toggle_save_article", methods=["POST"])
 def toggle_save_article():
     if "userID" not in session:
-        return jsonify({"status": "error", "message": "Not logged in"}), 403
+        return jsonify({"status": "error", "message": "Not Logged In"}), 403
 
     if session.get("userType", "").strip().lower() != "premium":
         return jsonify({
             "status": "error",
-            "message": "This SAVE feature is available for Premium users only. Upgrade to enjoy this feature."
+            "message": "This SAVE feature is available for Premium Users only. Upgrade to enjoy this feature."
         }), 403
 
     article_id = request.form.get("articleID")
@@ -278,9 +277,13 @@ def toggle_save_article():
     now_saved = article_controller.toggle_save_article(user_id, article_id)
 
     if now_saved:
-        return jsonify({"status": "saved"})
+        article_controller.increment_like_count(article_id)
     else:
-        return jsonify({"status": "unsaved"})
+        article_controller.decrement_like_count(article_id)
+
+    return jsonify({
+        "status": "saved" if now_saved else "unsaved"
+    })
 
 
 # Report article route
@@ -458,24 +461,36 @@ def insight():
     
     user_id = session.get("userID")
     article_id = request.args.get("article_id")
+
     articles = article_controller.get_my_articles(user_id)
+
     selected_article = None
+    analytics = {"views": 0, "likes": 0}  
 
     if article_id:
         try:
             article_id = int(article_id)
+
             selected_article = article_controller.get_article_insight(article_id)
+
+            # Only fetch analytics if article exists
+            if selected_article:
+                analytics = article_controller.get_article_analytics(article_id)
+
         except ValueError:
             selected_article = None
 
-    # Auto-show first article if none selected
+    # Auto-select first article if none chosen
     if not selected_article and articles:
-        selected_article = article_controller.get_article_insight(
-            articles[0]["articleID"]
-        )
+        first_id = articles[0]["articleID"]
+        selected_article = article_controller.get_article_insight(first_id)
+        analytics = article_controller.get_article_analytics(first_id)
 
     return render_template(
-        "insight.html", articles=articles, selected_article=selected_article
+        "insight.html",
+        articles=articles,
+        selected_article=selected_article,
+        analytics=analytics
     )
 
 
