@@ -127,12 +127,9 @@ class ArticleController:
                 a.articleID,
                 a.articleTitle,
                 a.content,
-                IFNULL(a.credibilityScore, 0) AS credibilityScore,
-                IFNULL(a.reviewPriority, 'N/A') AS reviewPriority,
                 a.updated_at,
-                IFNULL(an.views,0) AS views,
-                IFNULL(an.likes,0) AS likes,
-                IFNULL(an.shares,0) AS shares
+                IFNULL(an.views, 0) AS views,
+                IFNULL(an.likes, 0) AS likes
             FROM Article a
             LEFT JOIN ArticleAnalytics an
             ON a.articleID = an.articleID
@@ -142,13 +139,97 @@ class ArticleController:
         article = cursor.fetchone()
 
         if article:
-            # normalize keys to snake_case
-            article['credibility_score'] = article.pop('credibilityScore', 0)
-            article['review_priority'] = article.pop('reviewPriority', 'N/A')
-        
+            # Calculate and update the credibility score using views and likes
+            self.update_credibility_score(article_id)  # Update the credibility score
+
         cursor.close()
         conn.close()
+
         return article
+
+    def update_credibility_score(self, article_id):
+        # Fetch views and likes from ArticleAnalytics table
+        article_data = self.get_article_analytics(article_id)
+
+        views = article_data['views']
+        likes = article_data['likes']
+
+        # Max values for views and likes (These can be adjusted as needed)
+        max_views = 10000  # You can dynamically get this if needed
+        max_likes = 5000   # You can dynamically get this if needed
+
+        # Normalize views and likes to percentages (0 to 100 scale)
+        normalized_views = (views / max_views) * 100 if max_views else 0
+        normalized_likes = (likes / max_likes) * 100 if max_likes else 0
+
+        # Weighting factors (adjust these values according to the desired importance)
+        weight_views = 0.7  # 70% weight for views
+        weight_likes = 0.3  # 30% weight for likes
+
+        # Calculate final credibility score
+        credibility_score = (normalized_views * weight_views) + (normalized_likes * weight_likes)
+
+        # Ensure the credibility score is between 0 and 100
+        credibility_score = min(max(credibility_score, 0), 100)
+
+        # Update the Article table with the calculated credibility score
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE Article
+            SET credibilityScore = %s
+            WHERE articleID = %s
+        """, (credibility_score, article_id))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def get_max_views(self):
+        # Fetch max views dynamically from the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("SELECT MAX(views) FROM ArticleAnalytics")
+            result = cursor.fetchone()
+
+            # Check if result is None or empty, and handle it gracefully
+            if result is None or result[0] is None:
+                max_views = 10000  # Default value if no data is found
+            else:
+                max_views = result[0]  # Get the max views value if data exists
+        except Exception as e:
+            # In case of any database error, log and use a fallback value
+            print(f"Error fetching max views: {e}")
+            max_views = 10000  # Default value in case of an error
+
+        cursor.close()
+        conn.close()
+        return max_views
+
+    def get_max_likes(self):
+        # Fetch max likes dynamically from the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("SELECT MAX(likes) FROM ArticleAnalytics")
+            result = cursor.fetchone()
+
+            # Check if result is None or empty, and handle it gracefully
+            if result is None or result[0] is None:
+                max_likes = 5000  # Default value if no data is found
+            else:
+                max_likes = result[0]  # Get the max likes value if data exists
+        except Exception as e:
+            # In case of any database error, log and use a fallback value
+            print(f"Error fetching max likes: {e}")
+            max_likes = 5000  # Default value in case of an error
+
+        cursor.close()
+        conn.close()
+        return max_likes
 
     def save_ai_review(self, article_id, review_text):
         conn = get_db_connection()
@@ -209,21 +290,31 @@ class ArticleController:
         result = cursor.fetchone()
         cursor.close()
         conn.close()
+
+        # Ensure it always returns a dictionary with views and likes
         return result if result else {"views": 0, "likes": 0}
 
     def increment_view_count(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        # Ensure the ArticleAnalytics record exists for the article
         cursor.execute("""
             INSERT INTO ArticleAnalytics (articleID, views, likes, shares)
             VALUES (%s, 0, 0, 0)
             ON DUPLICATE KEY UPDATE articleID = articleID
         """, (article_id,))
+
+        # Increment views
         cursor.execute("""
             UPDATE ArticleAnalytics
             SET views = views + 1
             WHERE articleID = %s
         """, (article_id,))
+
+        # Recalculate and update the credibility score
+        self.update_credibility_score(article_id)
+
         conn.commit()
         cursor.close()
         conn.close()
@@ -231,16 +322,24 @@ class ArticleController:
     def increment_like_count(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        # Ensure the ArticleAnalytics record exists for the article
         cursor.execute("""
             INSERT INTO ArticleAnalytics (articleID, views, likes, shares)
             VALUES (%s, 0, 0, 0)
             ON DUPLICATE KEY UPDATE articleID = articleID
         """, (article_id,))
+
+        # Increment likes
         cursor.execute("""
             UPDATE ArticleAnalytics
             SET likes = likes + 1
             WHERE articleID = %s
         """, (article_id,))
+
+        # Recalculate and update the credibility score
+        self.update_credibility_score(article_id)
+
         conn.commit()
         cursor.close()
         conn.close()
