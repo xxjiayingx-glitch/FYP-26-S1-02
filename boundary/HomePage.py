@@ -66,7 +66,8 @@ def load_more_articles():
             "articleID": a['articleID'],
             "articleTitle": a['articleTitle'],
             "content": a['content'][:150],  # short preview
-            "imageURL": a['imageURL']
+            "imageURL": a['imageURL'],
+            "views": a['views']
         }
         for a in articles
     ]
