@@ -124,12 +124,6 @@ def create_checkout_session():
     raw_plan_name = plan["planName"]
     plan_name = normalize_plan_name(raw_plan_name)
 
-    # DEBUG - can remove later
-    print("DEBUG create_checkout_session:")
-    print("plan_id =", plan_id)
-    print("raw_plan_name =", raw_plan_name)
-    print("normalized plan_name =", plan_name)
-
     if plan_name != "premium":
         cursor.close()
         conn.close()
