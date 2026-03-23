@@ -19,7 +19,7 @@
 
 .subscription-subtitle {
     color: #666;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
 }
 
 .pricing-container {
@@ -35,6 +35,7 @@
     padding: 25px;
     width: 280px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    border: 2px solid #d9e8f3;
     transition: 0.3s;
 }
 
@@ -43,7 +44,8 @@
 }
 
 .highlight {
-    border: 2px solid #4f94b8;
+    border: 3px solid #4f94b8 !important;
+    box-shadow: 0 0 12px rgba(79, 148, 184, 0.45);
 }
 
 .plan-name {
@@ -64,6 +66,7 @@
 .features {
     text-align: left;
     margin: 15px 0;
+    padding-left: 20px;
 }
 
 .features li {
@@ -109,78 +112,70 @@
         No hidden fees. Simple, transparent pricing.
     </div>
 
-    <!-- ✅ CURRENT PLAN DISPLAY -->
+    {% set current_user_type = session.get('userType', '')|string|trim|lower %}
+    {% set normalized_current = current_user_type|replace('plan', '')|trim %}
+
     {% if session.get("userID") %}
-        {% if session.get("userType") %}
-            <div class="free-banner">
-                Current Plan: {{ session.get("userType")|capitalize }}
-            </div>
-        {% else %}
-            <div class="free-banner">
-                You are currently on the Free Plan
-            </div>
-        {% endif %}
+        <div class="free-banner">
+            You are currently on the {{ normalized_current|capitalize }} Plan
+        </div>
     {% endif %}
 
     <div class="pricing-container">
 
         {% if plans %}
             {% for plan in plans %}
+                {% set plan_name = plan.planName|string|trim|lower %}
+                {% set normalized_plan = plan_name|replace('plan', '')|trim %}
 
-            <div class="plan-card
-                {% if session.get('userType', '').strip().lower() == plan.planName.strip().lower() %}
-                    highlight
-                {% endif %}
-">
-                <div class="plan-name">{{ plan.planName }}</div>
+                <div class="plan-card {% if normalized_current == normalized_plan %}highlight{% endif %}">
+                    <div class="plan-name">{{ plan.planName }}</div>
 
-                <div class="plan-price">
-                    ${{ plan.price }}
-                    <span>/ {{ plan.billingCycle }}</span>
+                    <div class="plan-price">
+                        ${{ plan.price }}
+                        <span>/ {{ plan.billingCycle }}</span>
+                    </div>
+
+                    <ul class="features">
+                        {% for feature in plan.planDescription.split(',') %}
+                            <li>✔ {{ feature.strip() }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if not session.get("userID") %}
+
+                        <a href="{{ url_for('login.login') }}">
+                            <button class="btn subscribe-btn" type="button">
+                                Log in to Subscribe
+                            </button>
+                        </a>
+
+                    {% elif normalized_current == normalized_plan %}
+
+                        <button class="btn current-plan" disabled>
+                            Current Plan
+                        </button>
+
+                    {% elif normalized_plan == "premium" %}
+
+                        <form method="POST" action="{{ url_for('subscription.create_checkout_session') }}">
+                            <input type="hidden" name="plan_id" value="{{ plan.planID }}">
+                            <button class="btn subscribe-btn" type="submit">
+                                Upgrade to Premium
+                            </button>
+                        </form>
+
+                    {% else %}
+
+                        <form method="POST" action="{{ url_for('subscription.change_plan') }}">
+                            <input type="hidden" name="plan_id" value="{{ plan.planID }}">
+                            <button class="btn change-btn" type="submit">
+                                Switch Plan
+                            </button>
+                        </form>
+
+                    {% endif %}
                 </div>
-
-                <ul class="features">
-                    {% for feature in plan.planDescription.split(',') %}
-                        <li>✔ {{ feature.strip() }}</li>
-                    {% endfor %}
-                </ul>
-
-                <!-- BUTTON LOGIC HERE -->
-                {% if not session.get("userID") %}
-                    <a href="{{ url_for('login.login') }}">
-                        <button class="btn subscribe-btn">
-                            Log in to Subscribe
-                        </button>
-                    </a>
-
-                {% elif session.get("userType","").lower() == plan.planName.lower() %}
-
-                    <button class="btn current-plan" disabled>
-                        Current Plan
-                    </button>
-
-                {% elif session.get("userType") %}
-
-                    <form method="POST" action="{{ url_for('subscription.change_plan') }}">
-                        <input type="hidden" name="plan_id" value="{{ plan.id }}">
-                        <button class="btn change-btn">
-                            Change Plan
-                        </button>
-                    </form>
-
-                {% else %}
-
-                    <form method="POST" action="{{ url_for('subscription.subscribe') }}">
-                        <input type="hidden" name="plan_id" value="{{ plan.id }}">
-                        <button class="btn subscribe-btn">
-                            Subscribe Now
-                        </button>
-                    </form>
-
-                {% endif %}
-
-            </div>
-
             {% endfor %}
         {% else %}
             <p>No subscription plans available.</p>
