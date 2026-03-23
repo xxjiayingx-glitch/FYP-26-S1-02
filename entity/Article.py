@@ -1,5 +1,6 @@
 from entity.db_connection import get_db_connection
 
+
 class Article:
     @staticmethod
     def get_total_articles():
@@ -9,7 +10,7 @@ class Article:
         result = cursor.fetchone()
         conn.close()
         return result["total_articles"]
-    
+
     @staticmethod
     def updateStatus(articleID, action):
         conn = get_db_connection()
@@ -22,17 +23,20 @@ class Article:
         else:
             conn.close()
             return False
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             UPDATE Article SET articleStatus = %s WHERE articleID = %s 
-        """, (new_status, articleID))
+        """,
+            (new_status, articleID),
+        )
 
         conn.commit()
         updated = cursor.rowcount > 0
         conn.close()
 
         return updated
-    
+
     def get_all_articles(self):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -258,7 +262,7 @@ class Article:
         conn.close()
 
         return articles
-    
+
     def get_home_headline_article(self):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -287,11 +291,14 @@ class Article:
         cursor = conn.cursor()
 
         sql = """
-        SELECT a.articleID, a.articleTitle, a.content, ai.imageURL, c.categoryName, u.username
+        SELECT a.articleID, a.articleTitle, a.content, ai.imageURL, 
+            c.categoryName, u.username,
+            IFNULL(an.views, 0) AS views
         FROM Article a
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
         LEFT JOIN UserAccount u ON a.created_by = u.userID
+        LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
         WHERE a.articleStatus = 'published'
         """
 
@@ -340,19 +347,22 @@ class Article:
 
         conn.close()
         return result["total_articles"]
-    
+
     @staticmethod
     def count_eligible_verified_articles(userID):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
             FROM Article
             WHERE created_by = %s
             AND articleStatus = 'Published'
             AND credibilityScore >= 90
-        """, (userID,))
+        """,
+            (userID,),
+        )
 
         result = cursor.fetchone()
         conn.close()

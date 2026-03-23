@@ -44,7 +44,7 @@ def send_verification_email(email, token):
     service = build("gmail", "v1", credentials=creds)
 
     # Change 127.0.0.1:5000 to hosted site
-    verification_link = f"{BASE_URL}verify?token={token}"
+    verification_link = f"{BASE_URL}/verify?token={token}"
 
     message = EmailMessage()
     message.set_content(
