@@ -4,21 +4,35 @@
 
 {% block content %}
 
+<!-- Optional: Move this CSS to a static file (e.g., static/css/insight.css) -->
 <style>
-/* Your existing CSS remains the same */
-.container{ width:80%; margin:auto; }
-h2{ margin-bottom:30px; }
-.section{ margin-top:40px; text-align:center; }
-.box{ background:#eeeeee; padding:25px; width:350px; margin:auto; border-radius:6px; }
-.performance-table{ margin:auto; border-collapse:collapse; }
-.performance-table th, .performance-table td{ padding:10px 30px; border-right:1px solid #aaa; }
-.performance-table th:last-child, .performance-table td:last-child{ border-right:none; }
-.review-box{ background:#eeeeee; padding:25px; width:500px; margin:auto; border-radius:6px; text-align:left; }
-.actions{ margin-top:15px; }
-.btn{ padding:10px 25px; margin:8px; background:#4c7bd9; color:white; border:none; border-radius:5px; cursor:pointer; }
-.btn:hover{ background:#355db5; }
-.article-select{ margin-bottom:30px; }
-.flash-message{ text-align:center; margin-bottom:20px; color:red; font-weight:bold; }
+/* Container & Layout */
+.container { width: 85%; max-width: 1000px; margin: 40px auto; font-family: Arial, sans-serif; }
+h2 { text-align: center; margin-bottom: 30px; color: #333; }
+.section { margin-top: 40px; }
+.box { background: #f7f7f7; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+.review-box { background: #f7f7f7; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: left; min-height: 120px; }
+.article-select { text-align: center; margin-bottom: 30px; }
+.article-select select { padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
+
+/* Performance Table */
+.performance-table { margin: 0 auto; border-collapse: collapse; width: 60%; }
+.performance-table th, .performance-table td { padding: 12px 20px; border: 1px solid #ccc; font-size: 16px; }
+.performance-table th { background: #4c7bd9; color: #fff; }
+.performance-table td { background: #fff; }
+
+/* Progress Bar */
+.progress-container { background: #ddd; border-radius: 5px; width: 100%; margin: 8px 0; height: 24px; overflow: hidden; }
+.progress-bar { height: 100%; background: #4c7bd9; color: white; text-align: center; line-height: 24px; font-weight: bold; }
+
+/* Buttons */
+.actions { margin-top: 20px; text-align: center; }
+.btn { padding: 10px 25px; margin: 8px; background: #4c7bd9; color: white; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; font-size: 15px; }
+.btn:hover { background: #355db5; }
+
+/* Flash messages */
+.flash-message { text-align: center; margin-bottom: 20px; font-weight: bold; color: red; }
+
 </style>
 
 <div class="container">
@@ -30,7 +44,7 @@ h2{ margin-bottom:30px; }
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
-        <div class="flash-message {{ category }}">{{ message }}</div>
+            <div class="flash-message {{ category }}">{{ message }}</div>
         {% endfor %}
     {% endif %}
 {% endwith %}
@@ -38,58 +52,63 @@ h2{ margin-bottom:30px; }
 
 <!-- Article Selection -->
 <form method="GET" action="{{ url_for('insight') }}" class="article-select">
-<label><b>Select Article:</b></label>
-<select name="article_id">
-    <option>Select your Article</option>
-    {% for article in articles %}
-    <option value="{{article.articleID}}" {% if selected_article and selected_article.articleID == article.articleID %}selected{% endif %}>
-        {{article.articleTitle}}
-    </option>
-    {% endfor %}
-</select>
+    <label><b>Select Article:</b></label>
+    <select name="article_id" onchange="this.form.submit()">
+        <option>Select your Article</option>
+        {% for article in articles %}
+        <option value="{{ article.articleID }}" {% if selected_article and selected_article.articleID == article.articleID %}selected{% endif %}>
+            {{ article.articleTitle }}
+        </option>
+        {% endfor %}
+    </select>
 </form>
 
 {% if selected_article %}
 
 <!-- Overview Performance -->
 <div class="section">
-<h3>Overview Performance</h3>
-<div class="box">
-<table class="performance-table">
-<tr><th>Views</th><th>Likes</th><th>Shares</th></tr>
-<tr>
-<td>{{selected_article.views or 0}}</td>
-<td>{{selected_article.likes or 0}}</td>
-<td>{{selected_article.shares or 0}}</td>
-</tr>
-</table>
-</div>
+    <h3>Overview Performance</h3>
+    <div class="box">
+        <table class="performance-table">
+            <tr><th>Views</th><th>Likes</th></tr>
+            <tr>
+                <td>{{ selected_article.views | default(0) }}</td>
+                <td>{{ selected_article.likes | default(0) }}</td>
+            </tr>
+        </table>
+    </div>
 </div>
 
 <!-- Credibility Analysis -->
 <div class="section">
-<h3>Credibility Analysis</h3>
-<div class="box">
-<p><b>Credibility Score:</b> {{selected_article.credibilityScore}} / 100</p>
-<p><b>Article Last Updated:</b> {{selected_article.updated_at}}</p>
-</div>
+    <h3>Credibility Analysis</h3>
+    <div class="box">
+        <p><b>Credibility Score:</b></p>
+        <div class="progress-container">
+            <div class="progress-bar" style="width: {{ selected_article.credibilityScore | default(0) }}%">
+                {{ selected_article.credibilityScore | default(0) }}%
+            </div>
+        </div>
+        <p><b>Review Priority:</b> {{ selected_article.reviewPriority | default('N/A') }}</p>
+        <p><b>Article Last Updated:</b> {{ selected_article.updated_at | default('Unknown') }}</p>
+    </div>
 </div>
 
 <!-- Priority AI Article Review -->
 <div class="section">
-<h3>Priority AI Article Review</h3>
-<div class="review-box" id="ai-review-box">
-<p id="review-text">Loading AI summary...</p>
-</div>
+    <h3>Priority AI Article Review</h3>
+    <div class="review-box" id="ai-review-box">
+        <p id="review-text">Loading AI summary...</p>
+    </div>
 </div>
 
-<!-- Article Action -->
+<!-- Article Actions -->
 <div class="section">
-<h3>Article Action</h3>
-<div class="actions">
-<a href="/article/{{selected_article.articleID}}" class="btn">View Article</a>
-<a href="/edit_article/{{selected_article.articleID}}" class="btn">Edit Article</a>
-</div>
+    <h3>Article Actions</h3>
+    <div class="actions">
+        <a href="/article/{{ selected_article.articleID }}" class="btn">View Article</a>
+        <a href="/edit_article/{{ selected_article.articleID }}" class="btn">Edit Article</a>
+    </div>
 </div>
 
 {% endif %}
@@ -103,26 +122,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const select = document.querySelector("select[name='article_id']");
     const reviewText = document.getElementById("review-text");
 
-    if (!select || !reviewText) return; // safety check
+    if (!select || !reviewText) return;
 
-    // Function to fetch AI review asynchronously
     function fetchAIReview(articleId) {
         if (!articleId || articleId === "Select your Article") {
             reviewText.textContent = "No article selected.";
             return;
         }
-
         reviewText.textContent = "Generating AI summary...";
 
-        // Use fetch to get the review
         fetch(`/generate_ai_review_ajax/${articleId}`)
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-                if (data.success) {
-                    reviewText.textContent = data.review;
-                } else {
-                    reviewText.textContent = "Error: " + data.message;
-                }
+                reviewText.textContent = data.success ? data.review : "Error: " + data.message;
             })
             .catch(err => {
                 reviewText.textContent = "Error calling AI review API.";
@@ -130,18 +142,13 @@ document.addEventListener("DOMContentLoaded", function() {
             });
     }
 
-    // Fetch review on page load if article is already selected
     const initialArticleId = select.value;
     if (initialArticleId && initialArticleId !== "Select your Article") {
         fetchAIReview(initialArticleId);
     }
 
-    // Fetch review whenever the user selects a new article
     select.addEventListener("change", function() {
-        // Update the page instantly, then fetch in background
-        const articleId = this.value;
-        reviewText.textContent = "Loading AI summary...";
-        fetchAIReview(articleId);
+        fetchAIReview(this.value);
     });
 
 });

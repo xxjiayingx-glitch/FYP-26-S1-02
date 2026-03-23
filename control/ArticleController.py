@@ -121,18 +121,18 @@ class ArticleController:
 
     def get_article_insight(self, article_id):
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(DictCursor)
         query = """
             SELECT 
                 a.articleID,
                 a.articleTitle,
                 a.content,
-                a.credibilityScore,
-                a.reviewPriority,
+                IFNULL(a.credibilityScore, 0) AS credibilityScore,
+                IFNULL(a.reviewPriority, 'N/A') AS reviewPriority,
                 a.updated_at,
-                IFNULL(an.views,0) as views,
-                IFNULL(an.likes,0) as likes,
-                IFNULL(an.shares,0) as shares
+                IFNULL(an.views,0) AS views,
+                IFNULL(an.likes,0) AS likes,
+                IFNULL(an.shares,0) AS shares
             FROM Article a
             LEFT JOIN ArticleAnalytics an
             ON a.articleID = an.articleID
@@ -140,6 +140,12 @@ class ArticleController:
         """
         cursor.execute(query, (article_id,))
         article = cursor.fetchone()
+
+        if article:
+            # normalize keys to snake_case
+            article['credibility_score'] = article.pop('credibilityScore', 0)
+            article['review_priority'] = article.pop('reviewPriority', 'N/A')
+        
         cursor.close()
         conn.close()
         return article
@@ -152,6 +158,105 @@ class ArticleController:
         conn.commit()
         cursor.close()
         conn.close()
+
+    # ---- Article Fetching ----
+    def get_article_by_id(self, article_id):
+        conn = get_db_connection()
+        cursor = conn.cursor(DictCursor)
+        query = """
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                c.categoryID,
+                c.categoryName,
+                CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                ai.imageURL AS featured_image
+            FROM Article a
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            JOIN UserAccount u ON a.created_by = u.userID
+            LEFT JOIN ArticleImage ai 
+                ON a.articleID = ai.articleID
+            WHERE a.articleID = %s
+            ORDER BY ai.uploaded_at ASC
+            LIMIT 1
+        """
+        cursor.execute(query, (article_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        if not row:
+            return None
+        return {
+            'articleID': row['articleID'],
+            'articleTitle': row['articleTitle'],
+            'content': row['content'],
+            'categoryID': row['categoryID'],
+            'categoryName': row['categoryName'],
+            'full_name': row['full_name'],
+            'featured_image': row['featured_image']
+        }
+
+    # ---- Article Analytics ----
+    def get_article_analytics(self, article_id):
+        conn = get_db_connection()
+        cursor = conn.cursor(DictCursor)
+        cursor.execute("""
+            SELECT views, likes
+            FROM ArticleAnalytics
+            WHERE articleID = %s
+        """, (article_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result if result else {"views": 0, "likes": 0}
+
+    def increment_view_count(self, article_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO ArticleAnalytics (articleID, views, likes, shares)
+            VALUES (%s, 0, 0, 0)
+            ON DUPLICATE KEY UPDATE articleID = articleID
+        """, (article_id,))
+        cursor.execute("""
+            UPDATE ArticleAnalytics
+            SET views = views + 1
+            WHERE articleID = %s
+        """, (article_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def increment_like_count(self, article_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO ArticleAnalytics (articleID, views, likes, shares)
+            VALUES (%s, 0, 0, 0)
+            ON DUPLICATE KEY UPDATE articleID = articleID
+        """, (article_id,))
+        cursor.execute("""
+            UPDATE ArticleAnalytics
+            SET likes = likes + 1
+            WHERE articleID = %s
+        """, (article_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def decrement_like_count(self, article_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE ArticleAnalytics
+            SET likes = GREATEST(likes - 1, 0)
+            WHERE articleID = %s
+        """, (article_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
 
     def get_recommended_articles(self, user_id):
         """
@@ -260,43 +365,6 @@ class ArticleController:
             conn.close()
     
     
-    def get_article_by_id(self, article_id):
-        conn = get_db_connection()
-        cursor = conn.cursor(DictCursor)  # <--- important
-        query = """
-            SELECT 
-                a.articleID,
-                a.articleTitle,
-                a.content,
-                c.categoryID,
-                c.categoryName,
-                CONCAT(u.first_name, ' ', u.last_name) AS full_name,
-                ai.imageURL AS featured_image
-            FROM Article a
-            JOIN ArticleCategory c ON a.categoryID = c.categoryID
-            JOIN UserAccount u ON a.created_by = u.userID
-            LEFT JOIN ArticleImage ai 
-                ON a.articleID = ai.articleID
-            WHERE a.articleID = %s
-            ORDER BY ai.uploaded_at ASC
-            LIMIT 1
-        """
-        cursor.execute(query, (article_id,))
-        row = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        if not row:
-            return None
-        return {
-            'articleID': row['articleID'],
-            'articleTitle': row['articleTitle'],
-            'content': row['content'],
-            'categoryID': row['categoryID'],
-            'categoryName': row['categoryName'],
-            'full_name': row['full_name'],
-            'featured_image': row['featured_image']
-        }
-    
     def is_valid_report_category(self, report_category_id):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -397,29 +465,4 @@ class ArticleController:
         conn.close()
         return articles
     
-    def increment_view_count(self, article_id):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # Check if record exists
-        cursor.execute("""
-            SELECT analyticsID FROM ArticleAnalytics WHERE articleID = %s
-        """, (article_id,))
-        result = cursor.fetchone()
-
-        if result:
-            cursor.execute("""
-                UPDATE ArticleAnalytics
-                SET views = views + 1,
-                    lastUpdated = NOW()
-                WHERE articleID = %s
-            """, (article_id,))
-        else:
-            cursor.execute("""
-                INSERT INTO ArticleAnalytics (articleID, views, likes, shares, lastUpdated)
-                VALUES (%s, 1, 0, 0, NOW())
-            """, (article_id,))
-
-        conn.commit()
-        cursor.close()
-        conn.close()
+    
