@@ -55,41 +55,17 @@ class UpdateProfileCTL:
         if not stored_pw:
             raise ValueError("Password data is corrupted.")
 
-        try:
-            prefix, salt_b64, hash_hex = stored_pw.split('$')
-            _, N, r, p = prefix.split(':')
-            N, r, p = int(N), int(r), int(p)
-            salt = binascii.a2b_base64(salt_b64)
-            hash_bytes = bytes.fromhex(hash_hex)
-        except Exception as e:
-            raise ValueError(f"Stored password format is invalid: {e}")
-
-        # Verify current password by hashing and comparing
-        test_hash = hashlib.scrypt(
-            current_password.encode(),
-            salt=salt,
-            n=N, r=r, p=p,
-            dklen=len(hash_bytes)
-        )
-        if test_hash != hash_bytes:
+        # ✅ Use werkzeug instead of scrypt
+        if not check_password_hash(stored_pw, current_password):
             raise ValueError("Current password is incorrect.")
 
         if len(new_password) < 6:
             raise ValueError("Password must be at least 6 characters long.")
 
-        # Generate new hash for new password with new salt
-        new_salt = os.urandom(16)
-        new_hash_bytes = hashlib.scrypt(
-            new_password.encode(),
-            salt=new_salt,
-            n=N, r=r, p=p,
-            dklen=64
-        )
-        new_salt_b64 = binascii.b2a_base64(new_salt).decode().strip()
-        new_hash_hex = new_hash_bytes.hex()
+        # ✅ Generate new hash
+        new_hash = generate_password_hash(new_password)
 
-        stored_new = f"scrypt:{N}:{r}:{p}${new_salt_b64}${new_hash_hex}"
-        UserAccount.update_password(userID, stored_new)
+        UserAccount.update_password(userID, new_hash)
 
     @staticmethod
     def apply_verified_badge(userID):
