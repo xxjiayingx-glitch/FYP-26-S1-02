@@ -62,7 +62,7 @@
 
         <!-- Credibility -->
         <div class="meta-item">
-          ⭐ <span>{{ "%.1f"|format(headline.credibilityScore) }}</span>
+          📝 <span>{{ "%.1f"|format(headline.credibilityScore) }}</span>
         </div>
 
         <div class="featured-right">
@@ -143,7 +143,7 @@
 
         <!-- Credibility -->
         <div class="meta-item">
-          ⭐ <span>{{ "%.1f"|format(article.credibilityScore) }}</span>
+          📝 <span>{{ "%.1f"|format(article.credibilityScore) }}</span>
         </div>
       </div>
         <p class="news-para">{{ article['content'][:120] }}...</p>
@@ -255,7 +255,7 @@
 
               <!-- Credibility -->
               <div class="meta-item">
-                ⭐ <span>${(article.credibilityScore ?? 0).toFixed(1)}</span>
+                📝 <span>${(article.credibilityScore ?? 0).toFixed(1)}</span>
               </div>
               </div>
               <p class="news-para">${article.content}...</p>
@@ -273,7 +273,7 @@
     }
 
     // Script to show more testimonials
-    let testimonialOffset = 4;
+    let testimonialOffset = 3;
 
     function loadMoreTestimonials() {
       fetch(`/load-more-testimonials?offset=${testimonialOffset}`)
