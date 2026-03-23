@@ -1,0 +1,95 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Review Reported Article{% endblock %}
+{% block reports_active %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_review_article.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="review-wrapper">
+    <div class="review-header">
+        <h1>Review Reported Article</h1>
+        <a href="{{ url_for('article_reported.article_reported_page') }}" class="btn">Back</a>
+    </div>
+
+    <div class="review-section">
+        <h3>Reported Reasons:</h3>
+        <p>{{ report.reasons if report.reasons else '-' }}</p>
+    </div>
+
+    <div class="review-section">
+        <h3>Reported By:</h3>
+        <p>{{ report.reportedBy if report.reportedBy else '-' }}</p>
+    </div>
+
+    <div class="review-section">
+        <h3>Total Reports:</h3>
+        <p>{{ report.totalReports if report.totalReports else 1 }}</p>
+    </div>
+
+    <hr>
+
+    <div class="review-section">
+        <h2>Article Information</h2>
+    </div>
+
+    <div class="review-section">
+        <h3>Article Title:</h3>
+        <p>{{ report.articleTitle }}</p>
+    </div>
+
+    <div class="review-section">
+        <h3>Author:</h3>
+        <p>{{ report.createdBy if report.createdBy else '-' }}</p>
+    </div>
+
+    <div class="review-section">
+        <h3>Credibility Score:</h3>
+        <p>{{ report.credibilityScore }}</p>
+    </div>
+
+    <div class="review-section">
+        <h3>Report Status:</h3>
+        <p>{{ report.reportStatus }}</p>
+    </div>
+
+    <hr>
+
+    <div class="review-section">
+        <h3>Image:</h3>
+        {% if report.imageURL %}
+            <img src="{{ url_for('static', filename='uploads/' ~ report.imageURL) }}" alt="Article Image" class="article-image">
+        {% else %}
+            <div class="image-placeholder"></div>
+        {% endif %}
+    </div>
+
+    <div class="review-section">
+        <h3>Article Content:</h3>
+        <div class="content-box">
+            {{ report.content if report.content else '-' }}
+        </div>
+    </div>
+
+    <div class="action-row">
+        <form action="{{ url_for('review_article.suspend_or_unsuspend', articleID=report.articleID) }}" method="POST">
+            <input type="hidden" name="action" value="complete">
+            <button type="submit" class="btn">Mark As Complete</button>
+        </form>
+
+        {% if report.articleStatus == 'published' %}
+        <form action="{{ url_for('review_article.suspend_or_unsuspend', articleID=report.articleID) }}" method="POST">
+            <input type="hidden" name="action" value="suspend">
+            <button type="submit" class="btn">Suspend</button>
+        </form>
+        {% else %}
+        <form action="{{ url_for('review_article.suspend_or_unsuspend', articleID=report.articleID) }}" method="POST">
+            <input type="hidden" name="action" value="unsuspend">
+            <button type="submit" class="btn">Unsuspend</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
