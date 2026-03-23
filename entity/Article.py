@@ -269,7 +269,9 @@ class Article:
 
         sql = """
         SELECT a.*, c.categoryName, ai.imageURL, u.username,
-            IFNULL(an.views, 0) AS views
+            IFNULL(an.views, 0) AS views, 
+            IFNULL(an.likes, 0) AS likes,
+            IFNULL(a.credibilityScore, 0) AS credibilityScore
         FROM Article a
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -293,7 +295,9 @@ class Article:
         sql = """
         SELECT a.articleID, a.articleTitle, a.content, ai.imageURL, 
             c.categoryName, u.username,
-            IFNULL(an.views, 0) AS views
+            IFNULL(an.views, 0) AS views,
+            IFNULL(an.likes, 0) AS likes,
+            IFNULL(a.credibilityScore, 0) AS credibilityScore
         FROM Article a
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID

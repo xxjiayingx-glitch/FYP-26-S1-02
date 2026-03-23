@@ -46,5 +46,5 @@ def verify():
 
     success = registerCTL.user_entity.verify_user(token)
     if success:
-        return render_template("login.html", success="Account verified! You can now log in.")
+        return redirect(url_for("login_bp.login", success="Account verified! You can now log in."))
     return render_template("Unregistered/UnregRegAcc.html", categories=get_categories(), error="Invalid or expired verification link.")

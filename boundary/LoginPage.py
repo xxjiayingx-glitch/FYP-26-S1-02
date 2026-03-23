@@ -6,6 +6,7 @@ auth = AuthController()
 
 @login_bp.route("/login", methods=["GET", "POST"])
 def login():
+    success_msg = request.args.get("success")
     if request.method == "POST":
         email = request.form["email"]
         pwd = request.form["password"]
@@ -25,4 +26,4 @@ def login():
 
         return render_template("login.html", error="Invalid email or password")
 
-    return render_template("login.html")
+    return render_template("login.html", success=success_msg)

@@ -55,6 +55,15 @@
           </svg>
           <span>{{ headline.views }}</span>
         </div>
+        <!-- Likes -->
+        <div class="meta-item">
+          ❤️ <span>{{ headline.likes }}</span>
+        </div>
+
+        <!-- Credibility -->
+        <div class="meta-item">
+          ⭐ <span>{{ "%.1f"|format(headline.credibilityScore) }}</span>
+        </div>
 
         <div class="featured-right">
           {% if headline.imageURL %}
@@ -126,6 +135,15 @@
             <circle cx="8" cy="8" r="3" />
           </svg>
           <span>{{ article.views }}</span>
+        </div>
+        <!-- Likes -->
+        <div class="meta-item">
+          ❤️ <span>{{ article.likes }}</span>
+        </div>
+
+        <!-- Credibility -->
+        <div class="meta-item">
+          ⭐ <span>{{ "%.1f"|format(article.credibilityScore) }}</span>
         </div>
       </div>
         <p class="news-para">{{ article['content'][:120] }}...</p>
@@ -229,6 +247,15 @@
                   <circle cx="8" cy="8" r="3" />
                 </svg>
                 <span>${article.views ?? 0}</span>
+              </div>
+              <!-- Likes -->
+              <div class="meta-item">
+                ❤️ <span>${article.likes ?? 0}</span>
+              </div>
+
+              <!-- Credibility -->
+              <div class="meta-item">
+                ⭐ <span>${(article.credibilityScore ?? 0).toFixed(1)}</span>
               </div>
               </div>
               <p class="news-para">${article.content}...</p>
