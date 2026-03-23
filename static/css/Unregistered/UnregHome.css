@@ -58,12 +58,6 @@ html {
   padding: 0 20px;
 }
 
-/* .featured-news {
-  display: flex;
-  justify-content: space-between;
-  gap: 30px;
-  margin: 40px 5%;
-} */
 .featured-news {
   display: flex;
   justify-content: space-between;
@@ -71,6 +65,7 @@ html {
   gap: 20px;
   margin: 40px 5%;
 }
+
 .headline-views,
 .article-views {
   display: flex;
@@ -123,7 +118,7 @@ html {
   text-decoration: underline;
 }
 
-/*  */
+
 .latest-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -154,6 +149,13 @@ html {
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 10px;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 @media screen and (max-width: 1200px) {
