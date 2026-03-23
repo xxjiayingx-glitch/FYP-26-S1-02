@@ -1,8 +1,192 @@
 {% extends "master.html" %}
 
-{% block title %}Subscription{% endblock %}
+{% block title %}Subscription Plans{% endblock %}
 
 {% block content %}
-<h1>Subscription Page</h1>
-<p>This page is working.</p>
+
+<style>
+.subscription-wrapper {
+    max-width: 1200px;
+    margin: auto;
+    text-align: center;
+}
+
+.subscription-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.subscription-subtitle {
+    color: #666;
+    margin-bottom: 40px;
+}
+
+.pricing-container {
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.plan-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    width: 280px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.plan-card:hover {
+    transform: translateY(-6px);
+}
+
+.highlight {
+    border: 2px solid #4f94b8;
+}
+
+.plan-name {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.plan-price {
+    font-size: 28px;
+    margin: 15px 0;
+}
+
+.plan-price span {
+    font-size: 14px;
+    color: #777;
+}
+
+.features {
+    text-align: left;
+    margin: 15px 0;
+}
+
+.features li {
+    margin: 6px 0;
+}
+
+.btn {
+    margin-top: 15px;
+    padding: 10px;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.subscribe-btn {
+    background: #4f94b8;
+    color: white;
+}
+
+.change-btn {
+    background: orange;
+    color: white;
+}
+
+.current-plan {
+    background: #2563eb;
+    color: white;
+}
+
+.free-banner {
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #444;
+}
+</style>
+
+<div class="subscription-wrapper">
+
+    <div class="subscription-title">Plans & Pricing</div>
+    <div class="subscription-subtitle">
+        No hidden fees. Simple, transparent pricing.
+    </div>
+
+    <!-- ✅ CURRENT PLAN DISPLAY -->
+    {% if session.get("userID") %}
+        {% if session.get("userType") %}
+            <div class="free-banner">
+                Current Plan: {{ session.get("userType")|capitalize }}
+            </div>
+        {% else %}
+            <div class="free-banner">
+                You are currently on the Free Plan
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <div class="pricing-container">
+
+        {% if plans %}
+            {% for plan in plans %}
+
+            <div class="plan-card
+                {% if session.get('userType', '').strip().lower() == plan.planName.strip().lower() %}
+                    highlight
+                {% endif %}
+">
+                <div class="plan-name">{{ plan.planName }}</div>
+
+                <div class="plan-price">
+                    ${{ plan.price }}
+                    <span>/ {{ plan.billingCycle }}</span>
+                </div>
+
+                <ul class="features">
+                    {% for feature in plan.planDescription.split(',') %}
+                        <li>✔ {{ feature.strip() }}</li>
+                    {% endfor %}
+                </ul>
+
+                <!-- BUTTON LOGIC HERE -->
+                {% if not session.get("userID") %}
+                    <a href="{{ url_for('login.login') }}">
+                        <button class="btn subscribe-btn">
+                            Log in to Subscribe
+                        </button>
+                    </a>
+
+                {% elif session.get("userType","").lower() == plan.planName.lower() %}
+
+                    <button class="btn current-plan" disabled>
+                        Current Plan
+                    </button>
+
+                {% elif session.get("userType") %}
+
+                    <form method="POST" action="{{ url_for('subscription.change_plan') }}">
+                        <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                        <button class="btn change-btn">
+                            Change Plan
+                        </button>
+                    </form>
+
+                {% else %}
+
+                    <form method="POST" action="{{ url_for('subscription.subscribe') }}">
+                        <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                        <button class="btn subscribe-btn">
+                            Subscribe Now
+                        </button>
+                    </form>
+
+                {% endif %}
+
+            </div>
+
+            {% endfor %}
+        {% else %}
+            <p>No subscription plans available.</p>
+        {% endif %}
+
+    </div>
+</div>
+
 {% endblock %}

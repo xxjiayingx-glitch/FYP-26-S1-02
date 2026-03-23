@@ -36,7 +36,7 @@ class RegisterController:
         # Generate verification token
         token = secrets.token_urlsafe(32)
 
-        hashed_pw = generate_password_hash(password)
+        hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
 
         # Save user WITH token + unverified status
         new_user_id = self.user_entity.register_user(
