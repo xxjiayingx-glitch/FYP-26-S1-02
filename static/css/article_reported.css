@@ -1,142 +1,3 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    background: #f7f7f7;
-    color: #111;
-}
-
-.top-bar{
-    height: 72px;
-    background: #cfe5ff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 18px;
-    border-bottom: 1px solid #d8d8d8;
-}
-
-.brand {
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.1;
-}
-
-.top-right {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.top-right a {
-    text-decoration: none;
-    color: #111;
-}
-
-.avatar-top {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.avatar-top img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.layout {
-    display: flex;
-    min-height: calc(100vh - 72px);
-}
-
-.sidebar {
-    width: 250px;
-    background:  #f3f3f3;
-    border-right: 1px solid #ddd;
-    padding: 18px;
-    transition: width 0.3s ease, padding 0.3s ease;
-    overflow: hidden;
-}
-
-.profile-box {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: #ffffff;
-    border-radius: 24px;
-    padding: 18px;
-    margin-bottom: 22px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-}
-
-.avatar {
-    width: 78px;
-    height: 78px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.profile-info .username {
-    font-size: 20px;
-    font-weight: 700;
-}
-
-.profile-info .role {
-    font-size: 14px;
-    color: #555;
-}
-
-.menu {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.menu a{
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    text-decoration: none;
-    color: black;
-    border-radius: 10px;
-}
-
-.menu a:hover {
-    background: #e6e6e6;
-}
-
-.content {
-    flex: 1;
-    padding: 12px 24px 40px;
-}
-
-.hamburger {
-    font-size: 32px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    margin-bottom: 10px;
-}
-
 .page-header h1 {
     font-size: 28px;
     margin-bottom: 6px;
@@ -185,4 +46,20 @@ body {
     gap: 18px;
     font-size: 18px;
     font-weight: 700;
+}
+
+.review-btn {
+    text-decoration: None;
+    background: #cfd4ff;
+    color: #222;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.review-btn:hover {
+    opacity: 0.9;
 }

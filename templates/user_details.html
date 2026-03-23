@@ -1,181 +1,123 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Details</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_details.css') }}">
-    {% if message %}
-        <div class="success-message">{{ message }}</div>
-    {% endif %}
-</head>
-<body>
+{% extends "admin_base.html" %}
 
-    <!-- Top bar -->
-    <header class="topbar">
-        <div class="brand">Daily Scoop News<br>System</div>
+{% block title %}User Details{% endblock %}
 
-        <div class="top-right">
-            <div class="user-badge">👤</div>
-            <span>Hi, {{ admin.username if admin else 'Username' }}</span>
-            <a href="#">Logout</a>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user_details.css') }}">
+{% endblock %}
+
+{% block content %}
+{% if message %}
+    <div class="success-message">{{ message }}</div>
+{% endif %}
+
+<section class="page-header">
+    <h1>User Details</h1>
+    <p>Comprehensive information about a specific user</p>
+</section>
+
+<section class="details-section">
+    <h2>Account Information</h2>
+
+    <div class="details-grid">
+        <div class="detail-item">
+            <label>Name</label>
+            <p>{{ user.first_name }} {{ user.last_name }}</p>
         </div>
-    </header>
 
-    <div class="layout">
+        <div class="detail-item">
+            <label>Email</label>
+            <p>{{ user.email }}</p>
+        </div>
 
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="profile-box">
-                <div class="avatar">
-                    {% if admin and admin.profileImage %}
-                        <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
-                    {% else %}
-                        <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
-                    {% endif %}
-                </div>
+        <div class="detail-item">
+            <label>Subscription Status</label>
+            <p>{{ subscription_status if subscription_status else '-' }}</p>
+        </div>
 
-                <div class="profile-info">
-                    <div class="username">{{ admin.username if admin else 'Username' }}</div>
-                    <div class="role">{{ admin.userType if admin else 'Role' }}</div>
-                </div>
-            </div>
+        <div class="detail-item">
+            <label>Account Status</label>
+            <p>{{ user.accountStatus if user.accountStatus else '-' }}</p>
+        </div>
 
-            <nav class="menu">
-                <a href="/admin/dashboard"><span class="menu-icon"></span><span class="menu-text">Dashboard</span></a>
-                <a href="/admin/user-accounts" class="active"><span class="menu-icon"></span><span class="menu-text">User Accounts</span></a>
-                <a href="/admin/article-reported"><span class="menu-icon"></span><span class="menu-text">Article Reported</span></a>
-                <a href="/admin/category-management"><span class="menu-icon"></span><span class="menu-text">Category Management</span></a>
-                <a href="/admin/webpage-management"><span class="menu-icon"></span><span class="menu-text">Webpage Management</span></a>
-                <a href="#"><span class="menu-icon"></span><span class="menu-text">System Monitoring</span></a>
-                <a href="/admin/auto-publish-rules"><span class="menu-icon"></span><span class="menu-text">Auto-Publish Rules</span></a>
-            </nav>
-        </aside>
-
-        <!-- Main content -->
-        <main class="content">
-            <button class="hamburger" id="toggleSidebar">☰</button>
-
-            <section class="page-header">
-                <h1>User Details</h1>
-                <p>Comprehensive information about a specific user</p>
-            </section>
-
-            <section class="details-section">
-                <h2>Account Information</h2>
-
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <label>Name</label>
-                        <p>{{ user.first_name }} {{ user.last_name }}</p>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>Email</label>
-                        <p>{{ user.email }}</p>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>Subscription Status</label>
-                        <p>{{ subscription_status if subscription_status else '-' }}</p>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>Account Status</label>
-                        <p>{{ user.accountStatus if user.accountStatus else '-' }}</p>
-                    </div>
-
-                    <div class="detail-item full-width">
-                        <label>Account Created Date</label>
-                        <p>
-                            {% if user.created_at %}
-                                {{ user.created_at.strftime('%d/%m/%Y') if user.created_at.__class__.__name__ == 'datetime' else user.created_at }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <form action="/admin/user-accounts/{{ user.userID }}/delete" method="POST">
-                        <button type="submit" class="action-btn">Delete</button>
-                    </form>
-
-                    {% if user.userType == 'system admin' %}
-                         <span class="admin-protected">Protected</span>
-                    {% elif user.accountStatus == 'suspended' %}
-                        <form action="/admin/user-accounts/{{ user.userID }}/status" method="POST">
-                            <input type="hidden" name="action" value="unsuspend">
-                            <button type="submit" class="action-btn">Unsuspend</button>
-                        </form>
-                    {% else %}
-                        <form action="/admin/user-accounts/{{ user.userID }}/status" method="POST">
-                            <input type="hidden" name="action" value="suspend">
-                            <button type="submit" class="action-btn">Suspend</button>
-                        </form>
-                    {% endif %}
-                </div>
-            </section>
-
-            <section class="details-section">
-                <h2>Personal Information</h2>
-
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <label>Gender</label>
-                        <p>{{ user.gender if user.gender else '-' }}</p>
-                    </div>
-
-                    <div class="detail-item">
-                        <label>Date Of Birth</label>
-                        <p>
-                            {% if user.dateOfBirth %}
-                                {{ user.dateOfBirth.strftime('%d/%m/%Y') if user.dateOfBirth.__class__.__name__ == 'date' else user.dateOfBirth }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </p>
-                    </div>
-
-                    <div class="detail-item full-width">
-                        <label>Category Interested</label>
-                        <p>
-                            {% if interests %}
-                                {{ interests|join(', ') }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="details-section">
-                <h2>Contact Information</h2>
-
-                <div class="details-grid">
-                    <div class="detail-item full-width">
-                        <label>Phone Number</label>
-                        <p>{{ user.phone if user.phone else '-' }}</p>
-                    </div>
-                </div>
-            </section>
-
-            <div class="back-btn-wrapper">
-                <a href="/admin/user-accounts" class="back-btn">Back to User Accounts</a>
-            </div>
-        </main>
+        <div class="detail-item full-width">
+            <label>Account Created Date</label>
+            <p>
+                {% if user.created_at %}
+                    {{ user.created_at.strftime('%d/%m/%Y') if user.created_at.__class__.__name__ == 'datetime' else user.created_at }}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+        </div>
     </div>
 
-    <script>
-        const toggleButton = document.getElementById("toggleSidebar");
-        const sidebar = document.getElementById("sidebar");
+    <div class="action-buttons">
+        <form action="/admin/user-accounts/{{ user.userID }}/delete" method="POST">
+            <button type="submit" class="action-btn">Delete</button>
+        </form>
 
-        toggleButton.addEventListener("click", function () {
-            sidebar.classList.toggle("collapsed");
-        });
-    </script>
+        {% if user.userType == 'system admin' %}
+            <span class="admin-protected">Protected</span>
+        {% elif user.accountStatus == 'suspended' %}
+            <form action="/admin/user-accounts/{{ user.userID }}/status" method="POST">
+                <input type="hidden" name="action" value="unsuspend">
+                <button type="submit" class="action-btn">Unsuspend</button>
+            </form>
+        {% else %}
+            <form action="/admin/user-accounts/{{ user.userID }}/status" method="POST">
+                <input type="hidden" name="action" value="suspend">
+                <button type="submit" class="action-btn">Suspend</button>
+            </form>
+        {% endif %}
+    </div>
+</section>
 
-</body>
-</html>
+<section class="details-section">
+    <h2>Personal Information</h2>
+
+    <div class="details-grid">
+        <div class="detail-item">
+            <label>Gender</label>
+            <p>{{ user.gender if user.gender else '-' }}</p>
+        </div>
+
+        <div class="detail-item">
+            <label>Date Of Birth</label>
+            <p>
+                {% if user.dateOfBirth %}
+                    {{ user.dateOfBirth.strftime('%d/%m/%Y') if user.dateOfBirth.__class__.__name__ == 'date' else user.dateOfBirth }}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="detail-item full-width">
+            <label>Category Interested</label>
+            <p>
+                {% if interests %}
+                    {{ interests|join(', ') }}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="details-section">
+    <h2>Contact Information</h2>
+
+    <div class="details-grid">
+        <div class="detail-item full-width">
+            <label>Phone Number</label>
+            <p>{{ user.phone if user.phone else '-' }}</p>
+        </div>
+    </div>
+</section>
+
+<div class="back-btn-wrapper">
+    <a href="/admin/user-accounts" class="back-btn">Back to User Accounts</a>
+</div>
+{% endblock %}

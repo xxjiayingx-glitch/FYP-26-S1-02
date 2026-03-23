@@ -75,9 +75,11 @@ class ReportedArticle:
         cursor.execute(""" 
             SELECT 
                 a.articleID,
-                rc.categoryName AS reason,
-                COUNT(ra.articleID) AS totalReports,
+                GROUP_CONCAT(DISTINCT ua.username SEPARATOR ', ') AS reportedBy,
+                GROUP_CONCAT(DISTINCT rc.categoryName SEPARATOR ', ') AS reasons,
+                totals.totalReports,
                 a.articleTitle,
+                author.username AS createdBy,
                 a.credibilityScore,
                 a.articleStatus,
                 ra.reportStatus,
@@ -86,8 +88,18 @@ class ReportedArticle:
             FROM ReportedArticle ra
             JOIN Article a ON ra.articleID = a.articleID
             JOIN ArticleImage ai on a.articleID = ai.articleID
-            LEFT JOIN ReportCategory rc on ra.reason = rc.reportCategoryID
-            WHERE ra.reportID = %s
+            LEFT JOIN ReportCategory rc on ra.reportCategoryID = rc.reportCategoryID
+            LEFT JOIN UserAccount ua on ra.userID = ua.userID
+            LEFT JOIN UserAccount author on a.created_by = author.userID
+            JOIN (
+                SELECT articleID, COUNT(*) AS totalReports
+                FROM ReportedArticle
+                GROUP BY articleID
+            ) totals ON totals.articleID = a.articleID
+            WHERE a.articleID = (
+                SELECT articleID
+                FROM ReportedArticle
+                WHERE reportID = %s)
         """, (report_id,))
 
         reportDetails = cursor.fetchone()

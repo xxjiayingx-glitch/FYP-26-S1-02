@@ -1,188 +1,104 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Accounts</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_accounts.css') }}">
-</head>
-<body>
+{% extends "admin_base.html" %}
 
-    <!-- Top bar stays same -->
-    <header class="topbar">
-        <div class="brand">Daily Scoop News<br>System</div>
+{% block title %}User Accounts{% endblock %}
 
-        <div class="top-right">
-            <div class="avatar">
-                {% if admin and admin.profileImage %}
-                    <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
-                {% else %}
-                    <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
-                {% endif %}
-            </div>
-            <span>Hi, {{ admin.username if admin else 'Username' }}</span>
-            <a href="#">Logout</a>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user_accounts.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>User Accounts</h1>
+    <p>Manage registered users and account status</p>
+</section>
+
+<section class="filter-bar">
+    <form method="GET" action="/admin/user-accounts">
+        <div class="search-box">
+            <input type="text" name="q" placeholder="Search by username or ID" value="{{ q }}">
+            <button type="submit" class="search-icon"></button>
         </div>
-    </header>
 
-    <div class="layout">
+        <select name="userType" class="status-select">
+            <option value="">--Select--</option>
+            <option value="System Admin" {% if user_type == 'System Admin' %}selected{% endif %}>System Admin</option>
+            <option value="Premium" {% if user_type == 'Premium' %}selected{% endif %}>Premium</option>
+        </select>
 
-        <!-- Sidebar stays same -->
-        <aside class="sidebar" id="sidebar">
-            <div class="profile-box">
-                <div class="avatar">
-                    {% if admin and admin.profileImage %}
-                        <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
-                    {% else %}
-                        <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
-                    {% endif %}
-                </div>
+        <select name="accountStatus" class="status-select">
+            <option value="">--Select Status--</option>
+            <option value="Active" {% if account_status == 'Active' %}selected{% endif %}>Active</option>
+            <option value="Suspended" {% if account_status == 'Suspended' %}selected{% endif %}>Suspended</option>
+            <option value="Pending" {% if account_status == 'Pending' %}selected{% endif %}>Pending</option>
+        </select>
 
-                <div class="profile-info">
-                    <div class="username">{{ admin.username }}</div>
-                    <div class="role">{{ admin.userType }}</div>
-                </div>
-            </div>
+        <button type="submit" class="search-btn">Search</button>
+        <a href="/admin/user-accounts" class="clear-btn">Clear</a>
+    </form>
+</section>
 
-            
+<section class="table-section">
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Account<br>Created Date</th>
+                <th>Account Status</th>
+                <th></th>
+            </tr>
+        </thead>
 
-            <nav class="menu">
-                <a href="/admin/dashboard">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">Dashboard</span>
-                </a>
-                <a href="/admin/user-accounts">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">User Accounts</span>
-                </a>
-                <a href="/admin/article-reported"><span class="menu-icon"></span><span class="menu-text">Article Reported</span></a>
-                <a href="/admin/category-management"><span class="menu-icon"></span><span class="menu-text">Category Management</span></a>
-                <a href="/admin/webpage-management"><span class="menu-icon"></span><span class="menu-text">Webpage Management</span></a>
-                <a href="#"><span class="menu-icon"></span><span class="menu-text">System Monitoring</span></a>
-                <a href="/admin/auto-publish-rules"><span class="menu-icon"></span><span class="menu-text">Auto-Publish Rules</span></a>
-            </nav>
-        </aside>
-
-        <!-- Main content -->
-        <main class="content">
-            <button class="hamburger" id="toggleSidebar">☰</button>
-
-            <section class="page-header">
-                <h1>User Accounts</h1>
-                <p>Manage registered users and account status</p>
-            </section>
-
-            <section class="filter-bar">
-                <form method="GET" action="/admin/user-accounts">
-                    <div class="search-box">
-                        <input type="text" name="q" placeholder="Search by username or ID" value="{{ q }}">
-                        <button type="submit" class="search-icon"></button>
-                    </div>
-
-                    <select name="userType" class="status-select">
-                        <option value="">--Select--</option>
-                        <option value="System Admin" {% if user_type == 'System Admin' %}selected{% endif %}>System Admin</option>
-                        <option value="Premium" {% if user_type == 'Premium' %}selected{% endif %}>Premium</option>
-                        <option value="AI Trainer" {% if user_type == 'AI Trainer' %}selected{% endif %}>AI Trainer</option>
-                    </select>
-
-                    <select name="accountStatus" class="status-select">
-                        <option value="">--Select Status--</option>
-                        <option value="Active" {% if account_status == 'Active' %}selected{% endif %}>Active</option>
-                        <option value="Suspended" {% if account_status == 'Suspended' %}selected{% endif %}>Suspended</option>
-                    </select>
-
-                    <button type="submit" class="search-btn">Search</button>
-                    <a href="/admin/user-accounts" class="clear-btn">Clear</a>
-                </form>
-            </section>
-
-            <section class="table-section">
-                <table class="user-table">
-                    <thead>
-                        <tr>
-                            <th>User ID</th>
-                            <th>Username</th>
-                            <th>Role</th>
-                            <th>Account<br>Created Date</th>
-                            <th>Account Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% if users %}
-                            {% for user in users %}
-                            <tr>
-                                <td>{{ "%02d"|format(user.userID) }}</td>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.userType }}</td>
-                                <td>
-                                    {% if user.created_at %}
-                                        {{ user.created_at.strftime('%d/%m/%y') if user.created_at.__class__.__name__ == 'datetime' else user.created_at }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <span class="status-badge {{ user.accountStatus|lower if user.accountStatus else 'unknown' }}">
-                                        {{ user.accountStatus if user.accountStatus else 'Unknown' }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="/admin/user-accounts/{{ user.userID }}" class="detail-btn">&gt;</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
+        <tbody>
+            {% if users %}
+                {% for user in users %}
+                <tr>
+                    <td>{{ "%02d"|format(user.userID) }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.userType }}</td>
+                    <td>
+                        {% if user.created_at %}
+                            {{ user.created_at.strftime('%d/%m/%y') if user.created_at.__class__.__name__ == 'datetime' else user.created_at }}
                         {% else %}
-                            <tr>
-                                <td colspan="6" class="no-data">No user accounts found.</td>
-                            </tr>
+                            -
                         {% endif %}
-                    </tbody>
-                </table>
-            </section>
-
-            {% if total_pages > 1 %}
-            <div class="pagination">
-
-                {% if page > 1 %}
-                    <a href="?page={{ page-1 }}">&lt;</a>
-                {% endif %}
-
-                {% for p in range(1, total_pages + 1) %}
-                    <a class="{% if p == page %}active{% endif %}" href="?page={{ p }}">
-                        {{ p }}
-                    </a>
+                    </td>
+                    <td>
+                        <span class="status-badge {{ user.accountStatus|lower if user.accountStatus else 'unknown' }}">
+                            {{ user.accountStatus if user.accountStatus else 'Unknown' }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="/admin/user-accounts/{{ user.userID }}" class="detail-btn">&gt;</a>
+                    </td>
+                </tr>
                 {% endfor %}
-
-                {% if page < total_pages %}
-                    <a href="?page={{ page+1 }}">&gt;</a>
-                {% endif %}
-
-            </div>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="no-data">No user accounts found.</td>
+                </tr>
             {% endif %}
+        </tbody>
+    </table>
+</section>
 
-            <!-- <section class="pagination">
-                <a href="#">&lt;</a>
-                <a href="#" class="active-page">1</a>
-                <a href="#">2</a>
-                <a href="#">3</a>
-                <a href="#">4</a>
-                <a href="#">5</a>
-                <a href="#">&gt;</a>
-            </section> -->
-        </main>
-    </div>
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+        <a href="?page={{ page-1 }}{% if q %}&q={{ q }}{% endif %}{% if user_type %}&userType={{ user_type }}{% endif %}{% if account_status %}&accountStatus={{ account_status }}{% endif %}">&lt;</a>
+    {% endif %}
 
-    <script>
-        const toggleButton = document.getElementById("toggleSidebar");
-        const sidebar = document.getElementById("sidebar");
+    {% for p in range(1, total_pages + 1) %}
+        <a class="{% if p == page %}active{% endif %}"
+           href="?page={{ p }}{% if q %}&q={{ q }}{% endif %}{% if user_type %}&userType={{ user_type }}{% endif %}{% if account_status %}&accountStatus={{ account_status }}{% endif %}">
+            {{ p }}
+        </a>
+    {% endfor %}
 
-        toggleButton.addEventListener("click", function () {
-            sidebar.classList.toggle("collapsed");
-        });
-    </script>
-
-</body>
-</html>
+    {% if page < total_pages %}
+        <a href="?page={{ page+1 }}{% if q %}&q={{ q }}{% endif %}{% if user_type %}&userType={{ user_type }}{% endif %}{% if account_status %}&accountStatus={{ account_status }}{% endif %}">&gt;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
