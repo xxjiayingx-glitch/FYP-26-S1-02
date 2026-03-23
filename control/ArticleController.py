@@ -298,22 +298,17 @@ class ArticleController:
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Ensure the ArticleAnalytics record exists for the article
         cursor.execute("""
             INSERT INTO ArticleAnalytics (articleID, views, likes, shares)
             VALUES (%s, 0, 0, 0)
             ON DUPLICATE KEY UPDATE articleID = articleID
         """, (article_id,))
 
-        # Increment views
         cursor.execute("""
             UPDATE ArticleAnalytics
             SET views = views + 1
             WHERE articleID = %s
         """, (article_id,))
-
-        # Recalculate and update the credibility score
-        self.update_credibility_score(article_id)
 
         conn.commit()
         cursor.close()
@@ -323,26 +318,24 @@ class ArticleController:
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Ensure the ArticleAnalytics record exists for the article
         cursor.execute("""
             INSERT INTO ArticleAnalytics (articleID, views, likes, shares)
             VALUES (%s, 0, 0, 0)
             ON DUPLICATE KEY UPDATE articleID = articleID
         """, (article_id,))
 
-        # Increment likes
         cursor.execute("""
             UPDATE ArticleAnalytics
             SET likes = likes + 1
             WHERE articleID = %s
         """, (article_id,))
 
-        # Recalculate and update the credibility score
-        self.update_credibility_score(article_id)
-
         conn.commit()
         cursor.close()
         conn.close()
+
+        # Run after connection closes
+        self.update_credibility_score(article_id)
 
     def decrement_like_count(self, article_id):
         conn = get_db_connection()
@@ -446,22 +439,30 @@ class ArticleController:
     def toggle_save_article(self, user_id, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
-        try:
-            if self.is_article_saved(user_id, article_id):
-                # Already saved → remove
-                sql = "DELETE FROM Favourite WHERE userID=%s AND articleID=%s"
-                cursor.execute(sql, (user_id, article_id))
-                conn.commit()
-                return False  # now unsaved
-            else:
-                # Not saved → add
-                sql = "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())"
-                cursor.execute(sql, (user_id, article_id))
-                conn.commit()
-                return True  # now saved
-        finally:
-            cursor.close()
-            conn.close()
+
+        cursor.execute(
+            "SELECT 1 FROM Favourite WHERE userID=%s AND articleID=%s",
+            (user_id, article_id)
+        )
+
+        if cursor.fetchone():
+            cursor.execute(
+                "DELETE FROM Favourite WHERE userID=%s AND articleID=%s",
+                (user_id, article_id)
+            )
+            saved = False
+        else:
+            cursor.execute(
+                "INSERT INTO Favourite (userID, articleID, saved_at) VALUES (%s, %s, NOW())",
+                (user_id, article_id)
+            )
+            saved = True
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return saved
     
     
     def is_valid_report_category(self, report_category_id):
