@@ -31,8 +31,8 @@ def unreg_home():
     else:
         latest_articles = articleCTL.get_home_latest_articles(limit=3, offset=0)
     
-    # For testimonials, to display 3 on guest homepage on load
-    testimonials=testimonialCTL.getHomeTestimonials(offset=0, limit=3)
+    # For testimonials, to display 4 on guest homepage on load
+    testimonials=testimonialCTL.getHomeTestimonials(offset=0, limit=4)
 
     # For product features, to display 4 on guest homepage on load
     features = featuresCTL.get_features(offset=0, limit=4)
@@ -78,8 +78,8 @@ def load_more_articles():
 @home_bp.route("/load-more-testimonials")
 def load_more_testimonials():
 
-    offset = int(request.args.get("offset", 3))  # default 3
-    limit = 6
+    offset = int(request.args.get("offset", 4))  # default 3
+    limit = 8
 
     testimonials = testimonialCTL.getHomeTestimonials(offset=offset, limit=limit + 1)
 
