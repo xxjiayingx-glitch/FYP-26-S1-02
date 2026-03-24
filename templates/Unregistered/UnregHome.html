@@ -54,10 +54,10 @@
           <span>Like: {{ headline.likes }}</span>
         </div>
 
-        <!-- Credibility -->
+        <!-- Credibility
         <div class="meta-item">
           <span>Score: {{ "%.1f"|format(headline.credibilityScore) }}</span>
-        </div>
+        </div> -->
 
         <div class="featured-right">
           {% if headline.imageURL %}
@@ -129,10 +129,10 @@
           <span>Like: {{ article.likes }}</span>
         </div>
 
-        <!-- Credibility -->
+        <!-- Credibility
         <div class="meta-item">
           <span>Score: {{ "%.1f"|format(article.credibilityScore) }}</span>
-        </div>
+        </div> -->
       </div>
         <p class="news-para">{{ article['content'][:120] }}...</p>
         <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=article.articleID) }}">
@@ -235,10 +235,10 @@
                 <span>Like: ${article.likes ?? 0}</span>
               </div>
 
-              <!-- Credibility -->
-              <div class="meta-item">
-                <span>Score: ${(article.credibilityScore ?? 0).toFixed(1)}</span>
-              </div>
+              // <!-- Credibility -->
+              // <div class="meta-item">
+              //   <span>Score: ${(article.credibilityScore ?? 0).toFixed(1)}</span>
+              // </div>
               </div>
               <p class="news-para">${article.content}...</p>
               <a class="read-more" href="${articleDetailBase}${article.articleID}">Read more......</a>
