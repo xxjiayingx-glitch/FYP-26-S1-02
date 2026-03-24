@@ -6,40 +6,40 @@
 <div class="my-articles-container">
     <h2 class="page-title">My Articles</h2>
 
-    <div class="articles-topbar">
-        <form method="GET" action="{{ url_for('my_articles') }}" class="search-bar">
-            <input 
-                type="text" 
-                name="keyword" 
-                class="search-input"
-                placeholder="Search articles..."
-                value="{{ keyword if keyword else '' }}"
-            >
+<div class="articles-topbar">
 
-        <div class="status-tabs">
-            <a href="{{ url_for('my_articles') }}" 
-            class="{% if not status %}active{% endif %}">
-                All
-            </a>
+    <form method="GET" action="{{ url_for('my_articles') }}" class="search-bar">
+        <input 
+            type="text" 
+            name="keyword" 
+            class="search-input"
+            placeholder="Search articles..."
+            value="{{ keyword if keyword else '' }}"
+        >
+        <button type="submit" class="btn search-btn">Search</button>
+    </form>
 
-            <a href="{{ url_for('my_articles', status='draft') }}" 
-            class="{% if status == 'draft' %}active{% endif %}">
-                Draft
-            </a>
+    <div class="status-tabs">
+        <a href="{{ url_for('my_articles') }}" 
+           class="{% if not status %}active{% endif %}">
+            All
+        </a>
 
-            <a href="{{ url_for('my_articles', status='published') }}" 
-            class="{% if status == 'published' %}active{% endif %}">
-                Published
-            </a>
-        </div>
+        <a href="{{ url_for('my_articles', status='draft') }}" 
+           class="{% if status == 'draft' %}active{% endif %}">
+            Draft
+        </a>
 
-            <button type="submit" class="btn search-btn">Search</button>
-        </form>
-
-        <a href="{{ url_for('create_article') }}" class="btn create-article-btn">
-            Create New Article
+        <a href="{{ url_for('my_articles', status='published') }}" 
+           class="{% if status == 'published' %}active{% endif %}">
+            Published
         </a>
     </div>
+
+    <a href="{{ url_for('create_article') }}" class="btn create-article-btn">
+        Create Article
+    </a>
+</div>
 
     {% if articles %}
         <div class="articles-grid">
