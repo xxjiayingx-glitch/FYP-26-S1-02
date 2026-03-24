@@ -327,11 +327,14 @@ def my_articles():
 
     keyword = request.args.get("keyword", "").strip()
     category_id = request.args.get("category_id", "").strip()
+    status = request.args.get("status", "").strip()   # ✅ ADD THIS
 
     categories = article_controller.get_categories()
 
-    if keyword or category_id:
-        articles = article_controller.search_my_articles(user_id, keyword, category_id)
+    if keyword or category_id or status:
+        articles = article_controller.search_my_articles(
+            user_id, keyword, category_id, status   # ✅ PASS IT
+        )
     else:
         articles = article_controller.get_my_articles(user_id)
 
@@ -340,8 +343,10 @@ def my_articles():
         articles=articles,
         keyword=keyword,
         category_id=category_id,
+        status=status,   # ✅ SEND TO TEMPLATE
         categories=categories
     )
+    
 # Create Article Route
 @app.route("/create_article", methods=["GET", "POST"])
 def create_article():

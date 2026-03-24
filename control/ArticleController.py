@@ -41,8 +41,42 @@ class ArticleController:
     def delete_article(self, article_id):
         return self.article_entity.delete_article(article_id)
 
-    def search_my_articles(self, user_id, keyword="", category_id=""):
-        return self.article_entity.search_my_articles(user_id, keyword, category_id)
+    def search_my_articles(self, user_id, keyword="", category_id="", status=""):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT a.*, c.categoryName, ai.imageURL
+            FROM Article a
+            LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            WHERE a.created_by = %s
+        """
+        params = [user_id]
+
+        if keyword:
+            query += " AND a.articleTitle LIKE %s"
+            params.append(f"%{keyword}%")
+
+        if category_id:
+            query += " AND a.categoryID = %s"
+            params.append(category_id)
+
+        if status:
+            query += " AND LOWER(a.articleStatus) = LOWER(%s)"
+            params.append(status)
+
+        query += " ORDER BY a.created_at DESC"
+
+        print("QUERY:", query)
+        print("PARAMS:", params)
+
+        cursor.execute(query, params)
+        articles = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        return articles
     
     def get_article(self, article_id):
         conn = get_db_connection()

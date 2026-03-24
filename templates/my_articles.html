@@ -15,6 +15,24 @@
                 placeholder="Search articles..."
                 value="{{ keyword if keyword else '' }}"
             >
+
+        <div class="status-tabs">
+            <a href="{{ url_for('my_articles') }}" 
+            class="{% if not status %}active{% endif %}">
+                All
+            </a>
+
+            <a href="{{ url_for('my_articles', status='draft') }}" 
+            class="{% if status == 'draft' %}active{% endif %}">
+                Draft
+            </a>
+
+            <a href="{{ url_for('my_articles', status='published') }}" 
+            class="{% if status == 'published' %}active{% endif %}">
+                Published
+            </a>
+        </div>
+
             <button type="submit" class="btn search-btn">Search</button>
         </form>
 
