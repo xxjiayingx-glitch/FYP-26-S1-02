@@ -1,5 +1,3 @@
-import hashlib, binascii, os
-
 from entity.UserAccount import UserAccount
 from entity.Article import Article
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -8,6 +6,11 @@ class UpdateProfileCTL:
 
     @staticmethod
     def update_profile(userID, form):
+        user = UserAccount().get_profile(userID)
+
+        if not user:
+            raise ValueError("User not found.")
+
         first_name = form.get("firstName")
         last_name = form.get("lastName")
         email = form.get("email")
@@ -16,6 +19,18 @@ class UpdateProfileCTL:
         gender = form.get("gender")
         dateOfBirth = form.get("dateOfBirth")
 
+        # ENFORCE BACKEND RESTRICTIONS (IMPORTANT)
+        if not user.get("can_edit_email"):
+            email = user.get("email")
+
+        if not user.get("can_edit_username"):
+            username = user.get("username")
+
+        # VALIDATE GENDER
+        if gender not in ["Male", "Female"]:
+            gender = None
+
+        # INTERESTS HANDLING
         interests_list = form.getlist("interests[]")
 
         cleaned_interests = list(dict.fromkeys(
@@ -24,10 +39,14 @@ class UpdateProfileCTL:
             if item.strip()
         ))
 
+        # MIN + MAX VALIDATION
+        if len(cleaned_interests) < 1:
+            raise ValueError("Please select at least 1 interest.")
+
         if len(cleaned_interests) > 5:
             raise ValueError("You can select a maximum of 5 interests only.")
 
-        interests = ",".join(cleaned_interests) if cleaned_interests else None
+        interests = ",".join(cleaned_interests)
 
         UserAccount.update_profile(
             userID,
@@ -48,21 +67,24 @@ class UpdateProfileCTL:
     @staticmethod
     def change_password(userID, current_password, new_password):
         user = UserAccount().get_profile(userID)
+
         if not user:
             raise ValueError("User not found.")
 
         stored_pw = user.get("pwd")
+
         if not stored_pw:
             raise ValueError("Password data is corrupted.")
 
-        # ✅ Use werkzeug instead of scrypt
+        # VERIFY CURRENT PASSWORD
         if not check_password_hash(stored_pw, current_password):
             raise ValueError("Current password is incorrect.")
 
-        if len(new_password) < 6:
-            raise ValueError("Password must be at least 6 characters long.")
+        # PASSWORD POLICY
+        if len(new_password) < 8:
+            raise ValueError("Password must be at least 8 characters long.")
 
-        # ✅ Generate new hash
+        # HASH PASSWORD
         new_hash = generate_password_hash(new_password)
 
         UserAccount.update_password(userID, new_hash)
@@ -85,7 +107,8 @@ class UpdateProfileCTL:
         if user.get("verifiedBadgeStatus") == "Pending":
             raise ValueError("Your verification application is already pending.")
 
-        eligible_article_count = UserAccount.count_eligible_verified_articles(userID)
+        # FIXED (correct source)
+        eligible_article_count = Article.count_eligible_verified_articles(userID)
 
         if eligible_article_count < 5:
             raise ValueError(
@@ -96,7 +119,7 @@ class UpdateProfileCTL:
 
         if not success:
             raise ValueError("Unable to submit verification request.")
-        
+
     @staticmethod
     def verify_count(userID):
         return Article.count_eligible_verified_articles(userID)
