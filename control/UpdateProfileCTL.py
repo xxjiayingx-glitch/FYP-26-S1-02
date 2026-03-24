@@ -85,7 +85,7 @@ class UpdateProfileCTL:
             raise ValueError("Password must be at least 8 characters long.")
 
         # HASH PASSWORD
-        new_hash = generate_password_hash(new_password)
+        new_hash = generate_password_hash(new_password, method='pbkdf2:sha256')
 
         UserAccount.update_password(userID, new_hash)
 
