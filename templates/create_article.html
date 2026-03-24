@@ -71,7 +71,9 @@
 
 <div class="create-article-container" style="max-width: 800px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
     <h2>Create New Article</h2>
-
+        <div style="margin-bottom:15px; color:#555; font-size:14px;">
+            <strong>Created On:</strong> {{ current_time }}
+        </div>
         <form method="POST" enctype="multipart/form-data" class="create-article-form">
             
             <!-- Title -->

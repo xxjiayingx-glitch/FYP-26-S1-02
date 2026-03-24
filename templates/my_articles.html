@@ -6,40 +6,40 @@
 <div class="my-articles-container">
     <h2 class="page-title">My Articles</h2>
 
-<div class="articles-topbar">
+    <div class="articles-topbar">
 
-    <form method="GET" action="{{ url_for('my_articles') }}" class="search-bar">
-        <input 
-            type="text" 
-            name="keyword" 
-            class="search-input"
-            placeholder="Search articles..."
-            value="{{ keyword if keyword else '' }}"
-        >
-        <button type="submit" class="btn search-btn">Search</button>
-    </form>
+        <form method="GET" action="{{ url_for('my_articles') }}" class="search-bar">
+            <input 
+                type="text" 
+                name="keyword" 
+                class="search-input"
+                placeholder="Search articles..."
+                value="{{ keyword if keyword else '' }}"
+            >
+            <button type="submit" class="btn search-btn">Search</button>
+        </form>
 
-    <div class="status-tabs">
-        <a href="{{ url_for('my_articles') }}" 
-           class="{% if not status %}active{% endif %}">
-            All
-        </a>
+        <div class="status-tabs">
+            <a href="{{ url_for('my_articles') }}" 
+               class="{% if not status %}active{% endif %}">
+                All
+            </a>
 
-        <a href="{{ url_for('my_articles', status='draft') }}" 
-           class="{% if status == 'draft' %}active{% endif %}">
-            Draft
-        </a>
+            <a href="{{ url_for('my_articles', status='draft') }}" 
+               class="{% if status == 'draft' %}active{% endif %}">
+                Draft
+            </a>
 
-        <a href="{{ url_for('my_articles', status='published') }}" 
-           class="{% if status == 'published' %}active{% endif %}">
-            Published
+            <a href="{{ url_for('my_articles', status='published') }}" 
+               class="{% if status == 'published' %}active{% endif %}">
+                Published
+            </a>
+        </div>
+
+        <a href="{{ url_for('create_article') }}" class="btn create-article-btn">
+            Create Article
         </a>
     </div>
-
-    <a href="{{ url_for('create_article') }}" class="btn create-article-btn">
-        Create Article
-    </a>
-</div>
 
     {% if articles %}
         <div class="articles-grid">
@@ -50,6 +50,7 @@
                     {% else %}
                         <img src="{{ url_for('static', filename='img/default.jpg') }}" alt="Default Image" class="article-img">
                     {% endif %}
+
                     <div class="article-content">
                         <h3 class="article-title">{{ article.articleTitle }}</h3>
 
@@ -57,10 +58,32 @@
                             {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
                         </p>
 
-                        <div class="article-meta">
+                        <div class="article-meta" style="display:flex; flex-direction:column; gap:6px; font-size:14px;">
                             <span><strong>Status:</strong> {{ article.articleStatus }}</span>
                             <span><strong>Category:</strong> {{ article.categoryName if article.categoryName else 'N/A' }}</span>
-                            <span><strong>Created:</strong> {{ article.created_at }}</span>
+
+                            <span>
+                                <strong>Created:</strong>
+                                {{ article.created_at.strftime('%d %b %Y %H:%M') if article.created_at else 'N/A' }}
+                            </span>
+
+                            <span>
+                                <strong>First Edited:</strong>
+                                {% if article.first_edited_at %}
+                                    {{ article.first_edited_at.strftime('%d %b %Y %H:%M') }}
+                                {% else %}
+                                    Not edited yet
+                                {% endif %}
+                            </span>
+
+                            <span>
+                                <strong>Last Edited:</strong>
+                                {% if article.last_edited_at %}
+                                    {{ article.last_edited_at.strftime('%d %b %Y %H:%M') }}
+                                {% else %}
+                                    Not edited yet
+                                {% endif %}
+                            </span>
                         </div>
 
                         <div class="article-actions">

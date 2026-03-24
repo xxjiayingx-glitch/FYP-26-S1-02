@@ -70,22 +70,35 @@ class Article:
         cursor = conn.cursor()
 
         sql = """
-        SELECT a.*, c.categoryName, ai.imageURL
+        SELECT 
+            a.articleID,
+            a.articleTitle,
+            a.content,
+            a.articleStatus,
+            a.categoryID,
+            a.created_at,
+            a.first_edited_at,
+            a.last_edited_at,
+            c.categoryName,
+            ai.imageURL
         FROM Article a
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
         WHERE a.created_by = %s
         ORDER BY a.created_at DESC
         """
+
         cursor.execute(sql, (user_id,))
         articles = cursor.fetchall()
-
+        
+        cursor.close()
         conn.close()
         return articles
 
     def get_article(self, articleID):
         conn = get_db_connection()
         cursor = conn.cursor()
+        
         query = """
             SELECT 
                 a.articleID,
@@ -94,6 +107,9 @@ class Article:
                 a.categoryID,
                 a.articleStatus,
                 a.created_at,
+                a.first_edited_at,
+                a.last_edited_at,
+                a.updated_at,
                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
                 c.categoryName,
                 a.created_by,
@@ -106,9 +122,12 @@ class Article:
             ORDER BY ai.uploaded_at ASC
             LIMIT 1
         """
+
         cursor.execute(query, (articleID,))
         article = cursor.fetchone()
+        
         cursor.close()
+        conn.close()
         return article
 
     def get_headline_article(self):
@@ -180,15 +199,28 @@ class Article:
 
         sql = """
         INSERT INTO Article
-        (articleTitle, content, created_at, articleStatus, created_by, updated_at, categoryID)
-        VALUES (%s, %s, NOW(), %s, %s, NOW(), %s)
+        (
+            articleTitle,
+            content,
+            created_at,
+            first_edited_at,
+            last_edited_at,
+            articleStatus,
+            created_by,
+            updated_at,
+            categoryID
+        )
+        VALUES (%s, %s, NOW(), NULL, NULL, %s, %s, NOW(), %s)
         """
         cursor.execute(sql, (title, content, status, user_id, category_id))
         article_id = cursor.lastrowid
 
         conn.commit()
+        cursor.close()
         conn.close()
         return article_id
+
+
 
     def insert_article_image(self, article_id, image_url):
         conn = get_db_connection()
@@ -216,7 +248,7 @@ class Article:
         conn.commit()
         conn.close()
 
-    def search_my_articles(self, user_id, keyword="", category_id=""):
+    def search_my_articles(self, user_id, keyword="", category_id="", status=""):
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -225,42 +257,39 @@ class Article:
                 a.articleID,
                 a.articleTitle,
                 a.content,
-                a.created_at,
                 a.articleStatus,
                 a.categoryID,
-                ac.categoryName,
+                a.created_at,
+                a.first_edited_at,
+                a.last_edited_at,
+                c.categoryName,
                 ai.imageURL
             FROM Article a
-            LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
+            LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
             WHERE a.created_by = %s
         """
         params = [user_id]
 
         if keyword:
-            query += """
-                AND (
-                    LOWER(a.articleTitle) LIKE LOWER(%s)
-                    OR LOWER(a.content) LIKE LOWER(%s)
-                    OR LOWER(ac.categoryName) LIKE LOWER(%s)
-                )
-            """
-            like_keyword = f"%{keyword}%"
-            params.extend([like_keyword, like_keyword, like_keyword])
+            query += " AND a.articleTitle LIKE %s"
+            params.append(f"%{keyword}%")
 
         if category_id:
             query += " AND a.categoryID = %s"
             params.append(category_id)
 
-        query += " ORDER BY a.created_at DESC"
+        if status:
+            query += " AND LOWER(a.articleStatus) = LOWER(%s)"
+            params.append(status)
 
-        print("SEARCH QUERY:", query)
-        print("SEARCH PARAMS:", params)
+        query += " ORDER BY a.created_at DESC"
 
         cursor.execute(query, params)
         articles = cursor.fetchall()
-        conn.close()
 
+        cursor.close()
+        conn.close()
         return articles
 
     def get_home_headline_article(self):

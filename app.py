@@ -15,6 +15,9 @@ from werkzeug.utils import secure_filename
 from entity.db_connection import get_db_connection
 from routes.fact_check_routes import fact_check_bp
 
+# timestamp
+from datetime import datetime
+
 from boundary.AdminDashboardPage import admin_dashboard_bp
 from boundary.ViewUsersPage import view_users_bp
 from boundary.LoginPage import login_bp
@@ -234,6 +237,10 @@ def article_detail(article_id):
     user_type = session.get("userType", "").strip().lower()
     is_premium = "premium" in user_type
 
+    print("SESSION userID:", session.get("userID"))
+    print("SESSION userType:", session.get("userType"))
+    print("is_saved:", article_controller.is_article_saved(session.get("userID"), article_id))
+    
     return render_template(
         "article_detail.html",
         article=article,
@@ -258,33 +265,35 @@ def add_comment_route():
     return redirect(url_for("article_detail", article_id=article_id))
 
 
-# Save article route (for premium users)
+# Save article route
 @app.route("/toggle_save_article", methods=["POST"])
 def toggle_save_article():
     if "userID" not in session:
-        return jsonify({"status": "error", "message": "Not Logged In"}), 403
+        return jsonify({"status": "error", "message": "Please log in first."}), 403
 
-    if session.get("userType", "").strip().lower() != "premium":
+    user_type = session.get("userType", "").strip().lower()
+
+    # more robust premium check
+    if "premium" not in user_type:
         return jsonify({
-            "status": "error",
-            "message": "This SAVE feature is available for Premium Users only. Upgrade to enjoy this feature."
+            "status": "premium_only",
+            "message": "This is a Premium feature. Upgrade your account to save articles and view them later anytime."
         }), 403
 
     article_id = request.form.get("articleID")
+    if not article_id:
+        return jsonify({"status": "error", "message": "Missing article ID."}), 400
+
+    article_id = int(article_id)
     user_id = session["userID"]
 
-    # toggle_save_article returns True if saved, False if unsaved
     now_saved = article_controller.toggle_save_article(user_id, article_id)
-
-    if now_saved:
-        article_controller.increment_like_count(article_id)
-    else:
-        article_controller.decrement_like_count(article_id)
-
+    print("SAVE ROUTE userID:", session.get("userID"))
+    print("SAVE ROUTE articleID:", request.form.get("articleID"))
+    
     return jsonify({
         "status": "saved" if now_saved else "unsaved"
     })
-
 
 # Report article route
 @app.route("/report_article/<int:article_id>", methods=["POST"])
@@ -382,8 +391,13 @@ def create_article():
 
     # GET → fetch categories
     categories = article_controller.get_categories()
-    return render_template("create_article.html", categories=categories)
-
+    current_time = datetime.now().strftime("%d %b %Y %H:%M:%S")
+    
+    return render_template(
+        "create_article.html",
+        categories=categories,
+        current_time=current_time
+    )
 
 # Edit Article Route
 @app.route("/edit_article/<int:article_id>", methods=["GET", "POST"])

@@ -46,7 +46,17 @@ class ArticleController:
         cursor = conn.cursor()
 
         query = """
-            SELECT a.*, c.categoryName, ai.imageURL
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                a.articleStatus,
+                a.categoryID,
+                a.created_at,
+                a.first_edited_at,
+                a.last_edited_at,
+                c.categoryName,
+                ai.imageURL
             FROM Article a
             LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -68,9 +78,6 @@ class ArticleController:
 
         query += " ORDER BY a.created_at DESC"
 
-        print("QUERY:", query)
-        print("PARAMS:", params)
-
         cursor.execute(query, params)
         articles = cursor.fetchall()
 
@@ -81,6 +88,7 @@ class ArticleController:
     def get_article(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
+        
         query = """
             SELECT 
                 a.articleID,
@@ -89,18 +97,24 @@ class ArticleController:
                 a.categoryID,
                 a.articleStatus,
                 a.created_at,
+                a.first_edited_at,
+                a.last_edited_at,
+                a.updated_at,
                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
                 c.categoryName,
                 a.created_by,
-                ai.imageURL AS featured_image
+                ai.imageURL AS featured_image,
+                IFNULL(an.likes, 0) AS likes
             FROM Article a
             JOIN UserAccount u ON a.created_by = u.userID
             JOIN ArticleCategory c ON a.categoryID = c.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
             WHERE a.articleID = %s
             ORDER BY ai.uploaded_at ASC
             LIMIT 1
         """
+
         cursor.execute(query, (article_id,))
         article = cursor.fetchone()
         cursor.close()
@@ -113,12 +127,17 @@ class ArticleController:
         # Update article basic info
         sql = """
             UPDATE Article
-            SET articleTitle=%s,
-                categoryID=%s,
-                content=%s,
-                articleStatus=%s,
-                updated_at=NOW()
-            WHERE articleID=%s
+            SET articleTitle = %s,
+                categoryID = %s,
+                content = %s,
+                articleStatus = %s,
+                first_edited_at = CASE
+                    WHEN first_edited_at IS NULL THEN NOW()
+                    ELSE first_edited_at
+                END,
+                last_edited_at = NOW(),
+                updated_at = NOW()
+            WHERE articleID = %s
         """
         cursor.execute(sql, (title, category_id, content, status, article_id))
         
@@ -374,15 +393,24 @@ class ArticleController:
     def decrement_like_count(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO ArticleAnalytics (articleID, views, likes, shares)
+            VALUES (%s, 0, 0, 0)
+            ON DUPLICATE KEY UPDATE articleID = articleID
+        """, (article_id,))
+
         cursor.execute("""
             UPDATE ArticleAnalytics
             SET likes = GREATEST(likes - 1, 0)
             WHERE articleID = %s
         """, (article_id,))
+
         conn.commit()
         cursor.close()
         conn.close()
 
+        self.update_credibility_score(article_id)
 
     def get_recommended_articles(self, user_id):
         """
@@ -444,20 +472,25 @@ class ArticleController:
         conn.close()
 
     def is_article_saved(self, user_id, article_id):
-        """
-        Check if a given article is already saved by the user.
-        Returns True if saved, False otherwise.
-        """
+        if not user_id:
+            return False
+
         conn = get_db_connection()
         cursor = conn.cursor()
-        try:
-            sql = "SELECT 1 FROM Favourite WHERE userID=%s AND articleID=%s LIMIT 1"
-            cursor.execute(sql, (user_id, article_id))
-            result = cursor.fetchone()  # fetch just one row
-            return bool(result)
-        finally:
-            cursor.close()
-            conn.close()
+
+        query = """
+            SELECT 1 
+            FROM Favourite 
+            WHERE userID = %s AND articleID = %s
+            LIMIT 1
+        """
+        cursor.execute(query, (user_id, article_id))
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return result is not None
     
     def save_article(self, user_id, article_id):
         conn = get_db_connection()
@@ -495,6 +528,11 @@ class ArticleController:
         conn.commit()
         cursor.close()
         conn.close()
+
+        if saved:
+            self.increment_like_count(article_id)
+        else:
+            self.decrement_like_count(article_id)
 
         return saved
     

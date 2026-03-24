@@ -1,160 +1,451 @@
-
 {% extends "master.html" %}
-{% set is_premium = True %}
 {% block title %}{{ article.articleTitle }}{% endblock %}
+
 {% block content %}
 <div class="article-container" style="max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.08);">
-    <!-- Article Title -->
-    <h1 style="margin-bottom:15px;">{{ article.articleTitle }}</h1>
-    <!-- Featured Image -->
+
+    <h1>{{ article.articleTitle }}</h1>
+
     {% if article.featured_image %}
-        <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}" 
-             alt="Article Image" 
-             style="width:100%; max-height:400px; object-fit:cover; margin-bottom:20px;">
+    <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}"
+         alt="Article Image"
+         style="width:100%; max-height:400px; object-fit:cover; margin:15px 0;">
     {% endif %}
-    <!-- Metadata -->
-    <div style="color:gray; font-size:0.9em; margin-bottom:20px; display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
-        <span>Published On: {{ article.created_at.strftime('%d %b %Y') if article.created_at else '' }}</span>
+
+    <div style="color:gray; font-size:0.9em; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:10px;">
+        <span>Created: {{ article.created_at.strftime('%d %b %Y %H:%M') if article.created_at else 'N/A' }}</span>
+        <span>|</span>
+        <span>First Edited: {{ article.first_edited_at.strftime('%d %b %Y %H:%M') if article.first_edited_at else 'Not edited' }}</span>
+        <span>|</span>
+        <span>Last Edited: {{ article.last_edited_at.strftime('%d %b %Y %H:%M') if article.last_edited_at else 'Not edited' }}</span>
         <span>|</span>
         <span>Author: {{ article.full_name }}</span>
         <span>|</span>
         <span>Category: {{ article.categoryName }}</span>
     </div>
-    <!-- Article Content -->
-    <div style="margin-bottom:20px; white-space:pre-line;">
-        {{ article.content | safe }}
+
+    <div style="margin-bottom:20px; white-space: pre-line;">
+        {{ article.content }}
     </div>
-    <!-- Save / Report Buttons -->
-    <div style="display:flex; gap:15px; margin-bottom:30px;">
-        <!-- Save / Unlike Article -->
-        {% if is_premium %}
-        <button id="save-btn-{{ article.articleID }}" 
-                class="save-btn" 
-                data-article-id="{{ article.articleID }}" 
-                style="background:none; border:none; cursor:pointer; font-size:1.5em; display:flex; align-items:center; gap:5px;">
-            
-            {% if is_saved %}
-                <span class="heart saved">❤️</span> <span class="save-text">Saved</span>
-            {% else %}
-                <span class="heart">🤍</span> <span class="save-text">Save Article</span>
-            {% endif %}
+
+    <div class="article-action-bar">
+
+        <p style="color:red;">DEBUG is_saved = {{ is_saved }}</p>
+        <button id="save-btn"
+                type="button"
+                class="action-btn save-btn {% if is_saved %}saved-active{% endif %}"
+                data-article-id="{{ article.articleID }}">
+
+            <span class="heart-icon">
+                {% if is_saved %}❤️{% else %}🤍{% endif %}
+            </span>
+
+            <span class="save-text">
+                {% if is_saved %}Saved{% else %}Save Article{% endif %}
+            </span>
+
+            <span class="save-count-badge" id="save-count">
+                {{ article.likes }}
+            </span>
         </button>
-        {% endif %}
-        <!-- Report Article Button -->
-        <button type="button" class="btn btn-danger report-btn"
-                data-article-id="{{ article.articleID }}"
-                data-author-id="{{ article.created_by }}">
-            <i class="fa-solid fa-flag"></i> Report Article
+
+        <button type="button"
+                class="action-btn report-btn"
+                data-article-id="{{ article.articleID }}">
+            🚩 Report Article
         </button>
-        <!-- Report Modal -->
-        <div id="reportModal-{{ article.articleID }}" class="report-modal" 
-            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
-            <div style="background:#fff; padding:20px; border-radius:8px; width:400px; position:relative;">
-                <h3>Report Article</h3>
-                <p>Please provide a reason for reporting this article (optional):</p>
-                <form id="reportForm-{{ article.articleID }}" method="post" action="{{ url_for('report_article_route', article_id=article.articleID) }}">
-                    <input type="hidden" name="articleID" value="{{ article.articleID }}">
-                    <input type="hidden" name="authorID" value="{{ article.created_by }}">
-                    <!-- Dropdown to select report category -->
-                    <select name="report_category_id" required>
-                        <option value="1">Spam</option>
-                        <option value="2">Offensive Content</option>
-                        <option value="3">False Information</option>
-                    </select>
-                    <!-- Optional comment -->
-                    <textarea name="optionalComment" placeholder="Provide more details..." style="width:100%; height:80px; margin-bottom:10px; padding:5px;"></textarea>
-                    <button type="submit" style="background:#e74c3c; color:#fff; border:none; padding:6px 12px; border-radius:5px;">Report</button>
-                </form>
-                <!-- Close icon -->
-                <span class="close-report-modal" data-article-id="{{ article.articleID }}" style="position:absolute; top:10px; right:12px; cursor:pointer;">✖</span>
-            </div>
-        </div>
     </div>
-    <!-- Comments Section -->
+
     <div style="background:#eef3ff; padding:20px; border-radius:8px;">
         <h3>Comments</h3>
-        <div style="max-height:250px; overflow-y:auto; margin-bottom:20px;">
-            {% for comment in comments %}
-                <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #d0d0d0;">
-                    <strong>{{ comment.username }}</strong> on {{ comment.created_at.strftime('%b %d, %Y %H:%M') if comment.created_at else '' }}:
-                    <p style="margin:5px 0;">{{ comment.commentText }}</p>
-                </div>
-            {% else %}
-                <p>No comments yet.</p>
-            {% endfor %}
-        </div>
-        {% if session.get('userID') %}
-        <form action="{{ url_for('add_comment_route') }}" method="post">
-            <input type="hidden" name="articleID" value="{{ article.articleID }}">
-            <textarea name="commentText" placeholder="Write a comment..." required 
-                      style="width:100%; height:80px; padding:10px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px;"></textarea>
-            <button type="submit" style="background:#3498db; color:#fff; padding:8px 16px; border:none; border-radius:5px; cursor:pointer;">
-                Submit Comment
-            </button>
-        </form>
-        {% endif %}
+
+        {% for comment in comments %}
+            <p><strong>{{ comment.username }}</strong>: {{ comment.commentText }}</p>
+        {% else %}
+            <p>No comments yet.</p>
+        {% endfor %}
     </div>
 </div>
-<!-- JS -->
+
+<!-- REPORT MODAL -->
+<div id="reportModal-{{ article.articleID }}" class="report-modal">
+    <div class="report-modal-content">
+        <h3>Report Article</h3>
+        <p>Please select a reason for reporting this article.</p>
+
+        <form method="post" action="{{ url_for('report_article_route', article_id=article.articleID) }}">
+            <input type="hidden" name="articleID" value="{{ article.articleID }}">
+            <input type="hidden" name="authorID" value="{{ article.created_by }}">
+
+            <select name="report_category_id" required class="report-select">
+                <option value="" disabled selected>Select a reason</option>
+                <option value="1">Spam</option>
+                <option value="2">Offensive Content</option>
+                <option value="3">False Information</option>
+            </select>
+
+            <textarea name="optionalComment"
+                      placeholder="Provide more details (optional)..."
+                      class="report-textarea"></textarea>
+
+            <div class="modal-actions">
+                <button type="button"
+                        class="modal-btn cancel-btn close-report-modal"
+                        data-article-id="{{ article.articleID }}">
+                    Cancel
+                </button>
+                <button type="submit" class="modal-btn submit-report-btn">
+                    Submit Report
+                </button>
+            </div>
+        </form>
+
+        <span class="close-x close-report-modal" data-article-id="{{ article.articleID }}">✖</span>
+    </div>
+</div>
+
+<!-- PREMIUM MODAL -->
+<div id="premiumModal" class="premium-modal">
+    <div class="premium-modal-content">
+        <h3>🔒 Premium Feature</h3>
+        <p id="premiumMessage"></p>
+
+        <div class="modal-actions">
+            <button type="button" onclick="closePremiumModal()" class="modal-btn cancel-btn">Cancel</button>
+            <a href="{{ url_for('subscription.subscription_page') }}" class="modal-btn upgrade-btn">View Plans</a>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- CONFETTI CANVAS -->
+<canvas id="confetti-canvas"></canvas>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Save/Unsaved toggle
-    document.querySelectorAll('.save-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+    const saveBtn = document.getElementById('save-btn');
+    const saveCountEl = document.getElementById('save-count');
+    let isSaving = false;
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            const articleID = btn.dataset.articleId;
+
+            if (isSaving) return;
+            isSaving = true;
+            saveBtn.disabled = true;
+
+            const articleID = saveBtn.dataset.articleId;
+            const wasSaved = saveBtn.classList.contains('saved-active');
+
             const formData = new FormData();
             formData.append('articleID', articleID);
-            fetch("{{ url_for('toggle_save_article') }}", {
-                method: 'POST',
-                body: formData,
-                credentials: 'same-origin' 
-            })
-            .then(response => response.json())
-            .then(data => {
-                const heart = btn.querySelector('.heart');
-                const text = btn.querySelector('.save-text');
+
+            try {
+                const response = await fetch("{{ url_for('toggle_save_article') }}", {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
                 if (data.status === 'saved') {
-                    heart.textContent = '❤️';
-                    heart.classList.add('saved');
-                    text.textContent = 'Saved';
+                    updateSaveButton(true);
+
+                    if (!wasSaved) {
+                        increaseSaveCount();
+                        popSaveButton();
+
+                        if (!saveBtn.dataset.confettiPlayed) {
+                            launchConfetti();
+                            saveBtn.dataset.confettiPlayed = "true";
+                        }
+                    }
+
+                    showToast("Saved! 🎉");
+
                 } else if (data.status === 'unsaved') {
-                    heart.textContent = '🤍';
-                    heart.classList.remove('saved');
-                    text.textContent = 'Save Article';
+                    updateSaveButton(false);
+
+                    if (wasSaved) {
+                        decreaseSaveCount();
+                    }
+
+                    showToast("Removed from saved articles.");
+
+                } else if (data.status === 'premium_only') {
+                    showPremiumModal(data.message);
                 } else {
-                    alert(data.message || "Error saving article");
+                    showToast(data.message || "Error saving article.");
                 }
-            })
-            .catch(err => {
+
+            } catch (err) {
                 console.error(err);
-                alert("Failed to toggle save. Try again.");
-            });
+                showToast("Failed to save article. Try again.");
+            } finally {
+                setTimeout(() => {
+                    isSaving = false;
+                    saveBtn.disabled = false;
+                }, 600);
+            }
         });
-    });
-    // Report Modal
-    document.querySelectorAll('.report-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const articleID = btn.dataset.articleId;
-            const authorID = btn.dataset.authorId;
-            const modal = document.getElementById('reportModal-' + articleID);
-            modal.style.display = 'flex';
-        });
-    });
-    // Close Report Modal
-    document.querySelectorAll('.cancel-report-btn, .close-report-modal').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const articleID = btn.dataset.articleId;
-            const modal = document.getElementById('reportModal-' + articleID);
-            modal.style.display = 'none';
-        });
-    });
+    }
+
+    function updateSaveButton(saved) {
+        const heart = saveBtn.querySelector('.heart-icon');
+        const text = saveBtn.querySelector('.save-text');
+
+        if (saved) {
+            saveBtn.classList.add('saved-active');
+            heart.textContent = "❤️";
+            text.textContent = "Saved";
+        } else {
+            saveBtn.classList.remove('saved-active');
+            heart.textContent = "🤍";
+            text.textContent = "Save Article";
+        }
+    }
+
+    function increaseSaveCount() {
+        if (!saveCountEl) return;
+        let count = parseInt(saveCountEl.textContent || "0", 10);
+        saveCountEl.textContent = count + 1;
+    }
+
+    function decreaseSaveCount() {
+        if (!saveCountEl) return;
+        let count = parseInt(saveCountEl.textContent || "0", 10);
+        saveCountEl.textContent = Math.max(0, count - 1);
+    }
+
+    function popSaveButton() {
+        saveBtn.animate(
+            [
+                { transform: "scale(1)" },
+                { transform: "scale(1.15)" },
+                { transform: "scale(0.95)" },
+                { transform: "scale(1)" }
+            ],
+            {
+                duration: 250,
+                easing: "ease"
+            }
+        );
+    }
 });
 </script>
+
 <style>
-/* Heart styling */
-.heart.saved {
-    color: #e74c3c;
+.article-action-bar {
+    display: flex;
+    gap: 15px;
+    margin: 25px 0;
+    align-items: center;
+    flex-wrap: wrap;
 }
+
+.action-btn {
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+
+
+.save-btn {
+    background: #f3f4f6;
+    color: #333;
+    font-weight: 500;
+    border-radius: 999px;
+    padding: 10px 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Hover */
+.save-btn:hover {
+    background: #e5e7eb;
+}
+
+/* ACTIVE (saved) */
+.saved-active {
+    background: #fee2e2;
+    color: #dc2626;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.2);
+}
+
+/* Counter badge */
+.save-count-badge {
+    background: white;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #ddd;
+}
+
+
+
+.heart-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-size: 15px;
+}
+
+.report-btn {
+    background: #ffe5e5;
+    color: #c0392b;
+}
+
+.report-btn:hover {
+    background: #ffcccc;
+}
+
+.premium-modal,
+.report-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.premium-modal.show,
+.report-modal.show {
+    display: flex;
+}
+
+.premium-modal-content,
+.report-modal-content {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    width: 380px;
+    max-width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.16);
+}
+
+.report-select,
+.report-textarea {
+    width: 100%;
+    margin-top: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.report-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.modal-actions {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.cancel-btn {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.upgrade-btn {
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+}
+
+.upgrade-btn:hover {
+    background: #1d4ed8;
+}
+
+.submit-report-btn {
+    background: #dc2626;
+    color: white;
+}
+
+.close-x {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+}
+
+.toast {
+    visibility: hidden;
+    min-width: 320px;
+    max-width: 420px;
+    background-color: #2f2f2f;
+    color: white;
+    text-align: center;
+    border-radius: 12px;
+    padding: 16px 24px;
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    opacity: 0;
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+    transition: opacity 0.3s ease, bottom 0.3s ease;
+}
+
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 60px;
+}
+
+#confetti-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10001;
+    pointer-events: none;
+    display: none;
+}
+
+#save-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
 </style>
+
 {% endblock %}
