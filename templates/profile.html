@@ -64,14 +64,18 @@
                             <input type="text" id="lastName" name="lastName" value="{{ user.last_name or '' }}">
                         </div>
 
+                        <!-- EMAIL (Editable only if allowed) -->
                         <div class="form-row">
                             <label for="email">Email</label>
-                            <input type="email" id="email" name="email" value="{{ user.email or '' }}">
+                            <input type="email" id="email" name="email" value="{{ user.email or '' }}"
+                                {% if not user.can_edit_email %}readonly class="readonly-field" title="Email can only be changed via verification"{% endif %}>
                         </div>
 
+                        <!-- USERNAME (Editable only after 30 days) -->
                         <div class="form-row">
                             <label for="username">Username</label>
-                            <input type="text" id="username" name="username" value="{{ user.username or '' }}">
+                            <input type="text" id="username" name="username" value="{{ user.username or '' }}"
+                                {% if not user.can_edit_username %}readonly class="readonly-field" title="You can change your username after 30 days"{% endif %}>
                         </div>
 
                         <div class="form-row">
@@ -101,12 +105,11 @@
                     </div>
 
                     <div class="form-row full-width">
-                        <label for="interests">Select Your Interests (Max 5)</label>
+                        <label for="interests">Select Your Interests (Min 1, Max 5)</label>
 
                         <select id="interests" name="interests[]" multiple>
                             {% for item in ['Technology', 'Politics', 'Sports', 'Education', 'Art', 'Health', 'Parenting', 'Entertainment', 'Business', 'Government'] %}
-                            <option value="{{ item }}"
-                                {% if item.lower() in user.selected_interests %}selected{% endif %}>
+                            <option value="{{ item }}" {% if item.lower() in user.selected_interests %}selected{% endif %}>
                                 {{ item }}
                             </option>
                             {% endfor %}
@@ -119,7 +122,7 @@
                         const interestsSelect = document.getElementById("interests");
 
                         if (interestsSelect) {
-                            new Choices(interestsSelect, {
+                            const choicesInstance = new Choices(interestsSelect, {
                                 removeItemButton: true,
                                 maxItemCount: 5,
                                 searchEnabled: true,
@@ -128,7 +131,16 @@
                                 noResultsText: 'No matching interests found',
                                 itemSelectText: '',
                             });
+
+                            // Enforce minimum 1 interest
+                            interestsSelect.form.addEventListener('submit', function(e) {
+                                if (choicesInstance.getValue(true).length < 1) {
+                                    alert('Please select at least 1 interest.');
+                                    e.preventDefault();
+                                }
+                            });
                         }
+
                     });
                     </script>
 

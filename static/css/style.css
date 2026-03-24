@@ -1321,3 +1321,23 @@ a {
 .choices__input {
     margin: 5px;
 }
+
+/* Readonly / non-editable fields */
+.readonly-field {
+    background-color: #e9ecef !important;
+    /* light grey */
+    color: #6c757d !important;
+    /* muted text */
+    cursor: not-allowed;
+    border: 1px solid #ced4da;
+}
+
+.readonly-field:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: #ced4da;
+}
+
+.readonly-field::placeholder {
+    color: #adb5bd;
+}
