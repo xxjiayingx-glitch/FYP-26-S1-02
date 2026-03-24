@@ -26,4 +26,4 @@ def login():
 
         return render_template("login.html", error="Invalid email or password")
 
-    return render_template("login.html", success=success_msg)
+    return render_template("profile.html", success=success_msg)
