@@ -1,13 +1,11 @@
 <!doctype html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daily Scoop</title>
-    <link
-      rel="stylesheet"
-      href="../../static/css/Unregistered/UnregSubscription.css"
-    />
+    <link rel="stylesheet" href="../../static/css/Unregistered/UnregSubscription.css" />
   </head>
 
   <header class="navbar">
@@ -19,12 +17,8 @@
     </div>
 
     <nav class="navLinks">
-      <a href="{{ url_for('companyprofile.unreg_companyprof') }}"
-        >Company Profile</a
-      >
-      <a href="{{ url_for('home.unreg_home') }}#product-feature"
-        >Product Feature</a
-      >
+      <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
+      <a href="{{ url_for('home.unreg_home') }}#product-feature">Product Feature</a>
       <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
       <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
       <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
@@ -55,6 +49,7 @@
             <li>✔ {{ feature.strip() }}</li>
             {% endfor %}
           </ul>
+
         </div>
 
         {% endfor %} {% else %}
@@ -65,6 +60,27 @@
 
         {% endif %}
       </div>
+      {% if not session.get('userID') %}
+      <div class="center-login-prompt">
+        <p>You must be logged in to subscribe to a plan.</p>
+
+        <a href="{{ url_for('login.login') }}"
+          style="margin-right:10px; background:#3498db; color:white; padding:8px 12px; border-radius:5px; text-decoration:none;">
+          Log In
+        </a>
+        <a href="{{ url_for('register.register') }}"
+          style="background:#2ecc71; color:white; padding:8px 12px; border-radius:5px; text-decoration:none;">
+          Sign Up
+        </a>
+      </div>
+      {% endif %}
+
+      <!-- {% if session.get('userID') %}
+      <a href="{{ url_for('payment.checkout', plan_id=plan.id) }}" class="subscribe-btn">
+        Subscribe Now
+      </a>
+      {% endif %} -->
+
     </section>
   </body>
 
@@ -80,29 +96,11 @@
         </p>
 
         <div class="footer-social">
-          <a
-            href="https://facebook.com"
-            target="_blank"
-            class="footer-social-icon facebook"
-            rel="noopener"
-            >f</a
-          >
+          <a href="https://facebook.com" target="_blank" class="footer-social-icon facebook" rel="noopener">f</a>
 
-          <a
-            href="https://linkedin.com"
-            target="_blank"
-            class="footer-social-icon linkedin"
-            rel="noopener"
-            >in</a
-          >
+          <a href="https://linkedin.com" target="_blank" class="footer-social-icon linkedin" rel="noopener">in</a>
 
-          <a
-            href="https://x.com"
-            target="_blank"
-            class="footer-social-icon twitter"
-            rel="noopener"
-            >in</a
-          >
+          <a href="https://x.com" target="_blank" class="footer-social-icon twitter" rel="noopener">in</a>
         </div>
       </div>
 
@@ -123,4 +121,5 @@
       </div>
     </div>
   </footer>
+
 </html>
