@@ -117,10 +117,16 @@ def unreg_article_detail(article_id):
 
     comments = articleCTL.get_comments_for_article(article_id)
 
+    user_id = session.get("userID")
+    user_type = session.get("userType", "").strip().lower()
+
+    is_premium = "premium" in user_type
+    is_saved = articleCTL.is_article_saved(user_id, article_id) if user_id else False
+
     return render_template(
         "article_detail.html",
         article=article,
         comments=comments,
-        is_saved=False,
-        is_premium=False
+        is_saved=is_saved,
+        is_premium=is_premium
     )

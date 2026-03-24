@@ -30,7 +30,6 @@
 
     <div class="article-action-bar">
 
-        <p style="color:red;">DEBUG is_saved = {{ is_saved }}</p>
         <button id="save-btn"
                 type="button"
                 class="action-btn save-btn {% if is_saved %}saved-active{% endif %}"
@@ -111,24 +110,34 @@
         <p id="premiumMessage"></p>
 
         <div class="modal-actions">
-            <button type="button" onclick="closePremiumModal()" class="modal-btn cancel-btn">Cancel</button>
+            <button type="button" id="cancelPremiumBtn" class="modal-btn cancel-btn">Cancel</button>
             <a href="{{ url_for('subscription.subscription_page') }}" class="modal-btn upgrade-btn">View Plans</a>
         </div>
     </div>
 </div>
 
-<!-- TOAST -->
-<div id="toast" class="toast"></div>
-
 <!-- CONFETTI CANVAS -->
 <canvas id="confetti-canvas"></canvas>
+
+<!-- SAVE STATUS MODAL -->
+<div id="toastModal" class="toast-modal">
+    <div class="toast-modal-content">
+        <div id="toastMessage" class="toast-message">Saved! 🎉</div>
+        <button type="button" id="toastOkBtn" class="toast-ok-btn">OK</button>
+    </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const saveBtn = document.getElementById('save-btn');
     const saveCountEl = document.getElementById('save-count');
-    let isSaving = false;
+    const cancelPremiumBtn = document.getElementById("cancelPremiumBtn");
+    const toastOkBtn = document.getElementById("toastOkBtn");
 
+    let isSaving = false;
+    let toastTimer;
+
+    // ================= SAVE BUTTON =================
     if (saveBtn) {
         saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -151,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const data = await response.json();
+                console.log("save response:", data);
 
                 if (data.status === 'saved') {
                     updateSaveButton(true);
@@ -165,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
 
-                    showToast("Saved! 🎉");
+                    showToastModal("Saved! 🎉");
 
                 } else if (data.status === 'unsaved') {
                     updateSaveButton(false);
@@ -174,17 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         decreaseSaveCount();
                     }
 
-                    showToast("Removed from saved articles.");
+                    showToastModal("Removed from saved articles.");
 
                 } else if (data.status === 'premium_only') {
                     showPremiumModal(data.message);
                 } else {
-                    showToast(data.message || "Error saving article.");
+                    showToastModal(data.message || "Error saving article.");
                 }
 
             } catch (err) {
                 console.error(err);
-                showToast("Failed to save article. Try again.");
+                showToastModal("Failed to save article.");
             } finally {
                 setTimeout(() => {
                     isSaving = false;
@@ -194,6 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ================= BUTTON UI =================
     function updateSaveButton(saved) {
         const heart = saveBtn.querySelector('.heart-icon');
         const text = saveBtn.querySelector('.save-text');
@@ -229,11 +240,79 @@ document.addEventListener('DOMContentLoaded', () => {
                 { transform: "scale(0.95)" },
                 { transform: "scale(1)" }
             ],
-            {
-                duration: 250,
-                easing: "ease"
-            }
+            { duration: 250 }
         );
+    }
+
+    // ================= MODALS =================
+    function showPremiumModal(message) {
+        const modal = document.getElementById("premiumModal");
+        const text = document.getElementById("premiumMessage");
+
+        if (text) text.textContent = message;
+        if (modal) modal.classList.add("show");
+    }
+
+    function closePremiumModal() {
+        const modal = document.getElementById("premiumModal");
+        if (modal) modal.classList.remove("show");
+    }
+
+    // 🔥 FIXED TOAST (can reopen every time)
+    function showToastModal(message) {
+        const modal = document.getElementById("toastModal");
+        const text = document.getElementById("toastMessage");
+
+        if (!modal || !text) return;
+
+        text.textContent = message;
+
+        // reset first (important fix)
+        modal.classList.remove("show");
+        void modal.offsetWidth;
+
+        modal.classList.add("show");
+
+        // auto close after 1s
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            modal.classList.remove("show");
+        }, 1000);
+    }
+
+    function closeToastModal() {
+        const modal = document.getElementById("toastModal");
+        if (modal) modal.classList.remove("show");
+    }
+
+    // ================= EVENTS =================
+    if (cancelPremiumBtn) {
+        cancelPremiumBtn.addEventListener("click", closePremiumModal);
+    }
+
+    if (toastOkBtn) {
+        toastOkBtn.addEventListener("click", closeToastModal);
+    }
+
+    // click outside close
+    window.addEventListener("click", function (e) {
+        const premiumModal = document.getElementById("premiumModal");
+        const toastModal = document.getElementById("toastModal");
+
+        if (e.target === premiumModal) closePremiumModal();
+        if (e.target === toastModal) closeToastModal();
+    });
+
+    // ================= CONFETTI =================
+    function launchConfetti() {
+        const canvas = document.getElementById("confetti-canvas");
+        if (!canvas) return;
+
+        canvas.style.display = "block";
+
+        setTimeout(() => {
+            canvas.style.display = "none";
+        }, 1000);
     }
 });
 </script>
@@ -259,7 +338,70 @@ document.addEventListener('DOMContentLoaded', () => {
     transition: all 0.2s ease;
 }
 
+.toast-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+}
 
+.toast-modal.show {
+    display: flex;
+}
+
+.toast-modal-content {
+    background: #ffffff;
+    width: 340px;
+    max-width: 90%;
+    border-radius: 18px;
+    padding: 28px 24px;   
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    animation: popupFade 0.22s ease;
+    display: flex;        
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-message {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1a1a1a;
+}
+
+.toast-ok-btn {
+    border: none;
+    background: #2f6fed;
+    color: #fff;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.toast-ok-btn:hover {
+    background: #2459bf;
+}
+
+
+
+
+@keyframes popupFade {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
 
 .save-btn {
     background: #f3f4f6;
@@ -404,32 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
     color: #666;
 }
 
-.toast {
-    visibility: hidden;
-    min-width: 320px;
-    max-width: 420px;
-    background-color: #2f2f2f;
-    color: white;
-    text-align: center;
-    border-radius: 12px;
-    padding: 16px 24px;
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10000;
-    opacity: 0;
-    font-size: 16px;
-    font-weight: 600;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.22);
-    transition: opacity 0.3s ease, bottom 0.3s ease;
-}
 
-.toast.show {
-    visibility: visible;
-    opacity: 1;
-    bottom: 60px;
-}
 
 #confetti-canvas {
     position: fixed;
