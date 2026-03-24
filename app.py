@@ -1,3 +1,5 @@
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+
 from flask import (
     Flask,
     render_template,
@@ -237,9 +239,11 @@ def article_detail(article_id):
     user_type = session.get("userType", "").strip().lower()
     is_premium = "premium" in user_type
 
-    print("SESSION userID:", session.get("userID"))
-    print("SESSION userType:", session.get("userType"))
-    print("is_saved:", article_controller.is_article_saved(session.get("userID"), article_id))
+    print("ARTICLE DETAIL session userID:", session.get("userID"), flush=True)
+    print("ARTICLE DETAIL article_id:", article_id, flush=True)
+    print("ARTICLE DETAIL is_saved:", is_saved, flush=True)    
+
+    print("ARTICLE DETAIL ROUTE HIT", flush=True)
     
     return render_template(
         "article_detail.html",
