@@ -19,6 +19,18 @@ class UpdateProfileCTL:
         gender = form.get("gender")
         dateOfBirth = form.get("dateOfBirth")
 
+        # REQUIRED FIELD VALIDATION
+        if not first_name or not first_name.strip():
+            raise ValueError("First name is required.")
+        if not last_name or not last_name.strip():
+            raise ValueError("Last name is required.")
+        if not phone or not phone.strip():
+            raise ValueError("Phone number is required.")
+        if not gender or gender not in ["Male", "Female"]:
+            raise ValueError("Please select a gender.")
+        if not dateOfBirth or not dateOfBirth.strip():
+            raise ValueError("Date of birth is required.")
+
         # ENFORCE BACKEND RESTRICTIONS (IMPORTANT)
         if not user.get("can_edit_email"):
             email = user.get("email")
