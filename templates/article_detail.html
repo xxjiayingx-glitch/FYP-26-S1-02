@@ -73,6 +73,14 @@
             <p>No comments yet.</p>
         {% endfor %}
     </div>
+
+    <form method="POST" action="{{ url_for('add_comment_route') }}" class="comment-form">
+        <input type="hidden" name="articleID" value="{{ article.articleID }}">
+
+        <textarea name="commentText" placeholder="Write your comment..." required></textarea>
+
+        <button type="submit">Post Comment</button>
+    </form>
 </div>
 
 <!-- REPORT MODAL -->
@@ -213,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ================= BUTTON UI =================
     function updateSaveButton(saved) {
         const heart = saveBtn.querySelector('.heart-icon');
         const text = saveBtn.querySelector('.save-text');
@@ -253,7 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // ================= MODALS =================
     function showPremiumModal(message) {
         const modal = document.getElementById("premiumModal");
         const text = document.getElementById("premiumMessage");
@@ -267,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) modal.classList.remove("show");
     }
 
-    // 🔥 FIXED TOAST (can reopen every time)
     function showToastModal(message) {
         const modal = document.getElementById("toastModal");
         const text = document.getElementById("toastMessage");
@@ -275,14 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!modal || !text) return;
 
         text.textContent = message;
-
-        // reset first (important fix)
         modal.classList.remove("show");
         void modal.offsetWidth;
-
         modal.classList.add("show");
 
-        // auto close after 1s
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => {
             modal.classList.remove("show");
@@ -294,7 +295,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) modal.classList.remove("show");
     }
 
-    // ================= EVENTS =================
+    // ================= REPORT MODAL =================
+    const reportBtns = document.querySelectorAll(".report-btn");
+    const closeReportBtns = document.querySelectorAll(".close-report-modal");
+
+    reportBtns.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const articleId = this.dataset.articleId;
+            const modal = document.getElementById(`reportModal-${articleId}`);
+            if (modal) modal.classList.add("show");
+        });
+    });
+
+    closeReportBtns.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const articleId = this.dataset.articleId;
+            const modal = document.getElementById(`reportModal-${articleId}`);
+            if (modal) modal.classList.remove("show");
+        });
+    });
+
     if (cancelPremiumBtn) {
         cancelPremiumBtn.addEventListener("click", closePremiumModal);
     }
@@ -303,16 +323,20 @@ document.addEventListener('DOMContentLoaded', () => {
         toastOkBtn.addEventListener("click", closeToastModal);
     }
 
-    // click outside close
     window.addEventListener("click", function (e) {
         const premiumModal = document.getElementById("premiumModal");
         const toastModal = document.getElementById("toastModal");
 
         if (e.target === premiumModal) closePremiumModal();
         if (e.target === toastModal) closeToastModal();
+
+        document.querySelectorAll(".report-modal").forEach(modal => {
+            if (e.target === modal) {
+                modal.classList.remove("show");
+            }
+        });
     });
 
-    // ================= CONFETTI =================
     function launchConfetti() {
         const canvas = document.getElementById("confetti-canvas");
         if (!canvas) return;
@@ -398,7 +422,35 @@ document.addEventListener('DOMContentLoaded', () => {
     background: #2459bf;
 }
 
+.comment-form {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
+.comment-form textarea {
+    width: 100%;
+    min-height: 90px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.comment-form button {
+    align-self: flex-end;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.comment-form button:hover {
+    background: #1d4ed8;
+}
 
 
 @keyframes popupFade {
