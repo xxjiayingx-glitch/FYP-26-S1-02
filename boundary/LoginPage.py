@@ -28,6 +28,16 @@ def login():
             targetType="UserAccount"
             )
 
+            # First-time login if gender, DOB, and interests are all null
+            is_first_login = (
+                not user.get("gender") and
+                not user.get("dateOfBirth") and
+                not user.get("interests")
+            )
+
+            if is_first_login:
+                return redirect("/profile?first_login=1")
+
             if user["userType"] == "system admin":
                 return redirect("/admin/dashboard")
             else:
