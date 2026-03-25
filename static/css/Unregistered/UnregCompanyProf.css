@@ -11,16 +11,16 @@
 }
 
 .logo h1 {
-  font-size: 56px;
+  font-size: 42px;
   font-weight: 800;
   font-family: Inter;
   margin: 0;
-  color: #000000;
+  color: #1f3a5f;
 }
 
-.logo a{
-    text-decoration: none;
-    color: inherit;
+.logo a {
+  text-decoration: none;
+  color: inherit;
 }
 
 .navLinks {
@@ -40,36 +40,85 @@
   text-decoration: underline;
 }
 
-/* Body */
+/* Body & Company Section */
+body {
+  overflow-x: hidden;
+  font-family: 'Inter', Arial, sans-serif;
+  margin: 0;
+  background-color: #f5f7fa;
+  /* subtle background */
+}
+
+.section-title {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 800;
+  margin-top: 40px;
+  margin-bottom: 32px;
+  color: #1f3a5f;
+}
+
 .company-card {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start; 
-    margin: 40px auto;
-    max-width: 1100px;
-    padding: 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  /* align image and text height */
+  gap: 40px;
+  margin: 0 auto 60px;
+  max-width: 1100px;
+  padding: 0 24px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .company-image {
-    width: 800px;
-    height: 550px;
-    flex-shrink: 0;
-    overflow: hidden;
-    border-radius: 10px;
+  flex: 1 1 400px;
+  max-width: 500px;
+  overflow: hidden;
+  border-radius: 12px;
+  min-height: 300px;
 }
 
 .company-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .card-text {
-    flex: 1;
-    display: flex;
+  flex: 1 1 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+
+.card-text h2,
+.card-text h3 {
+  color: #1f3a5f;
+  margin-bottom: 8px;
+}
+
+.card-text p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Responsive: stack image and text on small screens */
+@media (max-width: 768px) {
+  .company-card {
     flex-direction: column;
-    gap: 16px;
+    padding: 24px;
+  }
+
+  .company-image,
+  .card-text {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
 }
 
 /* Footer section*/

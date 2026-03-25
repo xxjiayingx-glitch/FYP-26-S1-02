@@ -5,131 +5,221 @@
     <meta charset="UTF-8">
     <title>Login - Daily Scoop</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
     <style>
+        /* Body background */
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f3f3f3;
+            font-family: 'Inter', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            /* Full-page gradient */
+            background: linear-gradient(135deg, #c4def4, #f0f2f5);
         }
 
-        /* HEADER BAR */
+        /* ── Header ── */
         .login-header {
             background: #c4def4;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 20px 40px;
+            flex-wrap: wrap;
         }
 
         .brand {
             font-weight: 900;
-            font-size: 28px;
-            line-height: 1;
+            font-size: 38px;
+            line-height: 1.1;
+            color: #1f3a5f;
+            text-decoration: none;
+            text-align: left;
         }
 
-        /* NAV LINKS */
         .nav-links {
             display: flex;
             gap: 30px;
-            font-size: 12px;
-            font-weight: bold;
+            align-items: center;
         }
 
         .nav-links a {
             text-decoration: none;
             color: #000;
+            font-weight: 600;
+            font-size: 16px;
+            transition: color 0.2s;
         }
 
-        /* LOGIN SECTION */
+        .nav-links a:hover {
+            color: #2a5bd7;
+        }
+
+        /* ── Messages ── */
+        .message {
+            text-align: center;
+            font-size: 15px;
+            margin: 10px 0;
+        }
+
+        .message.success {
+            color: #28a745;
+        }
+
+        .message.error {
+            color: #dc3545;
+        }
+
+        /* ── Login Wrapper ── */
         .login-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 70vh;
+            flex: 1;
+            padding: 60px 16px;
+            /* Add overlay gradient with subtle transparency */
+            background: linear-gradient(rgba(255,255,255,0.25), rgba(255,255,255,0.25)), 
+                        url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            backdrop-filter: blur(4px); /* soft blur behind the card */
         }
 
+        /* ── Login Card ── */
         .login-card {
-            width: 340px;
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.95); /* semi-transparent white */
+            padding: 45px 35px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
             text-align: center;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        /* ── Headings ── */
         .login-card h2 {
-            margin-bottom: 10px;
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #1f3a5f;
         }
 
         .login-card p {
-            font-size: 13px;
-            margin-bottom: 20px;
+            font-size: 16px;
+            margin-bottom: 28px;
+            color: #494949;
         }
 
-        /* INPUTS */
-        .login-card label {
-            font-size: 12px;
-            display: block;
+        /* ── Form Inputs ── */
+        .login-card form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
             text-align: left;
-            margin-bottom: 3px;
+        }
+
+        .login-card label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #1f3a5f;
         }
 
         .login-card input {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 16px 4px;
+            border: 1.5px solid #1f3a5f;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
         }
 
-        /* FORGOT PASSWORD */
+        .login-card input:focus {
+            border-color: #2a5bd7;
+            box-shadow: 0 0 6px rgba(42, 91, 215, 0.3);
+            outline: none;
+            background-color: #f0f7fc;
+        }
+
+        /* ── Forgot Password ── */
         .forgot {
-            font-size: 11px;
+            font-size: 13px;
             text-align: right;
-            margin-top: -8px;
-            margin-bottom: 10px;
+            margin-top: -4px;
+            margin-bottom: 16px;
         }
 
         .forgot a {
             color: #2a5bd7;
+            text-decoration: none;
+            font-weight: 500;
         }
 
-        /* LOGIN BUTTON */
+        .forgot a:hover {
+            text-decoration: underline;
+            color: #1e3d7a;
+        }
+
+        /* ── Login Button ── */
         .login-btn {
             width: 100%;
-            padding: 9px;
-            background: #3d5c2e;
-            color: white;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #2d5a1b, #3c7e2b);
+            color: #fff;
             border: none;
-            border-radius: 4px;
+            border-radius: 10px;
             cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
         }
 
         .login-btn:hover {
-            background: #2e4723;
+            background: linear-gradient(90deg, #1e3d12, #2d5a1b);
+            transform: translateY(-2px);
         }
 
-        /* SIGNUP */
+        /* ── Signup Link ── */
         .signup {
-            margin-top: 25px;
-            font-size: 12px;
+            margin-top: 28px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
         }
 
         .signup a {
             color: #2a5bd7;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .signup a:hover {
+            color: #1e3d7a;
+            text-decoration: underline;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 35px 25px;
+            }
         }
     </style>
-
 </head>
 
 <body>
 
     <!-- HEADER -->
     <div class="login-header">
-
         <a href="{{ url_for('home.unreg_home') }}" class="brand">
-            Daily Scoop<br>
-            News System
+            Daily Scoop<br>News System
         </a>
 
         <div class="nav-links">
@@ -138,50 +228,38 @@
         </div>
     </div>
 
-    <!-- For verification email link success/error message-->
+    <!-- Messages -->
     {% if success %}
-    <p style="color: green">{{ success }}</p>
-
+    <p class="message success">{{ success }}</p>
     {% endif %}
     {% if error %}
-    <p style="color: red">{{ error }}</p>
+    <p class="message error">{{ error }}</p>
     {% endif %}
 
     <!-- LOGIN FORM -->
     <div class="login-wrapper">
-
         <div class="login-card">
-
             <h2>Welcome back!</h2>
-            <p>Login</p>
+            <p>Login to your account</p>
 
             <form method="POST">
-
                 <label>Email address</label>
-                <input type="email" name="email" required>
+                <input type="email" name="email" required placeholder="you@example.com">
 
                 <label>Password</label>
-                <input type="password" name="password" required>
+                <input type="password" name="password" required placeholder="Enter your password">
 
                 <div class="forgot">
-                    <a href="#">Forgot password</a>
+                    <a href="#">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="login-btn">Login</button>
-
             </form>
 
             <div class="signup">
-                Don't have an account?
-                <a href="{{ url_for('register.register') }}">Sign Up</a>
+                Don't have an account? <a href="{{ url_for('register.register') }}">Sign Up</a>
             </div>
-
-            {% if error %}
-            <p style="color:red;margin-top:10px;">{{ error }}</p>
-            {% endif %}
-
         </div>
-
     </div>
 
 </body>
