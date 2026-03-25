@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, session
 from control.LoginCTL import AuthController
+from control.SystemLogCTL import SystemLogCTL
 
 login_bp = Blueprint("login", __name__)
 auth = AuthController()
@@ -18,6 +19,14 @@ def login():
             session["username"] = user["username"]
             session["userType"] = user["userType"]
             session["profileImage"] = user["profileImage"]
+
+            # Logs login record
+            SystemLogCTL.logAction(
+            accountID=user["userID"],
+            action="Logged In",
+            targetID=user["userID"],
+            targetType="UserAccount"
+            )
 
             if user["userType"] == "system admin":
                 return redirect("/admin/dashboard")

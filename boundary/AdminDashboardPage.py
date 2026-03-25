@@ -8,6 +8,9 @@ def admin_dashboard():
     if "userID" not in session:
         return redirect(url_for("login.login"))
     
+    if session.get("userType") != "system admin":
+        return redirect(url_for("login.login"))
+    
     admin = {
         "userID": session.get("userID"),
         "username": session.get("username"),
