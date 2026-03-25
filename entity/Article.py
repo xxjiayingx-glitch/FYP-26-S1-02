@@ -248,15 +248,35 @@ class Article:
         cursor = conn.cursor()
 
         try:
-            sql = """
-                UPDATE Article
-                SET articleTitle = %s,
-                    categoryID = %s,
-                    content = %s,
-                    articleStatus = %s
-                WHERE articleID = %s
-            """
-            cursor.execute(sql, (title, category_id, content, status, article_id))
+            # Check whether article has been edited before
+            check_sql = "SELECT first_edited_at FROM Article WHERE articleID = %s"
+            cursor.execute(check_sql, (article_id,))
+            article = cursor.fetchone()
+
+            if article and article["first_edited_at"] is None:
+                sql = """
+                    UPDATE Article
+                    SET articleTitle = %s,
+                        categoryID = %s,
+                        content = %s,
+                        articleStatus = %s,
+                        first_edited_at = NOW(),
+                        last_edited_at = NOW()
+                    WHERE articleID = %s
+                """
+                cursor.execute(sql, (title, category_id, content, status, article_id))
+            else:
+                sql = """
+                    UPDATE Article
+                    SET articleTitle = %s,
+                        categoryID = %s,
+                        content = %s,
+                        articleStatus = %s,
+                        last_edited_at = NOW()
+                    WHERE articleID = %s
+                """
+                cursor.execute(sql, (title, category_id, content, status, article_id))
+
             conn.commit()
             return True
 
@@ -268,6 +288,7 @@ class Article:
         finally:
             cursor.close()
             conn.close()
+
 
     def update_article_image(self, article_id, image_filename):
         conn = get_db_connection()
