@@ -3,250 +3,239 @@
 {% block title %}Create Article{% endblock %}
 
 {% block content %}
-<div class="create-article-page">
-    <div class="create-article-card">
-        <h1 class="create-article-title">Create Your Own Article</h1>
-<!-- For AI -->
 <style>
+    .article-form-page {
+        max-width: 960px;
+        margin: 38px auto;
+        padding: 0 18px;
+    }
+
+    .article-form-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 22px;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+        padding: 30px;
+    }
+
+    .article-form-title {
+        margin: 0 0 22px;
+        font-size: 32px;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .article-meta-box {
+        margin-bottom: 24px;
+        padding: 14px 16px;
+        background: #f8fafc;
+        border: 1px solid #dbe3ee;
+        border-radius: 14px;
+        font-size: 14px;
+        color: #475569;
+    }
+
+    .form-row {
+        margin-bottom: 20px;
+    }
+
+    .form-row label {
+        display: block;
+        margin-bottom: 9px;
+        font-weight: 700;
+        font-size: 14px;
+        color: #1f2937;
+    }
+
+    .form-row input,
+    .form-row select,
+    .form-row textarea {
+        width: 100%;
+        padding: 13px 14px;
+        border: 1px solid #cfd8e3;
+        border-radius: 14px;
+        font-size: 15px;
+        background: #ffffff;
+        transition: 0.2s ease;
+    }
+
+    .form-row input:focus,
+    .form-row select:focus,
+    .form-row textarea:focus {
+        outline: none;
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.2);
+    }
+
+    textarea {
+        min-height: 220px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    /* CHECK BUTTON */
     #checkScoreBtn {
-        padding: 10px 20px;
-        background: #007bff;
+        width: 100%;
+        padding: 12px;
+        background: #2563eb;
         color: white;
         border: none;
-        border-radius: 5px;
+        border-radius: 10px;
+        font-weight: 600;
         cursor: pointer;
-        margin-bottom: 15px;
     }
 
     #checkScoreBtn:hover {
-        background: #0056b3;
+        background: #1d4ed8;
     }
 
-    #factCheckSection {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
+    /* AI SECTION */
+    .fact-check-section {
+        display: none;
+        margin-top: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 18px;
         background: #fafafa;
     }
 
     #previewPanel {
         border: 1px solid #ccc;
-        padding: 15px;
-        margin-top: 10px;
-        min-height: 100px;
-        line-height: 1.8;
-        border-radius: 8px;
+        padding: 12px;
+        border-radius: 10px;
         background: #fff;
+        margin-top: 10px;
     }
 
-    .highlight-supported {
-        background-color: #d4edda;
-        padding: 2px 4px;
-        border-radius: 4px;
+    /* BUTTONS */
+    .form-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 24px;
     }
 
-    .highlight-warning {
-        background-color: #fff3cd;
-        padding: 2px 4px;
-        border-radius: 4px;
+    .btn {
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
     }
 
-    .highlight-danger {
-        background-color: #f8d7da;
-        padding: 2px 4px;
-        border-radius: 4px;
+    /* Cancel */
+    .btn-cancel {
+        background: #e5e7eb;
+        color: #111827;
     }
 
-    .highlight-opinion {
-        background-color: #e2e3e5;
-        padding: 2px 4px;
-        border-radius: 4px;
+    .btn-cancel:hover {
+        background: #d1d5db;
     }
-    .highlight-reported {
-        background-color: #dbeafe;
-        padding: 2px 4px;
-        border-radius: 4px;
+
+    /* Draft (ORANGE 🔥) */
+    .btn-draft {
+        background: #f59e0b;
+        color: white;
     }
+
+    .btn-draft:hover {
+        background: #d97706;
+    }
+
+    /* Submit */
+    .btn-submit {
+        background: #22c55e;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        background: #16a34a;
+    }
+
 </style>
 
-<div class="create-article-container" style="max-width: 800px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-    <h2>Create New Article</h2>
-        <div style="margin-bottom:15px; color:#555; font-size:14px;">
+<div class="article-form-page">
+    <div class="article-form-card">
+        <h1 class="article-form-title">Create New Article</h1>
+
+        <div class="article-meta-box">
             <strong>Created On:</strong> {{ current_time }}
         </div>
-        <form method="POST" enctype="multipart/form-data" class="create-article-form">
-            
-            <!-- Title -->
-            <div class="create-form-row">
-                <label for="title">Title:</label>
-                <input 
-                    type="text" 
-                    id="title" 
-                    name="title" 
-                    required
-                    placeholder="Enter your article title"
-                    value="{{ request.form.title or '' }}"
-                >
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <input type="hidden" name="ai_fact_check_score" id="ai_fact_check_score">
+            <input type="hidden" name="ai_fact_check_status" id="ai_fact_check_status">
+
+            <div class="form-row">
+                <label>Title</label>
+                <input type="text" name="title" placeholder="Enter your article title" required>
             </div>
 
-            <!-- Category -->
-            <div class="create-form-row">
-                <label for="category">Category:</label>
-                <select id="category" name="category" required>
-                    <option value="" disabled {% if not request.form.category %}selected{% endif %}>
-                        Select your article category
-                    </option>
+            <div class="form-row">
+                <label>Category</label>
+                <select name="category" required>
+                    <option disabled selected>Select your article category</option>
                     {% for cat in categories %}
-                        <option 
-                            value="{{ cat.categoryID }}"
-                            {% if request.form.category == cat.categoryID|string %}selected{% endif %}
-                        >
-                            {{ cat.categoryName }}
-                        </option>
+                        <option value="{{ cat.categoryID }}">{{ cat.categoryName }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            <!-- Content -->
-            <div class="create-form-row">
-                <label for="content">Content:</label>
-                <textarea 
-                    id="content" 
-                    name="content" 
-                    rows="12" 
-                    required
-                    placeholder="Enter your full article content"
-                >{{ request.form.content or '' }}</textarea>
+            <div class="form-row">
+                <label>Content</label>
+                <textarea name="content" placeholder="Enter your full article content" required></textarea>
             </div>
 
-            <!-- Featured Image -->
-            <div class="create-form-row">
-                <label for="featured_image">Upload Featured Image:</label>
-                <input 
-                    type="file" 
-                    id="featured_image" 
-                    name="featured_image" 
-                    accept="image/*"
-                    required
-                >
+            <div class="form-row">
+                <label>Upload Featured Image</label>
+                <input type="file" name="featured_image" required>
             </div>
-        <!-- AI Fact Check -->
-        <button type="button" id="checkScoreBtn">Check Current Score</button>
-        <div id="factCheckSection" style="display:none; margin-top:20px;">
-            <h3>Fact Check Result</h3>
-            <p><strong>Score:</strong> <span id="scoreValue"></span></p>
-            <p><strong>Status:</strong> <span id="statusValue"></span></p>
 
-            <h4>Highlighted Preview</h4>
-            <div id="previewPanel"></div>
+            <button type="button" id="checkScoreBtn">Check Current Score</button>
 
-            <h4>Issues Found</h4>
-            <ul id="issuesList"></ul>
-        </div>
+            <div id="factCheckSection" class="fact-check-section">
+                <h3>Fact Check Result</h3>
+                <p><strong>Score:</strong> <span id="scoreValue"></span></p>
+                <p><strong>Status:</strong> <span id="statusValue"></span></p>
 
+                <h4>Preview</h4>
+                <div id="previewPanel"></div>
 
-
-            <!-- Buttons -->
-            <div class="create-form-actions">
-                <a href="{{ url_for('my_articles') }}" class="create-btn cancel-create-btn">
-                    Cancel
-                </a>
-
-                <button type="submit" class="create-btn draft-create-btn" name="submit_action" value="draft">
-                    Save as Draft
-                </button>
-
-                <button type="submit" class="create-btn publish-create-btn" name="submit_action" value="published">
-                    Submit
-                </button>
+                <h4>Issues</h4>
+                <ul id="issuesList"></ul>
             </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('my_articles') }}" class="btn btn-cancel">Cancel</a>
+                <button type="submit" name="submit_action" value="draft" class="btn btn-draft">Save as Draft</button>
+                <button type="submit" name="submit_action" value="published" class="btn btn-submit">Submit</button>
+            </div>
+
         </form>
     </div>
 </div>
 
-<!-- AI Check -->
 <script>
 document.getElementById("checkScoreBtn").addEventListener("click", async function () {
-    const content = document.getElementById("content").value.trim();
+    const content = document.querySelector("textarea").value;
 
-    if (!content) {
-        alert("Please enter article content first.");
-        return;
-    }
+    const response = await fetch("/fact-check-preview", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({content})
+    });
 
-    try {
-        const response = await fetch("/fact-check-preview", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ content: content })
-        });
+    const data = await response.json();
 
-        const data = await response.json();
+    document.getElementById("factCheckSection").style.display = "block";
+    document.getElementById("scoreValue").textContent = data.score;
+    document.getElementById("statusValue").textContent = data.status;
 
-        if (!response.ok) {
-            alert(data.error || "Fact check failed.");
-            return;
-        }
-
-        document.getElementById("factCheckSection").style.display = "block";
-        document.getElementById("scoreValue").textContent = data.score + " / 100";
-        document.getElementById("statusValue").textContent = data.status;
-
-        renderPreview(data.sentences);
-        renderIssues(data.sentences);
-
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Something went wrong while checking the article.");
-    }
+    document.getElementById("ai_fact_check_score").value = data.score;
+    document.getElementById("ai_fact_check_status").value = data.status;
 });
-
-function renderPreview(results) {
-    const previewPanel = document.getElementById("previewPanel");
-    previewPanel.innerHTML = "";
-
-    results.forEach(item => {
-        const span = document.createElement("span");
-        span.textContent = item.text + " ";
-
-        if (item.label === "reported_fact") {
-            span.className = "highlight-reported";
-        } else if (item.label === "supported") {
-            span.className = "highlight-supported";
-        } else if (item.label === "needs_evidence") {
-            span.className = "highlight-warning";
-        } else if (item.label === "contradicted") {
-            span.className = "highlight-danger";
-        } else {
-            span.className = "highlight-opinion";
-        }
-        span.title = item.reason;
-        previewPanel.appendChild(span);
-    });
-}
-
-function renderIssues(results) {
-    const issuesList = document.getElementById("issuesList");
-    issuesList.innerHTML = "";
-
-    let foundIssue = false;
-
-    results.forEach((item, index) => {
-        if (item.label === "needs_evidence" || item.label === "contradicted" || item.label === "opinion") {
-            foundIssue = true;
-            const li = document.createElement("li");
-            li.textContent = "Sentence " + (index + 1) + ": " + item.reason;
-            issuesList.appendChild(li);
-        }
-    });
-
-    if (!foundIssue) {
-        const li = document.createElement("li");
-        li.textContent = "No major credibility issues found.";
-        issuesList.appendChild(li);
-    }
-}
 </script>
+
 {% endblock %}

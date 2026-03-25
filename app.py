@@ -378,11 +378,12 @@ def create_article():
         title = request.form.get("title")
         category_id = request.form.get("category")
         content = request.form.get("content")
-        
-        # Use the button pressed to determine status
-        status = request.form.get("submit_action")  # 'draft' or 'published'
+        ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
+        ai_fact_check_status = request.form.get("ai_fact_check_status")
+
+        status = request.form.get("submit_action")
         if not status:
-            status = "draft"  # fallback default
+            status = "draft"
 
         featured_image = request.files.get("featured_image")
         image_filename = None
@@ -392,26 +393,30 @@ def create_article():
             save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
             featured_image.save(save_path)
 
-        # Insert article
         articleID = article_controller.create_article(
-            user_id, title, category_id, content, status, image_filename
+            user_id=user_id,
+            title=title,
+            category_id=category_id,
+            content=content,
+            status=status,
+            featured_image=image_filename,
+            ai_fact_check_score=ai_fact_check_score,
+            ai_fact_check_status=ai_fact_check_status
         )
 
-        # Log create article record
         if articleID:
             SystemLogCTL.logAction(
-            accountID=session["userID"],
-            action="Created Article",
-            targetID=articleID,
-            targetType="Article"
+                accountID=session["userID"],
+                action="Created Article",
+                targetID=articleID,
+                targetType="Article"
             )
             flash("Article created successfully!", "success")
             return redirect(url_for("my_articles"))
 
-    # GET → fetch categories
     categories = article_controller.get_categories()
     current_time = datetime.now().strftime("%d %b %Y %H:%M:%S")
-    
+
     return render_template(
         "create_article.html",
         categories=categories,
@@ -427,7 +432,6 @@ def edit_article(article_id):
 
     article = article_controller.get_article(article_id)
 
-    # Ensure the article belongs to the logged-in user
     if not article or article["created_by"] != user_id:
         flash("You do not have permission to edit this article.", "error")
         return redirect(url_for("my_articles"))
@@ -439,6 +443,8 @@ def edit_article(article_id):
         category_id = request.form.get("category")
         content = request.form.get("content")
         status = request.form.get("status")
+        ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
+        ai_fact_check_status = request.form.get("ai_fact_check_status")
 
         featured_image = request.files.get("featured_image")
         image_filename = None
@@ -448,7 +454,15 @@ def edit_article(article_id):
             save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
             featured_image.save(save_path)
 
-        updated = article_controller.update_article(article_id, title, category_id, content, status)
+        updated = article_controller.update_article(
+            article_id=article_id,
+            title=title,
+            category_id=category_id,
+            content=content,
+            status=status,
+            ai_fact_check_score=ai_fact_check_score,
+            ai_fact_check_status=ai_fact_check_status
+        )
 
         if updated and image_filename:
             article_controller.update_article_image(article_id, image_filename)
@@ -465,8 +479,11 @@ def edit_article(article_id):
         else:
             flash("Failed to update article.", "error")
 
-    return render_template("edit_article.html", article=article, categories=categories)
-
+    return render_template(
+        "edit_article.html",
+        article=article,
+        categories=categories
+    )
 
 # Delete Article Route
 @app.route("/delete_article/<int:article_id>", methods=["GET"])

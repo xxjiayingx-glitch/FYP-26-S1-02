@@ -20,8 +20,12 @@ class ArticleController:
     def get_my_articles(self, user_id):
         return self.article_entity.get_my_articles(user_id)
     
-    def create_article(self, user_id, title, category_id, content, status, featured_image=None):
-        article_id = self.article_entity.insert_article(user_id, title, category_id, content, status)
+    def create_article(self, user_id, title, category_id, content, status, featured_image=None,
+                   ai_fact_check_score=0, ai_fact_check_status=None):
+        article_id = self.article_entity.insert_article(
+            user_id, title, category_id, content, status,
+            ai_fact_check_score, ai_fact_check_status
+        )
         if article_id and featured_image:
             self.article_entity.insert_article_image(article_id, featured_image)
         return article_id
@@ -100,6 +104,8 @@ class ArticleController:
                 a.first_edited_at,
                 a.last_edited_at,
                 a.updated_at,
+                a.aiFactCheckScore,
+                a.aiFactCheckStatus,
                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
                 c.categoryName,
                 a.created_by,
@@ -162,9 +168,13 @@ class ArticleController:
     #----------------#
     # Update Article #
     #----------------#
-    def update_article(self, article_id, title, category_id, content, status):
-        return self.article_entity.update_article(article_id, title, category_id, content, status)
-    
+    def update_article(self, article_id, title, category_id, content, status,
+                   ai_fact_check_score=0, ai_fact_check_status=None):
+        return self.article_entity.update_article(
+            article_id, title, category_id, content, status,
+            ai_fact_check_score, ai_fact_check_status
+        )
+
     def update_article_image(self, article_id, image_filename):
         return self.article_entity.update_article_image(article_id, image_filename)
 

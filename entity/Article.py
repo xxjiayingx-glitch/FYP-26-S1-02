@@ -198,7 +198,8 @@ class Article:
         conn.close()
         return categories
 
-    def insert_article(self, user_id, title, category_id, content, status):
+    def insert_article(self, user_id, title, category_id, content, status,
+                   ai_fact_check_score=0, ai_fact_check_status=None):
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -213,11 +214,24 @@ class Article:
             articleStatus,
             created_by,
             updated_at,
-            categoryID
+            categoryID,
+            aiFactCheckScore,
+            aiFactCheckStatus
         )
-        VALUES (%s, %s, NOW(), NULL, NULL, %s, %s, NOW(), %s)
+        VALUES (%s, %s, NOW(), NULL, NULL, %s, %s, NOW(), %s, %s, %s)
         """
-        cursor.execute(sql, (title, content, status, user_id, category_id))
+        cursor.execute(
+            sql,
+            (
+                title,
+                content,
+                status,
+                user_id,
+                category_id,
+                float(ai_fact_check_score or 0),
+                ai_fact_check_status
+            )
+        )
         article_id = cursor.lastrowid
 
         conn.commit()
@@ -243,12 +257,13 @@ class Article:
     #----------------#
     # Update Article #
     #----------------#
-    def update_article(self, article_id, title, category_id, content, status):
+    
+    def update_article(self, article_id, title, category_id, content, status,
+                   ai_fact_check_score=0, ai_fact_check_status=None):
         conn = get_db_connection()
         cursor = conn.cursor()
 
         try:
-            # Check whether article has been edited before
             check_sql = "SELECT first_edited_at FROM Article WHERE articleID = %s"
             cursor.execute(check_sql, (article_id,))
             article = cursor.fetchone()
@@ -260,11 +275,24 @@ class Article:
                         categoryID = %s,
                         content = %s,
                         articleStatus = %s,
+                        aiFactCheckScore = %s,
+                        aiFactCheckStatus = %s,
                         first_edited_at = NOW(),
                         last_edited_at = NOW()
                     WHERE articleID = %s
                 """
-                cursor.execute(sql, (title, category_id, content, status, article_id))
+                cursor.execute(
+                    sql,
+                    (
+                        title,
+                        category_id,
+                        content,
+                        status,
+                        float(ai_fact_check_score or 0),
+                        ai_fact_check_status,
+                        article_id
+                    )
+                )
             else:
                 sql = """
                     UPDATE Article
@@ -272,10 +300,23 @@ class Article:
                         categoryID = %s,
                         content = %s,
                         articleStatus = %s,
+                        aiFactCheckScore = %s,
+                        aiFactCheckStatus = %s,
                         last_edited_at = NOW()
                     WHERE articleID = %s
                 """
-                cursor.execute(sql, (title, category_id, content, status, article_id))
+                cursor.execute(
+                    sql,
+                    (
+                        title,
+                        category_id,
+                        content,
+                        status,
+                        float(ai_fact_check_score or 0),
+                        ai_fact_check_status,
+                        article_id
+                    )
+                )
 
             conn.commit()
             return True
@@ -288,7 +329,6 @@ class Article:
         finally:
             cursor.close()
             conn.close()
-
 
     def update_article_image(self, article_id, image_filename):
         conn = get_db_connection()
