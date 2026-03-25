@@ -32,6 +32,7 @@ def profile_page():
 
     return render_template("profile.html", user=user, eligible_article_count=eligible_article_count)
 
+
 @profile_bp.route("/update", methods=["POST"])
 def update_profile():
     if "userID" not in session:
@@ -44,7 +45,7 @@ def update_profile():
         return redirect(url_for("profile.profile_page"))
 
     try:
-        UpdateProfileCTL.update_profile(
+        result = UpdateProfileCTL.update_profile(
             session["userID"],
             request.form
         )
@@ -58,12 +59,32 @@ def update_profile():
             ]
             session["user"] = updated_user
 
-        flash("Profile updated successfully")
+        flash(result["message"])
 
     except ValueError as e:
         flash(str(e))
 
     return redirect(url_for("profile.profile_page"))
+
+
+# EMAIL VERIFICATION
+@profile_bp.route("/verify-email-change", methods=["GET"])
+def verify_email_change():
+    token = request.args.get("token")
+
+    if not token:
+        flash("Missing email verification token.")
+        return redirect(url_for("profile.profile_page"))
+
+    success = UserAccount.verify_pending_email_change(token)
+
+    if success:
+        flash("Your new email has been verified and updated successfully.")
+    else:
+        flash("Invalid or expired email verification link.")
+
+    return redirect(url_for("profile.profile_page"))
+
 
 @profile_bp.route("/change-password", methods=["POST"])
 def change_password():
@@ -93,6 +114,7 @@ def change_password():
         flash(str(e))
 
     return redirect(url_for("profile.profile_page"))
+
 
 @profile_bp.route("/upload-photo", methods=["POST"])
 def upload_photo():
@@ -126,6 +148,7 @@ def upload_photo():
 
     return redirect(url_for("profile.profile_page"))
 
+
 @profile_bp.route("/apply-verified-badge", methods=["POST"])
 def apply_verified_badge():
     if "userID" not in session:
@@ -146,5 +169,38 @@ def apply_verified_badge():
         flash("Verification request submitted successfully.")
     except ValueError as e:
         flash(str(e))
+
+    return redirect(url_for("profile.profile_page"))
+
+
+
+@profile_bp.route("/resend-email-verification", methods=["POST"])
+def resend_email_verification():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user = UserAccount().get_profile(session["userID"])
+
+    if not user or not user.get("pendingEmail"):
+        flash("No pending email to verify.")
+        return redirect(url_for("profile.profile_page"))
+
+    import secrets
+    from server.email_service import send_email_change_verification_email
+
+    new_token = secrets.token_urlsafe(32)
+
+    UserAccount.start_email_change_request(
+        session["userID"],
+        user["pendingEmail"],
+        new_token
+    )
+
+    try:
+        send_email_change_verification_email(user["pendingEmail"], new_token)
+        flash("Verification email resent successfully.")
+    except Exception as e:
+        print("Resend email failed:", e)
+        flash("Failed to resend email.")
 
     return redirect(url_for("profile.profile_page"))

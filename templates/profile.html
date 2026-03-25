@@ -34,10 +34,11 @@
             <ul class="profile-menu">
                 <li><a href="#profile-info">👤 Profile Information</a></li>
                 <li><a href="#subscription-plan">⭐ Subscription Plan</a></li>
-                <li><a href="#security-settings">🔒 Security</a></li>
                 {% if user.userType and 'premium' in user.userType|lower %}
                 <li><a href="#verified-badge">✔ Verified Badge</a></li>
                 {% endif %}
+                <li><a href="#security-settings">🔒 Security</a></li>
+                
             </ul>
         </aside>
 
@@ -51,61 +52,112 @@
                     <p>Update your personal details and preferences.</p>
                 </div>
 
+                <form method="POST" action="/profile/update" class="profile-form" id="profileForm">
 
-                <form method="POST" action="/profile/update" class="profile-form">
                     <div class="form-grid">
+
+                        <!-- FIRST NAME -->
                         <div class="form-row">
-                            <label for="firstName">First Name</label>
-                            <input type="text" id="firstName" name="firstName" value="{{ user.first_name or '' }}">
+                            <label>First Name</label>
+                            <input type="text" name="firstName" value="{{ user.first_name or '' }}" required>
                         </div>
 
+                        <!-- LAST NAME -->
                         <div class="form-row">
-                            <label for="lastName">Last Name</label>
-                            <input type="text" id="lastName" name="lastName" value="{{ user.last_name or '' }}">
+                            <label>Last Name</label>
+                            <input type="text" name="lastName" value="{{ user.last_name or '' }}" required>
                         </div>
 
-                        <!-- EMAIL (Editable only if allowed) -->
+                        <!-- CURRENT EMAIL -->
                         <div class="form-row">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" value="{{ user.email or '' }}"
-                                {% if not user.can_edit_email %}readonly class="readonly-field" title="Email can only be changed via verification"{% endif %}>
+                            <label>Current Email</label>
+                            <input type="email" value="{{ user.email }}" readonly class="readonly-field">
+                            <small class="profile-note">Email cannot be edited directly</small>
                         </div>
 
-                        <!-- USERNAME (Editable only after 30 days) -->
+                        <!-- NEW EMAIL -->
                         <div class="form-row">
-                            <label for="username">Username</label>
-                            <input type="text" id="username" name="username" value="{{ user.username or '' }}"
-                                {% if not user.can_edit_username %}readonly class="readonly-field" title="You can change your username after 30 days"{% endif %}>
+                            <label>New Email</label>
+                            <input type="email" name="newEmail" placeholder="Enter new email">
+                            <small class="profile-note">Verification link will be sent</small>
+
+                            {% if user.pendingEmail %}
+                                <div class="profile-pending-box">
+                                    <small class="profile-warning">
+                                        Pending verification: {{ user.pendingEmail }}
+                                    </small>
+
+                                    <form method="POST" action="{{ url_for('profile.resend_email_verification') }}">
+                                        <button type="submit" class="resend-btn">
+                                            Resend Email
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
                         </div>
 
+                        <!-- USERNAME -->
                         <div class="form-row">
-                            <label for="phone">Phone</label>
-                            <input type="text" id="phone" name="phone" value="{{ user.phone or '' }}">
+                            <label>Username</label>
+                            <input type="text" name="username" value="{{ user.username }}"
+                                {% if not user.can_edit_username %}readonly class="readonly-field"{% endif %}>
+
+                            {% if user.can_edit_username %}
+                                <small class="profile-note">
+                                    {{ user.remaining_username_changes }} change(s) left (30 days)
+                                </small>
+                            {% else %}
+                                <small class="profile-warning">
+                                    Limit reached.
+                                    {% if user.username_wait_until %}
+                                        Try again after {{ user.username_wait_until.strftime('%d %b %Y') }}
+                                    {% endif %}
+                                </small>
+                            {% endif %}
                         </div>
 
+                        <!-- PHONE -->
                         <div class="form-row">
-                            <label for="dateOfBirth">Date of Birth</label>
-                            <input type="date" id="dateOfBirth" name="dateOfBirth" value="{{ user.dateOfBirth if user.dateOfBirth else '' }}">
+                            <label>Phone</label>
+                            <input type="text" name="phone" value="{{ user.phone or '' }}" required>
                         </div>
+
+                        <!-- DOB -->
+                        <div class="form-row">
+                            <label>Date of Birth</label>
+                            <input type="date" id="profile-dob" name="dateOfBirth"
+                                value="{{ user.dateOfBirth.strftime('%Y-%m-%d') if user.dateOfBirth else '' }}"
+                                max="{{ now.strftime('%Y-%m-%d') if now else '' }}"
+                                required>
+
+                            <small id="profile-dob-error" class="profile-warning" style="display:none;">
+                                Cannot be a future date
+                            </small>
+                        </div>
+
                     </div>
 
+                    <!-- GENDER -->
                     <div class="form-row">
                         <label>Gender</label>
                         <div class="gender-group">
-                            <label class="gender-option">
-                                <input type="radio" name="gender" value="Male" {% if user.gender == 'Male' %}checked{% endif %}>
-                                <span>Male</span>
+                            <label>
+                                <input type="radio" name="gender" value="Male"
+                                {% if user.gender == 'Male' %}checked{% endif %}>
+                                Male
                             </label>
 
-                            <label class="gender-option">
-                                <input type="radio" name="gender" value="Female" {% if user.gender == 'Female' %}checked{% endif %}>
-                                <span>Female</span>
+                            <label>
+                                <input type="radio" name="gender" value="Female"
+                                {% if user.gender == 'Female' %}checked{% endif %}>
+                                Female
                             </label>
                         </div>
                     </div>
 
+                    <!-- INTERESTS -->
                     <div class="form-row full-width">
-                        <label for="interests">Select Your Interests (Min 1, Max 5)</label>
+                        <label for="interests">Interests (Min 1, Max 5)</label>
 
                         <select id="interests" name="interests[]" multiple>
                             {% for item in ['Technology', 'Politics', 'Sports', 'Education', 'Art', 'Health', 'Parenting', 'Entertainment', 'Business', 'Government'] %}
@@ -114,40 +166,20 @@
                             </option>
                             {% endfor %}
                         </select>
+
+                        <small id="profile-interest-error" class="profile-warning" style="display:none;">
+                            Please select between 1 and 5 interests
+                        </small>
                     </div>
-
-                    <!-- Choices.js Init -->
-                    <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        const interestsSelect = document.getElementById("interests");
-
-                        if (interestsSelect) {
-                            const choicesInstance = new Choices(interestsSelect, {
-                                removeItemButton: true,
-                                maxItemCount: 5,
-                                searchEnabled: true,
-                                placeholder: true,
-                                placeholderValue: 'Select up to 5 interests',
-                                noResultsText: 'No matching interests found',
-                                itemSelectText: '',
-                            });
-
-                            // Enforce minimum 1 interest
-                            interestsSelect.form.addEventListener('submit', function(e) {
-                                if (choicesInstance.getValue(true).length < 1) {
-                                    alert('Please select at least 1 interest.');
-                                    e.preventDefault();
-                                }
-                            });
-                        }
-
-                    });
-                    </script>
 
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">Save Changes</button>
                     </div>
+
                 </form>
+
+
+
             </section>
 
             <!-- SUBSCRIPTION -->
@@ -283,5 +315,82 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("profileForm");
+    const dob = document.getElementById("profile-dob");
+    const dobError = document.getElementById("profile-dob-error");
+    const interestError = document.getElementById("profile-interest-error");
+    const interestsSelect = document.getElementById("interests");
+
+    let choicesInstance = null;
+
+    if (interestsSelect) {
+        choicesInstance = new Choices(interestsSelect, {
+            removeItemButton: true,
+            maxItemCount: 5,
+            searchEnabled: true,
+            placeholder: true,
+            placeholderValue: "Select up to 5 interests",
+            noResultsText: "No matching interests found",
+            itemSelectText: "",
+            shouldSort: false
+        });
+    }
+
+    function validateDOB() {
+        if (!dob || !dob.value) {
+            dobError.style.display = "none";
+            return true;
+        }
+
+        const selected = new Date(dob.value);
+        const today = new Date();
+
+        selected.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        if (selected > today) {
+            dobError.style.display = "block";
+            alert("Date of birth cannot be a future date.");
+            return false;
+        }
+
+        dobError.style.display = "none";
+        return true;
+    }
+
+    function validateInterests() {
+        if (!choicesInstance) return true;
+
+        const selectedItems = choicesInstance.getValue(true);
+
+        if (selectedItems.length < 1 || selectedItems.length > 5) {
+            interestError.style.display = "block";
+            alert("Please select between 1 and 5 interests.");
+            return false;
+        }
+
+        interestError.style.display = "none";
+        return true;
+    }
+
+    if (dob) {
+        dob.addEventListener("change", validateDOB);
+    }
+
+    if (form) {
+        form.addEventListener("submit", function(e) {
+            const dobValid = validateDOB();
+            const interestValid = validateInterests();
+
+            if (!dobValid || !interestValid) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
 
 {% endblock %}

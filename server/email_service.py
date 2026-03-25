@@ -66,6 +66,48 @@ def send_verification_email(email, token):
         print("Email failed", str(e))
 
 
+def send_email_change_verification_email(email, token):
+    verification_link = f"{BASE_URL}profile/verify-email-change?token={token}"
+
+    body = (
+        f"Hi!\n\n"
+        f"You requested to change your email for Daily Scoop News System.\n\n"
+        f"Please verify your new email by clicking the link below:\n"
+        f"{verification_link}\n\n"
+        f"If you did not request this change, please ignore this email."
+    )
+
+    service = build("gmail", "v1", credentials=_build_credentials())
+
+    message = EmailMessage()
+    message.set_content(body)
+    message["To"] = email
+    message["From"] = FROM_EMAIL
+    message["Subject"] = "Verify Your New Email"
+
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+    service.users().messages().send(
+        userId="me",
+        body={"raw": encoded_message}
+    ).execute()
+
+def _build_credentials():
+    token_info = json.loads(os.getenv("GMAIL_TOKEN"))
+
+    creds = Credentials(
+        token=token_info.get("token"),
+        refresh_token=token_info.get("refresh_token"),
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        scopes=SCOPES
+    )
+
+    if creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+
+    return creds
 
 # Generating token file
 # from google_auth_oauthlib.flow import InstalledAppFlow

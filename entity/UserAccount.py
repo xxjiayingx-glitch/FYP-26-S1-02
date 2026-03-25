@@ -1,5 +1,6 @@
 from entity.db_connection import get_db_connection
 from werkzeug.security import check_password_hash
+from datetime import datetime, timedelta
 
 class UserAccount:
     """Handles user account login, profile, admin, and registration related database actions."""
@@ -36,50 +37,111 @@ class UserAccount:
     # PROFILE
     # ==============================
     def get_profile(self, userID):
-        """Get full profile details for a specific user."""
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        sql = "SELECT * FROM UserAccount WHERE userID = %s"
-        cursor.execute(sql, (userID,))
-
+        cursor.execute("SELECT * FROM UserAccount WHERE userID = %s", (userID,))
         user = cursor.fetchone()
+
+        cursor.close()
         conn.close()
+
+        if not user:
+            return None
+
+        now = datetime.now()
+
+        change_count = user.get("usernameChangeCount") or 0
+        window_start = user.get("usernameChangeWindowStart")
+
+        can_edit_username = True
+        remaining_changes = 3
+        wait_until = None
+
+        if window_start:
+            if now - window_start < timedelta(days=30):
+                remaining_changes = max(0, 3 - change_count)
+                can_edit_username = change_count < 3
+
+                if not can_edit_username:
+                    wait_until = window_start + timedelta(days=30)
+            else:
+                remaining_changes = 3
+                can_edit_username = True
+
+        user["can_edit_username"] = can_edit_username
+        user["remaining_username_changes"] = remaining_changes
+        user["username_wait_until"] = wait_until
+
+        user["can_edit_email"] = False
 
         return user
 
     @staticmethod
-    def update_profile(userID, first_name, last_name, email, username, phone, gender, dateOfBirth, interests):
-        """Update user's profile information."""
+    def update_profile(userID, first_name, last_name, username, phone, gender, dateOfBirth, interests, username_changed=False):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        query = """
-            UPDATE UserAccount
-            SET first_name = %s,
-                last_name = %s,
-                email = %s,
-                username = %s,
-                phone = %s,
-                gender = %s,
-                dateOfBirth = %s,
-                interests = %s,
-                updated_at = NOW()
-            WHERE userID = %s
-        """
-        cursor.execute(query, (
-            first_name,
-            last_name,
-            email,
-            username,
-            phone,
-            gender,
-            dateOfBirth,
-            interests,
-            userID
-        ))
+        if username_changed:
+            query = """
+                UPDATE UserAccount
+                SET first_name = %s,
+                    last_name = %s,
+                    username = %s,
+                    phone = %s,
+                    gender = %s,
+                    dateOfBirth = %s,
+                    interests = %s,
+                    usernameChangeWindowStart = CASE
+                        WHEN usernameChangeWindowStart IS NULL
+                            OR usernameChangeWindowStart < DATE_SUB(NOW(), INTERVAL 30 DAY)
+                        THEN NOW()
+                        ELSE usernameChangeWindowStart
+                    END,
+                    usernameChangeCount = CASE
+                        WHEN usernameChangeWindowStart IS NULL
+                            OR usernameChangeWindowStart < DATE_SUB(NOW(), INTERVAL 30 DAY)
+                        THEN 1
+                        ELSE usernameChangeCount + 1
+                    END,
+                    lastUsernameChangedAt = NOW(),
+                    updated_at = NOW()
+                WHERE userID = %s
+            """
+            cursor.execute(query, (
+                first_name,
+                last_name,
+                username,
+                phone,
+                gender,
+                dateOfBirth,
+                interests,
+                userID
+            ))
+        else:
+            query = """
+                UPDATE UserAccount
+                SET first_name = %s,
+                    last_name = %s,
+                    phone = %s,
+                    gender = %s,
+                    dateOfBirth = %s,
+                    interests = %s,
+                    updated_at = NOW()
+                WHERE userID = %s
+            """
+            cursor.execute(query, (
+                first_name,
+                last_name,
+                phone,
+                gender,
+                dateOfBirth,
+                interests,
+                userID
+            ))
 
         conn.commit()
+        cursor.close()
         conn.close()
 
     @staticmethod
@@ -114,6 +176,86 @@ class UserAccount:
         conn.commit()
         conn.close()
     
+    def find_by_email_excluding_user(self, email, userID):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT * FROM UserAccount WHERE email = %s AND userID != %s",
+            (email, userID)
+        )
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+        return result
+
+
+    def find_by_username_excluding_user(self, username, userID):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT * FROM UserAccount WHERE username = %s AND userID != %s",
+            (username, userID)
+        )
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+        return result
+
+
+    @staticmethod
+    def start_email_change_request(userID, pending_email, token):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE UserAccount
+            SET pendingEmail = %s,
+                verificationToken = %s,
+                emailChangeRequestedAt = NOW(),
+                updated_at = NOW()
+            WHERE userID = %s
+        """, (pending_email, token, userID))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+
+    @staticmethod
+    def verify_pending_email_change(token):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                UPDATE UserAccount
+                SET email = pendingEmail,
+                    pendingEmail = NULL,
+                    verificationToken = NULL,
+                    emailChangeRequestedAt = NULL,
+                    isVerified = 1,
+                    updated_at = NOW()
+                WHERE verificationToken = %s
+                AND pendingEmail IS NOT NULL
+            """, (token,))
+
+            success = cursor.rowcount > 0
+            conn.commit()
+            return success
+        except:
+            conn.rollback()
+            return False
+        finally:
+            cursor.close()
+            conn.close()
+    
+
+
+
     @staticmethod
     def apply_verified_badge(userID):
         conn = get_db_connection()
