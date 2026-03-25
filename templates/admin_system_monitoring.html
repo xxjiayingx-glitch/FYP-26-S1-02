@@ -1,0 +1,18 @@
+{% extends "admin_base.html" %}
+
+{% block title %}System Monitoring{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>System Monitoring</h1>
+<div class="monitor-card">
+    <h3>System Logs</h3>
+    <p>Audit user actions and administrative activities.</p>
+    <button class="primary-btn" onclick="window.location.href='/admin/system-monitoring/view-logs'">
+        View
+    </button>
+</div>
+{% endblock %}

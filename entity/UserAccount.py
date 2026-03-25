@@ -18,8 +18,6 @@ class UserAccount:
         cursor.close()
         conn.close()
 
-        print("User found:", user)
-
         if not user:
             print("No user with that email")
             return None

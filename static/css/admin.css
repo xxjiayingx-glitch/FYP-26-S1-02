@@ -1,0 +1,211 @@
+/* ----------------- */
+/* System Monitoring */
+/* ----------------- */
+.monitor-card {
+    margin-top: 60px;
+    width: 280px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    transition:0.25s;
+}
+
+.monitor-card h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 18px 0;
+    line-height: 1.1;
+}
+
+.monitor-card p {
+    font-weight: 600;
+    color: #54aee8;
+    margin: 0 0 34px 0;
+    line-height: 1.3;
+}
+
+.primary-btn {
+    background:#4A6CF7;
+    border:none;
+    color:white;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size: 16px;
+    font-weight:600;
+}
+/* ----------------- */
+/* System Logs Table */
+/* ----------------- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-right: 80px;
+}
+
+.page-header h1 {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.breadcrumb {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.breadcrumb-link {
+    color: #2f80ed;        
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    margin: 0 6px;
+    color: #555;
+}
+
+.breadcrumb-current {
+    color: #000;          
+}
+
+.logs-filter-section {
+    margin: 20px 0 24px 0;
+    padding-left: 100px;
+}
+
+.logs-filter-form {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-input,
+.date-input {
+    padding: 10px 14px;
+    border: 1px solid #cfd2f9;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+}
+
+.search-input {
+    width: 300px;
+}
+
+.logs-filter-form select {
+    padding: 10px 14px;
+    border: 1px solid #cfd2f9;
+    border-radius: 10px;
+    font-size: 15px;
+    background: #fff;
+    color: #333;
+    height: 42px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5 7l5 5 5-5H5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 35px;
+}
+
+.logs-filter-form select:focus {
+    outline: none;
+    border-color: #4c67f2;
+    box-shadow: 0 0 0 2px rgba(76, 103, 242, 0.1);
+}
+
+.filter-btn,
+.clear-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #4c67f2;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.clear-btn {
+    display: inline-block;
+    background: #d9dcef;
+    color: #222;
+}
+
+.logs-table-wrapper {
+    width: 980px;
+    margin: 0 auto;
+}
+
+.logs-table-section {
+    margin-top: 20px;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #efeffb;
+    border: 1px solid #cfd2f9;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.logs-table thead th {
+    text-align: left;
+    padding: 18px 20px;
+    font-size: 16px;
+    border-bottom: 1px solid #cfd2f9;
+}
+
+.logs-table tbody td {
+    padding: 12px 20px;
+    font-size: 16px;
+    border-bottom: 1px solid #cfd2f9;
+}
+
+.logs-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pagination a {
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #4c67f2;
+    font-weight: 500;
+    border: 1px solid transparent;
+}
+
+.pagination a:hover {
+    background: #eef1ff;
+}
+
+.pagination a.active {
+    background: #4c67f2;
+    color: white;
+}
