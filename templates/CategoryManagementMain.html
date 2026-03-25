@@ -13,46 +13,42 @@
     margin-bottom:30px;
 }
 
-.category-card-wrapper{
-    display:flex;
-    gap:30px;
-}
 
-.category-card{
-    width:280px;
+/* ⭐⭐⭐ NEW STYLE LIKE WEBPAGE MANAGEMENT ⭐⭐⭐ */
+
+.section-card{
     background:white;
-    border-radius:16px;
-    padding:28px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.08);
-    transition:0.25s;
+    border-radius:18px;
+    padding:30px 35px;
+    margin-bottom:28px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-.category-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 12px 30px rgba(0,0,0,0.12);
-}
-
-.category-card h3{
-    font-size:22px;
+.section-left h2{
+    font-size:24px;
     margin-bottom:6px;
 }
 
-.category-card p{
+.section-left p{
     color:#777;
-    margin-bottom:20px;
+    width:420px;
 }
 
-.view-btn{
+.edit-btn{
     background:#4A6CF7;
-    border:none;
     color:white;
-    padding:10px 18px;
-    border-radius:8px;
-    cursor:pointer;
+    border:none;
+    padding:12px 22px;
+    border-radius:10px;
     font-weight:600;
+    cursor:pointer;
 }
 
-.view-btn:hover{
+.edit-btn:hover{
     background:#3b5de0;
 }
 
@@ -63,34 +59,44 @@
 
     <h1 class="page-title">Category Management</h1>
 
-    <div class="category-card-wrapper">
 
-        <div class="category-card">
+    <!-- ⭐ ARTICLE CATEGORY -->
+    <div class="section-card">
 
-            <h3>Article Category</h3>
-            <p>Manage article categories</p>
-
-            <button 
-                class="view-btn"
-                onclick="window.location.href='{{ url_for('article_category_page_bp.article_category_page_view') }}'">
-                View
-            </button>
-
+        <div class="section-left">
+            <h2>Article Category Section</h2>
+            <p>
+                Manage categories used to organise articles such as technology,
+                politics, health and business.
+            </p>
         </div>
 
+        <button
+            class="edit-btn"
+            onclick="window.location.href='{{ url_for('article_category_page_bp.article_category_page_view') }}'">
+            Edit Section
+        </button>
 
-        <div class="category-card">
+    </div>
 
-            <h3>Report Category</h3>
-            <p>Manage report categories</p>
 
-            <button 
-                class="view-btn"
-                onclick="window.location.href='/admin/report-category'">
-                View
-            </button>
 
+    <!-- ⭐ REPORT CATEGORY -->
+    <div class="section-card">
+
+        <div class="section-left">
+            <h2>Report Category Section</h2>
+            <p>
+                Manage report category types used when users flag inappropriate
+                or misleading articles.
+            </p>
         </div>
+
+        <button
+            class="edit-btn"
+            onclick="window.location.href='/admin/report-category'">
+            Edit Section
+        </button>
 
     </div>
 
