@@ -33,65 +33,25 @@
       <p>Sign Up</p>
 
       <form action="{{ url_for('register.register') }}" method="POST">
-        <div class="form-group">
-          <label for="firstName">First Name</label>
-          <input type="text" id="firstName" name="firstName" placeholder="First Name" />
-        </div>
 
-        <div class="form-group">
-          <label for="lastName">Last Name</label>
+        <!-- First + Last Name side by side -->
+        <div class="form-row-two">
+          <input type="text" id="firstName" name="firstName" placeholder="First Name" />
           <input type="text" id="lastName" name="lastName" placeholder="Last Name" />
         </div>
 
-        <div class="form-group">
-          <label for="email">Email address</label>
-          <input type="email" id="email" name="email" placeholder="Enter your email" />
-        </div>
+        <input type="email" id="email" name="email" placeholder="Enter your email" />
 
-        <div class="form-group">
-          <label for="phone">Phone</label>
-          <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" />
-        </div>
+        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" />
 
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" name="username" placeholder="Enter your username" />
-        </div>
+        <input type="text" id="username" name="username" placeholder="Enter your username" />
 
-        <div class="form-group">
-          <label for="password">Password</label>
+        <div class="password-group">
           <input type="password" id="password" name="password" placeholder="Password" />
           <small>Minimum 10 Characters</small>
         </div>
 
-        <div class="form-group">
-          <label for="retypePassword">Retype Password</label>
-          <input type="password" id="retypePassword" name="retypePassword" placeholder="Retype" />
-        </div>
-
-        <div class="form-row full-width">
-          <label>Select Your Interests (Min 1)</label>
-
-          <div class="interest-dropdown" id="interestDropdown">
-            <button type="button" class="interest-dropdown-trigger" id="interestTrigger"
-              onclick="toggleInterestDropdown()">
-              <span id="interestLabel">Select interests...</span>
-              <span class="dropdown-arrow">▾</span>
-            </button>
-
-            <div class="interest-dropdown-menu hidden" id="interestMenu">
-              {% for item in categories %}
-              <label class="interest-option">
-                <input type="checkbox" name="interests" value="{{ item.categoryName }}"
-                  class="interest-checkbox" onchange="updateInterestLabel()">
-                <span>{{ item.categoryName }}</span>
-              </label>
-              {% endfor %}
-            </div>
-          </div>
-
-          <span id="interestError" style="display:none; color:red;"></span>
-        </div>
+        <input type="password" id="retypePassword" name="retypePassword" placeholder="Retype Password" />
 
         <button type="submit" class="signup-btn">Sign Up</button>
       </form>
@@ -101,76 +61,28 @@
       </p>
     </div>
   </main>
+
   <!-- Popup Overlay -->
   <div id="popup-overlay" class="popup-overlay hidden">
     <div class="popup-box" id="popup-box">
       <p id="popup-message"></p>
     </div>
   </div>
+
   <script>
     function showPopup(message, type = "success") {
       const overlay = document.getElementById("popup-overlay");
       const box = document.getElementById("popup-box");
       const text = document.getElementById("popup-message");
-
       text.innerText = message;
-
       box.classList.remove("popup-success", "popup-error");
-
-      if (type === "success") {
-        box.classList.add("popup-success");
-      } else {
-        box.classList.add("popup-error");
-      }
-
+      box.classList.add(type === "success" ? "popup-success" : "popup-error");
       overlay.classList.remove("hidden");
     }
 
-    // Close when clicking outside
     document.getElementById("popup-overlay").addEventListener("click", function (e) {
-      const box = document.getElementById("popup-box");
-
-      if (!box.contains(e.target)) {
+      if (!document.getElementById("popup-box").contains(e.target)) {
         this.classList.add("hidden");
-      }
-    });
-
-
-    // Dropdown toggle
-    function toggleInterestDropdown() {
-      const menu = document.getElementById("interestMenu");
-      menu.classList.toggle("hidden");
-    }
-
-    // Update trigger label with selected interests
-    function updateInterestLabel() {
-      const checked = document.querySelectorAll(".interest-checkbox:checked");
-      const label = document.getElementById("interestLabel");
-      if (checked.length === 0) {
-        label.textContent = "Select interests...";
-      } else {
-        label.textContent = Array.from(checked).map(c => c.value).join(", ");
-      }
-    }
-
-    // Close dropdown when clicking outside
-    document.addEventListener("click", function (e) {
-      const dropdown = document.getElementById("interestDropdown");
-      if (!dropdown.contains(e.target)) {
-        document.getElementById("interestMenu").classList.add("hidden");
-      }
-    });
-
-    // Form validation
-    document.querySelector("form").addEventListener("submit", function (e) {
-      const checked = document.querySelectorAll(".interest-checkbox:checked");
-      const error = document.getElementById("interestError");
-      if (checked.length < 1) {
-        e.preventDefault();
-        error.innerText = "Select at least 1 interest";
-        error.style.display = "block";
-      } else {
-        error.style.display = "none";
       }
     });
   </script>
@@ -181,56 +93,41 @@
   </div>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const flashEl = document.getElementById("flash-data");
-        const successMsg = flashEl.dataset.success;
-        const errorMsg = flashEl.dataset.error;
-        if (successMsg) showPopup(successMsg, "success");
-        else if (errorMsg) showPopup(errorMsg, "error");
+      const flashEl = document.getElementById("flash-data");
+      const successMsg = flashEl.dataset.success;
+      const errorMsg = flashEl.dataset.error;
+      if (successMsg) showPopup(successMsg, "success");
+      else if (errorMsg) showPopup(errorMsg, "error");
     });
   </script>
-  <!-- <script>
-    {% if success %}
-    showPopup("{{ success }}", "success");
-    {% elif error %}
-    showPopup("{{ error }}", "error");
-    {% endif %}
-  </script> -->
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <h3 class="footer-title">Daily Scoop News</h3>
+        <p class="footer-description">
+          Delivering reliable and AI-powered news to keep readers informed
+          with credible and up-to-date stories.
+        </p>
+        <div class="footer-social">
+          <a href="https://facebook.com" target="_blank" class="footer-social-icon facebook" rel="noopener">f</a>
+          <a href="https://linkedin.com" target="_blank" class="footer-social-icon linkedin" rel="noopener">in</a>
+          <a href="https://x.com" target="_blank" class="footer-social-icon twitter" rel="noopener">X</a>
+        </div>
+      </div>
+      <div class="footer-links-section">
+        <h4 class="footer-links-title">Social Links</h4>
+        <div class="footer-links">
+          <a href="{{ url_for('info', page='contact') }}">Contact Us</a>
+          <a href="{{ url_for('info', page='privacy') }}">Privacy Policy</a>
+          <a href="{{ url_for('info', page='about') }}">About Us</a>
+          <a href="{{ url_for('info', page='terms') }}">Terms and Conditions</a>
+          <a href="{{ url_for('info', page='help') }}">Need help? Reach us here.</a>
+          <a href="{{ url_for('info', page='advertise') }}">Advertise with us</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
 </body>
-<footer class="footer">
-  <div class="footer-container">
-    <!-- Brand Section -->
-    <div class="footer-brand">
-      <h3 class="footer-title">Daily Scoop News</h3>
-
-      <p class="footer-description">
-        Delivering reliable and AI-powered news to keep readers informed
-        with credible and up-to-date stories.
-      </p>
-
-      <div class="footer-social">
-        <a href="https://facebook.com" target="_blank" class="footer-social-icon facebook" rel="noopener">f</a>
-
-        <a href="https://linkedin.com" target="_blank" class="footer-social-icon linkedin" rel="noopener">in</a>
-
-        <a href="https://x.com" target="_blank" class="footer-social-icon twitter" rel="noopener">X</a>
-      </div>
-    </div>
-
-    <!-- Links Section -->
-    <div class="footer-links-section">
-      <h4 class="footer-links-title">Social Links</h4>
-
-      <div class="footer-links">
-        <a href="{{ url_for('info', page='contact') }}">Contact Us</a>
-        <a href="{{ url_for('info', page='privacy') }}">Privacy Policy</a>
-        <a href="{{ url_for('info', page='about') }}">About Us</a>
-        <a href="{{ url_for('info', page='terms') }}">Terms and Conditions</a>
-        <a href="{{ url_for('info', page='help') }}">Need help? Reach us here.</a>
-        <a href="{{ url_for('info', page='advertise') }}">Advertise with us</a>
-      </div>
-
-    </div>
-  </div>
-</footer>
-
 </html>
