@@ -1,6 +1,196 @@
 {% extends "admin_base.html" %}
 {% block content %}
 
+<style>
+
+/* ================= LAYOUT ================= */
+
+.category-layout{
+    display:flex;
+    gap:28px;
+    padding:30px;
+    width:100%;
+    box-sizing:border-box;
+}
+
+/* ================= TABLE CARD ================= */
+
+.category-table-card{
+    flex:1;
+    background:white;
+    border-radius:22px;
+    padding:30px 32px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.06);
+}
+
+/* ================= TABLE ================= */
+
+.modern-table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+/* ⭐⭐⭐ 表头字体变大 */
+
+.modern-table th{
+    font-size:20px;
+    font-weight:700;
+    padding-bottom:10px;
+}
+
+/* ⭐⭐⭐ 固定列宽 */
+
+.modern-table th:nth-child(1),
+.modern-table td:nth-child(1){
+    width:10%;
+    text-align:left;
+    padding-left:4px;
+}
+
+.modern-table th:nth-child(2),
+.modern-table td:nth-child(2){
+    width:46%;
+    text-align:left;
+}
+
+.modern-table th:nth-child(3),
+.modern-table td:nth-child(3){
+    width:18%;
+    text-align:center;
+}
+
+.modern-table th:nth-child(4),
+.modern-table td:nth-child(4){
+    width:26%;
+    text-align:left;
+}
+
+/* ================= ROW ================= */
+
+.modern-table td{
+    padding:22px 6px;
+    border-bottom:1px solid #f1f2f4;
+    vertical-align:middle;
+    font-size:18px;
+    font-weight:500;
+}
+
+/* ⭐⭐⭐ ID 数字再向左 */
+
+.modern-table td:nth-child(1){
+    padding-left:2px;
+}
+
+/* ================= NAME INPUT ================= */
+
+.modern-table input{
+    width:78%;
+    max-width:320px;
+
+    padding:14px 18px;
+    font-size:18px;
+    font-weight:600;
+
+    border-radius:14px;
+    border:none;
+    background:#f2f3f5;
+    transition:.25s;
+}
+
+/* ================= STATUS ================= */
+
+.status{
+    background:#7ED957;
+    padding:8px 18px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:16px;
+    display:inline-block;
+}
+
+/* ================= ACTION ================= */
+
+.modern-table td:nth-child(4){
+    white-space:nowrap;
+}
+
+.action-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.action-wrap button{
+    padding:8px 18px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:16px;
+    border:none;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.action-wrap button:first-child{
+    background:#e6e6e6;
+    color:#222;
+}
+
+.action-wrap button:last-child{
+    background:#ff5a5f;
+    color:white;
+}
+
+.action-wrap button:first-child:hover{
+    background:#4A6CF7;
+    color:white;
+}
+
+.action-wrap button:last-child:hover{
+    background:#e13c41;
+}
+
+/* ================= RIGHT FORM ================= */
+
+.category-form-card{
+    width:320px;
+    background:white;
+    border-radius:22px;
+    padding:34px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.06);
+    text-align:center;
+}
+
+.category-form-card h2{
+    font-size:28px;
+    font-weight:800;
+    margin-bottom:24px;
+}
+
+.category-form-card input{
+    width:100%;
+    padding:16px;
+    border-radius:16px;
+    border:none;
+    background:#f2f3f5;
+    font-size:18px;
+    margin-bottom:18px;
+}
+
+.category-form-card button{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:16px;
+    background:linear-gradient(90deg,#5b73ea,#4A6CF7);
+    color:white;
+    font-size:18px;
+    font-weight:800;
+    cursor:pointer;
+}
+
+</style>
+
 <div class="category-layout">
 
     <div class="category-table-card">
@@ -42,8 +232,13 @@ function loadCategories() {
                         disabled></td>
                     <td><span class="status active">Active</span></td>
                     <td>
-                        <button type="button" onclick="editCategory(${cat.categoryID})">Edit</button>
-                        <button type="button" onclick="deleteCategory(${cat.categoryID})">Delete</button>
+                        <div class="action-wrap">
+                            <button class="edit-btn" type="button"
+                            onclick="editCategory(${cat.categoryID})">Edit</button>
+                            
+                            <button class="delete-btn" type="button"
+                            onclick="deleteCategory(${cat.categoryID})">Delete</button>
+                        </div>
                     </td>
                 </tr>
             `;
