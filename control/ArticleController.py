@@ -120,47 +120,56 @@ class ArticleController:
         cursor.close()
         conn.close()
         return article
-
-    def update_article(self, article_id, title, category_id, content, status, featured_image=None):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        # Update article basic info
-        sql = """
-            UPDATE Article
-            SET articleTitle = %s,
-                categoryID = %s,
-                content = %s,
-                articleStatus = %s,
-                first_edited_at = CASE
-                    WHEN first_edited_at IS NULL THEN NOW()
-                    ELSE first_edited_at
-                END,
-                last_edited_at = NOW(),
-                updated_at = NOW()
-            WHERE articleID = %s
-        """
-        cursor.execute(sql, (title, category_id, content, status, article_id))
+    
+    #-------------------#
+    #old update article #
+    #-------------------#
+    # def update_article(self, article_id, title, category_id, content, status, featured_image=None):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+    #     # Update article basic info
+    #     sql = """
+    #         UPDATE Article
+    #         SET articleTitle=%s,
+    #             categoryID=%s,
+    #             content=%s,
+    #             articleStatus=%s,
+    #             updated_at=NOW()
+    #         WHERE articleID=%s
+    #     """
+    #     cursor.execute(sql, (title, category_id, content, status, article_id))
         
-        # If there's a new featured image, update it or insert
-        if featured_image:
-            # Check if an image already exists for this article
-            check_sql = "SELECT articleID FROM ArticleImage WHERE articleID=%s LIMIT 1"
-            cursor.execute(check_sql, (article_id,))
-            exists = cursor.fetchone()
-            if exists:
-                # Update existing image
-                update_sql = "UPDATE ArticleImage SET imageURL=%s, uploaded_at=NOW() WHERE articleID=%s"
-                cursor.execute(update_sql, (featured_image, article_id))
-            else:
-                # Insert new image
-                insert_sql = "INSERT INTO ArticleImage (articleID, imageURL, uploaded_at) VALUES (%s, %s, NOW())"
-                cursor.execute(insert_sql, (article_id, featured_image))
+    #     # If there's a new featured image, update it or insert
+    #     if featured_image:
+    #         # Check if an image already exists for this article
+    #         check_sql = "SELECT articleID FROM ArticleImage WHERE articleID=%s LIMIT 1"
+    #         cursor.execute(check_sql, (article_id,))
+    #         exists = cursor.fetchone()
+    #         if exists:
+    #             # Update existing image
+    #             update_sql = "UPDATE ArticleImage SET imageURL=%s, uploaded_at=NOW() WHERE articleID=%s"
+    #             cursor.execute(update_sql, (featured_image, article_id))
+    #         else:
+    #             # Insert new image
+    #             insert_sql = "INSERT INTO ArticleImage (articleID, imageURL, uploaded_at) VALUES (%s, %s, NOW())"
+    #             cursor.execute(insert_sql, (article_id, featured_image))
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+    #     conn.commit()
+    #     cursor.close()
+    #     conn.close()
 
-        
+    #----------------#
+    # Update Article #
+    #----------------#
+    def update_article(self, article_id, title, category_id, content, status):
+        return self.article_entity.update_article(article_id, title, category_id, content, status)
+    
+    def update_article_image(self, article_id, image_filename):
+        return self.article_entity.update_article_image(article_id, image_filename)
+
+    #-------------------#
+    # Get Article Image #
+    #-------------------#
     def get_article_images(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -171,7 +180,9 @@ class ArticleController:
         conn.close()
         return [img['imageURL'] for img in images]
     
-
+    #---------------------#
+    # Get Article Insight #
+    #---------------------#
     def get_article_insight(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor(DictCursor)

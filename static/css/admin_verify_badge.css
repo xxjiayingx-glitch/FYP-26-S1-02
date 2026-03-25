@@ -1,0 +1,82 @@
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-right: 80px;
+}
+
+.page-header h1 {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: #54aee8;
+    margin-bottom: 24px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 20px;  
+}
+
+.btn {
+    width: 100px;
+    padding: 10px 20px;
+    border-radius: 8px; 
+    border: none;
+    background-color: #cfd4ff;
+    color: rgb(10, 10, 10);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    cursor: pointer;
+}
+
+.back-btn {
+    text-decoration: None;
+    background: #e3e5f6;
+    color: black;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.table-section {
+    display: flex;
+    justify-content: center;
+    padding-right: 80px;
+}
+
+.request-table {
+    width: 100%;
+    max-width: 1080px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #efeffb;
+    border: 1px solid #cfd2f9;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.request-table thead th {
+    text-align: left;
+    padding: 18px 20px;
+    font-size: 16px;
+    border-bottom: 1px solid #cfd2f9;
+}
+
+.request-table tbody td {
+    padding: 12px 20px;
+    font-size: 16px;
+    border-bottom: 1px solid #cfd2f9;
+}
+
+.request-table tbody tr:last-child td {
+    border-bottom: none;
+}

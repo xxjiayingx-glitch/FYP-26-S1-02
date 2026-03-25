@@ -45,11 +45,13 @@ from boundary.EditSubscriptionPlansPage import edit_subscription_plans_bp
 from boundary.WebAdminAPI import web_admin_api_bp
 from boundary.AdminVerifyBadgePage import admin_verified_bp
 from boundary.AdminUploadImage import admin_profile_bp
-#from boundary.AdminViewLogsPage import system_monitoring_bp
+from boundary.AdminViewLogsPage import system_monitoring_bp
 
 # Controllers
 from control.ArticleController import ArticleController
+from control.SystemLogCTL import SystemLogCTL
 article_controller = ArticleController()
+
 
 # Flask App
 app = Flask(__name__)
@@ -82,7 +84,7 @@ app.register_blueprint(web_admin_api_bp)
 app.register_blueprint(fact_check_bp)
 app.register_blueprint(admin_verified_bp)
 app.register_blueprint(admin_profile_bp)
-#app.register_blueprint(system_monitoring_bp)
+app.register_blueprint(system_monitoring_bp)
 
 # Image File Size
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
@@ -392,12 +394,20 @@ def create_article():
             featured_image.save(save_path)
 
         # Insert article
-        article_controller.create_article(
+        articleID = article_controller.create_article(
             user_id, title, category_id, content, status, image_filename
         )
 
-        flash("Article created successfully!", "success")
-        return redirect(url_for("my_articles"))
+        # Log create article record
+        if articleID:
+            SystemLogCTL.logAction(
+            accountID=session["userID"],
+            action="Created Article",
+            targetID=articleID,
+            targetType="Article"
+            )
+            flash("Article created successfully!", "success")
+            return redirect(url_for("my_articles"))
 
     # GET → fetch categories
     categories = article_controller.get_categories()
@@ -439,11 +449,22 @@ def edit_article(article_id):
             save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
             featured_image.save(save_path)
 
-        article_controller.update_article(
-            article_id, title, category_id, content, status, image_filename
-        )
-        flash("Article updated successfully!", "success")
-        return redirect(url_for("my_articles"))
+        updated = article_controller.update_article(article_id, title, category_id, content, status)
+
+        if updated and image_filename:
+            article_controller.update_article_image(article_id, image_filename)
+
+        if updated:
+            flash("Article updated successfully!", "success")
+            SystemLogCTL.logAction(
+                accountID=session["userID"],
+                action="Updated Article",
+                targetID=article_id,
+                targetType="Article"
+            )
+            return redirect(url_for("my_articles"))
+        else:
+            flash("Failed to update article.", "error")
 
     return render_template("edit_article.html", article=article, categories=categories)
 
@@ -461,8 +482,19 @@ def delete_article(article_id):
         flash("You do not have permission to delete this article.", "error")
         return redirect(url_for("my_articles"))
 
-    article_controller.delete_article(article_id)
-    flash("Article deleted successfully!", "success")
+    deleted = article_controller.delete_article(article_id)
+
+    if deleted:
+        flash("Article deleted successfully!", "success")
+        SystemLogCTL.logAction(
+        accountID=session["userID"],
+        action="Deleted Article",
+        targetID=article_id,
+        targetType="Article"
+        )
+    else:
+        flash("Failed to delete article.", "error")
+        
     return redirect(url_for("my_articles"))
 
 
@@ -550,6 +582,16 @@ def generate_ai_review_ajax(article_id):
 
 @app.route("/logout")
 def logout():
+    user_id = session.get("userID")
+
+    if user_id:
+        SystemLogCTL.logAction(
+            accountID=user_id,
+            action="Logged Out",
+            targetID=user_id,
+            targetType="UserAccount"
+        )
+
     session.clear()
     return redirect(url_for("login.login"))
 

@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_db_connection():
-    return pymysql.connect(
+    conn = pymysql.connect(
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
@@ -12,7 +12,7 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-    # ✅  Singapore timezone
+    # Singapore timezone
     with conn.cursor() as cursor:
         cursor.execute("SET time_zone = '+08:00'")
 

@@ -1,113 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto-Publish Rules</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auto_publish_rules.css') }}">
-</head>
-<body>
+{% extends "admin_base.html" %}
 
-    <header class="topbar">
-        <div class="top-left">
-            <button class="hamburger" id="toggleSidebar">☰</button>
-            <div class="brand">Daily Scoop News<br>System</div>
+{% block title %}Auto-Publish Rules{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auto_publish_rules.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Configure Auto-Publish Rules</h1>
+    <p>Set the minimum credibility score required for automatic publishing.</p>
+</section>
+
+{% if error %}
+    <div class="alert error">{{ error }}</div>
+{% endif %}
+
+{% if message %}
+    <div class="alert success">{{ message }}</div>
+{% endif %}
+
+<section class="form-card">
+    <form method="POST" action="{{ url_for('auto_publish.auto_publish_settings_page') }}">
+        <div class="form-group">
+            <label for="minCredibilityScore">Minimum Credibility Score Threshold</label>
+            <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                id="minCredibilityScore"
+                name="minCredibilityScore"
+                value="{{ current_rule.minCredibilityScore if current_rule else '' }}"
+                placeholder="Enter threshold, e.g. 75"
+                required
+            >
         </div>
 
-        <div class="top-right">
-            <div class="avatar">
-                {% if admin and admin.profileImage %}
-                    <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
-                {% else %}
-                    <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
-                {% endif %}
-            </div>
-            <span>Hi, {{ admin.username }}</span>
-            <a href="#">Logout</a>
-        </div>
-    </header>
+        <button type="submit" class="save-btn">Save Configuration</button>
+    </form>
+</section>
 
-    <div class="layout">
-        <aside class="sidebar" id="sidebar">
-            <div class="profile-box">
-                <div class="avatar">
-                    {% if admin and admin.profileImage %}
-                        <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
-                    {% else %}
-                        <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
-                    {% endif %}
-                </div>
+{% if current_rule %}
+<section class="info-card">
+    <h2>Current Rule</h2>
+    <p><strong>Minimum Credibility Score:</strong> {{ current_rule.minCredibilityScore }}</p>
+    <p><strong>Status:</strong> {{ current_rule.ruleStatus }}</p>
+    <p><strong>Last Updated:</strong> 
+        {% if current_rule.updated_at %}
+            {{ current_rule.updated_at.strftime('%d/%m/%Y') if current_rule.updated_at.__class__.__name__ == 'datetime' else current_rule.updated_at }}
+        {% else %}
+            -
+        {% endif %}
+    </p>
+</section>
+{% endif %}
 
-                <div class="profile-info">
-                    <div class="username">{{ admin.username if admin else 'Username' }}</div>
-                    <div class="role">{{ admin.userType if admin else 'Role' }}</div>
-                </div>
-            </div>
-
-            <nav class="menu">
-                <a href="/admin/dashboard"><span class="menu-text">Dashboard</span></a>
-                <a href="/admin/user-accounts"><span class="menu-text">User Accounts</span></a>
-                <a href="/admin/article-reported"><span class="menu-text">Article Reported</span></a>
-                <a href="/admin/category-management"><span class="menu-text">Category Management</span></a>
-                <a href="/admin/webpage-management"><span class="menu-text">Webpage Management</span></a>
-                <a href="#"><span class="menu-text">System Monitoring</span></a>
-                <a href="/admin/auto-publish-rules" class="active"><span class="menu-text">Auto-Publish Rules</span></a>
-            </nav>
-        </aside>
-
-        <main class="content">
-            <section class="page-header">
-                <h1>Configure Auto-Publish Rules</h1>
-                <p>Set the minimum credibility score required for automatic publishing.</p>
-            </section>
-
-            {% if error %}
-                <div class="alert error">{{ error }}</div>
-            {% endif %}
-
-            {% if message %}
-                <div class="alert success">{{ message }}</div>
-            {% endif %}
-
-            <section class="form-card">
-                <form method="POST" action="/admin/auto-publish-rules">
-                    <div class="form-group">
-                        <label for="minCredibilityScore">Minimum Credibility Score Threshold</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            max="100"
-                            id="minCredibilityScore"
-                            name="minCredibilityScore"
-                            value="{{ current_rule.minCredibilityScore if current_rule else '' }}"
-                            placeholder="Enter threshold, e.g. 75"
-                            required
-                        >
-                    </div>
-
-                    <button type="submit" class="save-btn">Save Configuration</button>
-                </form>
-            </section>
-
-            {% if current_rule %}
-            <section class="info-card">
-                <h2>Current Rule</h2>
-                <p><strong>Minimum Credibility Score:</strong> {{ current_rule.minCredibilityScore }}</p>
-                <p><strong>Status:</strong> {{ current_rule.ruleStatus }}</p>
-                <p><strong>Last Updated:</strong> {{ current_rule.updated_at if current_rule.updated_at else '-' }}</p>
-            </section>
-            {% endif %}
-        </main>
-    </div>
-
-    <script>
-        const toggleButton = document.getElementById("toggleSidebar");
-        const sidebar = document.getElementById("sidebar");
-
-        toggleButton.addEventListener("click", function () {
-            sidebar.classList.toggle("collapsed");
-        });
-    </script>
-</body>
-</html>
+{% endblock %}

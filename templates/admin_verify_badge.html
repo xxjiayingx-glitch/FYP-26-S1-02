@@ -1,204 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<style>
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-right: 40px;
-    }
+{% extends "admin_base.html" %}
 
-    .action-buttons {
-        display: flex;
-        gap: 20px;  
-    }
+{% block title %}Verified Badge Approval{% endblock %}
 
-    .btn {
-        width: 100px;
-        padding: 10px 20px;
-        border-radius: 8px; 
-        border: none;
-        background-color: #cfd4ff;
-        color: rgb(10, 10, 10);
-        font-size: 14px;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-        cursor: pointer;
-    }
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_verify_badge.css') }}">
+{% endblock %}
 
-    .back-btn {
-
-        text-decoration: None;
-        background: #e3e5f6;
-        color: black;
-        border: none;
-        border-radius: 12px;
-        padding: 12px 22px;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-}
-</style>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Admin Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_accounts.css') }}">
-</head>
-<body>
-    <header class="topbar">
-        <div class="brand">Daily Scoop News System</div>
-        <div class="top-right">
-             <div class="avatar-top">
-                {% if admin and admin.profileImage %}
-                    <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
-                {% else %}
-                    <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
-                {% endif %}
-            </div>
-            <span>Hi, {{ admin.username }}</span>
-            <a href="{{ url_for('login.login') }}">Logout</a>
-        </div>
-    </header>
-
-    <div class="layout">
-        <aside class="sidebar" id="sidebar">
-            <div class="profile-box">
-                <div class="avatar-wrapper">
-                    <div class="avatar">
-                        {% if admin and admin.profileImage %}
-                            <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
-                        {% else %}
-                            <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
-                        {% endif %}
-                    </div>
-
-                    <form action="{{ url_for('admin_dashboard.upload_profile_picture') }}" 
-                        method="POST" 
-                        enctype="multipart/form-data"
-                        class="upload-form">
-                        
-                        <input type="file" 
-                            name="profileImage" 
-                            id="profileImageInput" 
-                            accept=".png,.jpg,.jpeg,.webp" 
-                            hidden
-                            onchange="this.form.submit()">
-
-                        <label for="profileImageInput" class="update-profile-link">
-                            Update Profile Picture
-                        </label>
-                    </form>
-                </div>
-
-                <div class="profile-info">
-                    <div class="username">{{ admin.username }}</div>
-                    <div class="role">{{ admin.userType }}</div>
-                </div>
-            </div>
-
-            <nav class="menu">
-                <a href="/admin/dashboard">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">Dashboard</span>
-                </a>
-                <a href="/admin/user-accounts">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">User Accounts</span>
-                </a>
-                <a href="/admin/article-reported">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">Article Reported</span>
-                </a>
-                <a href="/admin/category-management">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">Category Management</span>
-                </a>
-                <a href="/admin/webpage-management">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">Webpage Management</span>
-                </a>
-                <a href="#">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">System Monitoring</span>
-                </a>
-                <a href="/admin/auto-publish-rules">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">Auto-Publish Rules</span>
-                </a>
-                <a href="/admin/verified-requests">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">Verified Badge Requests</span>
-                </a>
-            </nav>
-        </aside>
-
-        <main class="content" id="mainContent">
-            <button class="hamburger" id="toggleSidebar">☰</button>
-            <section class="page-header">
-                <div>
-                    <h1>Verified Badge Requests</h2>
-                    <p>Approve Or Reject Requests</p>
-                </div>
-                <a class="back-btn"href="/admin/dashboard">Back</a>
-            </section>
-            
-            <section class="table-section">
-                    {% if requests %}
-                    <table class="user-table">
-                        <thead>
-                            <tr>
-                                <th>User ID</th>
-                                <th>Username</th>
-                                <th>Email</th>
-                                <th>Qualifying Articles</th>
-                                <th>Published Articles</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {% for user in requests %}
-                            <tr>
-                                <td>{{ user.userID }}</td>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>{{ user.qualifying_articles }}</td>
-                                <td>{{ user.total_published_articles }}</td>
-
-                                <td>
-                                    <div class="action-buttons">
-                                        <form method="POST" action="/admin/verified-approve/{{ user.userID }}" style="display:inline;">
-                                            <button class="btn">Approve</button>
-                                        </form>
-
-                                        <form method="POST" action="/admin/verified-reject/{{ user.userID }}" style="display:inline;">
-                                            <button class="btn">Reject</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
-                    {% else %}
-                    <p>No pending requests.</p>
-                    {% endif %}
-            </section>
-        </main>
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>Verified Badge Requests</h2>
+        <p>Approve Or Reject Requests</p>
     </div>
+</section>
+        
+<section class="table-section">
+        {% if pendingRequests %}
+        <table class="request-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Qualifying Articles</th>
+                    <th>Published Articles</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-    <script>
-        const toggleButton = document.getElementById("toggleSidebar");
-        const sidebar = document.getElementById("sidebar");
+            <tbody>
+                {% for request in pendingRequests %}
+                <tr>
+                    <td>{{ request.userID }}</td>
+                    <td>{{ request.username }}</td>
+                    <td>{{ request.email }}</td>
+                    <td>{{ request.qualifying_articles }}</td>
+                    <td>{{ request.total_published_articles }}</td>
 
-        toggleButton.addEventListener("click", function () {
-            sidebar.classList.toggle("collapsed");
-        });
-    </script>
-</body>
-</html>
+                    <td>
+                        <div class="action-buttons">
+                            <form method="POST" action="/admin/verified-approve/{{ request.userID }}" style="display:inline;">
+                                <button class="btn">Approve</button>
+                            </form>
+
+                            <form method="POST" action="/admin/verified-reject/{{ request.userID }}" style="display:inline;">
+                                <button class="btn">Reject</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+        <p>No pending requests.</p>
+        {% endif %}
+</section>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+        <a href="?page={{ page-1 }}{% if q %}&q={{ q }}{% endif %}{% if user_type %}&userType={{ user_type }}{% endif %}{% if account_status %}&accountStatus={{ account_status }}{% endif %}">&lt;</a>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+        <a class="{% if p == page %}active{% endif %}"
+           href="?page={{ p }}{% if q %}&q={{ q }}{% endif %}{% if user_type %}&userType={{ user_type }}{% endif %}{% if account_status %}&accountStatus={{ account_status }}{% endif %}">
+            {{ p }}
+        </a>
+    {% endfor %}
+
+    {% if page < total_pages %}
+        <a href="?page={{ page+1 }}{% if q %}&q={{ q }}{% endif %}{% if user_type %}&userType={{ user_type }}{% endif %}{% if account_status %}&accountStatus={{ account_status }}{% endif %}">&gt;</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
 
  

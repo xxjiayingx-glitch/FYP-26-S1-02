@@ -18,8 +18,6 @@ class UserAccount:
         cursor.close()
         conn.close()
 
-        print("User found:", user)
-
         if not user:
             print("No user with that email")
             return None
@@ -458,7 +456,7 @@ class UserAccount:
         insert_query = """
             INSERT INTO UserAccount
             (username, email, pwd, first_name, last_name, phone, userType, accountStatus, verificationToken, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, 'free user', 'pending', %s, NOW())
+            VALUES (%s, %s, %s, %s, %s, %s, 'free', 'pending', %s, NOW())
         """
         cursor.execute(insert_query, (username, email, password, firstName, lastName, phone, token))
         conn.commit()

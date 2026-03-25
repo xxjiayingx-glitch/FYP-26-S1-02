@@ -235,18 +235,96 @@ class Article:
         conn.commit()
         conn.close()
 
+    #----------------#
+    # Update Article #
+    #----------------#
+    def update_article(self, article_id, title, category_id, content, status):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            sql = """
+                UPDATE Article
+                SET articleTitle = %s,
+                    categoryID = %s,
+                    content = %s,
+                    articleStatus = %s
+                WHERE articleID = %s
+            """
+            cursor.execute(sql, (title, category_id, content, status, article_id))
+            conn.commit()
+            return True
+
+        except Exception as e:
+            conn.rollback()
+            print("update_article error:", e)
+            return False
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def update_article_image(self, article_id, image_filename):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            sql_check = "SELECT * FROM ArticleImage WHERE articleID = %s"
+            cursor.execute(sql_check, (article_id,))
+            existing = cursor.fetchone()
+
+            if existing:
+                sql = """
+                    UPDATE ArticleImage
+                    SET imageURL = %s
+                    WHERE articleID = %s
+                """
+                cursor.execute(sql, (image_filename, article_id))
+            else:
+                sql = """
+                    INSERT INTO ArticleImage (articleID, imageURL)
+                    VALUES (%s, %s)
+                """
+                cursor.execute(sql, (article_id, image_filename))
+
+            conn.commit()
+            return True
+
+        except Exception as e:
+            conn.rollback()
+            print("update_article_image error:", e)
+            return False
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    #----------------#
+    # Delete Article #
+    #----------------#
     def delete_article(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # delete image records first if they exist
-        cursor.execute("DELETE FROM ArticleImage WHERE articleID = %s", (article_id,))
+        try:
+            # delete child records first
+            cursor.execute("DELETE FROM ArticleImage WHERE articleID = %s", (article_id,))
+            cursor.execute("DELETE FROM ArticleAnalytics WHERE articleID = %s", (article_id,))
 
-        # delete the article
-        cursor.execute("DELETE FROM Article WHERE articleID = %s", (article_id,))
+            # then delete parent record
+            cursor.execute("DELETE FROM Article WHERE articleID = %s", (article_id,))
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+            return True
+
+        except Exception as e:
+            conn.rollback()
+            print("delete_article error:", e)
+            return False
+
+        finally:
+            cursor.close()
+            conn.close()
 
     def search_my_articles(self, user_id, keyword="", category_id="", status=""):
         conn = get_db_connection()

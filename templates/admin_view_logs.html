@@ -1,0 +1,104 @@
+{% extends "admin_base.html" %}
+
+{% block title %}System Monitoring{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="/admin/system-monitoring" class="breadcrumb-link">System Monitoring</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">System Logs</span>
+</div>
+
+<section class="page-header">
+    <h1>System Logs</h1>
+</section>
+<section class="logs-table-wrapper">
+
+    <!-- Search and Filter -->
+
+    <section class="logs-filter-section">
+        <form method="GET" action="{{ url_for('system_monitoring.view_logs_page') }}" class="logs-filter-form">
+            <input type="text" name="q" placeholder="Search..." value="{{ q if q else '' }}" class="search-input">
+
+            <select name="search_by">
+                <option value="">All</option>
+                <option value="logID" {% if search_by == 'logID' %}selected{% endif %}>Log ID</option>
+                <option value="accountID" {% if search_by == 'accountID' %}selected{% endif %}>Account ID</option>
+                <option value="targetID" {% if search_by == 'targetID' %}selected{% endif %}>Target ID</option>
+                <option value="action" {% if search_by == 'action' %}selected{% endif %}>Action</option>
+                <option value="targetType" {% if search_by == 'targetType' %}selected{% endif %}>Target Type</option>
+            </select>
+
+            <input type="date" name="log_date" value="{{ log_date if log_date else '' }}" class="date-input">
+
+            <button type="submit" class="filter-btn">Search</button>
+            <a href="{{ url_for('system_monitoring.view_logs_page') }}" class="clear-btn">Clear</a>
+        </form>
+    </section>
+
+    <!-- Display table -->
+
+    <div class="logs-table-section">
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Log ID</th>
+                    <th>Account ID</th>
+                    <th>Action</th>
+                    <th>Target ID</th>
+                    <th>Target Type</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if logs %}
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.logID }}</td>
+                        <td>{{ log.accountID }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.targetID }}</td>
+                        <td>{{ log.targetType }}</td>
+                        <td>{{ log.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="no-data">No system logs found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Number -->
+
+    <div class="pagination">
+        <!-- Previous -->
+        {% if page >= 1 %}
+            <a href="?page={{ page-1 }}{% if q %}&q={{ q }}{% endif %}{% if search_by %}&search_by={{ search_by }}{% endif %}{% if log_date %}&log_date={{ log_date }}{% endif %}">
+                «
+            </a>
+        {% endif %}
+
+        <!-- Page numbers -->
+        {% for p in range(1, total_pages + 1) %}
+            <a class="{% if p == page %}active{% endif %}"
+            href="?page={{ p }}{% if q %}&q={{ q }}{% endif %}{% if search_by %}&search_by={{ search_by }}{% endif %}{% if log_date %}&log_date={{ log_date }}{% endif %}">
+                {{ p }}
+            </a>
+        {% endfor %}
+
+        <!-- Next -->
+        {% if page < total_pages %}
+            <a href="?page={{ page+1 }}{% if q %}&q={{ q }}{% endif %}{% if search_by %}&search_by={{ search_by }}{% endif %}{% if log_date %}&log_date={{ log_date }}{% endif %}">
+                »
+            </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
