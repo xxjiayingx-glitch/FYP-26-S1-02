@@ -104,7 +104,8 @@ class ArticleController:
                 c.categoryName,
                 a.created_by,
                 ai.imageURL AS featured_image,
-                IFNULL(an.likes, 0) AS likes
+                IFNULL(an.likes, 0) AS likes,
+                IFNULL(an.views, 0) AS views
             FROM Article a
             JOIN UserAccount u ON a.created_by = u.userID
             JOIN ArticleCategory c ON a.categoryID = c.categoryID
@@ -591,7 +592,9 @@ class ArticleController:
         cursor = conn.cursor()
         query = """
             SELECT a.articleID, a.articleTitle, a.content, c.categoryName, u.username,
-                IFNULL(ai.imageURL, NULL) AS featured_image, IFNULL(an.views,0) AS views
+                IFNULL(ai.imageURL, NULL) AS featured_image,
+                IFNULL(an.views, 0) AS views,
+                IFNULL(an.likes, 0) AS likes
             FROM Article a
             JOIN UserAccount u ON a.created_by = u.userID
             JOIN ArticleCategory c ON a.categoryID = c.categoryID
@@ -612,7 +615,9 @@ class ArticleController:
         cursor = conn.cursor()
         query = """
             SELECT a.articleID, a.articleTitle, a.content, u.username,
-                IFNULL(ai.imageURL, NULL) AS featured_image, IFNULL(an.views,0) AS views
+                IFNULL(ai.imageURL, NULL) AS featured_image,
+                IFNULL(an.views, 0) AS views,
+                IFNULL(an.likes, 0) AS likes
             FROM Article a
             JOIN UserAccount u ON a.created_by = u.userID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -632,12 +637,15 @@ class ArticleController:
         cursor = conn.cursor()
         query = """
             SELECT a.articleID, a.articleTitle, a.content, c.categoryID, c.categoryName, u.username,
-                IFNULL(ai.imageURL, NULL) AS featured_image
+                IFNULL(ai.imageURL, NULL) AS featured_image,
+                IFNULL(an.views, 0) AS views,
+                IFNULL(an.likes, 0) AS likes
             FROM Favourite f
             JOIN Article a ON f.articleID = a.articleID
             JOIN UserAccount u ON a.created_by = u.userID
             JOIN ArticleCategory c ON a.categoryID = c.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
             WHERE f.userID = %s AND a.articleStatus = 'published'
             ORDER BY f.saved_at DESC
             LIMIT %s

@@ -179,6 +179,176 @@ a {
     margin-bottom: 10px;
 }
 
+/* ===== Top Viewed Article (Hero Section) ===== */
+
+.featured-news {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    margin: 50px 5%;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* LEFT SIDE */
+.featured-left {
+    flex: 1.2;
+}
+
+.featured-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+/* META BADGES */
+.top-article-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.top-article-badge {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* LIKE badge */
+.top-article-badge.like {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* DESCRIPTION */
+.featured-desc {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+/* READ MORE */
+.read-more {
+    font-weight: 700;
+    color: #3b82f6;
+}
+
+.read-more:hover {
+    text-decoration: underline;
+}
+
+/* RIGHT SIDE IMAGE */
+.featured-right {
+    flex: 1;
+}
+
+.featured-right img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+/* Hover effect */
+.featured-news:hover img {
+    transform: scale(1.03);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .featured-news {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .featured-right img {
+        height: 200px;
+    }
+}
+
+/* ===== Article News Meta (Views + Likes) ===== */
+.article-news-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 8px 0 6px;
+}
+
+.article-news-item {
+    background: #f3f4f6;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.article-news-item span {
+    font-size: 15px;
+}
+
+/* Likes color */
+.article-news-item.like {
+    color: #e11d48;
+}
+
+/* Hover effect */
+.article-news-item:hover {
+    transform: scale(1.05);
+    transition: 0.2s ease;
+}
+
+/* ===== Article Detail - Views & Likes ===== */
+
+.article_detail-news {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0 18px;
+}
+
+.article_detail-news-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    padding: 6px 12px;
+    border-radius: 999px;
+
+    background: #f3f4f6;
+    color: #374151;
+
+    transition: all 0.2s ease;
+}
+
+.article_detail-news-item span {
+    font-size: 14px;
+}
+
+/* Likes style */
+.article_detail-news-item.like {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Hover effect */
+.article_detail-news-item:hover {
+    transform: scale(1.05);
+}
+
+
+
+
 /* ===== TESTIMONIAL GRID ===== */
 .testimonial-grid {
     display: grid;

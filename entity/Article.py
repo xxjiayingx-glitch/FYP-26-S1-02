@@ -1,3 +1,5 @@
+# entity/Article.py
+
 from entity.db_connection import get_db_connection
 
 
@@ -160,11 +162,14 @@ class Article:
         sql = """
         SELECT a.articleID, a.articleTitle, a.content, a.created_at,
             a.articleStatus, a.categoryID,
-            c.categoryName, ai.imageURL, u.username
+            c.categoryName, ai.imageURL, u.username,
+            COALESCE(aa.views, 0) AS views,
+            COALESCE(aa.likes, 0) AS likes
         FROM Article a
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
         LEFT JOIN UserAccount u ON a.created_by = u.userID
+        LEFT JOIN ArticleAnalytics aa ON a.articleID = aa.articleID
         INNER JOIN (
             SELECT categoryID, MAX(created_at) AS latest_created
             FROM Article

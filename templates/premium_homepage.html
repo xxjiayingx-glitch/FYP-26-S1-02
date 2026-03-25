@@ -1,11 +1,10 @@
-
 {% extends "master.html" %}
 {% block title %}Premium User Home{% endblock %}
 {% block content %}
+
 <!-- SEARCH ARTICLE -->
 <div class="search-bar-container">
     <form method="get" action="{{ url_for('premium_homepage') }}" class="search-form">
-
         <div class="search-wrapper">
             <i class="fa fa-search search-icon"></i>
 
@@ -22,7 +21,6 @@
                 Search
             </button>
         </div>
-
     </form>
 </div>
 
@@ -32,6 +30,12 @@
     {% set featured = top_viewed[0] %}
     <div class="featured-left">
         <h1 class="featured-title">{{ featured.articleTitle }}</h1>
+
+        <div class="top-article-meta">
+            <span class="top-article-badge">👁 {{ featured.views }}</span>
+            <span class="top-article-badge like">❤️ {{ featured.likes }}</span>
+        </div>
+
         <p class="featured-desc">
             {{ featured.content[:170] }}{% if featured.content|length > 170 %}...{% endif %}
         </p>
@@ -49,7 +53,6 @@
 </div>
 {% endif %}
 
-
 <!-- CATEGORY TOP ARTICLES -->
 <h2 style="margin-bottom:15px;">Articles from Your Favorite Category</h2>
 <div class="article-grid" style="margin-bottom:40px;">
@@ -61,15 +64,30 @@
             {% else %}
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
             {% endif %}
+
             <h4>{{ article.articleTitle }}</h4>
+
+            <div class="article-news-meta">
+                <div class="article-news-item">
+                    👁 <span>{{ article.views }}</span>
+                </div>
+                <div class="article-news-item like">
+                    ❤️ <span>{{ article.likes }}</span>
+                </div>
+            </div>
+
             <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
-            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">Read more...</a>
+
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                Read more...
+            </a>
         </div>
         {% endfor %}
     {% else %}
         <p>No articles in your favorite category yet.</p>
     {% endif %}
 </div>
+
 <!-- USER SAVED ARTICLES -->
 <h2 style="margin-bottom:15px;">Your Saved Articles</h2>
 <div class="article-grid" style="margin-bottom:40px;">
@@ -81,15 +99,30 @@
             {% else %}
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
             {% endif %}
+
             <h4>{{ article.articleTitle }}</h4>
+
+            <div class="article-news-meta">
+                <div class="article-news-item">
+                    👁 <span>{{ article.views }}</span>
+                </div>
+                <div class="article-news-item like">
+                    ❤️ <span>{{ article.likes }}</span>
+                </div>
+            </div>
+
             <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
-            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">Read more...</a>
+
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                Read more...
+            </a>
         </div>
         {% endfor %}
     {% else %}
         <p>You have not saved any articles yet.</p>
     {% endif %}
 </div>
+
 <!-- LATEST ARTICLES -->
 <h2 style="margin-bottom:15px;">Latest Articles</h2>
 <div class="article-grid">
@@ -101,13 +134,28 @@
             {% else %}
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
             {% endif %}
+
             <h4>{{ article.articleTitle }}</h4>
+
+            <div class="article-news-meta">
+                <div class="article-news-item">
+                    👁 <span>{{ article.views }}</span>
+                </div>
+                <div class="article-news-item like">
+                    ❤️ <span>{{ article.likes }}</span>
+                </div>
+            </div>
+
             <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
-            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">Read more...</a>
+
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                Read more...
+            </a>
         </div>
         {% endfor %}
     {% else %}
         <p>No latest articles available.</p>
     {% endif %}
 </div>
+
 {% endblock %}

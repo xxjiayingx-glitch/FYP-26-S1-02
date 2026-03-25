@@ -230,36 +230,35 @@ def dashboard():
 def article_detail(article_id):
     print("ARTICLE ROUTE FILE:", __file__, flush=True)
 
-    return "ROUTE TEST 999"
-    # user_id = session.get("userID")
-    
-    # article = article_controller.get_article(article_id)
-    # comments = article_controller.get_comments_for_article(article_id)
-    # article_controller.increment_view_count(article_id)
+    user_id = session.get("userID")
 
-    # # Safely check if the article is saved
-    # is_saved = article_controller.is_article_saved(user_id, article_id)
-    # is_saved = True
+    # Increase view first so updated count can be fetched
+    article_controller.increment_view_count(article_id)
 
-    # # Make premium check robust
-    # user_type = session.get("userType", "").strip().lower()
-    # is_premium = "premium" in user_type
+    article = article_controller.get_article(article_id)
+    comments = article_controller.get_comments_for_article(article_id)
 
-    # print("ARTICLE DETAIL session userID:", session.get("userID"), flush=True)
-    # print("ARTICLE DETAIL article_id:", article_id, flush=True)
-    # print("ARTICLE DETAIL is_saved:", is_saved, flush=True)    
+    # Safely check if the article is saved
+    is_saved = article_controller.is_article_saved(user_id, article_id)
 
-    # print("ARTICLE DETAIL ROUTE HIT", flush=True)
-    
-    # return render_template(
-    #     "article_detail.html",
-    #     article=article,
-    #     comments=comments,
-    #     is_saved=is_saved,
-    #     is_premium=is_premium
-    # )
-    # return "ARTICLE DETAIL NEW CODE IS RUNNING"   
+    # Make premium check robust
+    user_type = session.get("userType", "").strip().lower()
+    is_premium = "premium" in user_type
 
+    print("ARTICLE DETAIL session userID:", session.get("userID"), flush=True)
+    print("ARTICLE DETAIL article_id:", article_id, flush=True)
+    print("ARTICLE DETAIL is_saved:", is_saved, flush=True)
+    print("ARTICLE DETAIL views:", article.get("views") if article else None, flush=True)
+    print("ARTICLE DETAIL likes:", article.get("likes") if article else None, flush=True)
+    print("ARTICLE DETAIL ROUTE HIT", flush=True)
+
+    return render_template(
+        "article_detail.html",
+        article=article,
+        comments=comments,
+        is_saved=is_saved,
+        is_premium=is_premium
+    )
 
 # Add comment route
 @app.route("/add_comment", methods=["POST"])

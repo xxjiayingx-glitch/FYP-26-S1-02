@@ -6,6 +6,8 @@
 
     <h1>{{ article.articleTitle }}</h1>
 
+    <!-- ARTICLE STATS -->
+
     {% if article.featured_image %}
     <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}"
          alt="Article Image"
@@ -23,7 +25,14 @@
         <span>|</span>
         <span>Category: {{ article.categoryName }}</span>
     </div>
-
+    <div class="article_detail-news">
+        <div class="article_detail-news-item">
+            👁 <span>{{ article.views }}</span>
+        </div>
+        <div class="article_detail-news-item like">
+            ❤️ <span>{{ article.likes }}</span>
+        </div>
+    </div>
     <div style="margin-bottom:20px; white-space: pre-line;">
         {{ article.content }}
     </div>
