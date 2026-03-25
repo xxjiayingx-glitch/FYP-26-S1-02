@@ -4,87 +4,125 @@
 
 {% block content %}
 
-<!-- Container for Article Insights -->
 <style>
-.container { 
-    width: 85%; 
-    max-width: 1000px; 
-    margin: 40px auto; 
-    font-family: Arial, sans-serif; 
+/* Container & Typography */
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    font-family: Arial, sans-serif;
     padding: 20px;
 }
-h2 { 
-    text-align: center; 
-    margin-bottom: 30px; 
-    color: #333; 
-}
-.section { 
-    margin-top: 40px; 
-}
-.box { 
-    background: #f7f7f7; 
-    padding: 25px; 
-    border-radius: 8px; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-    text-align: center; 
+h2 {
+    text-align: center;
     margin-bottom: 30px;
+    color: #2c3e50;
+}
+h3 {
+    color: #34495e;
+    margin-bottom: 15px;
+}
+
+/* Flash Messages */
+.flash-message {
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.flash-message.success { background: #d4edda; color: #155724; }
+.flash-message.error { background: #f8d7da; color: #721c24; }
+.flash-message.warning { background: #fff3cd; color: #856404; }
+
+/* Form */
+.article-select {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.article-select select {
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Sections */
+.section {
+    margin-bottom: 40px;
+}
+
+/* Box/Card */
+.box {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    text-align: center;
 }
 
 /* Performance Table */
-.performance-table { 
-    margin: 0 auto; 
-    border-collapse: collapse; 
-    width: 60%; 
+.performance-table {
+    margin: 0 auto;
+    border-collapse: collapse;
+    width: 60%;
     font-size: 16px;
 }
-.performance-table th, .performance-table td { 
-    padding: 12px 20px; 
-    border: 1px solid #ccc; 
+.performance-table th, .performance-table td {
+    padding: 12px 20px;
+    border: 1px solid #ccc;
 }
-.performance-table th { 
-    background: #4c7bd9; 
-    color: #fff; 
+.performance-table th {
+    background: #4c7bd9;
+    color: #fff;
+    text-transform: uppercase;
 }
-.performance-table td { 
-    background: #fff; 
+.performance-table td {
+    background: #fff;
 }
 
 /* Progress Bar */
-.progress-container { 
-    background: #ddd; 
-    border-radius: 5px; 
-    width: 100%; 
-    margin: 8px 0; 
-    height: 24px; 
-    overflow: hidden; 
+.progress-container {
+    background: #e0e0e0;
+    border-radius: 5px;
+    width: 100%;
+    height: 28px;
+    margin: 12px 0;
+    overflow: hidden;
 }
-.progress-bar { 
-    height: 100%; 
-    background: #4c7bd9; 
-    color: white; 
-    text-align: center; 
-    line-height: 24px; 
-    font-weight: bold; 
+.progress-bar {
+    height: 100%;
+    background: #4c7bd9;
+    color: white;
+    text-align: center;
+    line-height: 28px;
+    font-weight: bold;
+    transition: width 0.5s ease;
 }
 
 /* Buttons */
-.actions { 
-    margin-top: 20px; 
-    text-align: center; 
+.actions {
+    margin-top: 20px;
+    text-align: center;
 }
-.btn { 
-    padding: 10px 25px; 
-    margin: 8px; 
-    background: #4c7bd9; 
-    color: white; 
-    border: none; 
-    border-radius: 5px; 
-    cursor: pointer; 
-    text-decoration: none; 
-    font-size: 15px; 
+.btn {
+    padding: 12px 25px;
+    margin: 8px;
+    background: #4c7bd9;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 15px;
+    transition: background 0.3s ease;
 }
-.btn:hover { 
-    background: #355db5; 
+.btn:hover {
+    background: #355db5;
+}
+
+/* Chart Container */
+canvas#credibilityChart {
+    max-width: 100%;
+    margin-top: 20px;
 }
 </style>
 
@@ -92,15 +130,15 @@ h2 {
 
     <h2>Article Insights</h2>
 
-    <!-- Flash messages -->
+    <!-- Flash Messages -->
     <div id="flash-container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash-message {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
 
     <!-- Article Selection -->
@@ -117,71 +155,58 @@ h2 {
     </form>
 
     {% if selected_article %}
-
-    <!-- Overview Performance -->
     <div class="section">
-        <h3>Overview Performance</h3>
         <div class="box">
+            <h3>Overview Performance</h3>
             <table class="performance-table">
                 <tr><th>Views</th><th>Likes</th></tr>
                 <tr>
-                    <td>{{ selected_article.views | default(0) }}</td>
-                    <td>{{ selected_article.likes | default(0) }}</td>
+                    <td>{{ analytics.views | default(0) }}</td>
+                    <td>{{ analytics.likes | default(0) }}</td>
                 </tr>
             </table>
         </div>
     </div>
 
-    <!-- Credibility Analysis -->
     <div class="section">
-        <h3>Credibility Analysis</h3>
         <div class="box">
+            <h3>Credibility Analysis</h3>
             <p><b>Credibility Score:</b></p>
             <div class="progress-container">
-                <div class="progress-bar" style="width: {{ selected_article.credibilityScore | default(0) }}%">
-                    {{ selected_article.credibilityScore | default(0) }}%
-                </div>
+                {% set credibility = selected_article.credibilityScore | default(0) %}
+                <div class="progress-bar" style="width: {{ credibility }}%">{{ credibility }}%</div>
             </div>
-            <p><b>How the Credibility Score is Calculated:</b><br>
-                Your article's credibility score is based on views (70%) and saves (30%)
-            </p>
-            <p><b>Score Ranges:</b><br>
-                0-50%: Your article is still growing.<br>
-                51-80%: Your article is performing well.<br>
-                81-100%: Your article is highly trusted and reliable.
-            </p>
+            <canvas id="credibilityChart" height="100"></canvas>
+            <p><b>How the Credibility Score is Calculated:</b> Based on views (70%) and likes (30%)</p>
+            <p><b>Score Ranges:</b> 0-50%: Growing, 51-80%: Performing well, 81-100%: Highly trusted</p>
         </div>
     </div>
 
-    <!-- Priority AI Article Review -->
     <div class="section">
-        <h3>Priority AI Article Review</h3>
-        <div class="review-box" id="ai-review-box">
+        <div class="box">
+            <h3>Priority AI Article Review</h3>
             <p id="review-text">Loading AI summary...</p>
         </div>
     </div>
 
-    <!-- Article Actions -->
     <div class="section">
-        <h3>Article Actions</h3>
         <div class="actions">
             <a href="/article/{{ selected_article.articleID }}" class="btn">View Article</a>
             <a href="/edit_article/{{ selected_article.articleID }}" class="btn">Edit Article</a>
         </div>
     </div>
-
     {% endif %}
 
 </div>
 
-<!-- JavaScript for Background AI Fetch -->
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
     const select = document.querySelector("select[name='article_id']");
     const reviewText = document.getElementById("review-text");
-
-    if (!select || !reviewText) return;
+    const articleId = select ? select.value : null;
 
     function fetchAIReview(articleId) {
         if (!articleId || articleId === "Select your Article") {
@@ -189,7 +214,6 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         reviewText.textContent = "Generating AI summary...";
-
         fetch(`/generate_ai_review_ajax/${articleId}`)
             .then(res => res.json())
             .then(data => {
@@ -201,14 +225,46 @@ document.addEventListener("DOMContentLoaded", function() {
             });
     }
 
-    const initialArticleId = select.value;
-    if (initialArticleId && initialArticleId !== "Select your Article") {
-        fetchAIReview(initialArticleId);
+    if (articleId) fetchAIReview(articleId);
+
+    if (select) {
+        select.addEventListener("change", function() {
+            fetchAIReview(this.value);
+            fetchCredibilityTrend(this.value);
+        });
     }
 
-    select.addEventListener("change", function() {
-        fetchAIReview(this.value);
-    });
+    const ctx = document.getElementById("credibilityChart").getContext("2d");
+    let credibilityChart;
+
+    function fetchCredibilityTrend(articleId) {
+        if (!articleId || articleId === "Select your Article") return;
+        fetch(`/credibility_trend/${articleId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.data) return;
+                const labels = data.data.map(d => d.date);
+                const scores = data.data.map(d => d.score);
+                if (credibilityChart) credibilityChart.destroy();
+                credibilityChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Credibility Trend',
+                            data: scores,
+                            borderColor: '#4c7bd9',
+                            backgroundColor: 'rgba(76,123,217,0.2)',
+                            tension: 0.2,
+                            fill: true
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+                });
+            }).catch(err => console.error(err));
+    }
+
+    if (articleId) fetchCredibilityTrend(articleId);
 
 });
 </script>

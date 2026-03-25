@@ -2,6 +2,7 @@
 from entity.Article import Article
 from entity.db_connection import get_db_connection
 from pymysql.cursors import DictCursor
+from datetime import datetime
 
 class ArticleController:
 
@@ -191,9 +192,7 @@ class ArticleController:
         conn.close()
         return [img['imageURL'] for img in images]
     
-    #---------------------#
     # Get Article Insight #
-    #---------------------#
     def get_article_insight(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor(DictCursor)
@@ -221,44 +220,6 @@ class ArticleController:
         conn.close()
 
         return article
-
-    def update_credibility_score(self, article_id):
-        # Fetch views and likes from ArticleAnalytics table
-        article_data = self.get_article_analytics(article_id)
-
-        views = article_data['views']
-        likes = article_data['likes']
-
-        # Max values for views and likes (These can be adjusted as needed)
-        max_views = 10000  # You can dynamically get this if needed
-        max_likes = 5000   # You can dynamically get this if needed
-
-        # Normalize views and likes to percentages (0 to 100 scale)
-        normalized_views = (views / max_views) * 100 if max_views else 0
-        normalized_likes = (likes / max_likes) * 100 if max_likes else 0
-
-        # Weighting factors (adjust these values according to the desired importance)
-        weight_views = 0.7  # 70% weight for views
-        weight_likes = 0.3  # 30% weight for likes
-
-        # Calculate final credibility score
-        credibility_score = (normalized_views * weight_views) + (normalized_likes * weight_likes)
-
-        # Ensure the credibility score is between 0 and 100
-        credibility_score = min(max(credibility_score, 0), 100)
-
-        # Update the Article table with the calculated credibility score
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE Article
-            SET credibilityScore = %s
-            WHERE articleID = %s
-        """, (credibility_score, article_id))
-
-        conn.commit()
-        cursor.close()
-        conn.close()
 
     def get_max_views(self):
         # Fetch max views dynamically from the database
@@ -357,16 +318,17 @@ class ArticleController:
     def get_article_analytics(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor(DictCursor)
+
         cursor.execute("""
             SELECT views, likes
             FROM ArticleAnalytics
             WHERE articleID = %s
         """, (article_id,))
+
         result = cursor.fetchone()
         cursor.close()
         conn.close()
 
-        # Ensure it always returns a dictionary with views and likes
         return result if result else {"views": 0, "likes": 0}
 
     def increment_view_count(self, article_id):
@@ -388,6 +350,8 @@ class ArticleController:
         conn.commit()
         cursor.close()
         conn.close()
+
+        self.update_credibility_score(article_id)
 
     def increment_like_count(self, article_id):
         conn = get_db_connection()
@@ -666,4 +630,72 @@ class ArticleController:
         conn.close()
         return articles
     
+
+    def calculate_credibility(ai_fact_check, views, saves):
+        if not views or views < 20:
+            return ai_fact_check * 0.7
+
+        save_score = min((saves / views) * 500, 100)
+
+        credibility = (0.7 * ai_fact_check) + (0.3 * save_score)
+        return round(credibility, 2)
     
+    def get_credibility_label(score):
+        if score >= 80:
+            return "Highly Credible"
+        elif score >= 50:
+            return "Moderately Credible"
+        else:
+            return "Low Credibility"
+        
+    def update_credibility_score(self, article_id):
+        conn = get_db_connection()
+        cursor = conn.cursor(DictCursor)
+
+        # Get views and likes
+        cursor.execute("""
+            SELECT views, likes
+            FROM ArticleAnalytics
+            WHERE articleID = %s
+        """, (article_id,))
+        analytics = cursor.fetchone() or {"views": 0, "likes": 0}
+
+        # Get AI Fact Check
+        cursor.execute("""
+            SELECT aiFactCheck
+            FROM Article
+            WHERE articleID = %s
+        """, (article_id,))
+        article = cursor.fetchone() or {"aiFactCheck": 0}
+
+        views = analytics["views"]
+        likes = analytics["likes"]
+        ai_fact = article["aiFactCheck"] or 0
+
+        # ---- Credibility Logic ----
+        if not views or views < 20:
+            credibility = ai_fact * 0.7
+        else:
+            like_score = min((likes / views) * 300, 100)
+            credibility = (0.7 * ai_fact) + (0.3 * like_score)
+
+        credibility = round(min(max(credibility, 0), 100), 2)
+
+        # Update DB
+        cursor.execute("""
+            UPDATE Article
+            SET credibilityScore = %s
+            WHERE articleID = %s
+        """, (credibility, article_id))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+    
+    # In control/ArticleController.py
+    def get_article_analytics_over_time(self, article_id):
+        article = self.get_article(article_id)
+        if not article:
+            return []
+        today = datetime.now().date()
+        return [(article["views"], article["likes"], today)]

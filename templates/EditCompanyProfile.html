@@ -1,185 +1,128 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Edit Company Profile</title>
+{% extends "admin_base.html" %}
+{% block content %}
 
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
-</head>
+<div class="page-wrapper">
 
-<body>
+    <h1 class="page-title">
+        Edit Company Profile
+    </h1>
 
-<header class="topbar">
-    <div class="brand">Daily Scoop News System</div>
+    <div class="form-card-large">
 
-    <div class="top-right">
-        <div class="avatar-top">
-            <img src="{{ url_for('static', filename='images/profile/default.png') }}">
+        <div class="form-row">
+            <label>Company Name</label>
+            <input id="companyName" class="input-modern">
         </div>
 
-        <span>Hi, {{ session['username'] }}</span>
-        <a href="/logout">Logout</a>
-    </div>
-</header>
+        <div class="form-row">
+            <label>Description</label>
+            <textarea id="description" class="input-modern"></textarea>
+        </div>
 
-<div class="layout">
+        <div class="form-row">
+            <label>Mission</label>
+            <textarea id="mission" class="input-modern"></textarea>
+        </div>
 
-<!-- ⭐ SIDEBAR -->
-<aside class="sidebar" id="sidebar">
+        <div class="form-row">
+            <label>Vision</label>
+            <textarea id="vision" class="input-modern"></textarea>
+        </div>
 
-    <div class="profile-box">
-        <div class="avatar-wrapper">
-            <div class="avatar">
-                <img src="{{ url_for('static', filename='images/profile/default.png') }}">
+        <div class="form-row two-col">
+            <div>
+                <label>Contact Email</label>
+                <input id="contactEmail" class="input-modern">
+            </div>
+
+            <div>
+                <label>Contact Phone</label>
+                <input id="contactPhone" class="input-modern">
             </div>
         </div>
 
-        <div class="profile-info">
-            <div class="username">{{ session['username'] }}</div>
-            <div class="role">System Admin</div>
+        <div class="form-actions">
+
+            <button
+                type="button"
+                class="btn-secondary"
+                onclick="window.location.href='/admin/webpage-management'">
+                Cancel
+            </button>
+
+            <button
+                type="button"
+                class="btn-primary"
+                onclick="saveCompanyProfile()">
+                Save Changes
+            </button>
+
         </div>
+
     </div>
-
-    <nav class="menu">
-
-        <a href="{{ url_for('admin_dashboard.admin_dashboard') }}">
-            <span class="menu-text">Dashboard</span>
-        </a>
-
-        <a href="/admin/user-accounts">
-            <span class="menu-text">User Accounts</span>
-        </a>
-
-        <a href="/admin/article-reported">
-            <span class="menu-text">Article Reported</span>
-        </a>
-
-        <a href="/admin/category-management">
-            <span class="menu-text">Category Management</span>
-        </a>
-
-        <a href="/admin/webpage-management" class="active">
-            <span class="menu-text">Webpage Management</span>
-        </a>
-
-        <a href="/admin/system-monitoring">
-            <span class="menu-text">System Monitoring</span>
-        </a>
-
-        <a href="/admin/auto-publish-rules">
-            <span class="menu-text">Auto-Publish Rules</span>
-        </a>
-
-    </nav>
-
-</aside>
-
-
-<!-- ⭐ MAIN -->
-<main class="content">
-
-<button class="hamburger" id="toggleSidebar">☰</button>
-
-<h1>Edit Company Profile Section</h1>
-
-<div class="card form-card">
-
-    <div class="form-group">
-        <label>Company Name</label>
-        <input id="companyName">
-    </div>
-
-    <div class="form-group">
-        <label>Description</label>
-        <textarea id="description"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Mission</label>
-        <textarea id="mission"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Vision</label>
-        <textarea id="vision"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Contact Email</label>
-        <input id="contactEmail">
-    </div>
-
-    <div class="form-group">
-        <label>Contact Phone</label>
-        <input id="contactPhone">
-    </div>
-
-    <div style="margin-top:30px;">
-        <button class="secondary-btn"
-            onclick="window.location.href='/admin/webpage-management'">
-            Cancel
-        </button>
-
-        <button class="primary-btn"
-            onclick="saveCompanyProfile()">
-            Save Changes
-        </button>
-    </div>
-
-</div>
-
-</main>
 
 </div>
 
 <script>
 
-const toggleButton = document.getElementById("toggleSidebar");
-const sidebar = document.getElementById("sidebar");
-
-toggleButton.addEventListener("click", function () {
-    sidebar.classList.toggle("collapsed");
-});
-
-
 window.onload = loadCompanyProfile;
 
 function loadCompanyProfile(){
+
     fetch("/admin/company-profile")
-    .then(res => res.json())
+    .then(res=>{
+        if(!res.ok){
+            throw new Error("Failed to load profile");
+        }
+        return res.json();
+    })
     .then(data => {
-        companyName.value = data.companyName || "";
-        description.value = data.description || "";
-        mission.value = data.mission || "";
-        vision.value = data.vision || "";
-        contactEmail.value = data.contactEmail || "";
-        contactPhone.value = data.contactPhone || "";
+
+        document.getElementById("companyName").value = data.companyName || "";
+        document.getElementById("description").value = data.description || "";
+        document.getElementById("mission").value = data.mission || "";
+        document.getElementById("vision").value = data.vision || "";
+        document.getElementById("contactEmail").value = data.contactEmail || "";
+        document.getElementById("contactPhone").value = data.contactPhone || "";
+
+    })
+    .catch(err=>{
+        console.error(err);
+        alert("Failed to load company profile");
     });
 }
 
 function saveCompanyProfile(){
+
     fetch("/admin/company-profile",{
         method:"PUT",
-        headers:{
-            "Content-Type":"application/json"
-        },
+        headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
-            companyName: companyName.value,
-            description: description.value,
-            mission: mission.value,
-            vision: vision.value,
-            contactEmail: contactEmail.value,
-            contactPhone: contactPhone.value
+            companyName: document.getElementById("companyName").value,
+            description: document.getElementById("description").value,
+            mission: document.getElementById("mission").value,
+            vision: document.getElementById("vision").value,
+            contactEmail: document.getElementById("contactEmail").value,
+            contactPhone: document.getElementById("contactPhone").value
         })
     })
-    .then(res=>res.json())
+    .then(res=>{
+        if(!res.ok){
+            throw new Error("Update failed");
+        }
+        return res.json();
+    })
     .then(data=>{
         alert(data.message);
         window.location.href="/admin/webpage-management";
     })
+    .catch(err=>{
+        console.error(err);
+        alert("Failed to save changes");
+    });
+
 }
 
 </script>
 
-</body>
-</html>
+{% endblock %}
