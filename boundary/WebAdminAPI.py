@@ -19,6 +19,7 @@ def get_company_profile():
 
     return jsonify(result if result else {})
 
+
 @web_admin_api_bp.route("/admin/company-profile", methods=["PUT"])
 def update_company_profile():
     data = request.json
@@ -32,6 +33,11 @@ def update_company_profile():
 
     updated_by = session.get("userID")
 
+    # ⭐⭐⭐⭐⭐⭐⭐ FIX ⭐⭐⭐⭐⭐⭐⭐
+    if not updated_by:
+        updated_by = 1   # fallback admin id
+    # ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -39,7 +45,7 @@ def update_company_profile():
     row = cursor.fetchone()
 
     if row:
-        profile_id = row[0]
+        profile_id = row["profileID"]
         cursor.execute("""
             UPDATE CompanyProfile
             SET companyName=%s,
@@ -102,6 +108,7 @@ def get_subscription_plan():
 
 @web_admin_api_bp.route("/admin/subscription-plan", methods=["PUT"])
 def update_subscription_plan():
+
     data = request.json
 
     plan_name = data.get("planName")
@@ -113,11 +120,20 @@ def update_subscription_plan():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT planID FROM SubscriptionPlan ORDER BY planID ASC LIMIT 1")
+    cursor.execute("""
+        SELECT planID
+        FROM SubscriptionPlan
+        ORDER BY planID ASC
+        LIMIT 1
+    """)
     row = cursor.fetchone()
 
     if row:
-        plan_id = row[0]
+
+        # ⭐⭐⭐⭐⭐ FIX HERE ⭐⭐⭐⭐⭐
+        plan_id = row["planID"] if isinstance(row, dict) else row[0]
+        # ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+
         cursor.execute("""
             UPDATE SubscriptionPlan
             SET planName=%s,
@@ -134,7 +150,9 @@ def update_subscription_plan():
             plan_status,
             plan_id
         ))
+
     else:
+
         cursor.execute("""
             INSERT INTO SubscriptionPlan
             (planName, planDescription, price, billingCycle, planStatus)
@@ -151,4 +169,6 @@ def update_subscription_plan():
     cursor.close()
     conn.close()
 
-    return jsonify({"message": "Subscription plan updated successfully"})
+    return jsonify({
+        "message": "Subscription plan updated successfully"
+    })
