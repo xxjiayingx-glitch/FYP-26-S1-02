@@ -1,7 +1,7 @@
 import re
 import secrets
-import os
 from entity.UserAccount import UserAccount
+from server.email_service import send_verification_email
 from werkzeug.security import generate_password_hash
 
 class RegisterController:
@@ -49,25 +49,9 @@ class RegisterController:
             if category_ids:
                 self.user_entity.save_category_interests(new_user_id, category_ids)
 
-        # try:
-        #     send_verification_email1(email, token)
-        # except Exception as e:
-        #     print("Failed to send verification email:", e)
-
-        # try:
-        #     send_verification_email2(email, token)
-        # except Exception as e:
-        #     print("Failed to send verification email:", e)
-        
         try:
-            if os.getenv("ENV") == "local":
-                from server.email_service2 import send_verification_email  # local
-            else:
-                from server.email_service import send_verification_email  # hosted
-
             send_verification_email(email, token)
-            
         except Exception as e:
             print("Failed to send verification email:", e)
-
+        
         return {"success": True, "message": "Registration successful", "userID": new_user_id}
