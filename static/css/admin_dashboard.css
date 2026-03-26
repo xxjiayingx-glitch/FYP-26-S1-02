@@ -5,37 +5,52 @@
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(180px, 1fr));
-    gap: 22px;
+    gap: 24px;
     margin-bottom: 50px;
 }
 
 .card {
     background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 22px;
-    min-height: 140px;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    padding: 20px 16px;
+    min-height: 120px;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
 }
 
-.card h3 {
-    font-size: 22px;
-    margin-bottom: 16px;
-}
-
-.number {
-    font-size: 42px;
-    font-weight: 700;
+.card-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #111;
     margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.card-number {
+    font-size: 36px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.card-change {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.2;
 }
 
 .positive {
-    color: green;
-    font-weight: 700;
+    color: #38a000;
 }
 
 .negative {
-    color: red;
-    font-weight: 700;
+    color: #ff2d2d;
 }
 
 .review-section,
@@ -73,6 +88,7 @@ th {
 }
 
 .primary-btn {
+    text-decoration: none;
     background: #1e7bff;
     color: white;
     border: none;

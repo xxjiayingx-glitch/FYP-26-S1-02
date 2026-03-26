@@ -1,6 +1,10 @@
 from entity.db_connection import get_db_connection
+from datetime import datetime, timedelta
 
 class ReportedArticle:
+    #-------#
+    # Admin #
+    #-------#
     @staticmethod
     def get_total_reported_articles():
         conn = get_db_connection()
@@ -106,7 +110,30 @@ class ReportedArticle:
         conn.close()
 
         return reportDetails
-    
+
+    @staticmethod
+    def get_total_reports_before_days(days):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cutoff = datetime.now() - timedelta(days=days)
+
+        query = """
+            SELECT COUNT(*) AS total
+            FROM ReportedArticle
+            WHERE reported_at < %s
+        """
+        cursor.execute(query, (cutoff,))
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return result["total"] if result else 0
+        
+    #--------#
+    #  User  #
+    #--------#
     def report_article(articleID, userID, reason, reportCategoryID):
         conn = get_db_connection()
         cursor = conn.cursor()

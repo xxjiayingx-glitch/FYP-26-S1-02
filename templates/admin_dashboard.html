@@ -14,27 +14,67 @@
 
 <section class="stats-grid">
     <div class="card">
-        <h3>Total Users</h3>
-        <p class="number">{{ stats.total_users }}</p>
-        <span class="positive">N/A</span>
+        <div class="card-title">Total Users</div>
+        <div class="card-number">{{ stats.total_users }}</div>
+        <div class="card-change 
+            {% if stats.users_change.direction == 'up' %}
+                positive
+            {% elif stats.users_change.direction == 'down' %}
+                negative
+            {% else %}
+                neutral
+            {% endif %}
+        ">
+            {{ stats.users_change.text }}
+        </div>
     </div>
 
     <div class="card">
-        <h3>Active Subscriptions</h3>
-        <p class="number">{{ stats.active_subscriptions }}</p>
-        <span class="negative">N/A</span>
+        <div class="card-title">Active Subscriptions</div>
+        <div class="card-number">{{ stats.active_subscriptions }}</div>
+        <div class="card-change 
+            {% if stats.subscriptions_change.direction == 'up' %}
+                positive
+            {% elif stats.subscriptions_change.direction == 'down' %}
+                negative
+            {% else %}
+                neutral
+            {% endif %}
+        ">
+            {{ stats.subscriptions_change.text }}
+        </div>
     </div>
 
     <div class="card">
-        <h3>Reported Articles</h3>
-        <p class="number">{{ stats.reported_articles }}</p>
-        <span class="negative">N/A</span>
+        <div class="card-title">Reported Articles</div>
+        <div class="card-number">{{ stats.reported_articles }}</div>
+        <div class="card-change 
+            {% if stats.reported_change.direction == 'up' %}
+                positive
+            {% elif stats.reported_change.direction == 'down' %}
+                negative
+            {% else %}
+                neutral
+            {% endif %}
+        ">
+            {{ stats.reported_change.text }}
+        </div>
     </div>
 
     <div class="card">
-        <h3>Total Articles</h3>
-        <p class="number">{{ stats.total_articles }}</p>
-        <span class="positive">N/A</span>
+        <div class="card-title">Total Articles</div>
+        <div class="card-number">{{ stats.total_articles }}</div>
+        <div class="card-change 
+            {% if stats.articles_change.direction == 'up' %}
+                positive
+            {% elif stats.articles_change.direction == 'down' %}
+                negative
+            {% else %}
+                neutral
+            {% endif %}
+        ">
+            {{ stats.articles_change.text }}
+        </div>
     </div>
 </section>
 
@@ -85,7 +125,7 @@
         <div class="activity-list">
             {% for log in recent_logs %}
                 <div class="activity-item">
-                    {{ log.action }}
+                    {{ log.username }} {{ log.action }}
                 </div>
             {% endfor %}
         </div>
@@ -93,6 +133,6 @@
         <p>No recent activity found.</p>
     {% endif %}
 
-    <button class="primary-btn">View More</button>
+    <a class="primary-btn" href="/admin/system-monitoring/view-logs">View More</a>
 </section>
 {% endblock %}

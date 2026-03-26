@@ -1,15 +1,7 @@
 from entity.db_connection import get_db_connection
+from datetime import datetime, timedelta
 
 class Subscription:
-    @staticmethod
-    def get_active_subscriptions():
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) AS active_subscriptions FROM Subscription WHERE status = 'active'")
-        result = cursor.fetchone()
-        conn.close()
-        return result["active_subscriptions"]
-    
     @staticmethod
     def get_subscription(userID):
         """
@@ -41,6 +33,43 @@ class Subscription:
             conn.close()
 
     @staticmethod
+    def get_new_subscriptions_last_7_days():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT COUNT(*) AS total
+            FROM Subscription
+            WHERE startDate >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return result["total"] if result else 0
+    
+    @staticmethod
+    def get_new_subscriptions_previous_7_days():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT COUNT(*) AS total
+            FROM Subscription
+            WHERE startDate >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+            AND startDate < DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return result["total"] if result else 0
+    
+    @staticmethod
     def get_all_plans(self):
 
         conn = get_db_connection()
@@ -59,3 +88,5 @@ class Subscription:
         conn.close()
 
         return plans
+
+    

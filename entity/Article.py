@@ -1,9 +1,11 @@
 # entity/Article.py
-
 from entity.db_connection import get_db_connection
-
+from datetime import datetime, timedelta
 
 class Article:
+    #-------#
+    # Admin #
+    #-------#
     @staticmethod
     def get_total_articles():
         conn = get_db_connection()
@@ -39,6 +41,46 @@ class Article:
 
         return updated
 
+    @staticmethod
+    def get_articles_last_7_days():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT COUNT(*) AS total
+            FROM Article
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return result["total"] if result else 0
+
+
+    @staticmethod
+    def get_articles_previous_7_days():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT COUNT(*) AS total
+            FROM Article
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+            AND created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return result["total"] if result else 0
+    #--------#
+    #  User  # 
+    #--------#
     def get_all_articles(self):
         conn = get_db_connection()
         cursor = conn.cursor()

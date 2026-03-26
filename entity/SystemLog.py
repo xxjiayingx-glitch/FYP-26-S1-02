@@ -6,8 +6,9 @@ class SystemLog:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT action, created_at
-            FROM SystemLog
+            SELECT ua.username, sl.action, sl.created_at
+            FROM SystemLog sl
+            JOIN UserAccount ua ON sl.accountID = ua.userID
             ORDER BY created_at DESC
             LIMIT 6
         """)

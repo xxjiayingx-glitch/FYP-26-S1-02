@@ -516,6 +516,25 @@ class UserAccount:
         updated = cursor.rowcount > 0
         conn.close()
         return updated
+    
+    @staticmethod
+    def get_total_users_before_days(days):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cutoff = datetime.now() - timedelta(days=days)
+
+        query = """
+            SELECT COUNT(*) AS total
+            FROM UserAccount
+            WHERE created_at < %s
+        """
+        cursor.execute(query, (cutoff,))
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+        return result["total"] if result else 0
 
     # ==============================
     # SUBSCRIPTION / INTERESTS
