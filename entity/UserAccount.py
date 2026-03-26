@@ -637,7 +637,7 @@ class UserAccount:
         insert_query = """
             INSERT INTO UserAccount
             (username, email, pwd, first_name, last_name, phone, userType, accountStatus, verificationToken, created_at, profileCompleted)
-            VALUES (%s, %s, %s, %s, %s, %s, 'free', 'pending', %s, NOW())
+            VALUES (%s, %s, %s, %s, %s, %s, 'free', 'pending', %s, NOW(), %s)
         """
         cursor.execute(insert_query, (username, email, password, firstName, lastName, phone, token, profileCompleted))
         conn.commit()
