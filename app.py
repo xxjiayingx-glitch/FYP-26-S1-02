@@ -536,15 +536,16 @@ def saved_articles():
         return redirect(url_for("dashboard"))
     return render_template("saved_articles.html")
 
-
 # Insight Page - Premium Only
 @app.route("/insight")
 def insight():
+    # --- Access Control ---
     if "userID" not in session:
         return redirect(url_for("login.login"))
-    
+
     if "premium" not in session.get("userType", "").lower():
         return redirect(url_for("dashboard"))
+
     if session.get("profileCompleted") == 0:
         flash("Please complete your profile before accessing this page.")
         return redirect(url_for("profile.complete_profile"))
@@ -552,12 +553,28 @@ def insight():
     user_id = session.get("userID")
     article_id = request.args.get("article_id")
 
-    # Fetch all articles for this user
+    # --- Fetch User Articles ---
     articles = article_controller.get_my_articles(user_id)
+
     selected_article = None
     analytics = {"views": 0, "likes": 0}
 
-    # Try to fetch selected article if provided
+    # --- Helper Function: Calculate Credibility ---
+    def attach_credibility(article, analytics):
+        views = analytics.get("views", 0)
+        likes = analytics.get("likes", 0)
+        ai_score = article.get("aiFactCheckScore", 0)
+
+        credibility = article_controller.calculate_credibility(
+            ai_score,
+            views,
+            likes
+        )
+
+        article["credibilityScore"] = round(credibility, 2)  # Round for frontend display
+        return article
+
+    # --- Case 1: User Selected an Article ---
     if article_id:
         try:
             article_id = int(article_id)
@@ -565,36 +582,26 @@ def insight():
 
             if selected_article:
                 analytics = article_controller.get_article_analytics(article_id)
+                selected_article = attach_credibility(selected_article, analytics)
             else:
                 flash("Selected article not found.", "warning")
         except ValueError:
             flash("Invalid article ID.", "error")
 
-    # Auto-select first article if none chosen or invalid
+    # --- Case 2: Auto-select First Article if none selected ---
     if not selected_article and articles:
         first_id = articles[0]["articleID"]
         selected_article = article_controller.get_article_insight(first_id)
         analytics = article_controller.get_article_analytics(first_id)
+        selected_article = attach_credibility(selected_article, analytics)
 
+    # --- Render Insight Page ---
     return render_template(
         "insight.html",
         articles=articles,
         selected_article=selected_article,
         analytics=analytics
     )
-
-
-# Credibility Trend for Chart.js
-@app.route('/credibility_trend/<int:article_id>')
-def credibility_trend(article_id):
-    data = article_controller.get_article_analytics_over_time(article_id)
-    trend = []
-    for row in data:
-        views, likes, date = row
-        score = min((likes / views * 70 + 30), 100) if views else 0
-        trend.append({"date": str(date), "score": round(score, 2)})
-    return jsonify({"success": True, "data": trend})
-
 
 # Generate AI Review (AJAX)
 @app.route("/generate_ai_review_ajax/<int:article_id>")

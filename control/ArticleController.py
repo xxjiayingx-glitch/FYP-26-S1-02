@@ -211,11 +211,6 @@ class ArticleController:
         """
         cursor.execute(query, (article_id,))
         article = cursor.fetchone()
-
-        if article:
-            # Calculate and update the credibility score using views and likes
-            self.update_credibility_score(article_id)  # Update the credibility score
-
         cursor.close()
         conn.close()
 
@@ -351,7 +346,6 @@ class ArticleController:
         cursor.close()
         conn.close()
 
-        self.update_credibility_score(article_id)
 
     def increment_like_count(self, article_id):
         conn = get_db_connection()
@@ -373,9 +367,6 @@ class ArticleController:
         cursor.close()
         conn.close()
 
-        # Run after connection closes
-        self.update_credibility_score(article_id)
-
     def decrement_like_count(self, article_id):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -395,8 +386,6 @@ class ArticleController:
         conn.commit()
         cursor.close()
         conn.close()
-
-        self.update_credibility_score(article_id)
 
     def get_recommended_articles(self, user_id):
         """
@@ -630,15 +619,14 @@ class ArticleController:
         conn.close()
         return articles
     
+    def calculate_credibility(self, ai_score, views, likes):
+        if views < 10:
+            engagement_score = 0
+        else:
+            engagement_rate = likes / views
+            engagement_score = min(engagement_rate * 100, 100)
 
-    def calculate_credibility(ai_fact_check, views, saves):
-        if not views or views < 20:
-            return ai_fact_check * 0.7
-
-        save_score = min((saves / views) * 500, 100)
-
-        credibility = (0.7 * ai_fact_check) + (0.3 * save_score)
-        return round(credibility, 2)
+        return round((ai_score * 0.5) + (engagement_score * 0.5), 2)
     
     def get_credibility_label(score):
         if score >= 80:
@@ -648,49 +636,6 @@ class ArticleController:
         else:
             return "Low Credibility"
         
-    def update_credibility_score(self, article_id):
-        conn = get_db_connection()
-        cursor = conn.cursor(DictCursor)
-
-        # Get views and likes
-        cursor.execute("""
-            SELECT views, likes
-            FROM ArticleAnalytics
-            WHERE articleID = %s
-        """, (article_id,))
-        analytics = cursor.fetchone() or {"views": 0, "likes": 0}
-
-        # Get AI Fact Check
-        cursor.execute("""
-            SELECT aiFactCheck
-            FROM Article
-            WHERE articleID = %s
-        """, (article_id,))
-        article = cursor.fetchone() or {"aiFactCheck": 0}
-
-        views = analytics["views"]
-        likes = analytics["likes"]
-        ai_fact = article["aiFactCheck"] or 0
-
-        # ---- Credibility Logic ----
-        if not views or views < 20:
-            credibility = ai_fact * 0.7
-        else:
-            like_score = min((likes / views) * 300, 100)
-            credibility = (0.7 * ai_fact) + (0.3 * like_score)
-
-        credibility = round(min(max(credibility, 0), 100), 2)
-
-        # Update DB
-        cursor.execute("""
-            UPDATE Article
-            SET credibilityScore = %s
-            WHERE articleID = %s
-        """, (credibility, article_id))
-
-        conn.commit()
-        cursor.close()
-        conn.close()
     
     # In control/ArticleController.py
     def get_article_analytics_over_time(self, article_id):

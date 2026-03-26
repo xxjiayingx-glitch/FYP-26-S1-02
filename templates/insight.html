@@ -5,7 +5,7 @@
 {% block content %}
 
 <style>
-/* Container & Typography */
+/* Container & typography */
 .container {
     max-width: 1000px;
     margin: 40px auto;
@@ -22,7 +22,7 @@ h3 {
     margin-bottom: 15px;
 }
 
-/* Flash Messages */
+/* Flash messages */
 .flash-message {
     padding: 10px 15px;
     margin-bottom: 15px;
@@ -33,7 +33,7 @@ h3 {
 .flash-message.error { background: #f8d7da; color: #721c24; }
 .flash-message.warning { background: #fff3cd; color: #856404; }
 
-/* Form */
+/* Article selection */
 .article-select {
     text-align: center;
     margin-bottom: 30px;
@@ -45,12 +45,10 @@ h3 {
     border: 1px solid #ccc;
 }
 
-/* Sections */
+/* Section boxes */
 .section {
     margin-bottom: 40px;
 }
-
-/* Box/Card */
 .box {
     background: #f9f9f9;
     padding: 25px;
@@ -59,7 +57,7 @@ h3 {
     text-align: center;
 }
 
-/* Performance Table */
+/* Performance table */
 .performance-table {
     margin: 0 auto;
     border-collapse: collapse;
@@ -73,13 +71,12 @@ h3 {
 .performance-table th {
     background: #4c7bd9;
     color: #fff;
-    text-transform: uppercase;
 }
 .performance-table td {
     background: #fff;
 }
 
-/* Progress Bar */
+/* Credibility progress bar */
 .progress-container {
     background: #e0e0e0;
     border-radius: 5px;
@@ -90,12 +87,12 @@ h3 {
 }
 .progress-bar {
     height: 100%;
-    background: #4c7bd9;
     color: white;
     text-align: center;
     line-height: 28px;
     font-weight: bold;
-    transition: width 0.5s ease;
+    transition: width 0.5s ease, background 0.5s ease;
+    width: 0;
 }
 
 /* Buttons */
@@ -108,21 +105,31 @@ h3 {
     margin: 8px;
     background: #4c7bd9;
     color: white;
-    border: none;
     border-radius: 5px;
-    cursor: pointer;
     text-decoration: none;
-    font-size: 15px;
-    transition: background 0.3s ease;
 }
 .btn:hover {
     background: #355db5;
 }
 
-/* Chart Container */
-canvas#credibilityChart {
-    max-width: 100%;
-    margin-top: 20px;
+/* AI Review text min-height */
+#review-text {
+    min-height: 50px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .performance-table {
+        width: 90%;
+        font-size: 14px;
+    }
+    .container {
+        padding: 15px;
+    }
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
 }
 </style>
 
@@ -155,6 +162,7 @@ canvas#credibilityChart {
     </form>
 
     {% if selected_article %}
+    <!-- Overview Performance -->
     <div class="section">
         <div class="box">
             <h3>Overview Performance</h3>
@@ -168,20 +176,27 @@ canvas#credibilityChart {
         </div>
     </div>
 
+    <!-- Credibility Analysis -->
     <div class="section">
         <div class="box">
             <h3>Credibility Analysis</h3>
-            <p><b>Credibility Score:</b></p>
+
+            {% set credibility = selected_article.credibilityScore | default(0) %}
+
+            <p><b>Credibility Score:</b> {{ credibility }}%</p>
+
             <div class="progress-container">
-                {% set credibility = selected_article.credibilityScore | default(0) %}
-                <div class="progress-bar" style="width: {{ credibility }}%">{{ credibility }}%</div>
+                <div class="progress-bar" id="credibility-bar" data-score="{{ credibility }}">
+                    {{ credibility }}%
+                </div>
             </div>
-            <canvas id="credibilityChart" height="100"></canvas>
-            <p><b>How the Credibility Score is Calculated:</b> Based on views (70%) and likes (30%)</p>
-            <p><b>Score Ranges:</b> 0-50%: Growing, 51-80%: Performing well, 81-100%: Highly trusted</p>
+
+            <p><b>How calculated:</b> AI Fact Check Score (50%) + Engagement Score (50%)</p>
+            <p><b>Ranges:</b> 0–50% (Low Credibility), 51–80% (Moderate), 81–100% (High Credibility)</p>
         </div>
     </div>
 
+    <!-- AI Review -->
     <div class="section">
         <div class="box">
             <h3>Priority AI Article Review</h3>
@@ -189,6 +204,7 @@ canvas#credibilityChart {
         </div>
     </div>
 
+    <!-- Actions -->
     <div class="section">
         <div class="actions">
             <a href="/article/{{ selected_article.articleID }}" class="btn">View Article</a>
@@ -199,72 +215,64 @@ canvas#credibilityChart {
 
 </div>
 
-<!-- JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
     const select = document.querySelector("select[name='article_id']");
     const reviewText = document.getElementById("review-text");
-    const articleId = select ? select.value : null;
+    const credibilityBar = document.getElementById("credibility-bar");
 
     function fetchAIReview(articleId) {
+
         if (!articleId || articleId === "Select your Article") {
             reviewText.textContent = "No article selected.";
             return;
         }
+
         reviewText.textContent = "Generating AI summary...";
+
         fetch(`/generate_ai_review_ajax/${articleId}`)
-            .then(res => res.json())
-            .then(data => {
-                reviewText.textContent = data.success ? data.review : "Error: " + data.message;
-            })
-            .catch(err => {
-                reviewText.textContent = "Error calling AI review API.";
-                console.error(err);
-            });
-    }
+        .then(res => res.json())
+        .then(data => {
 
-    if (articleId) fetchAIReview(articleId);
+            if (data.success) {
+                reviewText.textContent = data.review;
+            } else {
+                reviewText.textContent = "Error: " + data.message;
+            }
 
-    if (select) {
-        select.addEventListener("change", function() {
-            fetchAIReview(this.value);
-            fetchCredibilityTrend(this.value);
+        })
+        .catch(err => {
+            reviewText.textContent = "Error calling AI review API.";
+            console.error(err);
         });
     }
 
-    const ctx = document.getElementById("credibilityChart").getContext("2d");
-    let credibilityChart;
+    function setCredibilityColor() {
 
-    function fetchCredibilityTrend(articleId) {
-        if (!articleId || articleId === "Select your Article") return;
-        fetch(`/credibility_trend/${articleId}`)
-            .then(res => res.json())
-            .then(data => {
-                if (!data.data) return;
-                const labels = data.data.map(d => d.date);
-                const scores = data.data.map(d => d.score);
-                if (credibilityChart) credibilityChart.destroy();
-                credibilityChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Credibility Trend',
-                            data: scores,
-                            borderColor: '#4c7bd9',
-                            backgroundColor: 'rgba(76,123,217,0.2)',
-                            tension: 0.2,
-                            fill: true
-                        }]
-                    },
-                    options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
-                });
-            }).catch(err => console.error(err));
+        if (!credibilityBar) return;
+
+        const score = parseFloat(credibilityBar.dataset.score) || 0;
+
+        credibilityBar.style.width = score + "%";
+        credibilityBar.textContent = score + "%";
+
+        if (score <= 50) {
+            credibilityBar.style.background = "#e74c3c"; // red
+        }
+        else if (score <= 80) {
+            credibilityBar.style.background = "#f1c40f"; // yellow
+        }
+        else {
+            credibilityBar.style.background = "#2ecc71"; // green
+        }
     }
 
-    if (articleId) fetchCredibilityTrend(articleId);
+    if (select) {
+        fetchAIReview(select.value);
+    }
+
+    setCredibilityColor();
 
 });
 </script>
