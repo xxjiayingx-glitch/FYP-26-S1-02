@@ -28,6 +28,10 @@ class UserAccount:
 
         if check_password_hash(user["pwd"], pwd):
             print("Password matched")
+            if user.get("accountStatus") == "pending":
+                print("Account not verified")
+                return "pending_verification"
+
             return user
 
         print("Password did not match")

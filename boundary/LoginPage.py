@@ -14,6 +14,9 @@ def login():
 
         user = auth.login(email, pwd)
 
+        if user == "pending_verification":
+            return render_template("login.html", error="Please verify your email before logging in")
+        
         if user:
             session["userID"] = user["userID"]
             session["username"] = user["username"]

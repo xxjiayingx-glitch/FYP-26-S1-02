@@ -4,6 +4,8 @@ import os
 from entity.UserAccount import UserAccount
 from werkzeug.security import generate_password_hash
 
+env = os.getenv("ENV", "production")
+
 class RegisterController:
 
     def __init__(self):
@@ -60,13 +62,13 @@ class RegisterController:
         #     print("Failed to send verification email:", e)
         
         try:
-            if os.getenv("ENV") == "local":
+            if env == "local":
                 from server.email_service2 import send_verification_email  # local
             else:
                 from server.email_service import send_verification_email  # hosted
 
             send_verification_email(email, token)
-            
+
         except Exception as e:
             print("Failed to send verification email:", e)
 
