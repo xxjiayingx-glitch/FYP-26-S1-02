@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from control.TestimonialsCTL import TestimonialController
 
 testimonial_bp = Blueprint("testimonial", __name__, url_prefix="/testimonial")
@@ -7,6 +7,10 @@ testimonialCTL = TestimonialController()
 # Display all testimonials
 @testimonial_bp.route("/testimonials")
 def testimonial_page():
+    if session.get("profileCompleted") == 0:
+        flash("Please complete your profile before accessing this page.")
+        return redirect(url_for("profile.complete_profile"))
+    
     testimonials = testimonialCTL.getTestimonials()
     user_logged_in = "userID" in session
 

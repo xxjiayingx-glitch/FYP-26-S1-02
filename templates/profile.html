@@ -3,15 +3,28 @@
 
 
 {% block content %}
-<div class="profile-page">
+<div class="profile-page {% if force_complete %}force-complete-page{% endif %}">
     <div class="profile-header">
-        <h1>My Profile</h1>
-        <p>Manage your personal information, subscription, and account security.</p>
+        <h1>
+            {% if force_complete %}
+                Complete Your Profile
+            {% else %}
+                My Profile
+            {% endif %}
+        </h1>
+        <p>
+            {% if force_complete %}
+                Please complete your profile before continuing to the dashboard.
+            {% else %}
+                Manage your personal information, subscription, and account security.
+            {% endif %}
+        </p>
     </div>
 
-    <div class="profile-layout">
+    <div class="profile-layout {% if force_complete %}force-complete-layout{% endif %}">
 
         <!-- LEFT SIDEBAR -->
+        {% if not force_complete %}
         <aside class="profile-sidebar">
             <div class="sidebar-avatar-wrap">
                 <img
@@ -41,6 +54,7 @@
                 
             </ul>
         </aside>
+        {% endif %}
 
         <!-- RIGHT CONTENT -->
         <div class="profile-main">
@@ -54,6 +68,7 @@
 
                 <form method="POST" action="/profile/update" class="profile-form" id="profileForm">
 
+                <form method="POST" action="{% if force_complete %}{{ url_for('profile.complete_profile') }}{% else %}{{ url_for('profile.update_profile') }}{% endif %}" class="profile-form">
                     <div class="form-grid">
 
                         <!-- FIRST NAME -->
@@ -120,37 +135,27 @@
                         <div class="form-row">
                             <label>Phone</label>
                             <input type="text" name="phone" value="{{ user.phone or '' }}" required>
+                          <div class="form-row">
+                            <label for="dateOfBirth">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="dateOfBirth" value="{{ user.dateOfBirth if user.dateOfBirth else '' }}"{% if force_complete %}required{% endif %}>                        
                         </div>
-
-                        <!-- DOB -->
-                        <div class="form-row">
-                            <label>Date of Birth</label>
-                            <input type="date" id="profile-dob" name="dateOfBirth"
-                                value="{{ user.dateOfBirth.strftime('%Y-%m-%d') if user.dateOfBirth else '' }}"
-                                max="{{ now.strftime('%Y-%m-%d') if now else '' }}"
-                                required>
-
-                            <small id="profile-dob-error" class="profile-warning" style="display:none;">
-                                Cannot be a future date
-                            </small>
-                        </div>
-
                     </div>
 
-                    <!-- GENDER -->
-                    <div class="form-row">
+                    <div class="form-row full-width">
                         <label>Gender</label>
                         <div class="gender-group">
-                            <label>
+                            <label class="gender-card">
                                 <input type="radio" name="gender" value="Male"
-                                {% if user.gender == 'Male' %}checked{% endif %}>
-                                Male
+                                    {% if user.gender == 'Male' %}checked{% endif %}
+                                    {% if force_complete %}required{% endif %}>
+                                <span>Male</span>
                             </label>
 
-                            <label>
+                            <label class="gender-card">
                                 <input type="radio" name="gender" value="Female"
-                                {% if user.gender == 'Female' %}checked{% endif %}>
-                                Female
+                                    {% if user.gender == 'Female' %}checked{% endif %}
+                                    {% if force_complete %}required{% endif %}>
+                                <span>Female</span>
                             </label>
                         </div>
                     </div>
@@ -173,7 +178,13 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn-primary">Save Changes</button>
+                        <button type="submit" class="btn-primary">
+                            {% if force_complete %}
+                                Save and Continue
+                            {% else %}
+                                Save Changes
+                            {% endif %}
+                        </button>
                     </div>
 
                 </form>
@@ -183,6 +194,7 @@
             </section>
 
             <!-- SUBSCRIPTION -->
+            {% if not force_complete %}
             <section class="profile-card" id="subscription-plan">
                 <div class="card-header">
                     <h2>Subscription Plan</h2>
@@ -209,8 +221,10 @@
                 <div class="form-actions">
                     <a href="{{ url_for('subscription.subscription_page') }}" class="btn-primary">View Plan</a>                </div>
             </section>
+            {% endif %}
+
             <!-- Verify  -->
-            {% if user.userType and 'premium' in user.userType|lower %}
+            {% if not force_complete and user.userType and 'premium' in user.userType|lower %}
             <section class="profile-card" id="verified-badge">
                 <div class="card-header">
                     <h2>Verified Publisher Badge</h2>
@@ -281,7 +295,9 @@
                 </div>
             </section>
             {% endif %}
+
             <!-- SECURITY -->
+            {% if not force_complete %}
             <section class="profile-card" id="security-settings">
                 <div class="card-header">
                     <h2>Security</h2>
@@ -311,6 +327,7 @@
                     </div>
                 </form>
             </section>
+            {% endif %}
 
         </div>
     </div>

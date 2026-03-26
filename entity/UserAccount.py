@@ -224,11 +224,6 @@ class UserAccount:
             WHERE userID = %s
         """, (pending_email, token, userID))
 
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-
     @staticmethod
     def verify_pending_email_change(token):
         conn = get_db_connection()
@@ -256,10 +251,35 @@ class UserAccount:
         finally:
             cursor.close()
             conn.close()
-    
+
+    #------------------------#
+    # Force complete profile #
+    #------------------------#
+    @staticmethod
+    def update_required_fields(userID, gender, dob, interests):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        interests_str = ",".join(interests)
+
+        cursor.execute("""
+            UPDATE UserAccount
+            SET gender = %s,
+                dateOfBirth = %s,
+                interests = %s,
+                profileCompleted = 1
+            WHERE userID = %s
+        """, (gender, dob, interests_str, userID))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
 
 
 
+    #----------------------------#
+    # Verified Badge For Premium #
+    #----------------------------#
     @staticmethod
     def apply_verified_badge(userID):
         conn = get_db_connection()
@@ -594,17 +614,17 @@ class UserAccount:
         conn.close()
         return result
 
-    def register_user(self, username, email, password, firstName, lastName, phone, token):
+    def register_user(self, username, email, password, firstName, lastName, phone, token, profileCompleted = 0):
         """Register a new user with pending account status and verification token."""
         conn = get_db_connection()
         cursor = conn.cursor()
 
         insert_query = """
             INSERT INTO UserAccount
-            (username, email, pwd, first_name, last_name, phone, userType, accountStatus, verificationToken, created_at)
+            (username, email, pwd, first_name, last_name, phone, userType, accountStatus, verificationToken, created_at, profileCompleted)
             VALUES (%s, %s, %s, %s, %s, %s, 'free', 'pending', %s, NOW())
         """
-        cursor.execute(insert_query, (username, email, password, firstName, lastName, phone, token))
+        cursor.execute(insert_query, (username, email, password, firstName, lastName, phone, token, profileCompleted))
         conn.commit()
 
         new_user_id = cursor.lastrowid

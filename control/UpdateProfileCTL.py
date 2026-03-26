@@ -184,3 +184,7 @@ class UpdateProfileCTL:
     @staticmethod
     def verify_count(userID):
         return Article.count_eligible_verified_articles(userID)
+    
+    @staticmethod
+    def update_required_fields(userID, gender, dob, interests):
+        return UserAccount.update_required_fields(userID, gender, dob, interests)

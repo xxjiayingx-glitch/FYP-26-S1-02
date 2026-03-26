@@ -216,8 +216,12 @@ def premium_homepage():
 @app.route("/dashboard")
 def dashboard():
     if "userID" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("login.login"))
 
+    if session.get("profileCompleted") == 0:
+        flash("Please complete your profile before accessing this page.")
+        return redirect(url_for("profile.complete_profile"))
+   
     user_type = session.get("userType", "").lower()
 
     if "premium" in user_type:
@@ -344,6 +348,10 @@ def my_articles():
     user_id = session.get("userID")
     if not user_id:
         return redirect(url_for("login"))
+    
+    if session.get("profileCompleted") == 0:
+        flash("Please complete your profile before accessing this page.")
+        return redirect(url_for("profile.complete_profile"))
 
     keyword = request.args.get("keyword", "").strip()
     category_id = request.args.get("category_id", "").strip()
@@ -537,6 +545,9 @@ def insight():
     
     if "premium" not in session.get("userType", "").lower():
         return redirect(url_for("dashboard"))
+    if session.get("profileCompleted") == 0:
+        flash("Please complete your profile before accessing this page.")
+        return redirect(url_for("profile.complete_profile"))
 
     user_id = session.get("userID")
     article_id = request.args.get("article_id")

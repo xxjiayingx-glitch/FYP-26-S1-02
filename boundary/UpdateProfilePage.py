@@ -14,6 +14,10 @@ profile_bp = Blueprint("profile", __name__)
 def profile_page():
     if "userID" not in session:
         return redirect(url_for("login.login"))
+    
+    if session.get("profileCompleted") == 0:
+        flash("Please complete your profile before accessing this page.")
+        return redirect(url_for("profile.complete_profile"))
 
     user = UserAccount().get_profile(session["userID"])
 
@@ -30,7 +34,7 @@ def profile_page():
 
     eligible_article_count = UpdateProfileCTL.verify_count(session["userID"])
 
-    return render_template("profile.html", user=user, eligible_article_count=eligible_article_count)
+    return render_template("profile.html", user=user, eligible_article_count=eligible_article_count, force_complete=False)
 
 
 @profile_bp.route("/update", methods=["POST"])
@@ -204,3 +208,42 @@ def resend_email_verification():
         flash("Failed to resend email.")
 
     return redirect(url_for("profile.profile_page"))
+
+@profile_bp.route("/complete-profile", methods=["GET", "POST"])
+def complete_profile():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+    
+    user = UserAccount().get_profile(session["userID"])
+
+    if not user:
+        flash("User profile not found.")
+        return redirect(url_for("login.login"))
+
+    interests_raw = user.get("interests") or ""
+    user["selected_interests"] = [
+        i.strip().lower()
+        for i in interests_raw.split(",")
+        if i.strip()
+    ]
+
+    eligible_article_count = UpdateProfileCTL.verify_count(session["userID"])
+
+    if request.method == "POST":
+        gender = request.form["gender"]
+        dob = request.form["dateOfBirth"]
+        interests = request.form.getlist("interests[]")
+
+        control = UpdateProfileCTL()
+        control.update_required_fields(session["userID"], gender, dob, interests)
+
+        session["profileCompleted"] = 1
+
+        return redirect(url_for("dashboard"))
+
+    return render_template(
+        "profile.html",
+        user=user,
+        eligible_article_count=eligible_article_count,
+        force_complete=True
+    )

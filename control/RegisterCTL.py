@@ -42,7 +42,7 @@ class RegisterController:
 
         # Save user WITH token + unverified status
         new_user_id = self.user_entity.register_user(
-            username, email, hashed_pw, firstName, lastName, phone, token
+            username, email, hashed_pw, firstName, lastName, phone, token, profileCompleted = 0
         )
 
         # --- Save category interests if provided ---

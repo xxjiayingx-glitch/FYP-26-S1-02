@@ -1045,7 +1045,180 @@ a {
     }
 }
 
-/* ===== My Profile ===== */
+/* ===== My Profile  ===== */
+
+/* Force Complete Profile page */
+.force-complete-page {
+    padding: 40px 20px 60px;
+}
+
+.force-complete-page .profile-header {
+    max-width: 760px;
+}
+
+.force-complete-page .profile-header h1 {
+    font-size: 42px;
+    margin-bottom: 10px;
+    line-height: 1.15;
+}
+
+.force-complete-page .profile-header p {
+    font-size: 18px;
+    line-height: 1.5;
+    color: #667085;
+    margin: 0;
+}
+
+.force-complete-layout {
+    display: block !important;
+}
+
+.force-complete-layout.profile-layout {
+    grid-template-columns: none !important;
+}
+
+.force-complete-layout .profile-main {
+    width: min(1100px, 100%) !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+}
+
+.force-complete-page .profile-card {
+    padding: 42px 46px;
+    border-radius: 28px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.force-complete-page .card-header {
+    margin-bottom: 28px;
+}
+
+.force-complete-page .card-header h2 {
+    font-size: 32px;
+    margin-bottom: 10px;
+    line-height: 1.15;
+}
+
+.force-complete-page .card-header p {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #667085;
+    margin: 0;
+}
+
+.force-complete-page .profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.force-complete-page .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 22px;
+}
+
+.force-complete-page .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.force-complete-page .form-row.full-width {
+    grid-column: 1 / -1;
+}
+
+.force-complete-page .form-row label {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.force-complete-page .form-row input,
+.force-complete-page .form-row select,
+.force-complete-page .choices__inner {
+    min-height: 58px;
+    border-radius: 18px;
+    font-size: 16px;
+    padding: 14px 18px;
+}
+
+.force-complete-page .gender-group {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+}
+
+.force-complete-page .gender-card {
+    min-width: 150px;
+    min-height: 54px;
+    border: 2px solid #d9deea;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    background: #fff;
+}
+
+.force-complete-page .gender-card input {
+    position: absolute;
+    opacity: 0;
+}
+
+.force-complete-page .gender-card span {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.force-complete-page .gender-card:has(input:checked) {
+    border-color: #4c67f2;
+    background: #eef2ff;
+}
+
+.force-complete-page .choices {
+    margin-top: 2px;
+}
+
+.force-complete-page .choices__inner {
+    min-height: 76px;
+    padding: 10px 12px;
+    border-radius: 18px;
+}
+
+.force-complete-page .form-actions {
+    margin-top: 10px;
+}
+
+.force-complete-page .btn-primary {
+    min-width: 240px;
+    min-height: 60px;
+    border-radius: 18px;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .force-complete-page .profile-header,
+    .force-complete-layout .profile-main {
+        max-width: 100%;
+    }
+
+    .force-complete-page .profile-card {
+        padding: 28px 22px;
+    }
+
+    .force-complete-page .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .force-complete-page .gender-group {
+        flex-direction: column;
+    }
+}
+
+/* Normal Profile page */
 .profile-page {
     max-width: 1320px;
     margin: 40px auto 64px;

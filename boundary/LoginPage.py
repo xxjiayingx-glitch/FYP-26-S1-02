@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, session
+from flask import Blueprint, render_template, request, redirect, session, url_for
 from control.LoginCTL import AuthController
 from control.SystemLogCTL import SystemLogCTL
 
@@ -22,6 +22,7 @@ def login():
             session["username"] = user["username"]
             session["userType"] = user["userType"]
             session["profileImage"] = user["profileImage"]
+            session["profileCompleted"] = user["profileCompleted"]
 
             # Logs login record
             SystemLogCTL.logAction(
@@ -35,14 +36,17 @@ def login():
                 return redirect("/admin/dashboard")
 
             # First-time login if gender, DOB, and interests are all null
-            is_first_login = (
-                not user.get("gender") and
-                not user.get("dateOfBirth") and
-                not user.get("interests")
-            )
-            
-            if is_first_login:
-                return redirect("/profile?first_login=1")
+            # is_first_login = (
+            #     not user.get("gender") and
+            #     not user.get("dateOfBirth") and
+            #     not user.get("interests")
+            # )
+
+            # if is_first_login:
+            #     return redirect("/profile?first_login=1")
+
+            if user["profileCompleted"] == 0:
+                return redirect(url_for("profile.complete_profile"))
             else:
                 return redirect("/dashboard")
 
