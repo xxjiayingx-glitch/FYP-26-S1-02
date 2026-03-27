@@ -46,6 +46,7 @@ from boundary.WebAdminAPI import web_admin_api_bp
 from boundary.AdminVerifyBadgePage import admin_verified_bp
 from boundary.AdminUploadImage import admin_profile_bp
 from boundary.AdminViewLogsPage import system_monitoring_bp
+from boundary.EditKeyProductFeatures import web_management_bp
 
 # Controllers
 from control.ArticleController import ArticleController
@@ -85,6 +86,7 @@ app.register_blueprint(fact_check_bp)
 app.register_blueprint(admin_verified_bp)
 app.register_blueprint(admin_profile_bp)
 app.register_blueprint(system_monitoring_bp)
+app.register_blueprint(web_management_bp)
 
 # Image File Size
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
