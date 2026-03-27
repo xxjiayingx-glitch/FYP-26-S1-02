@@ -29,7 +29,9 @@
     </div>
 
     <div class="action-row">
-        <a href="/admin/webpage-management/key-features/add" class="add-btn">Add Feature</a>
+        <button type="button" class="add-btn" onclick="openAddModal()">
+            Add Feature
+        </button>
     </div>
 
     <div class="features-list">
@@ -60,7 +62,7 @@
                             <button
                                 type="button"
                                 class="edit-btn"
-                                onclick="openEditModal('{{ feature.featureID }}', '{{ feature.featureName }}', '{{ feature.image if feature.image else '' }}', 'Feature {{ loop.index }}')">
+                                onclick="openEditModal('{{ feature.featureID }}', '{{ feature.featureName }}', '{{ feature.image if feature.image else '' }}' , 'Feature {{ loop.index }}')">
                                 Edit
                             </button>
                             <a href="/admin/web-management/key-features/delete/{{ feature.featureID }}"
@@ -106,6 +108,37 @@
                 <div class="modal-actions">
                     <button type="button" class="cancel-btn" onclick="closeEditModal()">Cancel</button>
                     <button type="submit" class="save-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="addFeatureModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>Add Feature</h2>
+
+            <form method="POST" action="{{ url_for('web_management.add_key_feature') }}" enctype="multipart/form-data">
+                <div class="modal-form-row">
+                    <div class="modal-field">
+                        <label for="addImage">Image</label>
+
+                        <div class="modal-image-preview">
+                            <img id="addPreviewImage" src="" alt="Feature Preview" style="display: none;">
+                            <div id="addPlaceholder" class="placeholder-box"></div>
+                        </div>
+
+                        <input type="file" name="image" id="addImage" accept="image/*" onchange="previewAddFeatureImage(event)">
+                    </div>
+
+                    <div class="modal-field">
+                        <label for="addFeatureName">Feature Name</label>
+                        <input type="text" name="featureName" id="addFeatureName" required>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeAddModal()">Cancel</button>
+                    <button type="submit" class="save-btn">Add</button>
                 </div>
             </form>
         </div>
@@ -184,6 +217,54 @@
     window.addEventListener("click", function(event) {
         const modal = document.getElementById("editFeatureModal");
         if (event.target === modal) {
+            closeEditModal();
+        }
+    });
+    </script>
+
+    <script>
+    function openAddModal() {
+        document.getElementById("addFeatureModal").classList.add("show");
+        document.getElementById("addFeatureName").value = "";
+        document.getElementById("addImage").value = "";
+
+        const previewImage = document.getElementById("addPreviewImage");
+        const placeholder = document.getElementById("addPlaceholder");
+
+        previewImage.src = "";
+        previewImage.style.display = "none";
+        placeholder.style.display = "block";
+    }
+
+    function closeAddModal() {
+        document.getElementById("addFeatureModal").classList.remove("show");
+    }
+
+    function previewAddFeatureImage(event) {
+        const file = event.target.files[0];
+        const previewImage = document.getElementById("addPreviewImage");
+        const placeholder = document.getElementById("addPlaceholder");
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewImage.style.display = "block";
+                placeholder.style.display = "none";
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    window.addEventListener("click", function(event) {
+        const addModal = document.getElementById("addFeatureModal");
+        const editModal = document.getElementById("editFeatureModal");
+
+        if (event.target === addModal) {
+            closeAddModal();
+        }
+
+        if (event.target === editModal) {
             closeEditModal();
         }
     });
