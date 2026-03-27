@@ -133,6 +133,8 @@ def create_checkout_session():
     try:
         amount_cents = int(float(plan["price"]) * 100)
 
+        BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:5000")
+
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             mode="payment",
@@ -149,8 +151,8 @@ def create_checkout_session():
                     "quantity": 1,
                 }
             ],
-            success_url=url_for("subscription.payment_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url=url_for("subscription.payment_cancel", _external=True),
+            success_url=f"{BASE_URL}/subscription/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{BASE_URL}/subscription/cancel",
             metadata={
                 "user_id": str(user_id),
                 "plan_name": plan_name
@@ -165,9 +167,9 @@ def create_checkout_session():
     except Exception as e:
         cursor.close()
         conn.close()
+        print("Stripe error:", str(e))  # 👈 important debug
         flash(f"Payment setup failed: {str(e)}", "error")
         return redirect(url_for("subscription.subscription_page"))
-
 
 # -------------------------
 # PAYMENT SUCCESS
