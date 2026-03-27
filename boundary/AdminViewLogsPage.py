@@ -8,10 +8,10 @@ system_monitoring_bp = Blueprint("system_monitoring", __name__)
 @system_monitoring_bp.route("/admin/system-monitoring")
 def system_monitoring_pg():
     if "userID" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("login.login"))
     
     if session.get("userType") != "system admin":
-        return redirect("/login")
+        return redirect("login.login")
     
     dashboard_control = AdminDashboardControl()
     admin_data = dashboard_control.get_dashboard_data()
@@ -21,10 +21,10 @@ def system_monitoring_pg():
 @system_monitoring_bp.route("/admin/system-monitoring/view-logs", methods=["GET"])
 def view_logs_page():
     if "userID" not in session:
-        return redirect("/login")
+        return redirect("login.login")
 
     if session.get("userType") != "system admin":
-        return redirect("/login")
+        return redirect("login.login")
     
     dashboard_control = AdminDashboardControl()
     admin_data = dashboard_control.get_dashboard_data()
