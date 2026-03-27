@@ -91,7 +91,7 @@
                         <!-- NEW EMAIL -->
                         <div class="form-row">
                             <label>New Email</label>
-                            <input type="email" name="newEmail" placeholder="Enter new email">
+                            <input type="email" name="newEmail" placeholder="Enter new email (optional)">
                             <small class="profile-note">Verification link will be sent</small>
 
                             {% if user.pendingEmail %}
@@ -133,7 +133,8 @@
                         <div class="form-row">
                             <label>Phone</label>
                             <input type="text" name="phone" value="{{ user.phone or '' }}" required>
-                          <div class="form-row">
+                        </div>
+                        <div class="form-row">
                             <label for="dateOfBirth">Date of Birth</label>
                             <input type="date" id="dateOfBirth" name="dateOfBirth" value="{{ user.dateOfBirth if user.dateOfBirth else '' }}"{% if force_complete %}required{% endif %}>                        
                         </div>

@@ -227,12 +227,40 @@ def complete_profile():
         if i.strip()
     ]
 
-    eligible_article_count = UpdateProfileCTL.verify_count(session["userID"])
-
     if request.method == "POST":
-        gender = request.form["gender"]
-        dob = request.form["dateOfBirth"]
+        gender = request.form.get("gender", "").strip()
+        dob = request.form.get("dateOfBirth", "").strip()
         interests = request.form.getlist("interests[]")
+
+        form_user = dict(user)
+        form_user["gender"] = gender
+        form_user["dateOfBirth"] = dob
+        form_user["interests"] = interests
+        form_user["selected_interests"] = [i.strip().lower() for i in interests if i.strip()]
+
+        if not gender:
+            flash("Please select your gender.", "error")
+            return render_template(
+                "profile.html",
+                user=form_user,
+                force_complete=True
+            )
+
+        if not dob:
+            flash("Please select your date of birth.", "error")
+            return render_template(
+                "profile.html",
+                user=form_user,
+                force_complete=True
+            )
+
+        if not interests:
+            flash("Please select at least one interest.", "error")
+            return render_template(
+                "profile.html",
+                user=form_user,
+                force_complete=True
+            )
 
         control = UpdateProfileCTL()
         control.update_required_fields(session["userID"], gender, dob, interests)
@@ -244,6 +272,5 @@ def complete_profile():
     return render_template(
         "profile.html",
         user=user,
-        eligible_article_count=eligible_article_count,
         force_complete=True
     )

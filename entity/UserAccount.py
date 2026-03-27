@@ -271,8 +271,6 @@ class UserAccount:
         cursor.close()
         conn.close()
 
-
-
     #----------------------------#
     # Verified Badge For Premium #
     #----------------------------#
@@ -337,7 +335,7 @@ class UserAccount:
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT 
+            SELECT
                 u.userID,
                 u.username,
                 u.email,
