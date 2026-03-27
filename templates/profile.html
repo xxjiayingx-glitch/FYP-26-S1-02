@@ -66,8 +66,6 @@
                     <p>Update your personal details and preferences.</p>
                 </div>
 
-                <form method="POST" action="/profile/update" class="profile-form" id="profileForm">
-
                 <form method="POST" action="{% if force_complete %}{{ url_for('profile.complete_profile') }}{% else %}{{ url_for('profile.update_profile') }}{% endif %}" class="profile-form">
                     <div class="form-grid">
 

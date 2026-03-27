@@ -24,3 +24,7 @@ def edit_key_features():
 @web_management_bp.route("/admin/edit-key-product-features/update", methods=["POST"])
 def update_key_feature():
     return redirect(url_for("web_management.edit_key_product_features"))
+
+@web_management_bp.route("/admin/edit-key-product-features/add", methods=["POST"])
+def add_key_feature():
+    return redirect(url_for("web_management.edit_key_product_features"))
