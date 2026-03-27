@@ -11,15 +11,21 @@ load_dotenv()
 CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 FROM_EMAIL = os.getenv("FROM_EMAIL")
-BASE_URL = os.getenv("BASE_URL")
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:5000/")
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# TOKEN_PATH = os.path.join(BASE_DIR, "token.json")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TOKEN_PATH = os.path.join(BASE_DIR, "token.json")
 
 def send_verification_email(email, token):
-    token_info = json.loads(os.getenv("GMAIL_TOKEN"))
+    gmail_token_env = os.getenv("GMAIL_TOKEN")
+
+    if gmail_token_env:
+        token_info = json.loads(gmail_token_env)
+    else:
+        with open(TOKEN_PATH, "r") as f:
+            token_info = json.load(f)
 
     # with open(TOKEN_PATH, "r") as f:
     #     token_data = json.load(f)
@@ -44,7 +50,7 @@ def send_verification_email(email, token):
     service = build("gmail", "v1", credentials=creds)
 
     # Change 127.0.0.1:5000 to hosted site
-    verification_link = f"{BASE_URL}verify?token={token}"
+    verification_link = f"{BASE_URL.rstrip('/')}/verify?token={token}"
 
     message = EmailMessage()
     message.set_content(
@@ -67,7 +73,7 @@ def send_verification_email(email, token):
 
 
 def send_email_change_verification_email(email, token):
-    verification_link = f"{BASE_URL}profile/verify-email-change?token={token}"
+    verification_link = f"{BASE_URL.rstrip('/')}/profile/verify-email-change?token={token}"
 
     body = (
         f"Hi!\n\n"
@@ -93,7 +99,13 @@ def send_email_change_verification_email(email, token):
     ).execute()
 
 def _build_credentials():
-    token_info = json.loads(os.getenv("GMAIL_TOKEN"))
+    gmail_token_env = os.getenv("GMAIL_TOKEN")
+
+    if gmail_token_env:
+        token_info = json.loads(gmail_token_env)
+    else:
+        with open(TOKEN_PATH, "r") as f:
+            token_info = json.load(f)
 
     creds = Credentials(
         token=token_info.get("token"),
@@ -106,6 +118,8 @@ def _build_credentials():
 
     if creds.expired and creds.refresh_token:
         creds.refresh(Request())
+        with open(TOKEN_PATH, "w") as token_file:
+            token_file.write(creds.to_json())
 
     return creds
 
