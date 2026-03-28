@@ -23,6 +23,11 @@ class UserAccount:
             print("No user with that email")
             return None
 
+         # ADD THIS BLOCK
+        if (user.get("accountStatus") or "").lower() == "pending":
+            print("Account not yet verified")
+            return "pending"
+
         print("Stored hash:", user["pwd"])
         print("Entered password:", pwd)
 
