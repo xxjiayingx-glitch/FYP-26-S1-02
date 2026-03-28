@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="en">
-
+ 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Daily Scoop</title>
   <link rel="stylesheet" href="../../static/css/Unregistered/UnregHome.css" />
 </head>
-
+ 
 <header class="navbar">
   <div class="logo">
     <a href="{{ url_for('home.unreg_home') }}">
@@ -15,7 +15,7 @@
       <h1>News System</h1>
     </a>
   </div>
-
+ 
   <nav class="navLinks">
     <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
     <a href="#product-feature">Product Feature</a>
@@ -25,40 +25,31 @@
     <a href="{{ url_for('login.login') }}">Log In</a>
   </nav>
 </header>
-
+ 
 <body>
   <section class="headline">
     <div class="container">
-
+ 
       {% if headline %}
       <div class="featured-news">
-
+ 
         {% set featured = headline %}
         <div class="featured-left">
           <h1 class="featured-title">{{ headline.articleTitle }}</h1>
-
-          <p class="featured-desc">{{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif
-            %}
-          </p>
-
+ 
+          <!-- Views & Likes between title and description -->
+          <div class="article-meta">
+            <span class="meta-item views"><span class="icon">&#128065;</span> {{ headline.views }}</span>
+            <span class="meta-item likes"><span class="icon">&#10084;&#65039;</span> {{ headline.likes }}</span>
+          </div>
+ 
+          <p class="featured-desc">{{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif %}</p>
+ 
           <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=headline.articleID) }}">
             Read more......
           </a>
         </div>
-        <!-- View count -->
-        <div class="headline-views">
-          <span>View: {{ headline.views }}</span>
-        </div>
-        <!-- Likes -->
-        <div class="meta-item">
-          <span>Like: {{ headline.likes }}</span>
-        </div>
-
-        <!-- Credibility
-        <div class="meta-item">
-          <span>Score: {{ "%.1f"|format(headline.credibilityScore) }}</span>
-        </div> -->
-
+ 
         <div class="featured-right">
           {% if headline.imageURL %}
           <img src="{{ url_for('static', filename='uploads/' + headline.imageURL) }}" />
@@ -66,83 +57,43 @@
           <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
           {% endif %}
         </div>
-
+ 
       </div>
       {% else %}
       <p class="no-headline">No headline available</p>
       {% endif %}
     </div>
   </section>
-
-  <!-- <section class="headline">
-    <div class="container">
-
-      {% if headline %}
-      <div class="featured-news">
-
-        {% set featured = headline %}
-        <div class="featured-left">
-          <h1 class="featured-title">{{ headline.articleTitle }}</h1>
-
-          <p class="featured-desc">{{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif
-            %}
-          </p>
-
-          <a class="read-more" href="{{ url_for('article_detail', article_id=headline.articleID) }}">
-            Read more......
-          </a>
-        </div>
-      </div>
-
-      <div class="featured-right">
-        {% if headline.imageURL %}
-        <img src="{{ url_for('static', filename='uploads/' + headline.imageURL) }}" />
-        {% else %}
-        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
-        {% endif %}
-      </div>
-      {% else %}
-      <p class="no-headline">No headline available</p>
-      {% endif %}
-    </div>
-  </section> -->
-
+ 
   <section id="articles" class="news">
     <h3 class="latest-title">Latest News</h3>
     <div class="latest-grid" id="latest-articles">
       {% if articles %}
       {% for article in articles %}
-
+ 
       <div class="news-card">
         {% if article.imageURL %}
         <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}"
           alt="{{ article['articleTitle'] }}" />
         {% else %}
-        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" /> {% endif %}
-        <div class="title-row">
+        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" />
+        {% endif %}
+ 
         <h4 class="news-title">{{ article['articleTitle'] }}</h4>
-        <div class="article-views">
-          <span>View: {{ article.views }}</span>
+ 
+        <!-- Views & Likes between title and body -->
+        <div class="article-meta">
+          <span class="meta-item views"><span class="icon">&#128065;</span> {{ article.views }}</span>
+          <span class="meta-item likes"><span class="icon">&#10084;&#65039;</span> {{ article.likes }}</span>
         </div>
-        <!-- Likes -->
-        <div class="meta-item">
-          <span>Like: {{ article.likes }}</span>
-        </div>
-
-        <!-- Credibility
-        <div class="meta-item">
-          <span>Score: {{ "%.1f"|format(article.credibilityScore) }}</span>
-        </div> -->
-      </div>
+ 
         <p class="news-para">{{ article['content'][:120] }}...</p>
         <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=article.articleID) }}">
           Read more......
         </a>
       </div>
       {% endfor %} {% else %}
-      <p>
-        No latest news available.
-      </p>
+      <p>No latest news available.</p>
       {% endif %}
     </div>
     <div class="news-btn">
@@ -150,14 +101,13 @@
         View More
       </button>
     </div>
-    </div>
   </section>
-
+ 
   <section class="testimonials" id="testimonials">
     <h2 class="testimonial-title">Testimonials</h2>
     <p class="testimonial-desc">Here's what people are saying</p>
     <div class="container">
-
+ 
       <div class="testimonial-grid">
         {% if testimonials %}
         {% for t in testimonials %}
@@ -177,7 +127,7 @@
       </div>
     </div>
   </section>
-
+ 
   <section id="product-feature" class="feature">
     <div class="container">
       <h1 class="features-title">Product Feature</h1>
@@ -185,18 +135,18 @@
         {% if features %} {% for f in features %}
         <div class="feature-card">
           <h4>{{ f.featureName }}</h4>
-
+ 
           <div class="feature-img">
             <img src="{{ url_for('static', filename='uploads/' + f.featureImage) }}" alt="{{ f.featureName }}" />
           </div>
-
+ 
           <p>{{ f.featureDescription }}</p>
         </div>
         {% endfor %} {% else %}
         <p>No product features available yet.</p>
         {% endif %}
       </div>
-
+ 
       <div class="product-features-btn">
         <button class="view-more-features" data-section="features" onclick="loadMoreFeatures(this)">
           View More
@@ -204,12 +154,12 @@
       </div>
     </div>
   </section>
-
+ 
   <script>
     // Script to show more latest articles
     let articleOffset = 4;
     const articleLimit = 6;
-
+ 
     function loadMoreArticles(button) {
       fetch(
         `/load_more_articles?offset=${articleOffset}&limit=${articleLimit}`,
@@ -220,70 +170,63 @@
           data.forEach((article) => {
             const card = document.createElement("div");
             card.classList.add("news-card");
-
+ 
             const articleDetailBase = "{{ url_for('home.unreg_article_detail', article_id=0) }}".replace('/0', '/');
             card.innerHTML = `
               <img src="/static/uploads/${article.imageURL}" alt="${article.articleTitle}">
-              <div class="title-row">
               <h5 class="news-title">${article.articleTitle}</h5>
-              
-              <div class="article-views">
-                <span>View: ${article.views ?? 0}</span>
-              </div>
-              <!-- Likes -->
-              <div class="meta-item">
-                <span>Like: ${article.likes ?? 0}</span>
-              </div>
+              <div class="article-meta">
+                <span class="meta-item views"><span class="icon">&#128065;</span> ${article.views ?? 0}</span>
+                <span class="meta-item likes"><span class="icon">&#10084;&#65039;</span> ${article.likes ?? 0}</span>
               </div>
               <p class="news-para">${article.content}...</p>
               <a class="read-more" href="${articleDetailBase}${article.articleID}">Read more......</a>
             `;
             container.appendChild(card);
           });
-
+ 
           articleOffset += data.length;
-
+ 
           if (data.length < articleLimit) {
             button.style.display = "none";
           }
         });
     }
-
+ 
     // Script to show more testimonials
     let testimonialOffset = 4;
-
+ 
     function loadMoreTestimonials() {
       fetch(`/load-more-testimonials?offset=${testimonialOffset}`)
         .then((response) => response.json())
         .then((data) => {
           const grid = document.querySelector(".testimonial-grid");
-
+ 
           data.testimonials.forEach((t) => {
             const card = document.createElement("div");
             card.className = "testimonial-card";
-
+ 
             card.innerHTML = `
             <h4>${t.username}</h4>
             <p>${t.stars}</p>
             <p>${t.comment}</p>
           `;
-
+ 
             grid.appendChild(card);
           });
-
-          testimonialOffset += data.testimonials.length; // increment offset by number loaded
-
-          // hide button if no more testimonials
+ 
+          testimonialOffset += data.testimonials.length;
+ 
           if (!data.has_more) {
             document.querySelector(".view-more-testimonials").style.display = "none";
           }
         });
     }
-
+ 
     // Script to show more product features
     let featureOffset = 4;
     const featureLimit = 4;
-
+ 
     function loadMoreFeatures(button) {
       fetch(
         `/load_more_features?offset=${featureOffset}&limit=${featureLimit}`,
@@ -291,22 +234,22 @@
         .then((res) => res.json())
         .then((data) => {
           const container = document.getElementById("prodfeatures");
-
+ 
           data.features.forEach((feature) => {
             const card = document.createElement("div");
             card.classList.add("feature-card");
-
+ 
             card.innerHTML = `
                 <h4>${feature.featureName}</h4>
                 <img src="/static/uploads/${feature.featureImage}">
                 <p>${feature.featureDescription}</p>
               `;
-
+ 
             container.appendChild(card);
           });
-
+ 
           featureOffset += data.features.length;
-
+ 
           if (!data.has_more) {
             button.style.display = "none";
           }
@@ -314,31 +257,29 @@
     }
   </script>
 </body>
-
+ 
 <footer class="footer">
   <div class="footer-container">
     <!-- Brand Section -->
     <div class="footer-brand">
       <h3 class="footer-title">Daily Scoop News</h3>
-
+ 
       <p class="footer-description">
         Delivering reliable and AI-powered news to keep readers informed with
         credible and up-to-date stories.
       </p>
-
+ 
       <div class="footer-social">
         <a href="https://facebook.com" target="_blank" class="footer-social-icon facebook" rel="noopener">f</a>
-
         <a href="https://linkedin.com" target="_blank" class="footer-social-icon linkedin" rel="noopener">in</a>
-
         <a href="https://x.com" target="_blank" class="footer-social-icon twitter" rel="noopener">in</a>
       </div>
     </div>
-
+ 
     <!-- Links Section -->
     <div class="footer-links-section">
       <h4 class="footer-links-title">Social Links</h4>
-
+ 
       <div class="footer-links">
         <a href="{{ url_for('info', page='contact') }}">Contact Us</a>
         <a href="{{ url_for('info', page='privacy') }}">Privacy Policy</a>
@@ -347,10 +288,8 @@
         <a href="{{ url_for('info', page='help') }}">Need help? Reach us here.</a>
         <a href="{{ url_for('info', page='advertise') }}">Advertise with us</a>
       </div>
-
-
     </div>
   </div>
 </footer>
-
+ 
 </html>
