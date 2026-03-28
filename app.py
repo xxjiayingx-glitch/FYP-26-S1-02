@@ -270,7 +270,7 @@ def article_detail(article_id):
 @app.route("/add_comment", methods=["POST"])
 def add_comment_route():
     if "userID" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("login.login"))
 
     article_id = request.form.get("articleID")
     comment_text = request.form.get("commentText")

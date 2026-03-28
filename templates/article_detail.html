@@ -74,6 +74,7 @@
         {% endfor %}
     </div>
 
+    {% if session.get('userID') %}
     <form method="POST" action="{{ url_for('add_comment_route') }}" class="comment-form">
         <input type="hidden" name="articleID" value="{{ article.articleID }}">
 
@@ -81,6 +82,14 @@
 
         <button type="submit">Post Comment</button>
     </form>
+    {% else %}
+    <div style="margin-top:15px; padding:15px; background:#f3f4f6; border-radius:10px; text-align:center;">
+        <p style="margin:0; color:#555;">
+            <a href="{{ url_for('login.login') }}" style="color:#2563eb; font-weight:600;">Log in</a> 
+            to leave a comment.
+        </p>
+    </div>
+    {% endif %}
 </div>
 
 <!-- REPORT MODAL -->
