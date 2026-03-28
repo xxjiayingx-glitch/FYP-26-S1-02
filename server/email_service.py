@@ -123,6 +123,31 @@ def _build_credentials():
 
     return creds
 
+def send_forgot_password_email(email, token):
+    reset_link = f"{BASE_URL}/reset-password?token={token}"
+
+    body = (
+        f"Hi!\n\n"
+        f"You requested to reset your password for Daily Scoop News System.\n\n"
+        f"Click the link below to reset your password:\n"
+        f"{reset_link}\n\n"
+        f"If you did not request this, please ignore this email."
+    )
+
+    service = build("gmail", "v1", credentials=_build_credentials())
+
+    message = EmailMessage()
+    message.set_content(body)
+    message["To"] = email
+    message["From"] = FROM_EMAIL
+    message["Subject"] = "Reset Your Password"
+
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+    service.users().messages().send(
+        userId="me",
+        body={"raw": encoded_message}
+    ).execute()
+
 # Generating token file
 # from google_auth_oauthlib.flow import InstalledAppFlow
 

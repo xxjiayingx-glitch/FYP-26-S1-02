@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, session, url_for
 from control.LoginCTL import AuthController
 from control.SystemLogCTL import SystemLogCTL
+import secrets
+from server.email_service import send_forgot_password_email 
 
 login_bp = Blueprint("login", __name__)
 auth = AuthController()
@@ -50,3 +52,51 @@ def login():
         return render_template("login.html", error="Invalid email or password")
 
     return render_template("login.html", success=success_msg)
+
+@login_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form["email"]
+        user = auth.find_by_email(email)  # returns user or None
+
+        if user:
+            token = secrets.token_urlsafe(32)
+            # Store token in DB (reuse verificationToken column)
+            from entity.UserAccount import UserAccount
+            UserAccount.set_password_reset_token(user["userID"], token)
+            send_forgot_password_email(email, token)
+
+        # Always show the same message to avoid email enumeration
+        return render_template("forgot_password.html", success=True)
+
+    return render_template("forgot_password.html")
+
+
+@login_bp.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    token = request.args.get("token")
+
+    if not token:
+        return redirect(url_for("login.login"))
+
+    if request.method == "POST":
+        new_password = request.form["new_password"]
+        confirm_password = request.form["confirm_password"]
+
+        if new_password != confirm_password:
+            return render_template("reset_password.html", token=token, error="Passwords do not match.")
+
+        if len(new_password) < 8:
+            return render_template("reset_password.html", token=token, error="Password must be at least 8 characters.")
+
+        from werkzeug.security import generate_password_hash
+        from entity.UserAccount import UserAccount
+
+        success = UserAccount.reset_password_by_token(token, generate_password_hash(new_password, method='pbkdf2:sha256'))
+
+        if success:
+            return redirect(url_for("login.login", success="Password reset successfully. Please log in."))
+        else:
+            return render_template("reset_password.html", token=token, error="Invalid or expired reset link.")
+
+    return render_template("reset_password.html", token=token)

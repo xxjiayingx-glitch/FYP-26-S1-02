@@ -677,3 +677,34 @@ class UserAccount:
         conn.close()
 
         return success
+        
+    @staticmethod
+    def set_password_reset_token(userID, token):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE UserAccount
+            SET verificationToken = %s,
+                updated_at = NOW()
+            WHERE userID = %s
+        """, (token, userID))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    @staticmethod
+    def reset_password_by_token(token, new_hashed_password):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE UserAccount
+            SET pwd = %s,
+                verificationToken = NULL,
+                updated_at = NOW()
+            WHERE verificationToken = %s
+        """, (new_hashed_password, token))
+        conn.commit()
+        success = cursor.rowcount > 0
+        cursor.close()
+        conn.close()
+        return success
