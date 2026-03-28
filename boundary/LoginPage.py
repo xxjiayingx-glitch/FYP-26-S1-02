@@ -18,7 +18,7 @@ def login():
 
         # ADD THIS
         if user == "pending":
-            return render_template("login.html", error="Please verify your email before logging in.")
+            return render_template("login.html", pending=True)
 
         if user:
             session["userID"] = user["userID"]
