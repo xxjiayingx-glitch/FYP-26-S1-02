@@ -39,8 +39,8 @@
  
           <!-- Views & Likes between title and description -->
           <div class="article-meta">
-            <span class="meta-item views"><span class="icon">&#128065;</span> {{ headline.views }}</span>
-            <span class="meta-item likes"><span class="icon">&#10084;&#65039;</span> {{ headline.likes }}</span>
+            <span class="meta-item views">👁 {{ headline.views }}</span>
+            <span class="meta-item likes">❤️ {{ headline.likes }}</span>
           </div>
  
           <p class="featured-desc">{{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif %}</p>
@@ -83,8 +83,8 @@
  
         <!-- Views & Likes between title and body -->
         <div class="article-meta">
-          <span class="meta-item views"><span class="icon">&#128065;</span> {{ article.views }}</span>
-          <span class="meta-item likes"><span class="icon">&#10084;&#65039;</span> {{ article.likes }}</span>
+          <span class="meta-item views">👁 {{ article.views }}</span>
+          <span class="meta-item likes">❤️ {{ article.likes }}</span>
         </div>
  
         <p class="news-para">{{ article['content'][:120] }}...</p>
@@ -176,8 +176,8 @@
               <img src="/static/uploads/${article.imageURL}" alt="${article.articleTitle}">
               <h5 class="news-title">${article.articleTitle}</h5>
               <div class="article-meta">
-                <span class="meta-item views"><span class="icon">&#128065;</span> ${article.views ?? 0}</span>
-                <span class="meta-item likes"><span class="icon">&#10084;&#65039;</span> ${article.likes ?? 0}</span>
+                <span class="meta-item views">👁 ${article.views ?? 0}</span>
+                <span class="meta-item likes">❤️ ${article.likes ?? 0}</span>
               </div>
               <p class="news-para">${article.content}...</p>
               <a class="read-more" href="${articleDetailBase}${article.articleID}">Read more......</a>

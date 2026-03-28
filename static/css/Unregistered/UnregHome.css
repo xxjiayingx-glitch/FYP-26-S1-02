@@ -140,10 +140,6 @@ html {
   color: #c0392b;
 }
  
-.meta-item .icon {
-  font-size: 15px;
-  line-height: 1;
-}
  
 .latest-grid {
   display: grid;
