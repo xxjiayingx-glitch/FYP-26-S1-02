@@ -171,7 +171,7 @@ def send_forgot_password_email(email, token):
 
 # creds = flow.run_local_server(port=8080)
 
-# with open("token.json", "w") as token:
+# with open("server/token.json", "w") as token:
 #     token.write(creds.to_json())
 
 # print("✅ token.json generated")
