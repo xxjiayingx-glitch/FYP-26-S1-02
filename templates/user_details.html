@@ -3,7 +3,7 @@
 {% block title %}User Details{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/user_details.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -31,8 +31,8 @@
         </div>
 
         <div class="detail-item">
-            <label>Subscription Status</label>
-            <p>{{ subscription_status if subscription_status else '-' }}</p>
+            <label>Subscription Type</label>
+            <p>{{ user.userType if user.userType else '-' }}</p>
         </div>
 
         <div class="detail-item">
@@ -53,12 +53,18 @@
     </div>
 
     <div class="action-buttons">
-        <form action="/admin/user-accounts/{{ user.userID }}/delete" method="POST">
-            <button type="submit" class="action-btn">Delete</button>
-        </form>
+        {% if user.userType == 'system admin' %}
+            <button type="button" class="action-btn" disabled>Cannot delete system admin</button>
+        {% else %}
+            <form action="/admin/user-accounts/delete/{{ user.userID }}" method="POST">
+                <button type="button" class="action-btn" onclick="openDeleteModal()">
+                    Delete
+                </button>
+            </form>
+        {% endif %}
 
         {% if user.userType == 'system admin' %}
-            <span class="admin-protected">Protected</span>
+            <button type="button" class="action-btn" disabled>Cannot suspend system admin</button>
         {% elif user.accountStatus == 'suspended' %}
             <form action="/admin/user-accounts/{{ user.userID }}/status" method="POST">
                 <input type="hidden" name="action" value="unsuspend">
@@ -95,13 +101,7 @@
 
         <div class="detail-item full-width">
             <label>Category Interested</label>
-            <p>
-                {% if interests %}
-                    {{ interests|join(', ') }}
-                {% else %}
-                    -
-                {% endif %}
-            </p>
+            <p>{{ user.interests }}</p>
         </div>
     </div>
 </section>
@@ -120,4 +120,47 @@
 <div class="back-btn-wrapper">
     <a href="/admin/user-accounts" class="back-btn">Back to User Accounts</a>
 </div>
+
+<div id="deleteUserModal" class="delete-modal-overlay">
+    <div class="delete-modal-box">
+        <div class="delete-icon-circle">
+            ✖
+        </div>
+
+        <h2>Are you sure?</h2>
+        <p>
+            Do you really want to delete this user?<br>
+            This process cannot be undone.
+        </p>
+
+        <div class="delete-modal-actions">
+            <button type="button" class="cancel-delete-btn" onclick="closeDeleteModal()">
+                Cancel
+            </button>
+
+            <form method="POST" action="{{ url_for('user_details.delete_user', user_id=user.userID) }}">
+                <button type="submit" class="confirm-delete-btn">
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openDeleteModal() {
+    document.getElementById("deleteUserModal").classList.add("show");
+}
+
+function closeDeleteModal() {
+    document.getElementById("deleteUserModal").classList.remove("show");
+}
+
+window.addEventListener("click", function(event) {
+    const modal = document.getElementById("deleteUserModal");
+    if (event.target === modal) {
+        closeDeleteModal();
+    }
+});
+</script>
 {% endblock %}

@@ -68,6 +68,40 @@ body {
     color: #111;
 }
 
+.flash-container {
+    position: fixed;
+    top: 80px;
+    right: 30px;
+    z-index: 9999;
+}
+
+.flash-message {
+    margin-top: 20px;
+    min-width: 280px;
+    max-width: 360px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+    animation: toastSlideIn 0.35s ease;
+}
+
+.flash-message.success {
+    background: #ecfdf3;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.flash-message.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
 
 .layout {
     display: flex;

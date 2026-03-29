@@ -25,6 +25,17 @@
             <span>Hi, {{ admin.username if admin else 'Username' }}</span>
             <a href="{{ url_for('logout') }}">Logout</a>
         </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
     </header>
 
     <div class="layout">
@@ -116,4 +127,11 @@
         }
     </script>
 </body>
+<script>
+setTimeout(() => {
+    document.querySelectorAll('.flash-message').forEach(el => {
+        el.style.display = 'none';
+    });
+}, 3000);
+</script>
 </html>

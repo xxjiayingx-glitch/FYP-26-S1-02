@@ -2,6 +2,7 @@ from entity.db_connection import get_db_connection
 from werkzeug.security import check_password_hash
 from datetime import datetime, timedelta
 
+
 class UserAccount:
     """Handles user account login, profile, admin, and registration related database actions."""
 
@@ -450,7 +451,7 @@ class UserAccount:
 
         cursor.execute("""
             SELECT userID, first_name, last_name, email, gender, dateOfBirth, phone,
-                   accountStatus, created_at
+                   accountStatus, userType, interests, created_at
             FROM UserAccount
             WHERE userID = %s
         """, (user_id,))
@@ -534,6 +535,21 @@ class UserAccount:
         cursor.close()
         conn.close()
         return result["total"] if result else 0
+    
+    def delete_user(user_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = "DELETE FROM UserAccount WHERE userID = %s"
+        cursor.execute(query, (user_id,))
+        conn.commit()
+
+        success = cursor.rowcount > 0
+
+        cursor.close()
+        conn.close()
+
+        return success
 
     # ==============================
     # SUBSCRIPTION / INTERESTS
