@@ -713,3 +713,16 @@ class UserAccount:
         cursor.close()
         conn.close()
         return success
+
+    @staticmethod
+    def check_reset_token_valid(token):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT userID FROM UserAccount
+            WHERE verificationToken = %s
+        """, (token,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return user is not None

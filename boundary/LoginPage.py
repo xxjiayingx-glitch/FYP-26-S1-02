@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, session, url_for
+from werkzeug.security import generate_password_hash
+from entity.UserAccount import UserAccount
 from control.LoginCTL import AuthController
 from control.SystemLogCTL import SystemLogCTL
 import secrets
@@ -16,7 +18,6 @@ def login():
 
         user = auth.login(email, pwd)
 
-        # ADD THIS
         if user == "pending":
             return render_template("login.html", pending=True)
 
@@ -27,26 +28,15 @@ def login():
             session["profileImage"] = user["profileImage"]
             session["profileCompleted"] = user["profileCompleted"]
 
-            # Logs login record
             SystemLogCTL.logAction(
-            accountID=user["userID"],
-            action="Logged In",
-            targetID=user["userID"],
-            targetType="UserAccount"
+                accountID=user["userID"],
+                action="Logged In",
+                targetID=user["userID"],
+                targetType="UserAccount"
             )
 
             if user["userType"] == "system admin":
                 return redirect("/admin/dashboard")
-
-            # First-time login if gender, DOB, and interests are all null
-            # is_first_login = (
-            #     not user.get("gender") and
-            #     not user.get("dateOfBirth") and
-            #     not user.get("interests")
-            # )
-
-            # if is_first_login:
-            #     return redirect("/profile?first_login=1")
 
             if user["profileCompleted"] == 0:
                 return redirect(url_for("profile.complete_profile"))
@@ -61,16 +51,13 @@ def login():
 def forgot_password():
     if request.method == "POST":
         email = request.form["email"]
-        user = auth.find_by_email(email)  # returns user or None
+        user = auth.find_by_email(email)
 
         if user:
             token = secrets.token_urlsafe(32)
-            # Store token in DB (reuse verificationToken column)
-            from entity.UserAccount import UserAccount
             UserAccount.set_password_reset_token(user["userID"], token)
             send_forgot_password_email(email, token)
 
-        # Always show the same message to avoid email enumeration
         return render_template("forgot_password.html", success=True)
 
     return render_template("forgot_password.html")
@@ -83,6 +70,9 @@ def reset_password():
     if not token:
         return redirect(url_for("login.login"))
 
+    if not UserAccount.check_reset_token_valid(token):
+        return render_template("reset_password.html", token=token, error="Invalid or expired reset link.")
+
     if request.method == "POST":
         new_password = request.form["new_password"]
         confirm_password = request.form["confirm_password"]
@@ -90,11 +80,8 @@ def reset_password():
         if new_password != confirm_password:
             return render_template("reset_password.html", token=token, error="Passwords do not match.")
 
-        if len(new_password) < 8:
-            return render_template("reset_password.html", token=token, error="Password must be at least 8 characters.")
-
-        from werkzeug.security import generate_password_hash
-        from entity.UserAccount import UserAccount
+        if len(new_password) < 10:
+            return render_template("reset_password.html", token=token, error="Password must be at least 10 characters.")
 
         success = UserAccount.reset_password_by_token(token, generate_password_hash(new_password, method='pbkdf2:sha256'))
 
