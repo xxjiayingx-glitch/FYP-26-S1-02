@@ -239,35 +239,3 @@ body {
   font-size: 0.78rem;
   color: #475569;
 }
-
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .logo h1 { font-size: 28px; }
-  .navbar { padding: 12px 16px; }
-  .navLinks { gap: 16px; }
-  .navLinks a { font-size: 14px; }
-  .section-title { font-size: 32px; margin-top: 24px; margin-bottom: 16px; }
-  .company-card { flex-direction: column; gap: 0; padding: 0; border-radius: 12px; overflow: hidden; }
-  .company-image { flex: 1 1 100%; max-width: 100%; min-height: 200px; border-radius: 0; }
-  .card-text { flex: 1 1 100%; max-width: 100%; padding: 20px 16px; gap: 10px; }
-  .footer-container { padding: 32px 16px; gap: 24px; }
-  .footer-brand { border-right: none; padding-right: 0; border-bottom: 1px solid #2d3f52; padding-bottom: 24px; }
-  .footer-links-section { padding-left: 0; }
-  .footer-title { font-size: 26px; }
-  .footer-links-title { font-size: 22px; }
-}
-
-@media (max-width: 480px) {
-  .logo h1 { font-size: 22px; }
-  .navbar { padding: 10px 12px; }
-  .navLinks { gap: 10px; }
-  .navLinks a { font-size: 13px; }
-  .section-title { font-size: 24px; }
-  .footer-container { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 360px) {
-  .navbar { flex-wrap: wrap; gap: 6px; }
-  .navLinks { flex-wrap: wrap; }
-  .logo h1 { font-size: 18px; }
-}
