@@ -15,7 +15,7 @@ def view_verified_requests():
         return redirect(url_for("login.login"))
     
     page = request.args.get("page", 1, type=int)
-    per_page = 10
+    per_page = 20
     
     dashboard_control = AdminDashboardControl()
     admin_data = dashboard_control.get_dashboard_data()
@@ -26,7 +26,6 @@ def view_verified_requests():
     except Exception as e:
         print("ERROR:", e) 
         flash(str(e))
-        requests = []
 
     total_requests = len(requests)
     total_pages = math.ceil(total_requests/per_page) if total_requests > 0 else 1
