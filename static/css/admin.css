@@ -149,8 +149,18 @@
     color: #222;
 }
 
+.logs-period-info {
+    margin-bottom: 14px;
+    font-size: 14px;
+    color: #666;
+}
+
+.logs-period-info strong {
+    color: #222;
+}
+
 .logs-table-wrapper {
-    width: 980px;
+    width: 1100px;
     margin: 0 auto;
 }
 
@@ -211,6 +221,12 @@
     color: white;
 }
 
+.ellipsis {
+    margin-top: 5px;
+    padding: 0 8px;
+    color: #4c67f2;
+    font-weight: 600;
+}
 /* ------------------------- */
 /* Edit Key Product Features */
 /* ------------------------- */
