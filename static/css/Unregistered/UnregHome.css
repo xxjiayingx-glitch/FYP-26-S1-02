@@ -445,25 +445,3 @@ html {
   font-size: 0.78rem;
   color: #475569;
 }
-/* ===== MOBILE FIXES (max-width: 480px) ===== */
-@media (max-width: 480px) {
-  .logo h1 { font-size: 22px; }
-  .navbar { padding: 12px 16px; }
-  .navLinks { gap: 12px; }
-  .navLinks a { font-size: 13px; }
- 
-  .latest-title,
-  .testimonial-title,
-  .features-title { font-size: 28px; }
- 
-  .featured-news { margin: 20px 4%; }
- 
-  .view-more-articles,
-  .view-more-testimonials,
-  .view-more-features { font-size: 18px; padding: 8px 16px; }
-}
- 
-@media (max-width: 360px) {
-  .navbar { flex-wrap: wrap; gap: 8px; }
-  .navLinks { flex-wrap: wrap; }
-}
