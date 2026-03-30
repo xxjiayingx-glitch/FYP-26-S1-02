@@ -9,21 +9,26 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    
     <header class="topbar">
-        <div class="top-left">
-            <div class="brand">Daily Scoop News<br>System</div>
+        <div class="brand-wrap">
+            <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" class="brand">
+                Daily Scoop<br>
+                News System
+            </a>
         </div>
 
         <div class="top-right">
-            <div class="avatar-top">
+            <div class="avatar">
                 {% if admin and admin.profileImage %}
                     <img src="{{ url_for('static', filename='images/profile/' ~ admin.profileImage) }}" alt="Profile">
                 {% else %}
                     <img src="{{ url_for('static', filename='images/profile/default.png') }}" alt="Profile">
                 {% endif %}
             </div>
+
             <span>Hi, {{ admin.username if admin else 'Username' }}</span>
-            <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('logout') }}">Log Out</a>
         </div>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}

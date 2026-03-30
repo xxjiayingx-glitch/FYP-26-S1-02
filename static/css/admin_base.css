@@ -10,14 +10,48 @@ body {
     color: #111;
 }
 
-.topbar {
-    height: 72px;
-    background: #cfe5ff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 18px;
-    border-bottom: 1px solid #d8d8d8;
+.topbar{
+    background:#c4def4;
+    min-height:105px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 42px;
+    gap:30px;
+    border-bottom:1px solid rgba(0,0,0,0.06);
+}
+
+.brand-wrap{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-shrink:0;
+}
+
+.brand{
+    font-weight:900;
+    font-size:32px;
+    line-height:1;
+    color:#1f3a5f;
+    cursor:pointer;
+    letter-spacing:-0.5px;
+    text-decoration: none;
+    transition: all 0.3s ease; 
+}
+
+.brand:hover{
+    color:#3f8ec4;   /* lighter blue glow */
+    text-decoration: none;
+
+    text-shadow:
+        0 0 6px rgba(63,142,196,0.35),
+        0 0 12px rgba(63,142,196,0.25);
+
+    transform: scale(1.03);
+}
+
+.brand:active{
+    transform: scale(0.98);
 }
 
 .top-left {
@@ -26,20 +60,15 @@ body {
     gap: 12px;
 }
 
-.brand {
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.1;
-}
 .toggle-btn {
     all: unset;
     position: absolute;
-    top: 20px;
+    top: 25px;
     left: 270px;
     width: 44px;
     height: 44px;
-    border-radius: 12px;
-    background: #e3e5f6;
+    border-radius: 5px;
+    background: #f7f7f7;
     color: #111;
     display: flex;
     align-items: center;
@@ -53,19 +82,30 @@ body {
 }
 
 .toggle-btn:hover {
-    background: #d7daf1;
+    background: #e8e8ef;
 }
 .top-right {
     display: flex;
     align-items: center;
     gap: 18px;
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 600;
 }
 
 .top-right a {
+    display: inline-block;
+    padding: 12px 20px;
+    font-size: 18px;
+    font-weight: 600;
     text-decoration: none;
-    color: #111;
+    border-radius: 999px;
+    background:#111;
+    color:#fff;
+}
+
+.top-right a:hover {
+    background:#2f6f95;
+    color:#fff;
 }
 
 .flash-container {
@@ -129,6 +169,7 @@ body {
 }
 
 .profile-box {
+    margin-top: 20px;
     display: flex;
     align-items: center;
     gap: 20px;
@@ -141,7 +182,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;   /* 🔥 tighter spacing */
+    gap: 6px;   
 }
 
 .avatar-top {
@@ -187,19 +228,20 @@ body {
 }
 
 .profile-info .username {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
 }
 
 .profile-info .role {
     font-size: 14px;
     color: #555;
+    text-transform: uppercase
 }
 
 .menu {
     display: flex;
     flex-direction: column;
-    margin-top: 20px;
+    margin-top: 45px;
     gap: 6px;
 }
 
