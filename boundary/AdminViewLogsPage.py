@@ -21,33 +21,48 @@ def system_monitoring_pg():
 @system_monitoring_bp.route("/admin/system-monitoring/view-logs", methods=["GET"])
 def view_logs_page():
     if "userID" not in session:
-        return redirect("login.login")
+        return redirect(url_for("login.login"))
 
     if session.get("userType") != "system admin":
-        return redirect("login.login")
+        return redirect(url_for("login.login"))
     
     dashboard_control = AdminDashboardControl()
     admin_data = dashboard_control.get_dashboard_data()
     
     page = request.args.get("page", 1, type=int)
-    per_page = 10
+    per_page = 20
 
     q = request.args.get("q", "").strip()
     search_by = request.args.get("search_by", "").strip()
-    log_date = request.args.get("log_date", "").strip()
+    start_date = request.args.get("start_date", "")
+    end_date = request.args.get("end_date", "")
 
-    if q or log_date:
-        all_logs = SystemLogCTL.get_logs(q=q, search_by=search_by, log_date=log_date)
+    if q or start_date or end_date:
+        all_logs = SystemLogCTL.get_logs(
+            q=q,
+            search_by=search_by,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        total_logs = SystemLogCTL.count_logs(
+        q=q,
+        search_by=search_by,
+        start_date=start_date,
+        end_date=end_date
+    )
     else:
-        all_logs = SystemLogCTL.viewLogs()
+        all_logs = SystemLogCTL.viewLogs(page)
+        total_logs = SystemLogCTL.count_logs()
 
-
-    total_logs = len(all_logs)
     total_pages = math.ceil(total_logs/per_page) if total_logs > 0 else 1
 
-    start = (page-1) * per_page
-    end = start + per_page
-    logs = all_logs[start:end]
+    if q or start_date or end_date:
+        start = (page - 1) * per_page
+        end = start + per_page
+        logs = all_logs[start:end]
+    else:
+        logs = all_logs
 
     return render_template("admin_view_logs.html", admin=admin_data["admin"],logs=logs, page=page, total_pages=total_pages, q=q,
-    search_by=search_by, log_date=log_date)
+    search_by=search_by,  start_date=start_date, end_date=end_date)
