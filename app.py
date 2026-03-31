@@ -613,21 +613,50 @@ def generate_ai_review_ajax(article_id):
     if not article:
         return jsonify({"success": False, "message": "Article not found"})
 
-    # If AI review already exists, return it
-    if article.get("aiReview"):
-        review = article["aiReview"]
-    else:
-        try:
-            # Generate AI summary (replace this with real AI logic)
-            review = f"This is an AI summary for '{article['articleTitle']}'"
+    try:
+        title = article.get("articleTitle", "")
+        content = article.get("content", "").strip()
 
-            # Save AI review to DB
-            article_controller.save_ai_review(article_id, review)
+        if not content:
+            return jsonify({"success": False, "message": "No article content found"})
 
-        except Exception as e:
-            return jsonify({"success": False, "message": str(e)})
+        # -------- Summary --------
+        sentences = [s.strip() for s in content.replace("\n", " ").split(".") if s.strip()]
+        short_summary = ". ".join(sentences[:2])
+        if short_summary and not short_summary.endswith("."):
+            short_summary += "."
 
-    return jsonify({"success": True, "review": review})
+        # -------- Improvement Suggestions --------
+        suggestions = []
+
+        if len(content) < 150:
+            suggestions.append("Add more supporting details to make the article more informative.")
+
+        if len(sentences) < 3:
+            suggestions.append("Break the content into more clear sentences or paragraphs for better readability.")
+
+        if not any(word in content.lower() for word in ["according to", "reported", "source", "data", "study"]):
+            suggestions.append("Include supporting sources or evidence to strengthen credibility.")
+
+        if len(title.split()) < 4:
+            suggestions.append("Consider making the title slightly more specific and descriptive.")
+
+        if not suggestions:
+            suggestions.append("The content is clear overall. You can further improve it by adding stronger supporting evidence or examples.")
+
+        review = (
+            f"Summary:\n"
+            f"{short_summary}\n\n"
+            f"Suggestions to improve:\n- " +
+            "\n- ".join(suggestions)
+        )
+
+        article_controller.save_ai_review(article_id, review)
+
+        return jsonify({"success": True, "review": review})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
 
 @app.route("/logout")
 def logout():

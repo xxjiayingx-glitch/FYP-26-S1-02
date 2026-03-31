@@ -202,11 +202,14 @@ class ArticleController:
                 a.articleTitle,
                 a.content,
                 a.updated_at,
+                a.aiFactCheckScore,
+                a.aiFactCheckStatus,
+                a.aiReview,
                 IFNULL(an.views, 0) AS views,
                 IFNULL(an.likes, 0) AS likes
             FROM Article a
             LEFT JOIN ArticleAnalytics an
-            ON a.articleID = an.articleID
+                ON a.articleID = an.articleID
             WHERE a.articleID = %s
         """
         cursor.execute(query, (article_id,))
@@ -620,13 +623,17 @@ class ArticleController:
         return articles
     
     def calculate_credibility(self, ai_score, views, likes):
-        if views < 10:
-            engagement_score = 0
-        else:
+         ai_score = float(ai_score or 0)
+         views = int(views or 0)
+         likes = int(likes or 0)
+
+         if views < 10:
+            engagement_score = 0.0
+         else:
             engagement_rate = likes / views
             engagement_score = min(engagement_rate * 100, 100)
 
-        return round((ai_score * 0.5) + (engagement_score * 0.5), 2)
+         return round((ai_score * 0.5) + (engagement_score * 0.5), 2)
     
     def get_credibility_label(score):
         if score >= 80:
