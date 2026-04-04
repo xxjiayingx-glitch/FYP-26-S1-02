@@ -99,10 +99,17 @@ def update_company_profile():
 
 @web_admin_api_bp.route("/admin/subscription-plan", methods=["GET"])
 def get_subscription_plan():
+    plan_id = request.args.get("planID", 8, type=int)
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM SubscriptionPlan ORDER BY planID ASC LIMIT 1")
+    cursor.execute("""
+        SELECT *
+        FROM SubscriptionPlan
+        WHERE planID = %s
+        LIMIT 1
+    """, (plan_id,))
     result = cursor.fetchone()
 
     cursor.close()
@@ -110,64 +117,41 @@ def get_subscription_plan():
 
     return jsonify(result if result else {})
 
+
 @web_admin_api_bp.route("/admin/subscription-plan", methods=["PUT"])
 def update_subscription_plan():
 
     data = request.json
 
+    plan_id = data.get("planID")
     plan_name = data.get("planName")
     plan_description = data.get("planDescription")
     price = data.get("price")
     billing_cycle = data.get("billingCycle")
     plan_status = data.get("planStatus")
 
+    if not plan_id:
+        return jsonify({"message": "Missing planID"}), 400
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT planID
-        FROM SubscriptionPlan
-        ORDER BY planID ASC
-        LIMIT 1
-    """)
-    row = cursor.fetchone()
-
-    if row:
-
-        # ⭐⭐⭐⭐⭐ FIX HERE ⭐⭐⭐⭐⭐
-        plan_id = row["planID"] if isinstance(row, dict) else row[0]
-        # ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
-
-        cursor.execute("""
-            UPDATE SubscriptionPlan
-            SET planName=%s,
-                planDescription=%s,
-                price=%s,
-                billingCycle=%s,
-                planStatus=%s
-            WHERE planID=%s
-        """, (
-            plan_name,
-            plan_description,
-            price,
-            billing_cycle,
-            plan_status,
-            plan_id
-        ))
-
-    else:
-
-        cursor.execute("""
-            INSERT INTO SubscriptionPlan
-            (planName, planDescription, price, billingCycle, planStatus)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (
-            plan_name,
-            plan_description,
-            price,
-            billing_cycle,
-            plan_status
-        ))
+        UPDATE SubscriptionPlan
+        SET planName = %s,
+            planDescription = %s,
+            price = %s,
+            billingCycle = %s,
+            planStatus = %s
+        WHERE planID = %s
+    """, (
+        plan_name,
+        plan_description,
+        price,
+        billing_cycle,
+        plan_status,
+        plan_id
+    ))
 
     conn.commit()
     cursor.close()
@@ -176,6 +160,7 @@ def update_subscription_plan():
     return jsonify({
         "message": "Subscription plan updated successfully"
     })
+
 
 # -------------------- KEY PRODUCT FEATURES --------------------
 
