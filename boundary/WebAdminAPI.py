@@ -249,7 +249,7 @@ def get_key_features_paginated(page=1, per_page=3):
 
     offset = (page - 1) * per_page
     cursor.execute("""
-        SELECT featureID, featureName, featureImage AS image
+        SELECT featureID, featureName, featureDescription, featureImage AS image
         FROM ProductFeature
         ORDER BY featureID ASC
         LIMIT %s OFFSET %s
@@ -269,9 +269,10 @@ def add_key_feature():
         return redirect("/login")
 
     feature_name = request.form.get("featureName", "").strip()
+    feature_description = request.form.get("featureDescription", "").strip()
     image_file = request.files.get("image")
 
-    if not feature_name:
+    if not feature_name or not feature_description:
         return redirect("/admin/edit-key-product-features")
 
     if not image_file or image_file.filename == "":
@@ -286,10 +287,11 @@ def add_key_feature():
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO ProductFeature (featureName, featureImage, created_at, updated_at)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO ProductFeature (featureName, featureDescription, featureImage, created_at, updated_at)
+        VALUES (%s, %s, %s, %s, %s)
     """, (
         feature_name,
+        feature_description,
         image_filename,
         datetime.now(),
         datetime.now()
@@ -301,6 +303,7 @@ def add_key_feature():
 
     return redirect("/admin/edit-key-product-features")
 
+
 @web_admin_api_bp.route("/admin/key-features/update", methods=["POST"])
 def update_key_feature():
     if "userID" not in session:
@@ -308,9 +311,10 @@ def update_key_feature():
 
     feature_id = request.form.get("featureID")
     feature_name = request.form.get("featureName", "").strip()
+    feature_description = request.form.get("featureDescription", "").strip()
     image_file = request.files.get("image")
 
-    if not feature_id or not feature_name:
+    if not feature_id or not feature_name or not feature_description:
         return redirect("/admin/edit-key-product-features")
 
     conn = get_db_connection()
@@ -339,11 +343,13 @@ def update_key_feature():
     cursor.execute("""
         UPDATE ProductFeature
         SET featureName = %s,
+            featureDescription = %s,
             featureImage = %s,
             updated_at = %s
         WHERE featureID = %s
     """, (
         feature_name,
+        feature_description,
         image_filename,
         datetime.now(),
         feature_id
@@ -380,4 +386,5 @@ def delete_key_feature(feature_id):
     conn.close()
 
     return redirect("/admin/edit-key-product-features")
+
 
