@@ -1,30 +1,27 @@
-from flask import Blueprint, render_template, session, redirect, url_for
+from flask import Blueprint, render_template, session, redirect, url_for, request
+from boundary.WebAdminAPI import get_key_features_paginated
 
 web_management_bp = Blueprint("web_management", __name__)
 
 @web_management_bp.route("/admin/edit-key-product-features")
-def edit_key_features():
+def edit_key_product_features_page():
     if "userID" not in session:
         return redirect(url_for("login.login"))
-    
-    if session.get("userType") != "system admin":
-        return redirect("login.login")
 
     admin = {
+        "userID": session.get("userID"),
         "username": session.get("username"),
-        "profileImage": session.get("profileImage"),
-        "userType": session.get("userType")
+        "userType": session.get("userType"),
+        "profileImage": session.get("profileImage")
     }
 
+    page = request.args.get("page", 1, type=int)
+    features, pagination = get_key_features_paginated(page=page, per_page=3)
+
     return render_template(
-        "edit_key_product_features.html",
-        admin=admin
-    )
+    "edit_key_product_features.html",
+    admin=admin,
+    features=features,
+    pagination=pagination
+)
 
-@web_management_bp.route("/admin/edit-key-product-features/update", methods=["POST"])
-def update_key_feature():
-    return redirect(url_for("web_management.edit_key_product_features"))
-
-@web_management_bp.route("/admin/edit-key-product-features/add", methods=["POST"])
-def add_key_feature():
-    return redirect(url_for("web_management.edit_key_product_features"))
