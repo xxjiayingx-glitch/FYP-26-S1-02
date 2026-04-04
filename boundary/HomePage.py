@@ -94,8 +94,8 @@ def load_more_testimonials():
 @home_bp.route("/load_more_features")
 def load_more_features():
 
-    offset = request.args.get("offset", type=int)
-    limit = request.args.get("limit", type=int)
+    offset = request.args.get("offset", 0, type=int)
+    limit = request.args.get("limit", 4, type=int)
 
     features = featuresCTL.get_features(offset=offset, limit=limit + 1)
 
