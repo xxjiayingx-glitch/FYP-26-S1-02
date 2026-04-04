@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, session, redirect, url_for
+from flask import Blueprint, render_template, session, redirect, url_for, request
+from entity.db_connection import get_db_connection
 
 edit_subscription_plans_bp = Blueprint(
     "edit_subscription_plans_bp",
@@ -18,7 +19,25 @@ def edit_subscription_plans_page():
         "profileImage": session.get("profileImage")
     }
 
+    selected_plan_id = request.args.get("planID", 8, type=int)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM SubscriptionPlan
+        WHERE planID = %s
+        LIMIT 1
+    """, (selected_plan_id,))
+    plan = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
     return render_template(
         "EditSubscriptionPlans.html",
-        admin=admin
+        admin=admin,
+        plan=plan,
+        selected_plan_id=selected_plan_id
     )
