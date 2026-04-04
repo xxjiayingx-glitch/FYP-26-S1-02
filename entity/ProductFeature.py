@@ -11,7 +11,12 @@ class ProductFeature:
         SELECT featureID, featureName, featureDescription, featureImage
         FROM ProductFeature
         WHERE featureStatus = 'Active'
-        ORDER BY created_at DESC
+        ORDER BY
+            CASE
+                WHEN featureName = 'AI Checker' THEN 0
+                ELSE 1
+            END,
+            featureID ASC
         LIMIT %s OFFSET %s
         """
 
@@ -19,5 +24,4 @@ class ProductFeature:
         features = cursor.fetchall()
 
         conn.close()
-
         return features
