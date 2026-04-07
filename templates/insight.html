@@ -5,139 +5,364 @@
 {% block content %}
 
 <style>
-/* Container & typography */
 .container {
-    max-width: 1000px;
-    margin: 40px auto;
-    font-family: Arial, sans-serif;
+    max-width: 1100px;
+    margin: 36px auto 50px;
     padding: 20px;
-}
-h2 {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #2c3e50;
-}
-h3 {
-    color: #34495e;
-    margin-bottom: 15px;
+    font-family: Arial, sans-serif;
 }
 
-/* Flash messages */
+.page-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.page-header h2 {
+    margin: 0 0 8px;
+    color: #223b63;
+    font-size: 34px;
+    font-weight: 800;
+}
+
+.page-header p {
+    margin: 0;
+    color: #6f7f96;
+    font-size: 15px;
+}
+
 .flash-message {
-    padding: 10px 15px;
+    padding: 12px 16px;
     margin-bottom: 15px;
-    border-radius: 5px;
+    border-radius: 10px;
     font-weight: bold;
 }
 .flash-message.success { background: #d4edda; color: #155724; }
 .flash-message.error { background: #f8d7da; color: #721c24; }
 .flash-message.warning { background: #fff3cd; color: #856404; }
 
-/* Article selection */
 .article-select {
+    margin-bottom: 26px;
     text-align: center;
-    margin-bottom: 30px;
 }
+
+.article-select label {
+    display: block;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    font-size: 15px;
+    font-weight: 700;
+}
+
 .article-select select {
-    padding: 10px 15px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 760px;
+    padding: 13px 15px;
+    border-radius: 14px;
+    border: 1px solid #d8e1ef;
+    background: #fff;
+    font-size: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    outline: none;
 }
 
-/* Section boxes */
 .section {
-    margin-bottom: 40px;
+    margin-bottom: 24px;
 }
+
 .box {
-    background: #f9f9f9;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid #e6edf8;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 28px rgba(35, 63, 117, 0.08);
+}
+
+.box h3 {
+    margin: 0 0 18px;
+    color: #243b63;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.metric-card {
+    background: #f4f8ff;
+    border: 1px solid #dce7fb;
+    border-radius: 16px;
+    padding: 18px;
     text-align: center;
 }
 
-/* Performance table */
-.performance-table {
-    margin: 0 auto;
-    border-collapse: collapse;
-    width: 60%;
-    font-size: 16px;
-}
-.performance-table th, .performance-table td {
-    padding: 12px 20px;
-    border: 1px solid #ccc;
-}
-.performance-table th {
-    background: #4c7bd9;
-    color: #fff;
-}
-.performance-table td {
-    background: #fff;
+.metric-label {
+    color: #6b7b93;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
 }
 
-/* Credibility progress bar */
-.progress-container {
-    background: #e0e0e0;
-    border-radius: 5px;
-    width: 100%;
-    height: 28px;
-    margin: 12px 0;
-    overflow: hidden;
+.metric-value {
+    color: #2d4f8f;
+    font-size: 28px;
+    font-weight: 800;
 }
+
+.score-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.score-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #26384d;
+}
+
+.score-badge {
+    display: inline-block;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid #d8e3f8;
+    background: #eef4ff;
+    color: #2d4f8f;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.progress-container {
+    width: 100%;
+    height: 34px;
+    background: #e6ebf3;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+}
+
 .progress-bar {
     height: 100%;
-    color: white;
-    text-align: center;
-    line-height: 28px;
-    font-weight: bold;
-    transition: width 0.5s ease, background 0.5s ease;
     width: 0;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 34px;
+    text-align: center;
+    transition: width 0.6s ease, background 0.4s ease;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
 }
 
-/* Buttons */
-.actions {
-    margin-top: 20px;
+.credibility-helper {
+    background: #f8fbff;
+    border: 1px solid #dfe8f7;
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: #495a72;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.breakdown-card {
+    background: #fcfdff;
+    border: 1px solid #e5ecf7;
+    border-radius: 14px;
+    padding: 16px;
     text-align: center;
 }
+
+.breakdown-title {
+    font-size: 13px;
+    color: #70809a;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.breakdown-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #25447c;
+}
+
+.review-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.review-card {
+    background: #ffffff;
+    border: 1px solid #e3eaf5;
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.review-card h4 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #233a61;
+}
+
+.review-card.summary {
+    border-left: 6px solid #4c7bd9;
+    background: #f7faff;
+}
+
+.review-card.analytics {
+    border-left: 6px solid #7b61ff;
+    background: #faf8ff;
+}
+
+.review-card.strengths {
+    border-left: 6px solid #2ecc71;
+    background: #f4fdf7;
+}
+
+.review-card.issues {
+    border-left: 6px solid #e74c3c;
+    background: #fff6f5;
+}
+
+.review-card.suggestions {
+    border-left: 6px solid #f1c40f;
+    background: #fffdf4;
+}
+
+.review-card.credibility {
+    border-left: 6px solid #16a085;
+    background: #f3fcfa;
+}
+
+.review-content {
+    white-space: pre-wrap;
+    color: #314256;
+    line-height: 1.7;
+    font-size: 14px;
+    margin: 0;
+}
+
+.tag-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    display: inline-block;
+    background: #eef4ff;
+    color: #355a9a;
+    border: 1px solid #d9e6ff;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.actions {
+    margin-top: 6px;
+    text-align: center;
+}
+
 .btn {
-    padding: 12px 25px;
-    margin: 8px;
-    background: #4c7bd9;
-    color: white;
-    border-radius: 5px;
+    display: inline-block;
+    padding: 12px 24px;
+    margin: 8px 6px;
+    border-radius: 12px;
     text-decoration: none;
+    color: white;
+    font-weight: 800;
+    background: linear-gradient(135deg, #4c7bd9, #355db5);
+    box-shadow: 0 8px 18px rgba(76, 123, 217, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .btn:hover {
-    background: #355db5;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(76, 123, 217, 0.28);
 }
 
-/* AI Review text min-height */
-#review-text {
-    min-height: 50px;
+#review-loading {
+    display: none;
+    text-align: center;
+    padding: 14px 0 0;
+    color: #667892;
+    font-size: 14px;
+    font-weight: 700;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .performance-table {
-        width: 90%;
-        font-size: 14px;
+.spinner {
+    margin: 0 auto 10px;
+    width: 28px;
+    height: 28px;
+    border: 4px solid #e5ebf6;
+    border-top: 4px solid #4c7bd9;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+
+.empty-review {
+    color: #7a8799;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+    .metrics-grid,
+    .breakdown-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
+}
+
+@media (max-width: 640px) {
     .container {
-        padding: 15px;
+        padding: 14px;
     }
+
+    .page-header h2 {
+        font-size: 28px;
+    }
+
+    .metrics-grid,
+    .breakdown-grid {
+        grid-template-columns: 1fr;
+    }
+
     .btn {
-        padding: 10px 20px;
-        font-size: 14px;
+        width: 100%;
+        max-width: 240px;
     }
 }
 </style>
 
 <div class="container">
 
-    <h2>Article Insights</h2>
+    <div class="page-header">
+        <h2>Article Insights</h2>
+        <p>Review article performance, credibility, and AI-driven writing feedback in one place.</p>
+    </div>
 
-    <!-- Flash Messages -->
     <div id="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -148,9 +373,8 @@ h3 {
         {% endwith %}
     </div>
 
-    <!-- Article Selection -->
     <form method="GET" action="{{ url_for('insight') }}" class="article-select">
-        <label><b>Select Article:</b></label>
+        <label>Select Article:</label>
         <select name="article_id" onchange="this.form.submit()">
             <option>Select your Article</option>
             {% for article in articles %}
@@ -162,28 +386,58 @@ h3 {
     </form>
 
     {% if selected_article %}
-    <!-- Overview Performance -->
+
     <div class="section">
         <div class="box">
-            <h3>Overview Performance</h3>
-            <table class="performance-table">
-                <tr><th>Views</th><th>Likes</th></tr>
-                <tr>
-                    <td>{{ analytics.views | default(0) }}</td>
-                    <td>{{ analytics.likes | default(0) }}</td>
-                </tr>
-            </table>
+            <h3>📊 Overview Performance</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Views</div>
+                    <div class="metric-value">{{ analytics.views | default(0) }}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Likes</div>
+                    <div class="metric-value">{{ analytics.likes | default(0) }}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Article ID</div>
+                    <div class="metric-value">{{ selected_article.articleID }}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Status</div>
+                    <div class="metric-value" style="font-size:18px;">
+                        {% if selected_article.credibilityScore | default(0) > 50 %}
+                            Better
+                        {% else %}
+                            Low
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Credibility Analysis -->
     <div class="section">
         <div class="box">
-            <h3>Credibility Analysis</h3>
+            <h3>🧠 Credibility Analysis</h3>
 
             {% set credibility = selected_article.credibilityScore | default(0) %}
+            {% set ai_fact_score = selected_article.aiFactCheckScore | default(0) %}
+            {% set views = analytics.views | default(0) %}
+            {% set likes = analytics.likes | default(0) %}
+            {% if views >= 10 %}
+                {% set engagement_score = ((likes / views) * 100) %}
+                {% if engagement_score > 100 %}
+                    {% set engagement_score = 100 %}
+                {% endif %}
+            {% else %}
+                {% set engagement_score = 0 %}
+            {% endif %}
 
-            <p><b>Credibility Score:</b> {{ credibility }}%</p>
+            <div class="score-header">
+                <div class="score-title">Credibility Score</div>
+                <div class="score-badge">{{ credibility }}%</div>
+            </div>
 
             <div class="progress-container">
                 <div class="progress-bar" id="credibility-bar" data-score="{{ credibility }}">
@@ -191,80 +445,264 @@ h3 {
                 </div>
             </div>
 
-            <p><b>How calculated:</b> AI Fact Check Score (50%) + Engagement Score (50%)</p>
-            <p><b>Ranges:</b> 0–50% (Low Credibility), 51–80% (Moderate), 81–100% (High Credibility)</p>
+            <div class="credibility-helper">
+                <strong>How calculated:</strong> AI Fact Check Score (50%) + Engagement Score (50%)<br>
+                <strong>Bar color rule:</strong> 0–50% = red, above 50% = green<br>
+                <strong>Goal:</strong> Improve evidence, article quality, and user engagement to raise credibility.
+            </div>
+
+            <div class="breakdown-grid">
+                <div class="breakdown-card">
+                    <div class="breakdown-title">AI Fact Check</div>
+                    <div class="breakdown-value">{{ ai_fact_score }}%</div>
+                </div>
+                <div class="breakdown-card">
+                    <div class="breakdown-title">Engagement Score</div>
+                    <div class="breakdown-value">{{ engagement_score | round(1) }}%</div>
+                </div>
+                <div class="breakdown-card">
+                    <div class="breakdown-title">Overall Result</div>
+                    <div class="breakdown-value">
+                        {% if credibility > 50 %}
+                            Good
+                        {% else %}
+                            Low
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- AI Review -->
     <div class="section">
         <div class="box">
-            <h3>Priority AI Article Review</h3>
-            <pre id="review-text" style="white-space: pre-wrap; font-family: Arial, sans-serif; text-align: left;">Loading AI summary...</pre>        </div>
+            <h3>✨ Priority AI Article Review</h3>
+
+            <div id="review-loading">
+                <div class="spinner"></div>
+                Generating AI review...
+            </div>
+
+            <div class="review-wrapper" id="review-wrapper">
+                <div class="review-card summary">
+                    <h4>📌 Summary</h4>
+                    <pre class="review-content" id="summary-content">Waiting for AI review...</pre>
+                </div>
+
+                <div class="review-card analytics">
+                    <h4>📈 Content Analytics</h4>
+                    <div class="tag-list" id="analytics-content">
+                        <span class="tag">Waiting for analysis...</span>
+                    </div>
+                </div>
+
+                <div class="review-card strengths">
+                    <h4>✅ Strengths</h4>
+                    <pre class="review-content" id="strengths-content">Waiting for AI review...</pre>
+                </div>
+
+                <div class="review-card issues">
+                    <h4>⚠️ Issues Found</h4>
+                    <pre class="review-content" id="issues-content">Waiting for AI review...</pre>
+                </div>
+
+                <div class="review-card suggestions">
+                    <h4>💡 Suggestions to Improve</h4>
+                    <pre class="review-content" id="suggestions-content">Waiting for AI review...</pre>
+                </div>
+
+                <div class="review-card credibility">
+                    <h4>🔍 Credibility Explanation</h4>
+                    <pre class="review-content" id="credibility-content">Waiting for AI review...</pre>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Actions -->
     <div class="section">
         <div class="actions">
             <a href="/article/{{ selected_article.articleID }}" class="btn">View Article</a>
             <a href="/edit_article/{{ selected_article.articleID }}" class="btn">Edit Article</a>
         </div>
     </div>
-    {% endif %}
 
+    {% endif %}
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-
     const select = document.querySelector("select[name='article_id']");
-    const reviewText = document.getElementById("review-text");
     const credibilityBar = document.getElementById("credibility-bar");
 
-    function fetchAIReview(articleId) {
-
-        if (!articleId || articleId === "Select your Article") {
-            reviewText.textContent = "No article selected.";
-            return;
-        }
-
-        reviewText.textContent = "Generating AI summary...";
-
-        fetch(`/generate_ai_review_ajax/${articleId}`)
-        .then(res => res.json())
-        .then(data => {
-
-            if (data.success) {
-                reviewText.textContent = data.review;
-            } else {
-                reviewText.textContent = "Error: " + data.message;
-            }
-
-        })
-        .catch(err => {
-            reviewText.textContent = "Error calling AI review API.";
-            console.error(err);
-        });
-    }
+    const reviewLoading = document.getElementById("review-loading");
+    const summaryContent = document.getElementById("summary-content");
+    const analyticsContent = document.getElementById("analytics-content");
+    const strengthsContent = document.getElementById("strengths-content");
+    const issuesContent = document.getElementById("issues-content");
+    const suggestionsContent = document.getElementById("suggestions-content");
+    const credibilityContent = document.getElementById("credibility-content");
 
     function setCredibilityColor() {
-
         if (!credibilityBar) return;
 
         const score = parseFloat(credibilityBar.dataset.score) || 0;
-
         credibilityBar.style.width = score + "%";
-        credibilityBar.textContent = score + "%";
 
         if (score <= 50) {
-            credibilityBar.style.background = "#e74c3c"; // red
+            credibilityBar.style.background = "linear-gradient(135deg, #e74c3c, #d63031)";
+            credibilityBar.textContent = score + "% (Low)";
+        } else {
+            credibilityBar.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+            credibilityBar.textContent = score + "% (Good)";
         }
-        else if (score <= 80) {
-            credibilityBar.style.background = "#f1c40f"; // yellow
+    }
+
+    function setLoadingState(isLoading) {
+        if (!reviewLoading) return;
+        reviewLoading.style.display = isLoading ? "block" : "none";
+    }
+
+    function safeSetText(el, text) {
+        if (el) el.textContent = text || "No information available.";
+    }
+
+    function setAnalyticsTags(lines) {
+        if (!analyticsContent) return;
+
+        analyticsContent.innerHTML = "";
+
+        if (!lines || lines.length === 0) {
+            analyticsContent.innerHTML = '<span class="tag">No analytics available</span>';
+            return;
         }
-        else {
-            credibilityBar.style.background = "#2ecc71"; // green
+
+        lines.forEach(line => {
+            const clean = line.replace(/^- /, "").trim();
+            if (!clean) return;
+
+            const span = document.createElement("span");
+            span.className = "tag";
+            span.textContent = clean;
+            analyticsContent.appendChild(span);
+        });
+    }
+
+    function extractSection(text, startLabel, endLabels) {
+        const startIndex = text.indexOf(startLabel);
+        if (startIndex === -1) return "";
+
+        let sectionText = text.substring(startIndex + startLabel.length).trim();
+
+        let nearestEnd = sectionText.length;
+
+        endLabels.forEach(label => {
+            const idx = sectionText.indexOf(label);
+            if (idx !== -1 && idx < nearestEnd) {
+                nearestEnd = idx;
+            }
+        });
+
+        return sectionText.substring(0, nearestEnd).trim();
+    }
+
+    function parseAndDisplayReview(reviewText) {
+        if (!reviewText) {
+            safeSetText(summaryContent, "No AI review available.");
+            safeSetText(strengthsContent, "No AI review available.");
+            safeSetText(issuesContent, "No AI review available.");
+            safeSetText(suggestionsContent, "No AI review available.");
+            safeSetText(credibilityContent, "No AI review available.");
+            setAnalyticsTags([]);
+            return;
         }
+
+        const summary = extractSection(reviewText, "Summary:", [
+            "Content analytics:",
+            "Strengths:",
+            "Issues found:",
+            "Suggestions to improve:",
+            "Credibility explanation:"
+        ]);
+
+        const analytics = extractSection(reviewText, "Content analytics:", [
+            "Strengths:",
+            "Issues found:",
+            "Suggestions to improve:",
+            "Credibility explanation:"
+        ]);
+
+        const strengths = extractSection(reviewText, "Strengths:", [
+            "Issues found:",
+            "Suggestions to improve:",
+            "Credibility explanation:"
+        ]);
+
+        const issues = extractSection(reviewText, "Issues found:", [
+            "Suggestions to improve:",
+            "Credibility explanation:"
+        ]);
+
+        const suggestions = extractSection(reviewText, "Suggestions to improve:", [
+            "Credibility explanation:"
+        ]);
+
+        const credibility = extractSection(reviewText, "Credibility explanation:", []);
+
+        safeSetText(summaryContent, summary || "No summary available.");
+        safeSetText(strengthsContent, strengths || "No strengths available.");
+        safeSetText(issuesContent, issues || "No issues available.");
+        safeSetText(suggestionsContent, suggestions || "No suggestions available.");
+        safeSetText(credibilityContent, credibility || "No credibility explanation available.");
+
+        const analyticsLines = analytics
+            ? analytics.split("\n").map(line => line.trim()).filter(Boolean)
+            : [];
+        setAnalyticsTags(analyticsLines);
+    }
+
+    function fetchAIReview(articleId) {
+        if (!articleId || articleId === "Select your Article") {
+            safeSetText(summaryContent, "No article selected.");
+            safeSetText(strengthsContent, "No article selected.");
+            safeSetText(issuesContent, "No article selected.");
+            safeSetText(suggestionsContent, "No article selected.");
+            safeSetText(credibilityContent, "No article selected.");
+            setAnalyticsTags([]);
+            return;
+        }
+
+        setLoadingState(true);
+
+        fetch(`/generate_ai_review_ajax/${articleId}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log("AI RESPONSE:", data);
+
+                if (data.success) {
+                    parseAndDisplayReview(data.review);
+                } else {
+                    const msg = "AI review unavailable: " + data.message;
+                    safeSetText(summaryContent, msg);
+                    safeSetText(strengthsContent, msg);
+                    safeSetText(issuesContent, msg);
+                    safeSetText(suggestionsContent, msg);
+                    safeSetText(credibilityContent, msg);
+                    setAnalyticsTags([]);
+                }
+            })
+            .catch(err => {
+                console.error("FETCH ERROR:", err);
+                const msg = "Error calling AI review API.";
+                safeSetText(summaryContent, msg);
+                safeSetText(strengthsContent, msg);
+                safeSetText(issuesContent, msg);
+                safeSetText(suggestionsContent, msg);
+                safeSetText(credibilityContent, msg);
+                setAnalyticsTags([]);
+            })
+            .finally(() => {
+                setLoadingState(false);
+            });
     }
 
     if (select) {
@@ -272,7 +710,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     setCredibilityColor();
-
 });
 </script>
 

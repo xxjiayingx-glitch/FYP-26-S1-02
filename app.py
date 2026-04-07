@@ -614,41 +614,237 @@ def generate_ai_review_ajax(article_id):
         return jsonify({"success": False, "message": "Article not found"})
 
     try:
-        title = article.get("articleTitle", "")
-        content = article.get("content", "").strip()
+        import re
+        from collections import Counter
+        from statistics import mean
+        from sumy.parsers.plaintext import PlaintextParser
+        from sumy.nlp.tokenizers import Tokenizer
+        from sumy.summarizers.lsa import LsaSummarizer
+        import textstat
+        from rake_nltk import Rake
+
+        title = (article.get("articleTitle") or "").strip()
+        content = (article.get("content") or "").strip()
+        ai_score = float(article.get("aiFactCheckScore", 0) or 0)
+        views = int(article.get("views", 0) or 0)
+        likes = int(article.get("likes", 0) or 0)
 
         if not content:
             return jsonify({"success": False, "message": "No article content found"})
 
-        # -------- Summary --------
-        sentences = [s.strip() for s in content.replace("\n", " ").split(".") if s.strip()]
-        short_summary = ". ".join(sentences[:2])
-        if short_summary and not short_summary.endswith("."):
-            short_summary += "."
+        # -----------------------------
+        # Basic text preparation
+        # -----------------------------
+        clean_content = re.sub(r"\s+", " ", content).strip()
+        paragraphs = [p.strip() for p in content.split("\n") if p.strip()]
+        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', clean_content) if s.strip()]
+        words = re.findall(r"\b[a-zA-Z][a-zA-Z'-]*\b", clean_content.lower())
+        word_count = len(words)
+        sentence_count = max(len(sentences), 1)
+        avg_sentence_len = round(word_count / sentence_count, 1)
 
-        # -------- Improvement Suggestions --------
+        # -----------------------------
+        # Summary
+        # -----------------------------
+        parser = PlaintextParser.from_string(content, Tokenizer("english"))
+        summarizer = LsaSummarizer()
+        summary_sentences = summarizer(parser.document, 2)
+        summary = " ".join(str(s) for s in summary_sentences).strip()
+
+        if not summary:
+            summary = " ".join(sentences[:2])
+
+        # -----------------------------
+        # Readability
+        # -----------------------------
+        readability = round(textstat.flesch_reading_ease(clean_content), 1)
+        grade_level = round(textstat.flesch_kincaid_grade(clean_content), 1)
+
+        # -----------------------------
+        # Keyword extraction
+        # -----------------------------
+        rake = Rake()
+        rake.extract_keywords_from_text(clean_content)
+        keywords = rake.get_ranked_phrases()[:5]
+        keyword_text = ", ".join(keywords) if keywords else "No strong keywords detected"
+
+        # -----------------------------
+        # Evidence / source signals
+        # -----------------------------
+        evidence_terms = [
+            "according to", "reported", "source", "sources", "data", "study", "studies",
+            "research", "survey", "official", "ministry", "agency", "statistic", "statistics"
+        ]
+        evidence_hits = [term for term in evidence_terms if term in clean_content.lower()]
+        evidence_score = min(len(evidence_hits) * 15, 100)
+
+        # -----------------------------
+        # Repetition check
+        # -----------------------------
+        common_words = [w for w in words if len(w) > 4]
+        repeated = [w for w, c in Counter(common_words).most_common(5) if c >= 4]
+        repetition_flag = len(repeated) > 0
+
+        # -----------------------------
+        # Title quality check
+        # -----------------------------
+        title_words = title.split()
+        title_score = 100
+
+        if len(title_words) < 5:
+            title_score -= 25
+        if len(title_words) > 16:
+            title_score -= 15
+        if not any(ch.isalpha() for ch in title):
+            title_score -= 20
+        if ":" in title or "-" in title:
+            title_score += 5
+
+        title_score = max(min(title_score, 100), 0)
+
+        # -----------------------------
+        # Structure check
+        # -----------------------------
+        structure_score = 100
+        if len(paragraphs) < 2:
+            structure_score -= 25
+        if sentence_count < 3:
+            structure_score -= 20
+        if avg_sentence_len > 30:
+            structure_score -= 20
+        if avg_sentence_len < 8:
+            structure_score -= 10
+
+        structure_score = max(min(structure_score, 100), 0)
+
+        # -----------------------------
+        # Tone / professionalism signals
+        # -----------------------------
+        informal_terms = ["very very", "super", "damn", "omg", "lol", "u ", "ur ", "wanna", "gonna"]
+        tone_score = 100
+        if any(term in clean_content.lower() for term in informal_terms):
+            tone_score -= 25
+        if "!" in clean_content:
+            tone_score -= 10
+        tone_score = max(min(tone_score, 100), 0)
+
+        # -----------------------------
+        # Local AI quality score
+        # -----------------------------
+        readability_score = 100
+        if readability < 30:
+            readability_score = 55
+        elif readability < 50:
+            readability_score = 75
+        elif readability <= 80:
+            readability_score = 95
+        else:
+            readability_score = 80
+
+        local_quality_score = round(
+            (readability_score * 0.20) +
+            (evidence_score * 0.25) +
+            (title_score * 0.15) +
+            (structure_score * 0.20) +
+            (tone_score * 0.20),
+            1
+        )
+
+        # -----------------------------
+        # Strengths
+        # -----------------------------
+        strengths = []
+
+        if word_count >= 150:
+            strengths.append("The article contains a useful amount of detail.")
+        if evidence_hits:
+            strengths.append("The content includes evidence-related language that improves credibility.")
+        if 50 <= readability <= 80:
+            strengths.append("The article is reasonably readable for general audiences.")
+        if len(paragraphs) >= 2:
+            strengths.append("The article has acceptable paragraph structure.")
+        if title_score >= 80:
+            strengths.append("The headline is reasonably clear and focused.")
+
+        if not strengths:
+            strengths.append("The article has a clear topic and a usable starting structure.")
+
+        # -----------------------------
+        # Issues found
+        # -----------------------------
+        issues = []
+
+        if word_count < 120:
+            issues.append("The article is short and may need more context or supporting detail.")
+        if not evidence_hits:
+            issues.append("There are no strong source or evidence signals in the writing.")
+        if len(paragraphs) < 2:
+            issues.append("The content is not well separated into paragraphs.")
+        if avg_sentence_len > 30:
+            issues.append("Some sentences may be too long and harder to read.")
+        if avg_sentence_len < 8:
+            issues.append("The writing may be too fragmented and abrupt.")
+        if repetition_flag:
+            issues.append(f"Some words appear repeatedly, such as: {', '.join(repeated[:3])}.")
+        if title_score < 70:
+            issues.append("The headline could be more specific or informative.")
+
+        if not issues:
+            issues.append("No major structural issues were detected.")
+
+        # -----------------------------
+        # Suggestions
+        # -----------------------------
         suggestions = []
 
-        if len(content) < 150:
-            suggestions.append("Add more supporting details to make the article more informative.")
-
-        if len(sentences) < 3:
-            suggestions.append("Break the content into more clear sentences or paragraphs for better readability.")
-
-        if not any(word in content.lower() for word in ["according to", "reported", "source", "data", "study"]):
-            suggestions.append("Include supporting sources or evidence to strengthen credibility.")
-
-        if len(title.split()) < 4:
-            suggestions.append("Consider making the title slightly more specific and descriptive.")
+        if word_count < 120:
+            suggestions.append("Add more background details, explanation, or examples.")
+        if not evidence_hits:
+            suggestions.append("Include facts, sources, quoted information, or statistics to strengthen trust.")
+        if len(paragraphs) < 2:
+            suggestions.append("Break the article into smaller paragraphs to improve readability.")
+        if avg_sentence_len > 30:
+            suggestions.append("Split long sentences into shorter ones for clarity.")
+        if repetition_flag:
+            suggestions.append("Replace repeated words with more varied vocabulary.")
+        if title_score < 70:
+            suggestions.append("Rewrite the title so it is more specific and descriptive.")
+        if readability < 40:
+            suggestions.append("Use simpler wording to make the article easier for readers to understand.")
+        elif readability > 85:
+            suggestions.append("Add slightly more professional detail so the article feels stronger and more informative.")
 
         if not suggestions:
-            suggestions.append("The content is clear overall. You can further improve it by adding stronger supporting evidence or examples.")
+            suggestions.append("The article is fairly balanced overall. Focus on adding stronger supporting evidence for even better credibility.")
 
+        # -----------------------------
+        # Credibility explanation
+        # -----------------------------
+        engagement_score = 0 if views < 10 else min((likes / views) * 100, 100)
+        credibility_explanation = (
+            f"The article currently has an AI fact-check score of {ai_score}/100. "
+            f"The local content quality score is {local_quality_score}/100, based on readability, evidence signals, title quality, structure, and tone. "
+            f"Engagement is based on {views} views and {likes} likes, giving an engagement score of {round(engagement_score, 1)}/100. "
+            f"Credibility can be improved most by strengthening sources, clarity, and specificity."
+        )
+
+        # -----------------------------
+        # Final review output
+        # -----------------------------
         review = (
-            f"Summary:\n"
-            f"{short_summary}\n\n"
-            f"Suggestions to improve:\n- " +
-            "\n- ".join(suggestions)
+            f"Summary:\n{summary}\n\n"
+            f"Content analytics:\n"
+            f"- Word count: {word_count}\n"
+            f"- Sentence count: {sentence_count}\n"
+            f"- Average sentence length: {avg_sentence_len} words\n"
+            f"- Readability score: {readability}\n"
+            f"- Estimated grade level: {grade_level}\n"
+            f"- Top keywords: {keyword_text}\n"
+            f"- Local quality score: {local_quality_score}/100\n\n"
+            f"Strengths:\n- " + "\n- ".join(strengths) + "\n\n"
+            f"Issues found:\n- " + "\n- ".join(issues) + "\n\n"
+            f"Suggestions to improve:\n- " + "\n- ".join(suggestions) + "\n\n"
+            f"Credibility explanation:\n{credibility_explanation}"
         )
 
         article_controller.save_ai_review(article_id, review)
@@ -656,8 +852,9 @@ def generate_ai_review_ajax(article_id):
         return jsonify({"success": True, "review": review})
 
     except Exception as e:
+        print("LOCAL AI REVIEW ERROR:", str(e))
         return jsonify({"success": False, "message": str(e)})
-
+    
 @app.route("/logout")
 def logout():
     user_id = session.get("userID")
