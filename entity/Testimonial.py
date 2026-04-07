@@ -54,7 +54,7 @@ class TestimonialEntity:
             SELECT u.username, t.rating, t.comment, t.created_at
             FROM UserAccount u
             JOIN Testimonial t ON u.userID = t.userID
-            WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 180 DAY)
+            WHERE t.rating >= 4 AND t.semanticscore >= 0 AND t.created_at >= DATE_SUB(NOW(), INTERVAL 180 DAY)
             ORDER BY t.created_at DESC
             LIMIT %s OFFSET %s
         """, (limit, offset))
