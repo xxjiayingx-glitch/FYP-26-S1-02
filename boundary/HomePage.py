@@ -79,7 +79,7 @@ def load_more_articles():
 def load_more_testimonials():
 
     offset = int(request.args.get("offset", 4))  # default 3
-    limit = 4
+    limit = 8
 
     testimonials = testimonialCTL.getHomeTestimonials(offset=offset, limit=limit + 1)
 
