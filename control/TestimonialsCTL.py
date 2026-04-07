@@ -34,7 +34,7 @@ class TestimonialController:
 
     @staticmethod
     def getHomeTestimonials(offset, limit):
-        testimonials = TestimonialEntity.getHomeTestimonial(offset, limit)
+        testimonials = TestimonialEntity.getHomeTestimonial(offset, limit*3)
 
         filtered_testimonials = []
         for t in testimonials:
@@ -48,5 +48,9 @@ class TestimonialController:
             if rating >= 4 and semantic_score >= 0:
                 t["stars"] = "★" * rating + "☆" * (5 - rating)
                 filtered_testimonials.append(t)
+
+            # Stop once we have enough
+            if len(filtered_testimonials) == limit:
+                break
 
         return filtered_testimonials
