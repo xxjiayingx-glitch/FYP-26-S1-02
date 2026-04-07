@@ -1,0 +1,546 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Report Category{% endblock %}
+{% block categories_active %}active{% endblock %}
+
+{% block content %}
+<style>
+/* ================= PAGE ================= */
+.report-page{
+    width:100%;
+    box-sizing:border-box;
+}
+
+.report-page .page-title{
+    font-size:34px;
+    font-weight:800;
+    color:#111;
+    margin-bottom:26px;
+}
+
+/* ================= LAYOUT ================= */
+.category-layout{
+    display:flex;
+    gap:30px;
+    width:100%;
+    box-sizing:border-box;
+    align-items:flex-start;
+}
+
+/* ================= TABLE CARD ================= */
+.category-table-card{
+    flex:1;
+    background:#fff;
+    border-radius:24px;
+    padding:30px 34px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.06);
+}
+
+/* ================= FORM CARD ================= */
+.category-form-card{
+    width:340px;
+    background:#fff;
+    border-radius:24px;
+    padding:34px 30px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.06);
+}
+
+/* ================= TABLE ================= */
+.modern-table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+.modern-table thead th{
+    background:#f4f5ff;
+    color:#111;
+    text-align:left;
+    padding:16px 14px;
+    font-size:18px;
+    font-weight:800;
+}
+
+.modern-table tbody td{
+    padding:24px 14px;
+    border-bottom:1px solid #eeeeee;
+    vertical-align:middle;
+    font-size:16px;
+    color:#222;
+}
+
+.modern-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+/* ================= COLUMN WIDTH ================= */
+.modern-table th:nth-child(1),
+.modern-table td:nth-child(1){
+    width:10%;
+    text-align:left;
+}
+
+.modern-table th:nth-child(2),
+.modern-table td:nth-child(2){
+    width:43%;
+}
+
+.modern-table th:nth-child(3),
+.modern-table td:nth-child(3){
+    width:18%;
+}
+
+.modern-table th:nth-child(4),
+.modern-table td:nth-child(4){
+    width:29%;
+}
+
+/* ================= CONTENT STYLE ================= */
+.id-text{
+    font-size:18px;
+    font-weight:700;
+    color:#222;
+}
+
+.name-box{
+    display:inline-flex;
+    align-items:center;
+    min-width:220px;
+    max-width:100%;
+    padding:14px 18px;
+    background:#f4f4f6;
+    border-radius:16px;
+    font-size:16px;
+    font-weight:700;
+    color:#555;
+    line-height:1.2;
+}
+
+.status-badge{
+    display:inline-block;
+    padding:8px 16px;
+    border-radius:999px;
+    font-size:14px;
+    font-weight:800;
+    line-height:1;
+    white-space:nowrap;
+    text-transform:capitalize;
+}
+
+.status-badge.active{
+    background:#8ed36f;
+    color:#111;
+}
+
+.status-badge.inactive{
+    background:#e5e7eb;
+    color:#444;
+}
+
+/* ================= ACTION BUTTONS ================= */
+.action-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:nowrap;
+}
+
+.edit-btn,
+.delete-btn{
+    border:none;
+    border-radius:999px;
+    padding:10px 18px;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+    line-height:1;
+    min-width:78px;
+    transition:0.18s ease;
+}
+
+.edit-btn{
+    background:#e5e5e5;
+    color:#222;
+}
+
+.edit-btn:hover{
+    background:#d9d9d9;
+}
+
+.delete-btn{
+    background:#ff5c5c;
+    color:#fff;
+}
+
+.delete-btn:hover{
+    background:#ef4444;
+}
+
+/* ================= FORM ================= */
+.form-title{
+    font-size:30px;
+    font-weight:800;
+    color:#111;
+    line-height:1.15;
+    margin-bottom:28px;
+}
+
+.category-input,
+.modal-input,
+.modal-select{
+    width:100%;
+    border:none;
+    outline:none;
+    background:#f4f4f6;
+    border-radius:18px;
+    padding:17px 18px;
+    font-size:16px;
+    color:#333;
+    box-sizing:border-box;
+}
+
+.category-input{
+    margin-bottom:22px;
+}
+
+.category-input::placeholder,
+.modal-input::placeholder{
+    color:#9a9a9a;
+    font-weight:500;
+}
+
+.add-btn{
+    width:100%;
+    border:none;
+    border-radius:18px;
+    padding:16px 18px;
+    background:linear-gradient(90deg, #5a72f1, #4f6df5);
+    color:#fff;
+    font-size:18px;
+    font-weight:800;
+    cursor:pointer;
+    transition:0.18s ease;
+}
+
+.add-btn:hover{
+    transform:translateY(-1px);
+    opacity:0.96;
+}
+
+/* ================= EMPTY ================= */
+.empty-text{
+    text-align:center;
+    padding:44px 12px;
+    color:#777;
+    font-size:16px;
+}
+
+/* ================= MODAL ================= */
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.35);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:20px;
+}
+
+.modal-overlay.show{
+    display:flex;
+}
+
+.modal-card{
+    width:100%;
+    max-width:460px;
+    background:#fff;
+    border-radius:24px;
+    padding:30px 28px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.18);
+    animation:popIn 0.18s ease;
+}
+
+@keyframes popIn{
+    from{
+        opacity:0;
+        transform:translateY(8px) scale(0.98);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
+}
+
+.modal-title{
+    font-size:28px;
+    font-weight:800;
+    color:#111;
+    margin-bottom:10px;
+}
+
+.modal-subtitle{
+    font-size:15px;
+    color:#666;
+    margin-bottom:22px;
+    line-height:1.5;
+}
+
+.modal-row{
+    margin-bottom:16px;
+}
+
+.modal-label{
+    display:block;
+    font-size:15px;
+    font-weight:700;
+    color:#222;
+    margin-bottom:8px;
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    margin-top:24px;
+}
+
+.cancel-btn,
+.save-btn,
+.confirm-delete-btn{
+    border:none;
+    border-radius:14px;
+    padding:13px 18px;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    transition:0.18s ease;
+}
+
+.cancel-btn{
+    background:#ededed;
+    color:#222;
+}
+
+.cancel-btn:hover{
+    background:#dfdfdf;
+}
+
+.save-btn{
+    background:#4f6df5;
+    color:#fff;
+}
+
+.save-btn:hover{
+    background:#405de6;
+}
+
+.confirm-delete-btn{
+    background:#ff5c5c;
+    color:#fff;
+}
+
+.confirm-delete-btn:hover{
+    background:#ef4444;
+}
+
+.delete-highlight{
+    display:inline-block;
+    background:#fff3f3;
+    color:#d93b3b;
+    font-weight:800;
+    padding:4px 10px;
+    border-radius:999px;
+    margin-top:4px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1200px){
+    .category-layout{
+        flex-direction:column;
+    }
+
+    .category-form-card{
+        width:100%;
+    }
+}
+</style>
+
+<div class="report-page">
+    <h1 class="page-title">Report Category Management</h1>
+
+    <div class="category-layout">
+
+        <div class="category-table-card">
+            {% if categories and categories|length > 0 %}
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td class="id-text">
+                            {{ category.reportCategoryID }}
+                        </td>
+
+                        <td>
+                            <span class="name-box">
+                                {{ category.categoryName }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="status-badge {{ category.categoryStatus|lower }}">
+                                {{ category.categoryStatus }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="action-wrap">
+                                <button
+                                    type="button"
+                                    class="edit-btn"
+                                    onclick="openEditModal('{{ category.reportCategoryID }}', '{{ category.categoryName|e }}', '{{ category.categoryStatus|lower }}')"
+                                >
+                                    Edit
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="delete-btn"
+                                    onclick="openDeleteModal('{{ category.reportCategoryID }}', '{{ category.categoryName|e }}')"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-text">No report categories found.</div>
+            {% endif %}
+        </div>
+
+        <div class="category-form-card">
+            <h2 class="form-title">Add New Category</h2>
+
+            <form method="POST" action="{{ url_for('category_reported_page_bp.report_category_page') }}">
+                <input
+                    type="text"
+                    name="categoryName"
+                    class="category-input"
+                    placeholder="Category Name"
+                    required
+                >
+
+                <input type="hidden" name="categoryStatus" value="active">
+
+                <button type="submit" class="add-btn">Add</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+        <h2 class="modal-title">Edit Report Category</h2>
+        <p class="modal-subtitle">Update the report category name and status.</p>
+
+        <form id="editForm" action="#" method="POST">
+            <div class="modal-row">
+                <label class="modal-label">Category ID</label>
+                <input type="text" id="editCategoryId" class="modal-input" readonly>
+            </div>
+
+            <div class="modal-row">
+                <label class="modal-label">Category Name</label>
+                <input type="text" id="editCategoryName" name="categoryName" class="modal-input">
+            </div>
+
+            <div class="modal-row">
+                <label class="modal-label">Status</label>
+                <select id="editCategoryStatus" name="categoryStatus" class="modal-select">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="save-btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-card">
+        <h2 class="modal-title">Delete Report Category</h2>
+        <p class="modal-subtitle">
+            Are you sure you want to delete this report category?
+            <br>
+            <span class="delete-highlight" id="deleteCategoryName"></span>
+        </p>
+
+        <form id="deleteForm" action="#" method="POST">
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                <button type="submit" class="confirm-delete-btn">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditModal(id, name, status) {
+    document.getElementById("editCategoryId").value = id;
+    document.getElementById("editCategoryName").value = name;
+    document.getElementById("editCategoryStatus").value = status;
+    document.getElementById("editModal").classList.add("show");
+
+    // backend route placeholder
+    document.getElementById("editForm").action = "/admin/report-category/edit/" + id;
+}
+
+function closeEditModal() {
+    document.getElementById("editModal").classList.remove("show");
+}
+
+function openDeleteModal(id, name) {
+    document.getElementById("deleteCategoryName").textContent = name;
+    document.getElementById("deleteModal").classList.add("show");
+
+    // backend route placeholder
+    document.getElementById("deleteForm").action = "/admin/report-category/delete/" + id;
+}
+
+function closeDeleteModal() {
+    document.getElementById("deleteModal").classList.remove("show");
+}
+
+window.addEventListener("click", function(e) {
+    const editModal = document.getElementById("editModal");
+    const deleteModal = document.getElementById("deleteModal");
+
+    if (e.target === editModal) {
+        closeEditModal();
+    }
+
+    if (e.target === deleteModal) {
+        closeDeleteModal();
+    }
+});
+</script>
+{% endblock %}
