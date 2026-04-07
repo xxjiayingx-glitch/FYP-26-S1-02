@@ -36,3 +36,7 @@ pip install --upgrade torch
 ## IF NEVER RUN THE DATABASE AND WANT TO ADD IN THE NEW FEATURE ##
 ALTER TABLE Article
 ADD COLUMN aiReview TEXT;
+
+## FOR AI Insights ##
+pip install flask pymysql python-dotenv sumy textstat rake-nltk nltk
+python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords')"
