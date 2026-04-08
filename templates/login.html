@@ -133,10 +133,11 @@
 
         .login-card input {
             width: 100%;
-            padding: 16px 4px;
+            padding: 16px 12px;
             border: 1.5px solid #1f3a5f;
             border-radius: 12px;
             font-size: 15px;
+            box-sizing: border-box;
             transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
         }
 
@@ -205,6 +206,47 @@
             text-decoration: underline;
         }
 
+        /* ── Editor Apply Box ── */
+        .editor-apply-box {
+            margin-top: 18px;
+            padding: 14px 16px;
+            background: #f4f8fc;
+            border: 1px solid #d5e3f0;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .editor-apply-box h4 {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            color: #1f3a5f;
+        }
+
+        .editor-apply-box p {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #5a5a5a;
+        }
+
+        .editor-apply-box a {
+            color: #2a5bd7;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .editor-apply-box a:hover {
+            color: #1e3d7a;
+            text-decoration: underline;
+        }
+
+        .editor-note {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #7a7a7a;
+        }
+
         /* ── Responsive ── */
         @media (max-width: 480px) {
             .login-card {
@@ -271,6 +313,16 @@
 
             <div class="signup">
                 Don't have an account? <a href="{{ url_for('register.register') }}">Sign Up</a>
+            </div>
+
+            <div class="editor-apply-box">
+                <h4>Want to become a verified editor?</h4>
+                <p>
+                    Apply as an editor to join our trusted editorial team and submit your expertise
+                    for admin review.
+                </p>
+                <a href="{{ url_for('login.editor_applicant') }}">Apply as Editor</a>
+                <span class="editor-note">Editor access is only granted after admin approval.</span>
             </div>
         </div>
     </div>

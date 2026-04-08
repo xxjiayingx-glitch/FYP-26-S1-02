@@ -857,6 +857,28 @@ def generate_ai_review_ajax(article_id):
         print("LOCAL AI REVIEW ERROR:", str(e))
         return jsonify({"success": False, "message": str(e)})
     
+
+
+
+@app.route("/editor/dashboard")
+def editor_dashboard():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor":
+        return redirect(url_for("login.login"))
+
+    if editor_status != "approved":
+        return redirect(url_for("login.login"))
+
+    return render_template(
+        "editor_dashboard.html",
+        active_page="dashboard"
+    )
+
 @app.route("/logout")
 def logout():
     user_id = session.get("userID")

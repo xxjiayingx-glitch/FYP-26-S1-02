@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Apply as Editor - Daily Scoop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c4def4, #f0f2f5);
+        }
+
+        .page-header {
+            background: #c4def4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            font-weight: 900;
+            font-size: 38px;
+            line-height: 1.1;
+            color: #1f3a5f;
+            text-decoration: none;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: #1f3a5f;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .form-wrapper {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px 40px;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
+            padding: 36px;
+        }
+
+        .form-card h2 {
+            margin-top: 0;
+            color: #1f3a5f;
+            font-size: 32px;
+        }
+
+        .form-card p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .notice-box {
+            background: #f7fbff;
+            border: 1px solid #d4e5f7;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 28px;
+        }
+
+        .notice-box strong {
+            color: #1f3a5f;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f3a5f;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 14px 14px;
+            border: 1.5px solid #b8cde2;
+            border-radius: 10px;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #2a5bd7;
+            box-shadow: 0 0 0 3px rgba(42, 91, 215, 0.12);
+            background: #fcfeff;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .submit-row {
+            margin-top: 28px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary,
+        .btn-primary {
+            padding: 13px 22px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: #edf3f9;
+            color: #1f3a5f;
+            border: 1px solid #c8dced;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #1f5ea8, #2a78d1);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+        }
+
+        .btn-secondary:hover {
+            background: #e4edf7;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 15px;
+            margin: 18px 0;
+        }
+
+        .message.success {
+            color: #28a745;
+        }
+
+        .message.error {
+            color: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-card {
+                padding: 24px;
+            }
+
+            .brand {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page-header">
+        <a href="{{ url_for('home.unreg_home') }}" class="brand">
+            Daily Scoop<br>News System
+        </a>
+
+        <a href="{{ url_for('login.login') }}" class="back-link">← Back to Login</a>
+    </div>
+
+    {% if success %}
+    <p class="message success">{{ success }}</p>
+    {% endif %}
+
+    {% if error %}
+    <p class="message error">{{ error }}</p>
+    {% endif %}
+
+    <div class="form-wrapper">
+        <div class="form-card">
+            <h2>Apply as Editor</h2>
+            <p>
+                Submit your editor application for review. Approved editors will be granted access
+                to the editor dashboard after background verification by the system admin.
+            </p>
+
+            <div class="notice-box">
+                <strong>Important:</strong>
+                This is not a normal user sign-up. Editor access is a verified role and requires admin approval.
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="full_name">Full Name</label>
+                        <input type="text" id="full_name" name="full_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" id="phone" name="phone" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expertise_area">Area of Expertise</label>
+                        <select id="expertise_area" name="expertise_area" required>
+                            <option value="">Select expertise</option>
+                            <option value="Politics">Politics</option>
+                            <option value="War and Conflict">War and Conflict</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Science">Science</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Technology">Technology</option>
+                            <option value="General News">General News</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="years_experience">Years of Experience</label>
+                        <input type="number" id="years_experience" name="years_experience" min="0" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="bio">Short Professional Bio</label>
+                        <textarea id="bio" name="bio" placeholder="Tell us about your editorial experience, credentials, or background." required></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="portfolio_link">Portfolio / LinkedIn / Published Work Link</label>
+                        <input type="url" id="portfolio_link" name="portfolio_link" placeholder="https://">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="supporting_document">Supporting Document</label>
+                        <input type="file" id="supporting_document" name="supporting_document" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
+                    </div>
+                </div>
+
+                <div class="submit-row">
+                    <a href="{{ url_for('login.login') }}" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary">Submit Editor Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

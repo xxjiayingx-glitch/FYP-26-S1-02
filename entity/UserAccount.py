@@ -742,3 +742,46 @@ class UserAccount:
         cursor.close()
         conn.close()
         return user is not None
+    
+    # ==============================
+    # Editor
+    # ==============================
+
+    @staticmethod
+    def create_editor_applicant(
+        username, email, password,
+        first_name, last_name, phone,
+        expertise_area, years_experience,
+        bio, portfolio_link, document_filename
+    ):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        insert_query = """
+            INSERT INTO UserAccount
+            (
+                username, email, pwd,
+                first_name, last_name, phone,
+                userType, accountStatus,
+                editorApprovalStatus,
+                expertiseArea, yearsExperience,
+                editorBio, portfolioLink, supportingDocument,
+                created_at, profileCompleted
+            )
+            VALUES (%s, %s, %s, %s, %s, %s,
+                    'editor', 'inactive',
+                    'pending',
+                    %s, %s, %s, %s, %s,
+                    NOW(), 1)
+        """
+
+        cursor.execute(insert_query, (
+            username, email, password,
+            first_name, last_name, phone,
+            expertise_area, years_experience,
+            bio, portfolio_link, document_filename
+        ))
+
+        conn.commit()
+        cursor.close()
+        conn.close()

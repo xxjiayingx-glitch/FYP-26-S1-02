@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Editor Panel{% endblock %}
+
+    </title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        /* REMOVE ALL UNDERLINES */
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ===== TOP NAVBAR ===== */
+        .topbar {
+            background: #cfe7fb;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 18px;
+            line-height: 1.2;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .user-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .user-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #e3d9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout {
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .logout:hover {
+            background: rgba(0,0,0,0.08);
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 240px;
+            background: #ffffff;
+            border-right: 1px solid #e6e9ef;
+            padding: 20px 15px;
+        }
+
+        .profile-box {
+            background: #f2f4f8;
+            padding: 15px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #e3d9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-name {
+            font-weight: 700;
+        }
+
+        .profile-role {
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* NAV */
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav a {
+            padding: 12px 14px;
+            border-radius: 10px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .nav a:hover {
+            background: #f1f4f8;
+        }
+
+        .nav a.active {
+            background: #e9edf3;
+        }
+
+        .nav i {
+            width: 18px;
+        }
+
+        /* ===== CONTENT ===== */
+        .content {
+            flex: 1;
+            padding: 30px;
+        }
+
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="brand">
+            Daily Scoop News System
+        </div>
+
+        <div class="top-right">
+            <div class="user-box">
+                <div class="user-icon">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+                <span>Hi, {{ session.username }}</span>
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="logout">
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="profile-box">
+                <div class="profile-avatar">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+
+                <div>
+                    <div class="profile-name">{{ session.username }}</div>
+                    <div class="profile-role">Editor</div>
+                </div>
+            </div>
+
+            <div class="nav">
+                <a href="/editor/dashboard"
+                   class="{% if active_page == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+
+                <a href="#"
+                   class="{% if active_page == 'category' %}active{% endif %}">
+                    <i class="fa-solid fa-layer-group"></i> Category Articles
+                </a>
+
+                <a href="#"
+                   class="{% if active_page == 'my_articles' %}active{% endif %}">
+                    <i class="fa-solid fa-pen"></i> My Posted Articles
+                </a>
+
+                <a href="#"
+                   class="{% if active_page == 'approval' %}active{% endif %}">
+                    <i class="fa-solid fa-check"></i> Approval Articles
+                </a>
+
+                <a href="#"
+                   class="{% if active_page == 'profile' %}active{% endif %}">
+                    <i class="fa-solid fa-user-cog"></i> Manage My Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+
+    </div>
+
+</body>
+</html>
