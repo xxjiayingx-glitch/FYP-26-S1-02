@@ -28,7 +28,7 @@
         <aside class="profile-sidebar">
             <div class="sidebar-avatar-wrap">
                 <img
-                    src="{{ url_for('static', filename='uploads/' + (user.profileImage if user.profileImage else 'default.png')) }}"
+                    src="{{ url_for('static', filename='uploads/' + (user.profileImage if user.profileImage else 'default.png')) }}?v={{ user.profileImage }}"
                     alt="Profile Photo"
                     class="sidebar-avatar"
                 >

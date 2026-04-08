@@ -94,7 +94,7 @@ app.register_blueprint(category_reported_page_bp)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 # Upload image
-app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
+app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "uploads")
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 @app.route('/info/<page>')
