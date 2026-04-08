@@ -13,6 +13,31 @@ from flask import (
 from dotenv import load_dotenv
 load_dotenv()
 import os
+import nltk
+
+# --- NLTK Setup for Hosted Environment ---
+NLTK_DATA_DIR = os.path.join(os.getcwd(), "nltk_data")
+os.makedirs(NLTK_DATA_DIR, exist_ok=True)
+
+if NLTK_DATA_DIR not in nltk.data.path:
+    nltk.data.path.append(NLTK_DATA_DIR)
+
+def ensure_nltk():
+    try:
+        nltk.data.find("tokenizers/punkt")
+    except LookupError:
+        print("Downloading punkt...")
+        nltk.download("punkt", download_dir=NLTK_DATA_DIR)
+
+    try:
+        nltk.data.find("tokenizers/punkt_tab")
+    except LookupError:
+        print("Downloading punkt_tab...")
+        nltk.download("punkt_tab", download_dir=NLTK_DATA_DIR)
+
+ensure_nltk()
+print("NLTK READY ✅")
+
 from werkzeug.utils import secure_filename
 from entity.db_connection import get_db_connection
 from routes.fact_check_routes import fact_check_bp
@@ -854,8 +879,11 @@ def generate_ai_review_ajax(article_id):
         return jsonify({"success": True, "review": review})
 
     except Exception as e:
-        print("LOCAL AI REVIEW ERROR:", str(e))
-        return jsonify({"success": False, "message": str(e)})
+        print("AI ERROR:", str(e))
+        return jsonify({
+            "success": False,
+            "message": "AI review temporarily unavailable. Please try again later."
+        })
     
 
 
