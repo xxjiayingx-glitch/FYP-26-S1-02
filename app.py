@@ -40,6 +40,8 @@ ensure_nltk()
 print("NLTK DATA PATHS:", nltk.data.path, flush=True)
 
 from werkzeug.utils import secure_filename
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from entity.db_connection import get_db_connection
 from routes.fact_check_routes import fact_check_bp
 
@@ -685,7 +687,7 @@ def generate_ai_review_ajax(article_id):
         simple_words = [w for w in words if len(w) > 4]
         keywords = [w for w, _ in Counter(simple_words).most_common(5)]
         keyword_text = ", ".join(keywords) if keywords else "No strong keywords detected"
-        
+
         # -----------------------------
         # Evidence / source signals
         # -----------------------------
@@ -899,6 +901,139 @@ def editor_dashboard():
         "editor_dashboard.html",
         active_page="dashboard"
     )
+
+@app.route("/editor/manage_profile", methods=["GET", "POST"])
+def editor_manage_profile():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor" or editor_status != "approved":
+        return redirect(url_for("login.login"))
+
+    user_id = session.get("userID")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        if request.method == "POST":
+            form_type = request.form.get("form_type")
+
+            if form_type == "profile":
+                full_name = request.form.get("full_name", "").strip()
+                username = request.form.get("username", "").strip()
+                email = request.form.get("email", "").strip()
+                phone = request.form.get("phone", "").strip()
+                expertise_area = request.form.get("expertise_area", "").strip()
+                years_experience = request.form.get("years_experience", "").strip()
+                editor_bio = request.form.get("editor_bio", "").strip()
+                portfolio_link = request.form.get("portfolio_link", "").strip()
+
+                name_parts = full_name.split()
+                first_name = name_parts[0] if len(name_parts) > 0 else ""
+                last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+
+                update_sql = """
+                    UPDATE UserAccount
+                    SET first_name = %s,
+                        last_name = %s,
+                        username = %s,
+                        email = %s,
+                        phone = %s,
+                        expertiseArea = %s,
+                        yearsExperience = %s,
+                        editorBio = %s,
+                        portfolioLink = %s,
+                        updated_at = NOW()
+                    WHERE userID = %s
+                """
+
+                cursor.execute(update_sql, (
+                    first_name,
+                    last_name,
+                    username,
+                    email,
+                    phone,
+                    expertise_area,
+                    years_experience if years_experience else None,
+                    editor_bio,
+                    portfolio_link,
+                    user_id
+                ))
+                conn.commit()
+
+                session["username"] = username
+                flash("Profile updated successfully.", "success")
+
+            elif form_type == "password":
+                current_password = request.form.get("current_password", "").strip()
+                new_password = request.form.get("new_password", "").strip()
+                confirm_new_password = request.form.get("confirm_new_password", "").strip()
+
+                if not current_password or not new_password or not confirm_new_password:
+                    flash("Please fill in all password fields.", "error")
+                else:
+                    cursor.execute(
+                        "SELECT pwd FROM UserAccount WHERE userID = %s",
+                        (user_id,)
+                    )
+                    user = cursor.fetchone()
+
+                    if not user:
+                        flash("User account not found.", "error")
+                    elif not check_password_hash(user["pwd"], current_password):
+                        flash("Current password is incorrect.", "error")
+                    elif new_password != confirm_new_password:
+                        flash("New password and confirm password do not match.", "error")
+                    elif len(new_password) < 10:
+                        flash("New password must be at least 10 characters.", "error")
+                    elif current_password == new_password:
+                        flash("New password cannot be the same as your current password.", "error")
+                    else:
+                        hashed_new_password = generate_password_hash(
+                            new_password,
+                            method='pbkdf2:sha256'
+                        )
+
+                        cursor.execute("""
+                            UPDATE UserAccount
+                            SET pwd = %s,
+                                updated_at = NOW()
+                            WHERE userID = %s
+                        """, (hashed_new_password, user_id))
+                        conn.commit()
+
+                        flash("Password changed successfully.", "success")
+
+        cursor.execute("SELECT * FROM UserAccount WHERE userID = %s", (user_id,))
+        profile = cursor.fetchone()
+
+        return render_template(
+            "editor_manage_profile.html",
+            active_page="profile",
+            profile=profile
+        )
+
+    except Exception as e:
+        conn.rollback()
+        print("EDITOR MANAGE PROFILE ERROR:", e)
+        flash("Something went wrong. Please try again.", "error")
+
+        cursor.execute("SELECT * FROM UserAccount WHERE userID = %s", (user_id,))
+        profile = cursor.fetchone()
+
+        return render_template(
+            "editor_manage_profile.html",
+            active_page="profile",
+            profile=profile
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route("/logout")
 def logout():

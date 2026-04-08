@@ -218,8 +218,13 @@
                 </a>
 
                 <a href="#"
-                   class="{% if active_page == 'profile' %}active{% endif %}">
-                    <i class="fa-solid fa-user-cog"></i> Manage My Profile
+                   class="{% if active_page == 'approval' %}active{% endif %}">
+                    <i class="fa-solid fa-check"></i> Articles Reported
+                </a>
+
+                <a href="{{ url_for('editor_manage_profile') }}"
+                    class="{% if active_page == 'profile' %}active{% endif %}">
+                        <i class="fa-solid fa-user-cog"></i> Manage My Profile
                 </a>
             </div>
         </div>

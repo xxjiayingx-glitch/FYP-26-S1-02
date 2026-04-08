@@ -1,0 +1,393 @@
+{% extends "editor_master.html" %}
+
+{% block title %}Manage My Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 22px;
+    }
+
+    .page-header h1 {
+        font-size: 38px;
+        font-weight: 800;
+        margin: 0 0 6px 0;
+        color: #111827;
+        letter-spacing: -0.4px;
+    }
+
+    .page-header p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .profile-layout {
+        display: grid;
+        grid-template-columns: 290px 1fr;
+        gap: 26px;
+        align-items: start;
+    }
+
+    .left-panel {
+        background: #ffffff;
+        border: 1px solid #dbe3ee;
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .profile-image-box {
+        width: 130px;
+        height: 130px;
+        margin: 0 auto 18px;
+        border-radius: 18px;
+        background: #f3f4f8;
+        border: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 62px;
+        color: #6b7280;
+        overflow: hidden;
+    }
+
+    .profile-image-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .editor-name {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 4px;
+    }
+
+    .editor-username {
+        text-align: center;
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 22px;
+    }
+
+    .side-badge {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid #d7e3f1;
+        background: #f8fbff;
+        color: #1f3a5f;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .right-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .section-card {
+        background: #ffffff;
+        border: 1px solid #dbe3ee;
+        border-radius: 18px;
+        padding: 28px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: #2563eb;
+        margin-bottom: 6px;
+    }
+
+    .section-subtitle {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 24px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 22px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        border: 1px solid #cfd8e3;
+        border-radius: 10px;
+        padding: 12px 13px;
+        font-size: 14px;
+        background: #fff;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #7aa7dc;
+        box-shadow: 0 0 0 3px rgba(122, 167, 220, 0.15);
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .hint-text {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .file-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .action-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    .primary-btn {
+        background: linear-gradient(90deg, #2f80ed, #256dd1);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(47, 128, 237, 0.18);
+        transition: 0.2s ease;
+    }
+
+    .primary-btn:hover {
+        transform: translateY(-1px);
+        background: linear-gradient(90deg, #256dd1, #1f5fba);
+    }
+
+    .security-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    @media (max-width: 1100px) {
+        .profile-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header h1 {
+            font-size: 30px;
+        }
+
+        .section-card {
+            padding: 22px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Manage My Profile</h1>
+    <p>Manage your professional editor information and account security.</p>
+</div>
+
+<div class="profile-layout">
+    <div class="left-panel">
+        <div class="profile-image-box">
+            {% if profile and profile.profileImage %}
+                <img src="{{ url_for('static', filename='uploads/' ~ profile.profileImage) }}" alt="Profile Image">
+            {% else %}
+                <i class="fa-regular fa-user"></i>
+            {% endif %}
+        </div>
+
+        <div class="editor-name">
+            {{ profile.first_name if profile and profile.first_name else session.get('username', 'Editor Name') }}
+        </div>
+
+        <div class="editor-username">
+            @{{ profile.username if profile and profile.username else session.get('username', 'username') }}
+        </div>
+
+        <div class="side-badge">
+            <i class="fa-solid fa-id-badge"></i>
+            <span>Verified Editor Profile</span>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="section-card">
+            <div class="section-title">Profile Information</div>
+            <div class="section-subtitle">
+                Update your editor profile details, expertise, credentials, and supporting information.
+            </div>
+
+            <form method="POST" action="{{ url_for('editor_manage_profile') }}" enctype="multipart/form-data">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="full_name"
+                               value="{{ ((profile.first_name or '') ~ ' ' ~ (profile.last_name or '')).strip() if profile else '' }}"
+                               placeholder="Full Name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username"
+                               value="{{ profile.username if profile else '' }}"
+                               placeholder="Username">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email"
+                               value="{{ profile.email if profile else '' }}"
+                               placeholder="Email Address">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone"
+                               value="{{ profile.phone if profile else '' }}"
+                               placeholder="Phone Number">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Primary Area of Expertise</label>
+                        <select name="expertise_area">
+                            <option value="">Select expertise</option>
+                            <option value="Politics" {% if profile and profile.expertiseArea == 'Politics' %}selected{% endif %}>Politics</option>
+                            <option value="War and Conflict" {% if profile and profile.expertiseArea == 'War and Conflict' %}selected{% endif %}>War and Conflict</option>
+                            <option value="Entertainment" {% if profile and profile.expertiseArea == 'Entertainment' %}selected{% endif %}>Entertainment</option>
+                            <option value="Science" {% if profile and profile.expertiseArea == 'Science' %}selected{% endif %}>Science</option>
+                            <option value="Sports" {% if profile and profile.expertiseArea == 'Sports' %}selected{% endif %}>Sports</option>
+                            <option value="Finance" {% if profile and profile.expertiseArea == 'Finance' %}selected{% endif %}>Finance</option>
+                            <option value="Technology" {% if profile and profile.expertiseArea == 'Technology' %}selected{% endif %}>Technology</option>
+                            <option value="General News" {% if profile and profile.expertiseArea == 'General News' %}selected{% endif %}>General News</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Years of Experience</label>
+                        <input type="number" name="years_experience"
+                               value="{{ profile.yearsExperience if profile else '' }}"
+                               placeholder="Years of Experience" min="0">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Short Professional Bio</label>
+                        <textarea name="editor_bio" placeholder="Tell us about your editorial experience, credentials, or background.">{{ profile.editorBio if profile and profile.editorBio else '' }}</textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Portfolio / LinkedIn / Published Work Link</label>
+                        <input type="url" name="portfolio_link"
+                               value="{{ profile.portfolioLink if profile else '' }}"
+                               placeholder="https://">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Profile Image</label>
+                        <input type="file" name="profile_image">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Supporting Document</label>
+                        <input type="file" name="supporting_document">
+                        {% if profile and profile.supportingDocument %}
+                            <div class="hint-text">Current file: {{ profile.supportingDocument }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Upload More Supporting Files</label>
+                        <div class="file-stack">
+                            <input type="file" name="extra_upload_1">
+                            <input type="file" name="extra_upload_2">
+                            <input type="file" name="extra_upload_3">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-row">
+                    <button type="submit" name="form_type" value="profile" class="primary-btn">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">Security</div>
+            <div class="section-subtitle">
+                Update your password to keep your editor account secure.
+            </div>
+
+            <form method="POST" action="{{ url_for('editor_manage_profile') }}">
+                <div class="security-grid">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" name="current_password" placeholder="Enter current password">
+                    </div>
+
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" name="new_password" placeholder="Enter new password">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" name="confirm_new_password" placeholder="Confirm new password">
+                    </div>
+                </div>
+
+                <div class="action-row">
+                    <button type="submit" name="form_type" value="password" class="primary-btn">
+                        Change Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
