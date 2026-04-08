@@ -15,28 +15,29 @@ load_dotenv()
 import os
 import nltk
 
-# --- NLTK Setup for Hosted Environment ---
 NLTK_DATA_DIR = os.path.join(os.getcwd(), "nltk_data")
 os.makedirs(NLTK_DATA_DIR, exist_ok=True)
 
 if NLTK_DATA_DIR not in nltk.data.path:
-    nltk.data.path.append(NLTK_DATA_DIR)
+    nltk.data.path.insert(0, NLTK_DATA_DIR)
 
 def ensure_nltk():
-    try:
-        nltk.data.find("tokenizers/punkt")
-    except LookupError:
-        print("Downloading punkt...")
-        nltk.download("punkt", download_dir=NLTK_DATA_DIR)
+    resources = [
+        ("punkt", "tokenizers/punkt"),
+        ("punkt_tab", "tokenizers/punkt_tab"),
+        ("stopwords", "corpora/stopwords")
+    ]
 
-    try:
-        nltk.data.find("tokenizers/punkt_tab")
-    except LookupError:
-        print("Downloading punkt_tab...")
-        nltk.download("punkt_tab", download_dir=NLTK_DATA_DIR)
+    for resource_name, resource_path in resources:
+        try:
+            nltk.data.find(resource_path)
+            print(f"NLTK resource already exists: {resource_name}", flush=True)
+        except LookupError:
+            print(f"Downloading NLTK resource: {resource_name}", flush=True)
+            nltk.download(resource_name, download_dir=NLTK_DATA_DIR)
 
 ensure_nltk()
-print("NLTK READY ✅")
+print("NLTK DATA PATHS:", nltk.data.path, flush=True)
 
 from werkzeug.utils import secure_filename
 from entity.db_connection import get_db_connection
@@ -643,12 +644,7 @@ def generate_ai_review_ajax(article_id):
     try:
         import re
         from collections import Counter
-        from statistics import mean
-        from sumy.parsers.plaintext import PlaintextParser
-        from sumy.nlp.tokenizers import Tokenizer
-        from sumy.summarizers.lsa import LsaSummarizer
         import textstat
-        from rake_nltk import Rake
 
         title = (article.get("articleTitle") or "").strip()
         content = (article.get("content") or "").strip()
@@ -673,13 +669,9 @@ def generate_ai_review_ajax(article_id):
         # -----------------------------
         # Summary
         # -----------------------------
-        parser = PlaintextParser.from_string(content, Tokenizer("english"))
-        summarizer = LsaSummarizer()
-        summary_sentences = summarizer(parser.document, 2)
-        summary = " ".join(str(s) for s in summary_sentences).strip()
-
+        summary = " ".join(sentences[:2]).strip()
         if not summary:
-            summary = " ".join(sentences[:2])
+            summary = clean_content[:250] + "..." if len(clean_content) > 250 else clean_content
 
         # -----------------------------
         # Readability
@@ -690,11 +682,10 @@ def generate_ai_review_ajax(article_id):
         # -----------------------------
         # Keyword extraction
         # -----------------------------
-        rake = Rake()
-        rake.extract_keywords_from_text(clean_content)
-        keywords = rake.get_ranked_phrases()[:5]
+        simple_words = [w for w in words if len(w) > 4]
+        keywords = [w for w, _ in Counter(simple_words).most_common(5)]
         keyword_text = ", ".join(keywords) if keywords else "No strong keywords detected"
-
+        
         # -----------------------------
         # Evidence / source signals
         # -----------------------------
@@ -879,7 +870,9 @@ def generate_ai_review_ajax(article_id):
         return jsonify({"success": True, "review": review})
 
     except Exception as e:
-        print("AI ERROR:", str(e))
+        import traceback
+        print("LOCAL AI REVIEW ERROR:", str(e), flush=True)
+        traceback.print_exc()
         return jsonify({
             "success": False,
             "message": "AI review temporarily unavailable. Please try again later."
