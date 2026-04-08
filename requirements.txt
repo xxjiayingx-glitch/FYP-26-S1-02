@@ -39,3 +39,8 @@ google-auth-httplib2
 google-auth-oauthlib
 google-auth
 stripe
+sumy==0.11.0
+lxml
+breadability
+textstat
+rake-nltk
