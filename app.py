@@ -882,7 +882,9 @@ def generate_ai_review_ajax(article_id):
             "message": "AI review temporarily unavailable. Please try again later."
         })
     
-
+# ----------------------------
+# ---------- EDITOR ----------
+# ----------------------------
 
 
 @app.route("/editor/dashboard")
@@ -903,6 +905,62 @@ def editor_dashboard():
         "editor_dashboard.html",
         active_page="dashboard"
     )
+    
+@app.route("/editor/category_articles")
+def editor_category_articles():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    return render_template(
+        "editor_category_articles.html",
+        active_page="category"
+    )
+
+
+@app.route("/editor/my_articles")
+def editor_my_articles():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_id = session.get("userID")
+
+    keyword = request.args.get("keyword", "").strip()
+    status = request.args.get("status", "").strip()
+
+    if keyword or status:
+        articles = article_controller.search_my_articles(
+            user_id, keyword, None, status
+        )
+    else:
+        articles = article_controller.get_my_articles(user_id)
+
+    return render_template(
+        "editor_my_articles.html",
+        articles=articles,
+        keyword=keyword,
+        status=status,
+        active_page="my_articles"
+    )
+
+
+@app.route("/editor/approval_articles")
+def editor_approval_articles():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    return render_template(
+        "editor_approval_articles.html",
+        active_page="approval"
+    )
+
+    
+@app.route("/editor/articles_reported")
+def editor_articles_reported():
+    return render_template(
+        "editor_articles_reported.html",
+        active_page="reported"
+    )    
+
 
 @app.route("/editor/manage_profile", methods=["GET", "POST"])
 def editor_manage_profile():

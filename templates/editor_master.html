@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Editor Panel{% endblock %}
-
-    </title>
+    <title>{% block title %}Editor Panel{% endblock %}</title>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
         body {
@@ -24,20 +23,41 @@
         }
 
         /* ===== TOP NAVBAR ===== */
-        .topbar {
-            background: #cfe7fb;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 28px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        .topbar{
+            background:#c4def4;
+            min-height:80px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:18px 42px;
+            gap:30px;
+            border-bottom:1px solid rgba(0,0,0,0.06);
         }
 
-        .brand {
-            font-weight: 800;
-            font-size: 18px;
-            line-height: 1.2;
+        .brand{
+            font-weight:900;
+            font-size:32px;
+            line-height:1;
+            color:#1f3a5f;
+            cursor:pointer;
+            letter-spacing:-0.5px;
+            text-decoration: none;
+            transition: all 0.3s ease;  
+        }
+        
+        .brand:hover{
+            color:#3f8ec4;   /* lighter blue glow */
+            text-decoration: none;
+
+            text-shadow:
+                0 0 6px rgba(63,142,196,0.35),
+                0 0 12px rgba(63,142,196,0.25);
+
+            transform: scale(1.03);
+        }
+
+        .brand:active{
+            transform: scale(0.98);
         }
 
         .top-right {
@@ -163,7 +183,10 @@
     <!-- TOP BAR -->
     <div class="topbar">
         <div class="brand">
-            Daily Scoop News System
+            <a href="{{ url_for('editor_dashboard') }}">
+                Daily Scoop<br>
+                News System
+            </a>
         </div>
 
         <div class="top-right">
@@ -202,24 +225,24 @@
                     <i class="fa-solid fa-house"></i> Dashboard
                 </a>
 
-                <a href="#"
+                <a href="{{ url_for('editor_category_articles') }}"
                    class="{% if active_page == 'category' %}active{% endif %}">
                     <i class="fa-solid fa-layer-group"></i> Category Articles
                 </a>
 
-                <a href="#"
+                 <a href="{{ url_for('editor_my_articles') }}"
                    class="{% if active_page == 'my_articles' %}active{% endif %}">
                     <i class="fa-solid fa-pen"></i> My Posted Articles
                 </a>
 
-                <a href="#"
-                   class="{% if active_page == 'approval' %}active{% endif %}">
-                    <i class="fa-solid fa-check"></i> Approval Articles
+                <a href="{{ url_for('editor_approval_articles') }}"
+                class="{% if active_page == 'approval' %}active{% endif %}">
+                    <i class="fa-solid fa-clipboard-check"></i> Approval Articles
                 </a>
 
-                <a href="#"
-                   class="{% if active_page == 'approval' %}active{% endif %}">
-                    <i class="fa-solid fa-check"></i> Articles Reported
+                <a href="{{ url_for('editor_articles_reported') }}"
+                class="{% if active_page == 'reported' %}active{% endif %}">
+                    <i class="fa-solid fa-flag"></i> Articles Reported
                 </a>
 
                 <a href="{{ url_for('editor_manage_profile') }}"
