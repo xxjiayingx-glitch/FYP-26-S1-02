@@ -76,6 +76,7 @@ from boundary.AdminUploadImage import admin_profile_bp
 from boundary.AdminViewLogsPage import system_monitoring_bp
 from boundary.EditKeyProductFeatures import web_management_bp
 from boundary.CategoryReportedPage import category_reported_page_bp
+from boundary.EditorApplicationsPage import editor_applications_page_bp
 
 # Controllers
 from control.ArticleController import ArticleController
@@ -117,6 +118,7 @@ app.register_blueprint(admin_profile_bp)
 app.register_blueprint(system_monitoring_bp)
 app.register_blueprint(web_management_bp)
 app.register_blueprint(category_reported_page_bp)
+app.register_blueprint(editor_applications_page_bp)
 
 # Image File Size
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
