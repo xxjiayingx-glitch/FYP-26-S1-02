@@ -1,0 +1,1015 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Editor Applications{% endblock %}
+{% block applications_active %}active{% endblock %}
+
+{% block content %}
+<style>
+/* ================= PAGE ================= */
+.editor-app-page{
+    width:100%;
+    box-sizing:border-box;
+}
+
+.page-header{
+    margin-bottom:22px;
+}
+
+.page-title{
+    font-size:34px;
+    font-weight:800;
+    color:#111;
+    margin-bottom:6px;
+}
+
+.page-subtitle{
+    font-size:15px;
+    color:#5f6b7a;
+    margin:0;
+}
+
+/* ================= TOP STATS ================= */
+.stats-row{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:18px;
+    margin:24px 0 22px 0;
+    width:100%;
+}
+
+.stat-card{
+    background:#fff;
+    border-radius:18px;
+    padding:20px 22px;
+    box-shadow:0 10px 24px rgba(0,0,0,0.05);
+    border:1px solid rgba(0,0,0,0.05);
+    display:flex;
+    align-items:center;
+    gap:16px;
+}
+
+.stat-icon{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    font-weight:800;
+    flex-shrink:0;
+}
+
+.stat-card.pending .stat-icon{
+    background:#fff1c8;
+    color:#c68a00;
+}
+
+.stat-card.approved .stat-icon{
+    background:#ddf5df;
+    color:#1c8b43;
+}
+
+.stat-card.rejected .stat-icon{
+    background:#ffe1e1;
+    color:#d63d3d;
+}
+
+.stat-card.total .stat-icon{
+    background:#eef2f7;
+    color:#3d4958;
+}
+
+.stat-number{
+    font-size:34px;
+    font-weight:800;
+    line-height:1;
+    color:#111;
+}
+
+.stat-label{
+    margin-top:4px;
+    font-size:13px;
+    color:#5f6b7a;
+    font-weight:700;
+}
+
+/* ================= MAIN LAYOUT ================= */
+.editor-main-layout{
+    display:grid;
+    gap:24px;
+    align-items:start;
+}
+
+.editor-main-layout.single-column{
+    grid-template-columns:minmax(0, 1fr);
+}
+
+.editor-main-layout.with-details{
+    grid-template-columns:minmax(0, 1.75fr) minmax(360px, 0.95fr);
+}
+
+/* ================= LEFT SIDE ================= */
+.left-panel{
+    min-width:0;
+}
+
+.filter-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+}
+
+.search-box,
+.filter-select{
+    height:46px;
+    border:none;
+    outline:none;
+    border-radius:14px;
+    background:#fff;
+    box-shadow:0 8px 20px rgba(0,0,0,0.05);
+    border:1px solid rgba(0,0,0,0.06);
+    padding:0 16px;
+    font-size:14px;
+    color:#333;
+}
+
+.search-box{
+    flex:1;
+    min-width:240px;
+}
+
+.filter-select{
+    min-width:160px;
+}
+
+.table-card{
+    background:#fff;
+    border-radius:22px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.06);
+    overflow:hidden;
+}
+
+.application-table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+.application-table thead th{
+    background:#f3f4ff;
+    color:#111;
+    text-align:left;
+    padding:16px 14px;
+    font-size:14px;
+    font-weight:800;
+}
+
+.application-table tbody td{
+    padding:16px 14px;
+    border-bottom:1px solid #ededed;
+    vertical-align:middle;
+    font-size:14px;
+    color:#222;
+    word-wrap:break-word;
+}
+
+.application-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+.application-table tbody tr:hover{
+    background:#fafbff;
+}
+
+.application-table th:nth-child(1),
+.application-table td:nth-child(1){
+    width:16%;
+}
+
+.application-table th:nth-child(2),
+.application-table td:nth-child(2){
+    width:21%;
+}
+
+.application-table th:nth-child(3),
+.application-table td:nth-child(3){
+    width:18%;
+}
+
+.application-table th:nth-child(4),
+.application-table td:nth-child(4){
+    width:12%;
+}
+
+.application-table th:nth-child(5),
+.application-table td:nth-child(5){
+    width:14%;
+}
+
+.application-table th:nth-child(6),
+.application-table td:nth-child(6){
+    width:10%;
+}
+
+.application-table th:nth-child(7),
+.application-table td:nth-child(7){
+    width:9%;
+}
+
+.name-cell{
+    font-weight:700;
+    color:#222;
+}
+
+.email-cell{
+    color:#666;
+}
+
+.status-badge{
+    display:inline-block;
+    padding:7px 13px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    text-transform:capitalize;
+    white-space:nowrap;
+}
+
+.status-badge.pending{
+    background:#fff1c8;
+    color:#c68a00;
+}
+
+.status-badge.approved{
+    background:#ddf5df;
+    color:#1c8b43;
+}
+
+.status-badge.rejected{
+    background:#ffe1e1;
+    color:#d63d3d;
+}
+
+.action-group{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.icon-btn{
+    width:34px;
+    height:34px;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:0.18s ease;
+}
+
+.icon-btn.view{
+    background:#e7ebff;
+    color:#4f6df5;
+}
+
+.icon-btn.view:hover{
+    background:#dce2ff;
+}
+
+.icon-btn.approve{
+    background:#dcf6df;
+    color:#1f8b4c;
+}
+
+.icon-btn.approve:hover{
+    background:#cdeed2;
+}
+
+.icon-btn.reject{
+    background:#ffe0e0;
+    color:#d63d3d;
+}
+
+.icon-btn.reject:hover{
+    background:#ffd2d2;
+}
+
+.table-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    padding:14px 16px 16px 16px;
+    border-top:1px solid #ededed;
+    background:#fff;
+    font-size:13px;
+    color:#666;
+}
+
+.pagination{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.page-btn{
+    min-width:30px;
+    height:30px;
+    border:none;
+    border-radius:8px;
+    background:#f1f3f6;
+    color:#444;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    padding:0 10px;
+}
+
+.page-btn.active{
+    background:#4f6df5;
+    color:#fff;
+}
+
+.empty-state{
+    padding:44px 24px;
+    text-align:center;
+    color:#6b7280;
+    font-size:15px;
+}
+
+/* ================= RIGHT DETAILS PANEL ================= */
+.right-panel.hidden,
+.details-panel.hidden{
+    display:none;
+}
+
+.details-panel{
+    background:#fff;
+    border-radius:24px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.06);
+    overflow:hidden;
+}
+
+.details-header{
+    padding:22px 24px;
+    border-bottom:1px solid #ececec;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.details-title{
+    font-size:22px;
+    font-weight:800;
+    color:#111;
+    margin:0;
+}
+
+.close-details{
+    border:none;
+    background:transparent;
+    font-size:28px;
+    line-height:1;
+    cursor:pointer;
+    color:#333;
+}
+
+.details-body{
+    padding:22px 24px 26px 24px;
+}
+
+.applicant-top{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+    margin-bottom:22px;
+}
+
+.applicant-avatar{
+    width:74px;
+    height:74px;
+    border-radius:16px;
+    background:#f2f4f7;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:36px;
+    flex-shrink:0;
+}
+
+.applicant-name{
+    font-size:18px;
+    font-weight:800;
+    color:#111;
+    margin-bottom:4px;
+}
+
+.applicant-email{
+    font-size:14px;
+    color:#666;
+    margin-bottom:10px;
+}
+
+.detail-section{
+    padding:18px 0;
+    border-top:1px solid #ededed;
+}
+
+.detail-section:first-of-type{
+    border-top:none;
+    padding-top:0;
+}
+
+.detail-label{
+    font-size:14px;
+    font-weight:800;
+    color:#111;
+    margin-bottom:8px;
+}
+
+.detail-value{
+    font-size:15px;
+    color:#333;
+    line-height:1.55;
+    word-break:break-word;
+}
+
+.detail-link{
+    color:#2f74dc;
+    text-decoration:none;
+    word-break:break-all;
+}
+
+.detail-link:hover{
+    text-decoration:underline;
+}
+
+.file-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+.file-name{
+    font-size:14px;
+    color:#555;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.download-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:12px 18px;
+    border:none;
+    border-radius:12px;
+    background:#f3f4f6;
+    color:#222;
+    font-size:14px;
+    font-weight:800;
+    text-decoration:none;
+    cursor:pointer;
+}
+
+.download-btn:hover{
+    background:#e8eaee;
+}
+
+.download-btn.disabled{
+    pointer-events:none;
+    opacity:0.5;
+}
+
+.timeline-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-size:14px;
+    color:#333;
+    flex-wrap:wrap;
+}
+
+.remarks-box{
+    width:100%;
+    min-height:100px;
+    border:1px solid #dddddd;
+    border-radius:14px;
+    padding:14px 14px;
+    font-size:14px;
+    resize:vertical;
+    box-sizing:border-box;
+    outline:none;
+}
+
+.decision-actions{
+    display:flex;
+    gap:14px;
+    margin-top:18px;
+}
+
+.decision-btn{
+    border:none;
+    border-radius:14px;
+    padding:14px 22px;
+    font-size:16px;
+    font-weight:800;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:0.18s ease;
+}
+
+.decision-btn.approve{
+    background:#56c26b;
+    color:#fff;
+}
+
+.decision-btn.approve:hover{
+    background:#43b15a;
+}
+
+.decision-btn.reject{
+    background:#ff5c5c;
+    color:#fff;
+}
+
+.decision-btn.reject:hover{
+    background:#ef4444;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1300px){
+    .editor-main-layout.with-details{
+        grid-template-columns:1fr;
+    }
+
+    .right-panel{
+        margin-top:6px;
+    }
+}
+
+@media (max-width: 900px){
+    .stats-row{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+    }
+}
+</style>
+
+<div class="editor-app-page">
+    <div class="page-header">
+        <h1 class="page-title">Editor Applications</h1>
+        <p class="page-subtitle">Review and manage editor registration requests.</p>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card pending">
+            <div class="stat-icon">⌛</div>
+            <div>
+                <div class="stat-number">{{ pending_count|default(0) }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+
+        <div class="stat-card approved">
+            <div class="stat-icon">✓</div>
+            <div>
+                <div class="stat-number">{{ approved_count|default(0) }}</div>
+                <div class="stat-label">Approved</div>
+            </div>
+        </div>
+
+        <div class="stat-card rejected">
+            <div class="stat-icon">✕</div>
+            <div>
+                <div class="stat-number">{{ rejected_count|default(0) }}</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+
+        <div class="stat-card total">
+            <div class="stat-icon">≡</div>
+            <div>
+                <div class="stat-number">{{ total_count|default(0) }}</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor-main-layout single-column" id="editorMainLayout">
+        <div class="left-panel">
+            <div class="filter-row">
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="search-box"
+                    placeholder="Search by applicant name or email"
+                >
+
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">Status: All</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+
+                <select id="expertiseFilter" class="filter-select">
+                    <option value="all">Expertise: All</option>
+                    {% if applications %}
+                        {% for application in applications %}
+                            {% if application.expertiseArea %}
+                                <option value="{{ application.expertiseArea|lower }}">{{ application.expertiseArea }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="table-card">
+                {% if applications and applications|length > 0 %}
+                <table class="application-table">
+                    <thead>
+                        <tr>
+                            <th>Applicant</th>
+                            <th>Email</th>
+                            <th>Expertise Area</th>
+                            <th>Experience</th>
+                            <th>Applied On</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="applicationTableBody">
+                        {% for application in applications %}
+                        <tr
+                            class="application-row"
+                            data-name="{{ application.fullName|default('')|lower }}"
+                            data-email="{{ application.email|default('')|lower }}"
+                            data-status="{{ application.applicationStatus|default('pending')|lower }}"
+                            data-expertise="{{ application.expertiseArea|default('')|lower }}"
+                        >
+                            <td class="name-cell">{{ application.fullName|default('-') }}</td>
+                            <td class="email-cell">{{ application.email|default('-') }}</td>
+                            <td>{{ application.expertiseArea|default('-') }}</td>
+                            <td>{{ application.yearsOfExperience|default('-') }}</td>
+                            <td>{{ application.applied_at|default('-') }}</td>
+                            <td>
+                                <span class="status-badge {{ application.applicationStatus|default('pending')|lower }}">
+                                    {{ application.applicationStatus|default('pending') }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-group">
+                                    <button
+                                        type="button"
+                                        class="icon-btn view"
+                                        title="View"
+                                        data-app='{{ application|tojson|safe }}'
+                                    >
+                                        👁
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="icon-btn approve"
+                                        title="Approve"
+                                        onclick="quickDecision('approve', '{{ application.applicationID }}')"
+                                    >✓</button>
+
+                                    <button
+                                        type="button"
+                                        class="icon-btn reject"
+                                        title="Reject"
+                                        onclick="quickDecision('reject', '{{ application.applicationID }}')"
+                                    >✕</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="table-footer">
+                    <div id="tableSummary">Showing {{ applications|length }} application(s)</div>
+                    <div class="pagination" id="pagination"></div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    No editor applications found.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="right-panel hidden" id="rightPanel">
+            <div class="details-panel hidden" id="detailsPanel">
+                <div class="details-header">
+                    <h2 class="details-title">Applicant Details</h2>
+                    <button type="button" class="close-details" id="closeDetailsBtn">×</button>
+                </div>
+
+                <div class="details-body">
+                    <div class="applicant-top">
+                        <div class="applicant-avatar">👤</div>
+                        <div>
+                            <div class="applicant-name" id="detailName">-</div>
+                            <div class="applicant-email" id="detailEmail">-</div>
+                            <span class="status-badge pending" id="detailStatus">pending</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Expertise Area</div>
+                        <div class="detail-value" id="detailExpertise">-</div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Years of Experience</div>
+                        <div class="detail-value" id="detailExperience">-</div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Editor Bio</div>
+                        <div class="detail-value" id="detailBio">-</div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Portfolio Link</div>
+                        <div class="detail-value">
+                            <a href="#" target="_blank" class="detail-link" id="detailPortfolio">-</a>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Supporting Document</div>
+                        <div class="file-row">
+                            <div class="file-name" id="detailResumeName">📄 No document</div>
+                            <a href="#" id="downloadResumeBtn" class="download-btn disabled" download>Download</a>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Application Timeline</div>
+                        <div class="timeline-row">
+                            <span>Applied On</span>
+                            <span id="detailAppliedOn">-</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Admin Decision</div>
+                        <form id="decisionForm" method="POST" action="#">
+                            <textarea
+                                name="adminRemarks"
+                                id="detailRemarks"
+                                class="remarks-box"
+                                placeholder="Add remarks here..."
+                            ></textarea>
+
+                            <div class="decision-actions">
+                                <button type="submit" class="decision-btn approve" id="approveBtn">✓ Approve</button>
+                                <button type="submit" class="decision-btn reject" id="rejectBtn">✕ Reject</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="quickDecisionForm" method="POST" style="display:none;">
+    <input type="hidden" name="adminRemarks" value="">
+</form>
+
+<script>
+const editorMainLayout = document.getElementById("editorMainLayout");
+const rightPanel = document.getElementById("rightPanel");
+const detailsPanel = document.getElementById("detailsPanel");
+const closeDetailsBtn = document.getElementById("closeDetailsBtn");
+
+const detailName = document.getElementById("detailName");
+const detailEmail = document.getElementById("detailEmail");
+const detailStatus = document.getElementById("detailStatus");
+const detailExpertise = document.getElementById("detailExpertise");
+const detailExperience = document.getElementById("detailExperience");
+const detailBio = document.getElementById("detailBio");
+const detailPortfolio = document.getElementById("detailPortfolio");
+const detailResumeName = document.getElementById("detailResumeName");
+const detailAppliedOn = document.getElementById("detailAppliedOn");
+const detailRemarks = document.getElementById("detailRemarks");
+const downloadResumeBtn = document.getElementById("downloadResumeBtn");
+const decisionForm = document.getElementById("decisionForm");
+const approveBtn = document.getElementById("approveBtn");
+const rejectBtn = document.getElementById("rejectBtn");
+
+function normalizeStatus(status) {
+    return (status || "pending").toLowerCase();
+}
+
+function showDetails(appData) {
+    editorMainLayout.classList.remove("single-column");
+    editorMainLayout.classList.add("with-details");
+    rightPanel.classList.remove("hidden");
+    detailsPanel.classList.remove("hidden");
+
+    detailName.textContent = appData.fullName || "-";
+    detailEmail.textContent = appData.email || "-";
+    detailExpertise.textContent = appData.expertiseArea || "-";
+    detailExperience.textContent = appData.yearsOfExperience || "-";
+    detailBio.textContent = appData.editorBio || "-";
+    detailAppliedOn.textContent = appData.applied_at || "-";
+    detailRemarks.value = appData.adminRemarks || "";
+
+    const status = normalizeStatus(appData.applicationStatus);
+    detailStatus.textContent = status;
+    detailStatus.className = "status-badge " + status;
+
+    if (appData.portfolioLink) {
+        detailPortfolio.textContent = appData.portfolioLink;
+        detailPortfolio.href = appData.portfolioLink;
+    } else {
+        detailPortfolio.textContent = "-";
+        detailPortfolio.href = "#";
+    }
+
+    if (appData.resumeFileName) {
+        detailResumeName.textContent = "📄 " + appData.resumeFileName;
+
+        if (appData.resumeFilePath) {
+            let resumePath = appData.resumeFilePath;
+            if (!resumePath.startsWith("http") && !resumePath.startsWith("/")) {
+                resumePath = "/static/" + resumePath;
+            }
+            downloadResumeBtn.href = resumePath;
+            downloadResumeBtn.classList.remove("disabled");
+        } else {
+            downloadResumeBtn.href = "#";
+            downloadResumeBtn.classList.add("disabled");
+        }
+    } else {
+        detailResumeName.textContent = "📄 No document";
+        downloadResumeBtn.href = "#";
+        downloadResumeBtn.classList.add("disabled");
+    }
+
+    approveBtn.onclick = function(e) {
+        e.preventDefault();
+        decisionForm.action = "/admin/editor-applications/approve/" + appData.applicationID;
+        decisionForm.submit();
+    };
+
+    rejectBtn.onclick = function(e) {
+        e.preventDefault();
+        decisionForm.action = "/admin/editor-applications/reject/" + appData.applicationID;
+        decisionForm.submit();
+    };
+}
+
+document.querySelectorAll(".icon-btn.view").forEach(btn => {
+    btn.addEventListener("click", function() {
+        const appData = JSON.parse(this.dataset.app);
+        showDetails(appData);
+    });
+});
+
+if (closeDetailsBtn) {
+    closeDetailsBtn.addEventListener("click", function() {
+        detailsPanel.classList.add("hidden");
+        rightPanel.classList.add("hidden");
+        editorMainLayout.classList.remove("with-details");
+        editorMainLayout.classList.add("single-column");
+    });
+}
+
+const searchInput = document.getElementById("searchInput");
+const statusFilter = document.getElementById("statusFilter");
+const expertiseFilter = document.getElementById("expertiseFilter");
+const rows = Array.from(document.querySelectorAll(".application-row"));
+const tableSummary = document.getElementById("tableSummary");
+const pagination = document.getElementById("pagination");
+
+let currentPage = 1;
+const rowsPerPage = 5;
+
+function getFilteredRows() {
+    const query = (searchInput?.value || "").trim().toLowerCase();
+    const status = (statusFilter?.value || "all").toLowerCase();
+    const expertise = (expertiseFilter?.value || "all").toLowerCase();
+
+    return rows.filter(row => {
+        const name = row.dataset.name || "";
+        const email = row.dataset.email || "";
+        const rowStatus = row.dataset.status || "";
+        const rowExpertise = row.dataset.expertise || "";
+
+        const matchSearch = !query || name.includes(query) || email.includes(query);
+        const matchStatus = status === "all" || rowStatus === status;
+        const matchExpertise = expertise === "all" || rowExpertise === expertise;
+
+        return matchSearch && matchStatus && matchExpertise;
+    });
+}
+
+function renderPagination(totalPages) {
+    if (!pagination) return;
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement("button");
+    prevBtn.className = "page-btn";
+    prevBtn.textContent = "<";
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.className = "page-btn" + (i === currentPage ? " active" : "");
+        btn.textContent = i;
+        btn.onclick = () => {
+            currentPage = i;
+            renderTable();
+        };
+        pagination.appendChild(btn);
+    }
+
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "page-btn";
+    nextBtn.textContent = ">";
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+function renderTable() {
+    const filteredRows = getFilteredRows();
+    const total = filteredRows.length;
+    const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+
+    if (currentPage > totalPages) {
+        currentPage = 1;
+    }
+
+    rows.forEach(row => row.style.display = "none");
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    filteredRows.slice(start, end).forEach(row => {
+        row.style.display = "";
+    });
+
+    if (tableSummary) {
+        if (total === 0) {
+            tableSummary.textContent = "No matching results";
+        } else {
+            tableSummary.textContent = `Showing ${start + 1} to ${Math.min(end, total)} of ${total} results`;
+        }
+    }
+
+    renderPagination(totalPages);
+}
+
+function quickDecision(action, applicationId) {
+    const ok = confirm(
+        action === "approve"
+            ? "Approve this application?"
+            : "Reject this application?"
+    );
+
+    if (!ok) return;
+
+    const form = document.getElementById("quickDecisionForm");
+    form.action = "/admin/editor-applications/" + action + "/" + applicationId;
+    form.submit();
+}
+
+if (searchInput) searchInput.addEventListener("input", renderTable);
+if (statusFilter) statusFilter.addEventListener("change", renderTable);
+if (expertiseFilter) expertiseFilter.addEventListener("change", renderTable);
+
+renderTable();
+</script>
+{% endblock %}
