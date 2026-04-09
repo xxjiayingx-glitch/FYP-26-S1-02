@@ -491,7 +491,7 @@ a {
 }
 
 .page-title {
-    font-size: 42px;
+    font-size: 30px;
     font-weight: 800;
     color: #111827;
     margin-bottom: 26px;
@@ -1057,7 +1057,7 @@ a {
 }
 
 .force-complete-page .profile-header h1 {
-    font-size: 42px;
+    font-size: 30px;
     margin-bottom: 10px;
     line-height: 1.15;
 }
@@ -1200,6 +1200,7 @@ a {
 }
 
 @media (max-width: 768px) {
+
     .force-complete-page .profile-header,
     .force-complete-layout .profile-main {
         max-width: 100%;
@@ -1231,7 +1232,7 @@ a {
 
 .profile-header h1 {
     margin: 0 0 10px;
-    font-size: 48px;
+    font-size: 30px;
     font-weight: 800;
     color: #0f172a;
     line-height: 1.08;
