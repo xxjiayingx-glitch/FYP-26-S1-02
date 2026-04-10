@@ -1,0 +1,240 @@
+{% extends "editor_master.html" %}
+
+{% block title %}Create Article{% endblock %}
+
+{% block content %}
+<style>
+    .article-form-page {
+        max-width: 960px;
+        margin: 38px auto;
+        padding: 0 18px;
+    }
+
+    .article-form-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 22px;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+        padding: 30px;
+    }
+
+    .article-form-title {
+        margin: 0 0 22px;
+        font-size: 32px;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .article-meta-box {
+        margin-bottom: 24px;
+        padding: 14px 16px;
+        background: #f8fafc;
+        border: 1px solid #dbe3ee;
+        border-radius: 14px;
+        font-size: 14px;
+        color: #475569;
+    }
+
+    .form-row {
+        margin-bottom: 20px;
+    }
+
+    .form-row label {
+        display: block;
+        margin-bottom: 9px;
+        font-weight: 700;
+        font-size: 14px;
+        color: #1f2937;
+    }
+
+    .form-row input,
+    .form-row select,
+    .form-row textarea {
+        width: 100%;
+        padding: 13px 14px;
+        border: 1px solid #cfd8e3;
+        border-radius: 14px;
+        font-size: 15px;
+        background: #ffffff;
+        transition: 0.2s ease;
+    }
+
+    .form-row input:focus,
+    .form-row select:focus,
+    .form-row textarea:focus {
+        outline: none;
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.2);
+    }
+
+    textarea {
+        min-height: 220px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    /* CHECK BUTTON */
+    #checkScoreBtn {
+        width: 100%;
+        padding: 12px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    #checkScoreBtn:hover {
+        background: #1d4ed8;
+    }
+
+    /* AI SECTION */
+    .fact-check-section {
+        display: none;
+        margin-top: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 18px;
+        background: #fafafa;
+    }
+
+    #previewPanel {
+        border: 1px solid #ccc;
+        padding: 12px;
+        border-radius: 10px;
+        background: #fff;
+        margin-top: 10px;
+    }
+
+    /* BUTTONS */
+    .form-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .btn {
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* Cancel */
+    .btn-cancel {
+        background: #e5e7eb;
+        color: #111827;
+    }
+
+    .btn-cancel:hover {
+        background: #d1d5db;
+    }
+
+    /* Draft (ORANGE 🔥) */
+    .btn-draft {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-draft:hover {
+        background: #d97706;
+    }
+
+    /* Submit */
+    .btn-submit {
+        background: #22c55e;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        background: #16a34a;
+    }
+
+</style>
+
+<div class="article-form-page">
+    <div class="article-form-card">
+        <h1 class="article-form-title">Create New Article</h1>
+
+        <div class="article-meta-box">
+            <strong>Created On:</strong> {{ current_time }}
+        </div>
+
+        <form method="POST" action="{{ url_for('editor_create_article') }}" enctype="multipart/form-data">
+            <input type="hidden" name="ai_fact_check_score" id="ai_fact_check_score">
+            <input type="hidden" name="ai_fact_check_status" id="ai_fact_check_status">
+
+            <div class="form-row">
+                <label>Title</label>
+                <input type="text" name="title" placeholder="Enter your article title" required>
+            </div>
+
+            <div class="form-row">
+                <label>Category</label>
+                <select name="category" required>
+                    <option disabled selected>Select your article category</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.categoryID }}">{{ cat.categoryName }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label>Content</label>
+                <textarea name="content" placeholder="Enter your full article content" required></textarea>
+            </div>
+
+            <div class="form-row">
+                <label>Upload Featured Image</label>
+                <input type="file" name="featured_image" required>
+            </div>
+
+            <button type="button" id="checkScoreBtn">Check Current Score</button>
+
+            <div id="factCheckSection" class="fact-check-section">
+                <h3>Fact Check Result</h3>
+                <p><strong>Score:</strong> <span id="scoreValue"></span></p>
+                <p><strong>Status:</strong> <span id="statusValue"></span></p>
+
+                <h4>Preview</h4>
+                <div id="previewPanel"></div>
+
+                <h4>Issues</h4>
+                <ul id="issuesList"></ul>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('editor_my_articles') }}" class="btn btn-cancel">Cancel</a>
+                <button type="submit" name="submit_action" value="draft" class="btn btn-draft">Save as Draft</button>
+                <button type="submit" name="submit_action" value="published" class="btn btn-submit">Submit</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById("checkScoreBtn").addEventListener("click", async function () {
+    const content = document.querySelector("textarea").value;
+
+    const response = await fetch("/fact-check-preview", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({content})
+    });
+
+    const data = await response.json();
+
+    document.getElementById("factCheckSection").style.display = "block";
+    document.getElementById("scoreValue").textContent = data.score;
+    document.getElementById("statusValue").textContent = data.status;
+
+    document.getElementById("ai_fact_check_score").value = data.score;
+    document.getElementById("ai_fact_check_status").value = data.status;
+});
+</script>
+
+{% endblock %}

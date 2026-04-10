@@ -470,12 +470,15 @@ def create_article():
 def edit_article(article_id):
     user_id = session.get("userID")
     if not user_id:
-        return redirect(url_for("login"))
+        return redirect(url_for("login.login"))
 
     article = article_controller.get_article(article_id)
 
     if not article or article["created_by"] != user_id:
         flash("You do not have permission to edit this article.", "error")
+
+        if (session.get("userType") or "").strip().lower() == "editor":
+            return redirect(url_for("editor_my_articles"))
         return redirect(url_for("my_articles"))
 
     categories = article_controller.get_categories()
@@ -517,9 +520,21 @@ def edit_article(article_id):
                 targetID=article_id,
                 targetType="Article"
             )
+
+            if (session.get("userType") or "").strip().lower() == "editor":
+                return redirect(url_for("editor_my_articles"))
             return redirect(url_for("my_articles"))
+
         else:
             flash("Failed to update article.", "error")
+
+    if (session.get("userType") or "").strip().lower() == "editor":
+        return render_template(
+            "editor_edit_article.html",
+            article=article,
+            categories=categories,
+            active_page="my_articles"
+        )
 
     return render_template(
         "edit_article.html",
@@ -532,12 +547,15 @@ def edit_article(article_id):
 def delete_article(article_id):
     user_id = session.get("userID")
     if not user_id:
-        return redirect(url_for("login"))
+        return redirect(url_for("login.login"))
 
     article = article_controller.get_article(article_id)
 
     if not article or article["created_by"] != user_id:
         flash("You do not have permission to delete this article.", "error")
+
+        if (session.get("userType") or "").strip().lower() == "editor":
+            return redirect(url_for("editor_my_articles"))
         return redirect(url_for("my_articles"))
 
     deleted = article_controller.delete_article(article_id)
@@ -545,22 +563,19 @@ def delete_article(article_id):
     if deleted:
         flash("Article deleted successfully!", "success")
         SystemLogCTL.logAction(
-        accountID=session["userID"],
-        action="Deleted Article",
-        targetID=article_id,
-        targetType="Article"
+            accountID=session["userID"],
+            action="Deleted Article",
+            targetID=article_id,
+            targetType="Article"
         )
     else:
         flash("Failed to delete article.", "error")
-        
+
+    if (session.get("userType") or "").strip().lower() == "editor":
+        return redirect(url_for("editor_my_articles"))
     return redirect(url_for("my_articles"))
 
 
-# @app.route("/testimonial")
-# def testimonial():
-#     if "userID" not in session:
-#         return redirect(url_for("login"))
-#     return render_template("testimonial.html")
 
 @app.route("/saved-articles")
 def saved_articles():
@@ -939,6 +954,74 @@ def editor_my_articles():
         articles=articles,
         keyword=keyword,
         status=status,
+        active_page="my_articles"
+    )
+
+@app.route("/editor/create_article", methods=["GET", "POST"])
+def editor_create_article():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor":
+        flash("Access denied.", "danger")
+        return redirect(url_for("login.login"))
+
+    if editor_status != "approved":
+        flash("Your editor account is not approved yet.", "warning")
+        return redirect(url_for("login.login"))
+
+    user_id = session.get("userID")
+
+    if request.method == "POST":
+        title = request.form.get("title")
+        category_id = request.form.get("category")
+        content = request.form.get("content")
+        ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
+        ai_fact_check_status = request.form.get("ai_fact_check_status")
+
+        status = request.form.get("submit_action")
+        if not status:
+            status = "draft"
+
+        featured_image = request.files.get("featured_image")
+        image_filename = None
+
+        if featured_image and featured_image.filename:
+            image_filename = secure_filename(featured_image.filename)
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
+            featured_image.save(save_path)
+
+        articleID = article_controller.create_article(
+            user_id=user_id,
+            title=title,
+            category_id=category_id,
+            content=content,
+            status=status,
+            featured_image=image_filename,
+            ai_fact_check_score=ai_fact_check_score,
+            ai_fact_check_status=ai_fact_check_status
+        )
+
+        if articleID:
+            SystemLogCTL.logAction(
+                accountID=session["userID"],
+                action="Created Article",
+                targetID=articleID,
+                targetType="Article"
+            )
+            flash("Article created successfully!", "success")
+            return redirect(url_for("editor_my_articles"))
+
+    categories = article_controller.get_categories()
+    current_time = datetime.now().strftime("%d %b %Y %H:%M:%S")
+
+    return render_template(
+        "editor_create_article.html",
+        categories=categories,
+        current_time=current_time,
         active_page="my_articles"
     )
 

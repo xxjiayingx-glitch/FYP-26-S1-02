@@ -1,0 +1,410 @@
+{% extends "editor_master.html" %}
+
+{% block title %}Edit Article{% endblock %}
+
+{% block content %}
+<style>
+    .edit-article-page {
+        max-width: 950px;
+        margin: 35px auto;
+        padding: 0 20px;
+    }
+
+    .edit-article-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+        padding: 30px;
+    }
+
+    .edit-article-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 22px;
+    }
+
+    .article-meta-box {
+        background: linear-gradient(to right, #f8fbff, #f9fafb);
+        border: 1px solid #dbeafe;
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 24px;
+    }
+
+    .article-meta-box p {
+        margin: 6px 0;
+        font-size: 14px;
+        color: #475569;
+    }
+
+    .form-section {
+        margin-bottom: 22px;
+    }
+
+    .form-section label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 700;
+        font-size: 14px;
+        color: #1f2937;
+    }
+
+    .form-section input[type="text"],
+    .form-section select,
+    .form-section textarea,
+    .form-section input[type="file"] {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background: #fff;
+        transition: all 0.2s ease;
+    }
+
+    .form-section input[type="text"]:focus,
+    .form-section select:focus,
+    .form-section textarea:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+    }
+
+    .form-section textarea {
+        min-height: 220px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .image-preview-box {
+        margin-top: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 14px;
+        background: #fafafa;
+    }
+
+    .image-preview-box strong {
+        display: block;
+        margin-bottom: 12px;
+        color: #1f2937;
+    }
+
+    .image-preview-box img {
+        max-width: 380px;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        border: 1px solid #d1d5db;
+        display: block;
+    }
+
+    .check-btn {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 11px 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .check-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .fact-check-card {
+        margin-top: 18px;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        background: #fcfcfd;
+        padding: 18px;
+    }
+
+    .fact-check-card h3 {
+        margin-top: 0;
+        margin-bottom: 14px;
+        color: #111827;
+        font-size: 22px;
+    }
+
+    .score-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+    }
+
+    .score-pill {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .score-pill.score {
+        background: #eef2ff;
+        color: #3730a3;
+    }
+
+    .score-pill.status {
+        background: #ecfeff;
+        color: #155e75;
+    }
+
+    #previewPanel {
+        border: 1px solid #d1d5db;
+        border-radius: 12px;
+        background: #fff;
+        min-height: 90px;
+        padding: 14px;
+        line-height: 1.8;
+        margin-top: 8px;
+        margin-bottom: 14px;
+    }
+
+    #issuesList {
+        margin-top: 8px;
+        padding-left: 20px;
+        color: #374151;
+    }
+
+    .highlight-supported {
+        background-color: #d4edda;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    .highlight-warning {
+        background-color: #fff3cd;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    .highlight-danger {
+        background-color: #f8d7da;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    .highlight-opinion {
+        background-color: #e5e7eb;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    .highlight-reported {
+        background-color: #dbeafe;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    .action-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .btn-link,
+    .btn-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 110px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-link {
+        background: #e5e7eb;
+        color: #111827;
+    }
+
+    .btn-submit {
+        background: #16a34a;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        background: #15803d;
+    }
+</style>
+
+<div class="edit-article-page">
+    <div class="edit-article-card">
+        <h1 class="edit-article-title">Edit Article</h1>
+
+        <div class="article-meta-box">
+            <p><strong>Created On:</strong> {{ article.created_at.strftime('%d %b %Y %H:%M:%S') if article.created_at else 'N/A' }}</p>
+            <p><strong>First Edited On:</strong> {{ article.first_edited_at.strftime('%d %b %Y %H:%M:%S') if article.first_edited_at else 'Not edited yet' }}</p>
+            <p><strong>Last Edited On:</strong> {{ article.last_edited_at.strftime('%d %b %Y %H:%M:%S') if article.last_edited_at else 'Not edited yet' }}</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="ai_fact_check_score" id="ai_fact_check_score" value="{{ article.aiFactCheckScore or 0 }}">
+            <input type="hidden" name="ai_fact_check_status" id="ai_fact_check_status" value="{{ article.aiFactCheckStatus or '' }}">
+
+            <div class="form-section">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" value="{{ article.articleTitle }}" required>
+            </div>
+
+            <div class="form-section">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    {% for cat in categories %}
+                        <option value="{{ cat.categoryID }}" {% if article.categoryID|string == cat.categoryID|string %}selected{% endif %}>
+                            {{ cat.categoryName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-section">
+                <label for="content">Content</label>
+                <textarea id="content" name="content" required>{{ article.content }}</textarea>
+            </div>
+
+            <div class="form-section">
+                <label for="featured_image">Upload New Featured Image</label>
+                <input type="file" id="featured_image" name="featured_image" accept="image/*">
+
+                {% if article.featured_image %}
+                <div class="image-preview-box">
+                    <strong>Current Image</strong>
+                    <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}" alt="Current article image">
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-section">
+                <label for="status">Status</label>
+                <select id="status" name="status" required>
+                    <option value="draft" {% if article.articleStatus|string == 'draft' %}selected{% endif %}>Draft</option>
+                    <option value="published" {% if article.articleStatus|string == 'published' %}selected{% endif %}>Published</option>
+                </select>
+            </div>
+
+            <button type="button" id="checkScoreBtn" class="check-btn">Recheck Current Score</button>
+
+            <div class="fact-check-card">
+                <h3>Fact Check Result</h3>
+
+                <div class="score-row">
+                    <span class="score-pill score">Score: <span id="scoreValue">{{ article.aiFactCheckScore or 0 }}</span>/100</span>
+                    <span class="score-pill status">Status: <span id="statusValue">{{ article.aiFactCheckStatus or 'Not checked yet' }}</span></span>
+                </div>
+
+                <label><strong>Highlighted Preview</strong></label>
+                <div id="previewPanel">Run the fact check again to refresh the highlighted preview.</div>
+
+                <label><strong>Issues Found</strong></label>
+                <ul id="issuesList">
+                    <li>Run the fact check again to see updated issues.</li>
+                </ul>
+            </div>
+
+            <div class="action-row">
+                <a href="{{ url_for('editor_my_articles') }}" class="btn-link">Cancel</a>
+                <button type="submit" class="btn-submit">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById("checkScoreBtn").addEventListener("click", async function () {
+    const content = document.getElementById("content").value.trim();
+
+    if (!content) {
+        alert("Please enter article content first.");
+        return;
+    }
+
+    try {
+        const response = await fetch("/fact-check-preview", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ content: content })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.error || "Fact check failed.");
+            return;
+        }
+
+        document.getElementById("scoreValue").textContent = data.score;
+        document.getElementById("statusValue").textContent = data.status;
+        document.getElementById("ai_fact_check_score").value = data.score;
+        document.getElementById("ai_fact_check_status").value = data.status;
+
+        renderPreview(data.sentences);
+        renderIssues(data.sentences);
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong while checking the article.");
+    }
+});
+
+function renderPreview(results) {
+    const previewPanel = document.getElementById("previewPanel");
+    previewPanel.innerHTML = "";
+
+    results.forEach(item => {
+        const span = document.createElement("span");
+        span.textContent = item.text + " ";
+
+        if (item.label === "reported_fact") {
+            span.className = "highlight-reported";
+        } else if (item.label === "supported") {
+            span.className = "highlight-supported";
+        } else if (item.label === "needs_evidence") {
+            span.className = "highlight-warning";
+        } else if (item.label === "contradicted") {
+            span.className = "highlight-danger";
+        } else {
+            span.className = "highlight-opinion";
+        }
+
+        span.title = item.reason;
+        previewPanel.appendChild(span);
+    });
+}
+
+function renderIssues(results) {
+    const issuesList = document.getElementById("issuesList");
+    issuesList.innerHTML = "";
+
+    let foundIssue = false;
+
+    results.forEach((item, index) => {
+        if (item.label === "needs_evidence" || item.label === "contradicted" || item.label === "opinion") {
+            foundIssue = true;
+            const li = document.createElement("li");
+            li.textContent = "Sentence " + (index + 1) + ": " + item.reason;
+            issuesList.appendChild(li);
+        }
+    });
+
+    if (!foundIssue) {
+        const li = document.createElement("li");
+        li.textContent = "No major credibility issues found.";
+        issuesList.appendChild(li);
+    }
+}
+</script>
+{% endblock %}
