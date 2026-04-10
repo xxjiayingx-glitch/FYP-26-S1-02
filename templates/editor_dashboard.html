@@ -1,6 +1,149 @@
 {% extends "editor_master.html" %}
 
+{% block title %}Editor Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== DASHBOARD ===== */
+.dashboard-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+/* Cards */
+.stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    flex: 1;
+    min-width: 200px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e6e9ef;
+}
+
+.stat-title {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.stat-change {
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.green { color: green; }
+.red { color: red; }
+
+/* Action Section */
+.action-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #d93025;
+    margin-bottom: 10px;
+}
+
+.warning {
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* Table */
+.table-box {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e6e9ef;
+    padding: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    font-size: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e6e9ef;
+}
+
+td {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Button */
+.review-btn {
+    margin-top: 20px;
+    background: #4a7cff;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.review-btn:hover {
+    background: #3a65d6;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Editor Dashboard</h2>
-<p>Welcome to your dashboard.</p>
+
+<div class="dashboard-title">Editor’s Dashboard</div>
+
+<!-- STAT CARDS -->
+<div class="stats">
+    <div class="stat-card">
+        <div class="stat-title">Total Articles</div>
+        <div class="stat-value">{{ total_articles }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-title">Pending Approval</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-title">Rejected Articles</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-title">Approved Articles</div>
+    </div>
+</div>
+
+<!-- ACTION SECTION -->
+<div class="action-title">Action needed !</div>
+<div class="warning">⚠ Pending Approval for Articles</div>
+
+<div class="table-box">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Submitted On</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<button class="review-btn">Review Now</button>
+
 {% endblock %}

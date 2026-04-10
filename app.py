@@ -916,9 +916,20 @@ def editor_dashboard():
     if editor_status != "approved":
         return redirect(url_for("login.login"))
 
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(articleID) FROM Article")
+    result = cursor.fetchone()
+    total_articles = list(result.values())[0]
+
+    cursor.close()
+    conn.close()
+
     return render_template(
         "editor_dashboard.html",
-        active_page="dashboard"
+        active_page="dashboard",
+        total_articles=total_articles
     )
     
 @app.route("/editor/category_articles")
