@@ -296,14 +296,16 @@
                         <label>Primary Area of Expertise</label>
                         <select name="expertise_area">
                             <option value="">Select expertise</option>
-                            <option value="Politics" {% if profile and profile.expertiseArea == 'Politics' %}selected{% endif %}>Politics</option>
-                            <option value="War and Conflict" {% if profile and profile.expertiseArea == 'War and Conflict' %}selected{% endif %}>War and Conflict</option>
-                            <option value="Entertainment" {% if profile and profile.expertiseArea == 'Entertainment' %}selected{% endif %}>Entertainment</option>
-                            <option value="Science" {% if profile and profile.expertiseArea == 'Science' %}selected{% endif %}>Science</option>
-                            <option value="Sports" {% if profile and profile.expertiseArea == 'Sports' %}selected{% endif %}>Sports</option>
-                            <option value="Finance" {% if profile and profile.expertiseArea == 'Finance' %}selected{% endif %}>Finance</option>
                             <option value="Technology" {% if profile and profile.expertiseArea == 'Technology' %}selected{% endif %}>Technology</option>
-                            <option value="General News" {% if profile and profile.expertiseArea == 'General News' %}selected{% endif %}>General News</option>
+                            <option value="Politics" {% if profile and profile.expertiseArea == 'Politics' %}selected{% endif %}>Politics</option>
+                            <option value="Sports" {% if profile and profile.expertiseArea == 'Sports' %}selected{% endif %}>Sports</option>
+                            <option value="Education" {% if profile and profile.expertiseArea == 'Education' %}selected{% endif %}>Education</option>
+                            <option value="Art" {% if profile and profile.expertiseArea == 'Art' %}selected{% endif %}>Art</option>
+                            <option value="Health" {% if profile and profile.expertiseArea == 'Health' %}selected{% endif %}>Health</option>
+                            <option value="Parenting" {% if profile and profile.expertiseArea == 'Parenting' %}selected{% endif %}>Parenting</option>
+                            <option value="Entertainment" {% if profile and profile.expertiseArea == 'Entertainment' %}selected{% endif %}>Entertainment</option>
+                            <option value="Business" {% if profile and profile.expertiseArea == 'Business' %}selected{% endif %}>Business</option>
+                            <option value="Government" {% if profile and profile.expertiseArea == 'Government' %}selected{% endif %}>Government</option>
                         </select>
                     </div>
 
