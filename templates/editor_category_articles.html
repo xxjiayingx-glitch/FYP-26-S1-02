@@ -1,6 +1,96 @@
 {% extends "editor_master.html" %}
 
+{% block extra_css %}
+<style>
+    .page-title {
+        font-size: 28px;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        padding: 18px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .table th {
+        text-align: left;
+        padding: 12px;
+        background: #eef2ff;
+        font-weight: 700;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table td {
+        padding: 12px;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    .table tr:hover {
+        background: #f9fafb;
+    }
+
+    .badge {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: #e0f2fe;
+        color: #0369a1;
+        font-weight: 600;
+    }
+
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Category Articles</h2>
-<p>View own category articles</p>
+
+<div class="page-title">Category Articles</div>
+<div class="page-subtitle">View articles under your assigned category</div>
+
+<div class="card">
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Article Id.</th>
+                <th>Title</th>
+                <th>Categories</th>
+                <th>Author</th>
+                <th>Created on</th>
+                <th>Approved on</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for a in articles %}
+            <tr onclick="window.location='{{ url_for('article_detail', article_id=a.articleID) }}'"
+                style="cursor: pointer;">
+                
+                <td>{{ a.articleID }}</td>
+                <td><strong>{{ a.articleTitle }}</strong></td>
+                <td><span class="badge">{{ a.categoryName }}</span></td>
+                <td>{{ a.created_by }}</td>
+                <td>{{ a.created_at }}</td>
+                <td>{{ a.approved_at if a.approved_at else '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+</div>
+
 {% endblock %}

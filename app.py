@@ -937,11 +937,75 @@ def editor_category_articles():
     if "userID" not in session:
         return redirect(url_for("login.login"))
 
+    user_id = session["userID"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # 1. Get editor expertise area
+    cursor.execute("""
+        SELECT expertiseArea
+        FROM UserAccount
+        WHERE userID = %s
+    """, (user_id,))
+    editor = cursor.fetchone()
+
+    expertise = editor["expertiseArea"] if editor else None
+
+    # 2. Get categoryID from Category table
+    cursor.execute("""
+        SELECT categoryID
+        FROM ArticleCategory
+        WHERE categoryName = %s AND categoryStatus = 'active'
+    """, (expertise,))
+    category = cursor.fetchone()
+
+    category_id = category["categoryID"] if category else None
+
+    # 3. Get filtered articles
+    if category_id:
+        cursor.execute("""
+            SELECT a.articleID, a.articleTitle, c.categoryName,
+                   a.created_by, a.created_at
+            FROM Article a
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            WHERE a.categoryID = %s
+            ORDER BY a.created_at DESC
+        """, (category_id,))
+        articles = cursor.fetchall()
+    else:
+        articles = []
+
+    cursor.close()
+    conn.close()
+
     return render_template(
         "editor_category_articles.html",
-        active_page="category"
+        active_page="category",
+        articles=articles,
+        expertise=expertise
     )
 
+@app.route("/editor/article_preview/<int:article_id>")
+def editor_article_preview(article_id):
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_id = session.get("userID")
+    
+    article = article_controller.get_article(article_id)
+
+    if not article:
+        return jsonify({"error": "Not found"})
+
+    return jsonify({
+        "title": article["articleTitle"],
+        "content": article["content"],
+        "author": article["created_by"],
+        "category": article["categoryName"],
+        "created_at": article["created_at"],
+        "approved_at": article["approved_at"]
+    })
 
 @app.route("/editor/my_articles")
 def editor_my_articles():
