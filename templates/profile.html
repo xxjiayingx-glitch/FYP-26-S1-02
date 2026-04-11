@@ -164,8 +164,9 @@
                         <label for="interests">Interests (Min 1, Max 5)</label>
 
                         <select id="interests" name="interests[]" multiple>
-                            {% for item in ['Technology', 'Politics', 'Sports', 'Education', 'Art', 'Health', 'Parenting', 'Entertainment', 'Business', 'Government'] %}
-                            <option value="{{ item }}" {% if item.lower() in user.selected_interests %}selected{% endif %}>
+                            {% for item in categories %}
+                            <option value="{{ item }}"
+                                {% if item.lower() in user.selected_interests %}selected{% endif %}>
                                 {{ item }}
                             </option>
                             {% endfor %}

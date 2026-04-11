@@ -620,6 +620,25 @@ class UserAccount:
         conn.commit()
         cursor.close()
         conn.close()
+        
+    @staticmethod
+    def get_all_categories():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT categoryName
+            FROM ArticleCategory
+            WHERE categoryStatus = 'active'
+            ORDER BY categoryName ASC
+        """)
+
+        categories = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return [row["categoryName"] for row in categories]
 
     # ==============================
     # REGISTRATION / VERIFICATION

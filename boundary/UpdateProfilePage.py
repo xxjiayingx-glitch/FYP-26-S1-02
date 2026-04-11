@@ -34,7 +34,9 @@ def profile_page():
 
     eligible_article_count = UpdateProfileCTL.verify_count(session["userID"])
 
-    return render_template("profile.html", user=user, eligible_article_count=eligible_article_count, force_complete=False)
+    categories = UserAccount.get_all_categories()
+    
+    return render_template("profile.html", user=user, eligible_article_count=eligible_article_count, force_complete=False, categories=categories)
 
 
 @profile_bp.route("/update", methods=["POST"])
@@ -243,7 +245,8 @@ def complete_profile():
             return render_template(
                 "profile.html",
                 user=form_user,
-                force_complete=True
+                force_complete=True,
+                categories=UserAccount.get_all_categories()
             )
 
         if not dob:
@@ -251,7 +254,8 @@ def complete_profile():
             return render_template(
                 "profile.html",
                 user=form_user,
-                force_complete=True
+                force_complete=True,
+                categories=UserAccount.get_all_categories()
             )
 
         if not interests:
@@ -259,7 +263,8 @@ def complete_profile():
             return render_template(
                 "profile.html",
                 user=form_user,
-                force_complete=True
+                force_complete=True,
+                categories=UserAccount.get_all_categories()
             )
 
         control = UpdateProfileCTL()
@@ -268,9 +273,12 @@ def complete_profile():
         session["profileCompleted"] = 1
 
         return redirect(url_for("dashboard"))
-
+    
+    categories = UserAccount.get_all_categories()
+    
     return render_template(
         "profile.html",
         user=user,
-        force_complete=True
+        force_complete=True,
+        categories=categories
     )
