@@ -255,16 +255,12 @@
                         <label for="expertise_area">Area of Expertise</label>
                         <select id="expertise_area" name="expertise_area" required>
                             <option value="">Select expertise</option>
-                            <option value="Technology">Technology</option>
-                            <option value="Politics">Politics</option>
-                            <option value="Sports">Sports</option>
-                            <option value="Education">Education</option>
-                            <option value="Art">Art</option>
-                            <option value="Health">Health</option>
-                            <option value="Parenting">Parenting</option>
-                            <option value="Entertainment">Entertainment</option>
-                            <option value="Business">Business</option>
-                            <option value="Government">Government</option>
+
+                            {% for c in categories %}
+                                <option value="{{ c.categoryName }}">
+                                    {{ c.categoryName }}
+                                </option>
+                            {% endfor %}
                         </select>
                     </div>
 

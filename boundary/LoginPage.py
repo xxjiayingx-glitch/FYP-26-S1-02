@@ -75,6 +75,16 @@ def login():
 
 @login_bp.route("/editor-applicant", methods=["GET", "POST"])
 def editor_applicant():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT categoryID, categoryName
+        FROM ArticleCategory
+        WHERE categoryStatus = 'active'
+    """)
+    categories = cursor.fetchall()
+
     if request.method == "POST":
         full_name = request.form.get("full_name", "").strip()
         username = request.form.get("username", "").strip()
@@ -104,9 +114,6 @@ def editor_applicant():
                 "editor_applicant.html",
                 error="Password must be at least 10 characters."
             )
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
 
         try:
             # Check if email or username already exists
@@ -201,8 +208,11 @@ def editor_applicant():
         finally:
             cursor.close()
             conn.close()
-
-    return render_template("editor_applicant.html")
+            
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    return render_template("editor_applicant.html",categories=categories)
 
 
 @login_bp.route("/forgot-password", methods=["GET", "POST"])
