@@ -1,4 +1,5 @@
 from entity.AutoPublishRule import AutoPublishRule
+from entity.CredibilityStatusRule import CredibilityStatusRule
 
 class AutoPublish:
     def saveAutoPublishRules(self, minCredibilityScore, updated_by):
@@ -23,3 +24,51 @@ class AutoPublish:
 
     def getCurrentAutoPublishRule(self):
         return AutoPublishRule.getCurrentRule()
+    
+    
+    #-----------------------------------#
+    # update credibility threholds rule #
+    #-----------------------------------#
+    def getCurrentCredibilityStatusRule(self):
+        return CredibilityStatusRule.get_active_rule()
+
+    def update_credibility_thresholds(self, form_data, admin_id):
+        try:
+            verified = float(form_data.get("verifiedMinScore", 0))
+            highly_credible = float(form_data.get("highlyCredibleMinScore", 0))
+            generally_reliable = float(form_data.get("generallyReliableMinScore", 0))
+            mixed = float(form_data.get("mixedMinScore", 0))
+            low_confidence = float(form_data.get("lowConfidenceMinScore", 0))
+            misleading_cutoff = float(form_data.get("misleadingCutoffScore", 0))
+        except ValueError:
+            return False, "All threshold values must be numeric."
+
+        values = [
+            verified,
+            highly_credible,
+            generally_reliable,
+            mixed,
+            low_confidence,
+            misleading_cutoff
+        ]
+
+        if any(v < 0 or v > 100 for v in values):
+            return False, "All threshold values must be between 0 and 100."
+
+        if not (verified >= highly_credible >= generally_reliable >= mixed >= low_confidence):
+            return False, "Threshold order must be: Verified ≥ Highly Credible ≥ Generally Reliable ≥ Mixed ≥ Low Confidence."
+
+        updated = CredibilityStatusRule.update_active_rule(
+            verified,
+            highly_credible,
+            generally_reliable,
+            mixed,
+            low_confidence,
+            misleading_cutoff,
+            admin_id
+        )
+
+        if not updated:
+            return False, "Failed to update credibility thresholds."
+
+        return True, "Credibility thresholds updated successfully."

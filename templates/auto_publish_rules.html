@@ -9,8 +9,8 @@
 {% block content %}
 
 <section class="page-header">
-    <h1>Configure Auto-Publish Rules</h1>
-    <p>Set the minimum credibility score required for automatic publishing.</p>
+    <h1>Configure Auto-Publishing and Credibility Rules</h1>
+    <p>Set the minimum credibility score required for automatic publishing and define the credibility status thresholds.</p>
 </section>
 
 {% if error %}
@@ -23,6 +23,8 @@
 
 <section class="form-card">
     <form method="POST" action="{{ url_for('auto_publish.auto_publish_settings_page') }}">
+        
+        <h2>Auto-Publish Rule</h2>
         <div class="form-group">
             <label for="minCredibilityScore">Minimum Credibility Score Threshold</label>
             <input
@@ -38,18 +40,132 @@
             >
         </div>
 
+        <hr>
+
+        <h2>Credibility Status Thresholds</h2>
+
+        <p class="form-hint">
+            Threshold order must be: Verified ≥ Highly Credible ≥ Generally Reliable ≥ Mixed ≥ Low Confidence.
+        </p>
+
+        <div class="form-group">
+            <label for="verifiedMinScore">Verified Minimum Score</label>
+            <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                id="verifiedMinScore"
+                name="verifiedMinScore"
+                value="{{ current_credibility_rule.verifiedMinScore if current_credibility_rule else '' }}"
+                required
+            >
+        </div>
+
+        <div class="threshold-grid">
+            <div class="form-group">
+                <label for="highlyCredibleMinScore">Highly Credible Minimum Score</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    id="highlyCredibleMinScore"
+                    name="highlyCredibleMinScore"
+                    value="{{ current_credibility_rule.highlyCredibleMinScore if current_credibility_rule else '' }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="generallyReliableMinScore">Generally Reliable Minimum Score</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    id="generallyReliableMinScore"
+                    name="generallyReliableMinScore"
+                    value="{{ current_credibility_rule.generallyReliableMinScore if current_credibility_rule else '' }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="mixedMinScore">Mixed / Needs Verification Minimum Score</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    id="mixedMinScore"
+                    name="mixedMinScore"
+                    value="{{ current_credibility_rule.mixedMinScore if current_credibility_rule else '' }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="lowConfidenceMinScore">Low Confidence Minimum Score</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    id="lowConfidenceMinScore"
+                    name="lowConfidenceMinScore"
+                    value="{{ current_credibility_rule.lowConfidenceMinScore if current_credibility_rule else '' }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="misleadingCutoffScore">Potentially Misleading Cutoff Score</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    id="misleadingCutoffScore"
+                    name="misleadingCutoffScore"
+                    value="{{ current_credibility_rule.misleadingCutoffScore if current_credibility_rule else '' }}"
+                    required
+                >
+            </div>
+        </div>
+
         <button type="submit" class="save-btn">Save Configuration</button>
     </form>
 </section>
 
 {% if current_rule %}
 <section class="info-card">
-    <h2>Current Rule</h2>
+    <h2>Current Auto-Publish Rule</h2>
     <p><strong>Minimum Credibility Score:</strong> {{ current_rule.minCredibilityScore }}</p>
     <p><strong>Status:</strong> {{ current_rule.ruleStatus }}</p>
     <p><strong>Last Updated:</strong> 
         {% if current_rule.updated_at %}
             {{ current_rule.updated_at.strftime('%d/%m/%Y') if current_rule.updated_at.__class__.__name__ == 'datetime' else current_rule.updated_at }}
+        {% else %}
+            -
+        {% endif %}
+    </p>
+</section>
+{% endif %}
+
+{% if current_credibility_rule %}
+<section class="info-card">
+    <h2>Current Credibility Status Rule</h2>
+    <p><strong>Verified Minimum Score:</strong> {{ current_credibility_rule.verifiedMinScore }}</p>
+    <p><strong>Highly Credible Minimum Score:</strong> {{ current_credibility_rule.highlyCredibleMinScore }}</p>
+    <p><strong>Generally Reliable Minimum Score:</strong> {{ current_credibility_rule.generallyReliableMinScore }}</p>
+    <p><strong>Mixed / Needs Verification Minimum Score:</strong> {{ current_credibility_rule.mixedMinScore }}</p>
+    <p><strong>Low Confidence Minimum Score:</strong> {{ current_credibility_rule.lowConfidenceMinScore }}</p>
+    <p><strong>Potentially Misleading Cutoff Score:</strong> {{ current_credibility_rule.misleadingCutoffScore }}</p>
+    <p><strong>Status:</strong> {{ current_credibility_rule.ruleStatus }}</p>
+    <p><strong>Last Updated:</strong> 
+        {% if current_credibility_rule.updated_at %}
+            {{ current_credibility_rule.updated_at.strftime('%d/%m/%Y') if current_credibility_rule.updated_at.__class__.__name__ == 'datetime' else current_credibility_rule.updated_at }}
         {% else %}
             -
         {% endif %}

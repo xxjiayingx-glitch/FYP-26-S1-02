@@ -1,6 +1,142 @@
 {% extends "editor_master.html" %}
 
+{% block title %}Articles Reported{% endblock %}
+
 {% block content %}
-<h2>Articles Reported</h2>
-<p>Review and manage reported articles</p>
+<style>
+    .page-header h1 {
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .page-header p {
+        color: #54aee8;
+        font-size: 16px;
+        margin-bottom: 28px;
+    }
+
+    .report-table {
+        width: 100%;
+        max-width: 1380px;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #efeffb;
+        border: 1px solid #cfd2f9;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .report-table thead th {
+        text-align: left;
+        padding: 18px 20px;
+        font-size: 16px;
+        border-bottom: 1px solid #cfd2f9;
+    }
+
+    .report-table tbody td {
+        padding: 20px 20px;
+        font-size: 16px;
+        border-bottom: 1px solid #cfd2f9;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .pagination {
+        margin-top: 36px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 18px;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .review-btn {
+        text-decoration: None;
+        background: #cfd4ff;
+        color: #222;
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+    }
+
+    .review-btn:hover {
+        opacity: 0.9;
+    }
+</style>
+
+<section class="page-header">
+    <h1>Articles Reported</h1>
+    <p>Review and manage article reported</p>
+</section>
+
+<section class="table-section">
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th>Report ID</th>
+                <th>Article ID</th>
+                <th>Article Title</th>
+                <th>Article Category</th>
+                <th>Total Reports</th>
+                <th>Latest Report Date</th>
+                <th>Article Status</th>
+                <th>Review Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% if reportedArticles %}
+            {% for article in reportedArticles %}
+            <tr>
+                <td>{{ article.reportID }}</td>
+                <td>{{ article.articleID }}</td>
+                <td>{{ article.articleTitle }}</td>
+                <td>{{ article.category }}</td>
+                <td>{{ article.totalReports }}</td>
+                <td>
+                    {% if article.latestReportDate %}
+                        {{ article.latestReportDate.strftime('%d/%m/%Y') if article.latestReportDate.__class__.__name__ == 'datetime' else article.latestReportDate }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ article.articleStatus }}</td>
+                <td>{{ article.reportStatus }}</td>
+                <td>
+                    <a class="review-btn" href="/editor/article-reported/{{ article.reportID }}">Review</a>
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="8">No reported articles found</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+</section>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+        <a href="?page={{ page-1 }}">&lt;</a>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+        <a class="{% if p == page %}active{% endif %}" href="?page={{ p }}">{{ p }}</a>
+    {% endfor %}
+
+    {% if page < total_pages %}
+        <a href="?page={{ page+1 }}">&gt;</a>
+    {% endif %}
+</div>
+{% endif %}
 {% endblock %}

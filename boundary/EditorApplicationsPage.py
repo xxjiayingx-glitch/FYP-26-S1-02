@@ -128,7 +128,7 @@ def editor_applications_page():
     conn.close()
 
     return render_template(
-        "editor_applications.html",
+        "admin_view_editor_applications.html",
         admin=admin,
         applications=applications,
         pending_count=pending_count,

@@ -1112,12 +1112,12 @@ def editor_approval_articles():
     )
 
     
-@app.route("/editor/articles_reported")
-def editor_articles_reported():
-    return render_template(
-        "editor_articles_reported.html",
-        active_page="reported"
-    )    
+# @app.route("/editor/articles_reported")
+# def editor_articles_reported():
+#     return render_template(
+#         "editor_articles_reported.html",
+#         active_page="reported"
+#     )    
 
 
 @app.route("/editor/manage_profile", methods=["GET", "POST"])

@@ -10,6 +10,7 @@ from entity.LLMCache import LLMCache
 from entity.FactcheckCache import FactcheckCache
 from entity.ClaimVerificationLog import ClaimVerificationLog
 from entity.AIFeedbackCache import AIFeedbackCache
+from entity.CredibilityStatusRule import CredibilityStatusRule
 import time
 from datetime import datetime
 import logging
@@ -2704,13 +2705,39 @@ class FactCheckController:
     #         return "High Risk"
 
     @staticmethod
+    def get_status_thresholds():
+        rule_entity = CredibilityStatusRule()
+        rule = rule_entity.get_active_rule()
+
+        if not rule:
+            return {
+                "verified_min": 85,
+                "highly_credible_min": 75,
+                "generally_reliable_min": 65,
+                "mixed_min": 50,
+                "low_confidence_min": 30,
+                "misleading_cutoff": 40
+            }
+
+        return {
+            "verified_min": float(rule["verifiedMinScore"]),
+            "highly_credible_min": float(rule["highlyCredibleMinScore"]),
+            "generally_reliable_min": float(rule["generallyReliableMinScore"]),
+            "mixed_min": float(rule["mixedMinScore"]),
+            "low_confidence_min": float(rule["lowConfidenceMinScore"]),
+            "misleading_cutoff": float(rule["misleadingCutoffScore"])
+        }
+
+    @staticmethod
     def get_status(score, reasons=None):
         score = max(0, min(score, 100))
         reasons = reasons or []
 
+        thresholds = FactCheckController.get_status_thresholds()
+
         has_stat_match = any("matches official data" in r.lower() for r in reasons)
         has_stat_mismatch = any(
-            "statistical mismatch" in r.lower() or 
+            "statistical mismatch" in r.lower() or
             "differs from the latest available official data" in r.lower()
             for r in reasons
         )
@@ -2739,30 +2766,30 @@ class FactCheckController:
 
         # Strong negative signals
         if has_stat_mismatch or has_factcheck_false:
-            if score < 40:
+            if score < thresholds["misleading_cutoff"]:
                 return "Potentially Misleading"
             return "Low Confidence"
 
         # Strong verified signals
-        if (has_stat_match or has_factcheck_true) and score >= 85:
+        if (has_stat_match or has_factcheck_true) and score >= thresholds["verified_min"]:
             return "Verified"
 
         # High confidence reporting
-        if score >= 75:
+        if score >= thresholds["highly_credible_min"]:
             return "Highly Credible"
 
         # Generally acceptable
-        if score >= 65:
+        if score >= thresholds["generally_reliable_min"]:
             return "Generally Reliable"
 
         # Mixed signals
-        if score >= 50:
+        if score >= thresholds["mixed_min"]:
             if has_llm_unlikely or has_llm_questionable:
                 return "Mixed / Needs Verification"
             return "Generally Reliable"
 
         # Weak credibility
-        if score >= 30:
+        if score >= thresholds["low_confidence_min"]:
             return "Low Confidence"
 
         # Very risky

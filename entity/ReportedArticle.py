@@ -51,23 +51,41 @@ class ReportedArticle:
 
     
     @staticmethod
-    def get_article_reported():
+    def get_article_reported(expertise_category=None):
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("""
+        query = """
             SELECT
-                ra.reportID,
+                MIN(ra.reportID) AS reportID,
                 a.articleID,
                 a.articleTitle,
+                ac.categoryName as category,
                 COUNT(ra.articleID) AS totalReports,
                 MAX(ra.reported_at) AS latestReportDate,
                 a.articleStatus,
-                ra.reportStatus
+                MIN(ra.reportStatus) AS reportStatus
             FROM ReportedArticle ra
             JOIN Article a ON ra.articleID = a.articleID
-            GROUP BY a.articleID
+            LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
+            WHERE 1=1
+        """
+
+        params = []
+
+        if expertise_category:
+            query += " AND ac.categoryName = %s"
+            params.append(expertise_category)
+
+        query += """
+            GROUP BY a.articleID, a.articleTitle, ac.categoryName, a.articleStatus
             ORDER BY totalReports DESC
-        """)
+        """
+
+        print("expertise_category =", expertise_category)
+        print("query =", query)
+        print("params =", params)
+        
+        cursor.execute(query, params)
         result = cursor.fetchall()
         conn.close()
         return result

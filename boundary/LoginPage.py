@@ -48,6 +48,7 @@ def login():
             session["profileImage"] = user.get("profileImage")
             session["profileCompleted"] = user.get("profileCompleted", 0)
             session["editorApprovalStatus"] = user.get("editorApprovalStatus", "")
+            session["expertiseArea"] = user.get("expertiseArea")
 
             SystemLogCTL.logAction(
                 accountID=user["userID"],
