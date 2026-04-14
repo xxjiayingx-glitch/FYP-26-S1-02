@@ -6,6 +6,8 @@ from control.SystemLogCTL import SystemLogCTL
 import secrets
 from server.email_service import send_forgot_password_email
 from entity.db_connection import get_db_connection
+import os
+from werkzeug.utils import secure_filename
 
 login_bp = Blueprint("login", __name__)
 auth = AuthController()
@@ -76,68 +78,145 @@ def login():
 
 @login_bp.route("/editor-applicant", methods=["GET", "POST"])
 def editor_applicant():
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    conn = None
+    cursor = None
 
-    cursor.execute("""
-        SELECT categoryID, categoryName
-        FROM ArticleCategory
-        WHERE categoryStatus = 'active'
-    """)
-    categories = cursor.fetchall()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    if request.method == "POST":
-        full_name = request.form.get("full_name", "").strip()
-        username = request.form.get("username", "").strip()
-        email = request.form.get("email", "").strip()
-        phone = request.form.get("phone", "").strip()
-        password = request.form.get("password", "").strip()
-        expertise_area = request.form.get("expertise_area", "").strip()
-        years_experience = request.form.get("years_experience", "").strip()
-        bio = request.form.get("bio", "").strip()
-        portfolio_link = request.form.get("portfolio_link", "").strip()
+        cursor.execute("""
+            SELECT categoryID, categoryName
+            FROM ArticleCategory
+            WHERE categoryStatus = 'active'
+        """)
+        categories = cursor.fetchall()
 
-        supporting_document = request.files.get("supporting_document")
-        document_filename = None
+        if request.method == "POST":
+            full_name = request.form.get("full_name", "").strip()
+            username = request.form.get("username", "").strip()
+            email = request.form.get("email", "").strip()
+            phone = request.form.get("phone", "").strip()
+            password = request.form.get("password", "").strip()
+            expertise_area = request.form.get("expertise_area", "").strip()
+            years_experience = request.form.get("years_experience", "").strip()
+            bio = request.form.get("bio", "").strip()
+            portfolio_link = request.form.get("portfolio_link", "").strip()
 
-        if supporting_document and supporting_document.filename:
-            document_filename = supporting_document.filename
+            # supporting_document = request.files.get("supporting_document")
+            # document_filename = None
 
-        # Basic validation
-        if not all([full_name, username, email, phone, password, expertise_area, years_experience, bio]):
-            return render_template(
-                "editor_applicant.html",
-                error="Please fill in all required fields."
-            )
+            # if supporting_document and supporting_document.filename:
+            #     document_filename = supporting_document.filename
 
-        if len(password) < 10:
-            return render_template(
-                "editor_applicant.html",
-                error="Password must be at least 10 characters."
-            )
+            # Basic validation
+            if not all([full_name, username, email, phone, password, expertise_area, years_experience, bio]):
+                return render_template(
+                    "editor_applicant.html",
+                    error="Please fill in all required fields."
+                )
 
-        try:
+            if len(password) < 10:
+                return render_template(
+                    "editor_applicant.html",
+                    error="Password must be at least 10 characters."
+                )
+            
+            name_parts = full_name.split()
+            first_name = name_parts[0] if len(name_parts) > 0 else ""
+            last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+
+            UPLOAD_FOLDER = os.path.join("static", "uploads", "editor_documents")
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+            supporting_document = request.files.get("supporting_document")
+            document_filename = None
+
+            if supporting_document and supporting_document.filename:
+                safe_filename = secure_filename(supporting_document.filename)
+                file_path = os.path.join(UPLOAD_FOLDER, safe_filename)
+                supporting_document.save(file_path)
+                document_filename = f"uploads/editor_documents/{safe_filename}"
+
             # Check if email or username already exists
-            check_sql = """
-                SELECT userID
+            cursor.execute("""
+                SELECT userID, email, username, editorApprovalStatus, supportingDocument
                 FROM UserAccount
                 WHERE email = %s OR username = %s
-            """
-            cursor.execute(check_sql, (email, username))
+            """, (email, username))
             existing_user = cursor.fetchone()
 
             if existing_user:
-                cursor.close()
-                conn.close()
+                existing_status = (existing_user.get("editorApprovalStatus") or "").strip().lower()
+                existing_user_id = existing_user.get("userID")
+                existing_email = (existing_user.get("email") or "").strip().lower()
+                existing_username = (existing_user.get("username") or "").strip().lower()
+                existing_document = existing_user.get("supportingDocument")
+
+                if existing_status == "rejected" and existing_email == email.lower() and existing_username == username.lower():
+                    hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
+                    final_document = document_filename if document_filename else existing_document
+
+                    update_sql = """
+                        UPDATE UserAccount
+                        SET
+                            pwd = %s,
+                            first_name = %s,
+                            last_name = %s,
+                            phone = %s,
+                            userType = %s,
+                            accountStatus = %s,
+                            editorApprovalStatus = %s,
+                            expertiseArea = %s,
+                            yearsExperience = %s,
+                            editorBio = %s,
+                            portfolioLink = %s,
+                            supportingDocument = %s,
+                            editorAdminRemarks = NULL,
+                            profileCompleted = %s,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE userID = %s
+                    """
+
+                    cursor.execute(
+                        update_sql,
+                        (
+                            hashed_password,
+                            first_name,
+                            last_name,
+                            phone,
+                            "editor",
+                            "active",
+                            "pending",
+                            expertise_area,
+                            years_experience,
+                            bio,
+                            portfolio_link,
+                            final_document,
+                            1,
+                            existing_user_id
+                        )
+                    )
+
+                    conn.commit()
+
+                    return redirect(
+                        url_for(
+                            "login.login",
+                            success="Editor application resubmitted successfully. Please wait for admin approval.We will notify you by email."
+                        )
+                    )
+
                 return render_template(
                     "editor_applicant.html",
+                    categories=categories,
                     error="Email or username already exists."
                 )
 
             # Split full name into first_name and last_name
-            name_parts = full_name.split()
-            first_name = name_parts[0] if len(name_parts) > 0 else ""
-            last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+            # name_parts = full_name.split()
+            # first_name = name_parts[0] if len(name_parts) > 0 else ""
+            # last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
 
             hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
@@ -146,7 +225,7 @@ def editor_applicant():
             # first_name, last_name, phone, userType, accountStatus,
             # editorApprovalStatus, expertiseArea, yearsExperience,
             # editorBio, portfolioLink, supportingDocument, profileCompleted
-            insert_sql = """
+            cursor.execute("""
                 INSERT INTO UserAccount
                 (
                     username,
@@ -166,54 +245,50 @@ def editor_applicant():
                     profileCompleted
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-
-            cursor.execute(
-                insert_sql,
-                (
-                    username,
-                    email,
-                    hashed_password,
-                    first_name,
-                    last_name,
-                    phone,
-                    "editor",
-                    "active",
-                    "pending",
-                    expertise_area,
-                    years_experience,
-                    bio,
-                    portfolio_link,
-                    document_filename,
-                    1
-                )
-            )
+            """,(
+                username,
+                email,
+                hashed_password,
+                first_name,
+                last_name,
+                phone,
+                "editor",
+                "active",
+                "pending",
+                expertise_area,
+                years_experience,
+                bio,
+                portfolio_link,
+                document_filename,
+                1
+                ))
 
             conn.commit()
 
             return redirect(
                 url_for(
                     "login.login",
-                    success="Editor application submitted successfully. Please wait for admin approval."
+                    success="Editor application submitted successfully. Please wait for admin approval.We will notify you by email."
                 )
             )
+        
+        return render_template("editor_applicant.html", categories=categories)
 
-        except Exception as e:
+    except Exception as e:
+        if conn:
             conn.rollback()
-            print("EDITOR APPLICATION ERROR:", e)
-            return render_template(
-                "editor_applicant.html",
-                error="Something went wrong while submitting your application."
-            )
+        print("EDITOR APPLICATION ERROR:", e)
+        return render_template(
+            "editor_applicant.html",
+            categories=categories if 'categories' in locals() else [],
+            error="Something went wrong while submitting your application."
+        )
 
-        finally:
+    finally:
+        if cursor:
             cursor.close()
+        if conn and conn.open:
             conn.close()
-            
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    return render_template("editor_applicant.html",categories=categories)
 
 
 @login_bp.route("/forgot-password", methods=["GET", "POST"])

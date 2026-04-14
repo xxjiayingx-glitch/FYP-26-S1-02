@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from entity.db_connection import get_db_connection
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 editor_applications_page_bp = Blueprint("editor_applications_page_bp", __name__)
 
@@ -156,11 +159,36 @@ def approve_editor_application(user_id):
         WHERE userID = %s
     """, ("approved", admin_remarks if admin_remarks else None, user_id))
 
+    cursor.execute("""
+        SELECT username, first_name, last_name, email
+        FROM UserAccount
+        WHERE userID = %s
+    """, (user_id,))
+
+    user = cursor.fetchone()
     conn.commit()
     cursor.close()
     conn.close()
 
-    flash("Application approved successfully.", "success")
+    if user and user.get("email"):
+        full_name = f"{user.get('first_name') or ''} {user.get('last_name') or ''}".strip()
+        if not full_name:
+            full_name = user.get("username") or "Applicant"
+
+        email_sent = send_editor_application_decision_email(
+            to_email=user["email"],
+            full_name=full_name,
+            decision="approved",
+            remarks=admin_remarks
+        )
+
+        if email_sent:
+            flash("Application approved successfully. Email notification sent.", "success")
+        else:
+            flash("Application approved successfully, but email could not be sent.", "warning")
+    else:
+        flash("Application approved successfully, but applicant email was not found.", "warning")
+
     return redirect(url_for("editor_applications_page_bp.editor_applications_page"))
 
 
@@ -182,9 +210,106 @@ def reject_editor_application(user_id):
         WHERE userID = %s
     """, ("rejected", admin_remarks if admin_remarks else None, user_id))
 
+    cursor.execute("""
+        SELECT username, first_name, last_name, email
+        FROM UserAccount
+        WHERE userID = %s
+    """, (user_id,))
+
+    user = cursor.fetchone()
     conn.commit()
     cursor.close()
     conn.close()
 
-    flash("Application rejected successfully.", "success")
+    if user and user.get("email"):
+        full_name = f"{user.get('first_name') or ''} {user.get('last_name') or ''}".strip()
+        if not full_name:
+            full_name = user.get("username") or "Applicant"
+
+        email_sent = send_editor_application_decision_email(
+            to_email=user["email"],
+            full_name=full_name,
+            decision="rejected",
+            remarks=admin_remarks
+        )
+
+        if email_sent:
+            flash("Application rejected successfully. Email notification sent.", "success")
+        else:
+            flash("Application rejected successfully, but email could not be sent.", "warning")
+    else:
+        flash("Application rejected successfully, but applicant email was not found.", "warning")
+
     return redirect(url_for("editor_applications_page_bp.editor_applications_page"))
+
+def send_editor_application_decision_email(to_email, full_name, decision, remarks=""):
+    smtp_email = os.getenv("FROM_EMAIL")
+    smtp_password = os.getenv("EMAIL_APP_PASSWORD")   # Gmail app password
+    smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    smtp_port = int(os.getenv("SMTP_PORT", 587))
+
+    if not smtp_email or not smtp_password:
+        print("Email not sent: missing FROM_EMAIL or EMAIL_APP_PASSWORD")
+        return False
+
+    decision_text = "approved" if decision == "approved" else "rejected"
+    subject = f"Your Editor Application Has Been {decision_text.title()}"
+
+    remarks_html = ""
+    if remarks:
+        remarks_html = f"""
+            <p><strong>Admin comments:</strong></p>
+            <p>{remarks}</p>
+        """
+
+    if decision == "approved":
+        body_html = f"""
+        <html>
+            <body>
+                <p>Dear {full_name},</p>
+
+                <p>We are pleased to inform you that your editor application has been <strong>approved</strong>.</p>
+
+                {remarks_html}
+
+                <p>You may now log in to your account and access editor features.</p>
+
+                <p>Best regards,<br>System Administration Team</p>
+            </body>
+        </html>
+        """
+    else:
+        body_html = f"""
+        <html>
+            <body>
+                <p>Dear {full_name},</p>
+
+                <p>We regret to inform you that your editor application has been <strong>rejected</strong>.</p>
+
+                {remarks_html}
+
+                <p>You may review the feedback and submit a new application if allowed by the system.</p>
+
+                <p>Best regards,<br>System Administration Team</p>
+            </body>
+        </html>
+        """
+
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = smtp_email
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        msg.attach(MIMEText(body_html, "html"))
+
+        server = smtplib.SMTP(smtp_host, smtp_port)
+        server.starttls()
+        server.login(smtp_email, smtp_password)
+        server.send_message(msg)
+        server.quit()
+
+        return True
+
+    except Exception as e:
+        print("Failed to send editor application email:", e)
+        return False
