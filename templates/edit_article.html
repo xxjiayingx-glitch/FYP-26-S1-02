@@ -102,7 +102,6 @@
         display: block;
     }
  
-    /* Fact Check Result */
     .check-btn {
         background: #2563eb;
         color: white;
@@ -119,305 +118,325 @@
     }
 
     .fact-check-section {
-    margin-top: 20px;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 20px;
-    background: #f8fafc;
-}
+        margin-top: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 20px;
+        background: #f8fafc;
+    }
 
-.factcheck-header {
-    margin-bottom: 18px;
-}
+    .factcheck-header {
+        margin-bottom: 18px;
+    }
 
-.factcheck-header h3 {
-    margin: 0 0 8px;
-    color: #111827;
-}
+    .factcheck-header h3 {
+        margin: 0 0 8px;
+        color: #111827;
+    }
 
-.factcheck-meta {
-    margin: 0;
-    color: #374151;
-    font-size: 15px;
-}
+    .factcheck-meta {
+        margin: 0;
+        color: #374151;
+        font-size: 15px;
+    }
 
-.factcheck-divider {
-    margin: 0 10px;
-    color: #9ca3af;
-}
+    .factcheck-divider {
+        margin: 0 10px;
+        color: #9ca3af;
+    }
 
-.sensationalism-warning {
-    margin-top: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: #fff7ed;
-    border: 1px solid #fdba74;
-    color: #c2410c;
-    font-size: 14px;
-}
+    .sensationalism-warning {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fff7ed;
+        border: 1px solid #fdba74;
+        color: #c2410c;
+        font-size: 14px;
+    }
 
-.factcheck-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 18px;
-    align-items: start;
-}
-
-.factcheck-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
-.factcheck-card h4 {
-    margin: 0 0 14px;
-    color: #111827;
-}
-
-.score-reasons {
-    max-height: 180px;
-    overflow-y: auto;
-    padding-right: 6px;
-    margin: 0;
-    padding-left: 18px;
-}
-
-.score-reasons li {
-    margin-bottom: 8px;
-    color: #374151;
-    line-height: 1.5;
-}
-
-.sentence-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.sentence-header-row h4 {
-    margin: 0;
-}
-
-.mini-filter-btn {
-    border: 1px solid #cbd5e1;
-    background: #f8fafc;
-    color: #1e293b;
-    padding: 8px 10px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.mini-filter-btn:hover {
-    background: #eef2f7;
-}
-
-.sentence-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 520px;
-    overflow-y: auto;
-    padding-right: 4px;
-}
-
-.sentence-item {
-    border: 1px solid #e5e7eb;
-    border-left: 5px solid #cbd5e1;
-    border-radius: 12px;
-    padding: 12px 14px;
-    background: #f9fafb;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.sentence-item:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
-}
-
-.sentence-item.active {
-    border-color: #94a3b8;
-    background: #f8fafc;
-    box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.18);
-}
-
-.sentence-item.good {
-    border-left-color: #16a34a;
-    background: #f0fdf4;
-}
-
-.sentence-item.neutral {
-    border-left-color: #cbd5e1;
-    background: #ffffff;
-}
-
-.sentence-item.warning {
-    border-left-color: #f59e0b;
-    background: #fff7ed;
-}
-
-.sentence-item.danger {
-    border-left-color: #dc2626;
-    background: #fef2f2;
-}
-
-.sentence-item-title {
-    font-size: 14px;
-    line-height: 1.55;
-    color: #111827;
-    margin-bottom: 8px;
-}
-
-.sentence-item-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.sentence-tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 8px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    background: #e5e7eb;
-    color: #374151;
-}
-
-.sentence-tag.good {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.sentence-tag.warning {
-    background: #ffedd5;
-    color: #c2410c;
-}
-
-.sentence-tag.danger {
-    background: #fee2e2;
-    color: #b91c1c;
-}
-
-.sentence-feedback-box {
-    margin: 14px 0 16px;
-    padding: 14px 16px;
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    border-radius: 12px;
-}
-
-.sentence-feedback-box p {
-    margin: 0 0 10px;
-    line-height: 1.6;
-}
-
-.sentence-feedback-box p:last-child {
-    margin-bottom: 0;
-}
-
-.preview-panel {
-    min-height: 220px;
-}
-
-.preview-placeholder {
-    color: #6b7280;
-    font-style: italic;
-    margin: 0;
-}
-
-.preview-block {
-    font-size: 15px;
-}
-
-.preview-block p {
-    margin: 0 0 14px;
-    line-height: 1.7;
-    color: #374151;
-}
-
-.preview-block strong {
-    color: #111827;
-}
-
-.preview-verdict {
-    font-weight: 700;
-}
-
-.preview-verdict.good {
-    color: #15803d;
-}
-
-.preview-verdict.warning {
-    color: #c2410c;
-}
-
-.preview-verdict.danger {
-    color: #b91c1c;
-}
-
-.preview-link {
-    color: #2563eb;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.preview-link:hover {
-    text-decoration: underline;
-}
-
-.confidence-bar {
-    height: 6px;
-    background: #e5e7eb;
-    border-radius: 4px;
-    margin-top: 6px;
-    margin-bottom: 12px;
-    overflow: hidden;
-}
-
-.confidence-fill {
-    height: 6px;
-    background: #16a34a;
-    border-radius: 4px;
-}
-
-.confidence-fill.good {
-    background: #16a34a;
-}
-
-.confidence-fill.warning {
-    background: #f59e0b;
-}
-
-.confidence-fill.danger {
-    background: #dc2626;
-}
-
-@media (max-width: 900px) {
     .factcheck-grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .factcheck-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .factcheck-card h4 {
+        margin: 0 0 14px;
+        color: #111827;
+    }
+
+    .score-reasons {
+        max-height: 180px;
+        overflow-y: auto;
+        padding-right: 6px;
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .score-reasons li {
+        margin-bottom: 8px;
+        color: #374151;
+        line-height: 1.5;
+    }
+
+    .sentence-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .sentence-header-row h4 {
+        margin: 0;
+    }
+
+    .mini-filter-btn {
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #1e293b;
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .mini-filter-btn:hover {
+        background: #eef2f7;
     }
 
     .sentence-list {
-        max-height: 380px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 520px;
+        overflow-y: auto;
+        padding-right: 4px;
     }
-}
+
+    .sentence-item {
+        border: 1px solid #e5e7eb;
+        border-left: 5px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: #f9fafb;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .sentence-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .sentence-item.active {
+        border-color: #94a3b8;
+        background: #f8fafc;
+        box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.18);
+    }
+
+    .sentence-item.good {
+        border-left-color: #16a34a;
+        background: #f0fdf4;
+    }
+
+    .sentence-item.neutral {
+        border-left-color: #cbd5e1;
+        background: #ffffff;
+    }
+
+    .sentence-item.warning {
+        border-left-color: #f59e0b;
+        background: #fff7ed;
+    }
+
+    .sentence-item.danger {
+        border-left-color: #dc2626;
+        background: #fef2f2;
+    }
+
+    .sentence-item-title {
+        font-size: 14px;
+        line-height: 1.55;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+
+    .sentence-item-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .sentence-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .sentence-tag.good {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .sentence-tag.warning {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .sentence-tag.danger {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .sentence-feedback-box {
+        margin: 14px 0 16px;
+        padding: 14px 16px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+    }
+
+    .sentence-feedback-box p {
+        margin: 0 0 10px;
+        line-height: 1.6;
+    }
+
+    .sentence-feedback-box p:last-child {
+        margin-bottom: 0;
+    }
+
+    .preview-panel {
+        min-height: 220px;
+    }
+
+    .preview-placeholder {
+        color: #6b7280;
+        font-style: italic;
+        margin: 0;
+    }
+
+    .preview-block {
+        font-size: 15px;
+    }
+
+    .preview-block p {
+        margin: 0 0 14px;
+        line-height: 1.7;
+        color: #374151;
+    }
+
+    .preview-block strong {
+        color: #111827;
+    }
+
+    .preview-verdict {
+        font-weight: 700;
+    }
+
+    .preview-verdict.good {
+        color: #15803d;
+    }
+
+    .preview-verdict.warning {
+        color: #c2410c;
+    }
+
+    .preview-verdict.danger {
+        color: #b91c1c;
+    }
+
+    .preview-link {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .preview-link:hover {
+        text-decoration: underline;
+    }
+
+    .confidence-bar {
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        margin-top: 6px;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .confidence-fill {
+        height: 6px;
+        background: #16a34a;
+        border-radius: 4px;
+    }
+
+    .confidence-fill.good {
+        background: #16a34a;
+    }
+
+    .confidence-fill.warning {
+        background: #f59e0b;
+    }
+
+    .confidence-fill.danger {
+        background: #dc2626;
+    }
+
+    @media (max-width: 900px) {
+        .factcheck-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sentence-list {
+            max-height: 380px;
+        }
+    }
+
+    .status-display {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 600;
+        box-sizing: border-box;
+    }
+
+    .status-hint {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #64748b;
+    }
 
     .action-row {
         display: flex;
         gap: 12px;
         margin-top: 24px;
+        flex-wrap: wrap;
     }
 
     .btn-link,
-    .btn-submit {
+    .btn-submit,
+    .btn-draft {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -433,6 +452,15 @@
     .btn-link {
         background: #e5e7eb;
         color: #111827;
+    }
+
+    .btn-draft {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-draft:hover {
+        background: #d97706;
     }
 
     .btn-submit {
@@ -493,11 +521,13 @@
             </div>
 
             <div class="form-section">
-                <label for="status">Status</label>
-                <select id="status" name="status" required>
-                    <option value="draft" {% if article.articleStatus|string == 'draft' %}selected{% endif %}>Draft</option>
-                    <option value="published" {% if article.articleStatus|string == 'published' %}selected{% endif %}>Published</option>
-                </select>
+                <label>Status</label>
+                <div class="status-display">
+                    {{ article.articleStatus }}
+                </div>
+                <div class="status-hint">
+                    Status is controlled by your action buttons below and the editor review process.
+                </div>
             </div>
 
             <button type="button" id="checkScoreBtn" class="check-btn">Recheck Current Score</button>
@@ -548,7 +578,8 @@
 
             <div class="action-row">
                 <a href="{{ url_for('my_articles') }}" class="btn-link">Cancel</a>
-                <button type="submit" class="btn-submit">Update</button>
+                <button type="submit" name="submit_action" value="draft" class="btn-draft">Save as Draft</button>
+                <button type="submit" name="submit_action" value="submit" class="btn-submit">Update & Submit</button>
             </div>
         </form>
     </div>

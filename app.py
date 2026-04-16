@@ -409,12 +409,11 @@ def my_articles():
         categories=categories
     )
     
-# Create Article Route
 @app.route("/create_article", methods=["GET", "POST"])
 def create_article():
     user_id = session.get("userID")
     if not user_id:
-        return redirect(url_for("login"))
+        return redirect(url_for("login.login"))
 
     if request.method == "POST":
         title = request.form.get("title")
@@ -423,9 +422,13 @@ def create_article():
         ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
         ai_fact_check_status = request.form.get("ai_fact_check_status")
 
-        status = request.form.get("submit_action")
-        if not status:
+        submit_action = request.form.get("submit_action", "").strip().lower()
+
+        if submit_action == "submit":
+            status = "pending review"
+        else:
             status = "draft"
+
 
         featured_image = request.files.get("featured_image")
         image_filename = None
@@ -446,6 +449,8 @@ def create_article():
             ai_fact_check_status=ai_fact_check_status
         )
 
+        print("FREE USER article created with ID =", articleID, flush=True)
+
         if articleID:
             SystemLogCTL.logAction(
                 accountID=session["userID"],
@@ -453,7 +458,12 @@ def create_article():
                 targetID=articleID,
                 targetType="Article"
             )
-            flash("Article created successfully!", "success")
+
+            if status == "pending review":
+                flash("Article submitted for review successfully!", "success")
+            else:
+                flash("Article saved as draft successfully!", "success")
+
             return redirect(url_for("my_articles"))
 
     categories = article_controller.get_categories()
@@ -487,9 +497,19 @@ def edit_article(article_id):
         title = request.form.get("title")
         category_id = request.form.get("category")
         content = request.form.get("content")
-        status = request.form.get("status")
         ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
         ai_fact_check_status = request.form.get("ai_fact_check_status")
+
+        submit_action = request.form.get("submit_action", "").strip().lower()
+        status_from_form = request.form.get("status", "").strip().lower()
+
+        if (session.get("userType") or "").strip().lower() == "editor":
+            status = status_from_form if status_from_form else article.get("articleStatus", "draft")
+        else:
+            if submit_action == "submit":
+                status = "pending review"
+            else:
+                status = "draft"
 
         featured_image = request.files.get("featured_image")
         image_filename = None
@@ -513,7 +533,6 @@ def edit_article(article_id):
             article_controller.update_article_image(article_id, image_filename)
 
         if updated:
-            flash("Article updated successfully!", "success")
             SystemLogCTL.logAction(
                 accountID=session["userID"],
                 action="Updated Article",
@@ -522,7 +541,14 @@ def edit_article(article_id):
             )
 
             if (session.get("userType") or "").strip().lower() == "editor":
-                return redirect(url_for("editor_my_articles"))
+                flash("Article updated successfully!", "success")
+                return redirect("/editor/my_articles")
+
+            if status == "pending review":
+                flash("Article updated and resubmitted for review successfully!", "success")
+            else:
+                flash("Article updated and saved as draft successfully!", "success")
+
             return redirect(url_for("my_articles"))
 
         else:
@@ -942,7 +968,6 @@ def editor_category_articles():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # 1. Get editor expertise area
     cursor.execute("""
         SELECT expertiseArea
         FROM UserAccount
@@ -952,7 +977,6 @@ def editor_category_articles():
 
     expertise = editor["expertiseArea"] if editor else None
 
-    # 2. Get categoryID from Category table
     cursor.execute("""
         SELECT categoryID
         FROM ArticleCategory
@@ -962,11 +986,14 @@ def editor_category_articles():
 
     category_id = category["categoryID"] if category else None
 
-    # 3. Get filtered articles
     if category_id:
         cursor.execute("""
-            SELECT a.articleID, a.articleTitle, c.categoryName,
-                   a.created_by, a.created_at
+            SELECT a.articleID,
+                   a.articleTitle,
+                   c.categoryName,
+                   a.created_by,
+                   a.created_at,
+                   a.approved_at
             FROM Article a
             JOIN ArticleCategory c ON a.categoryID = c.categoryID
             WHERE a.categoryID = %s
@@ -1009,6 +1036,31 @@ def editor_article_preview(article_id):
         active_page="category"
     )
 
+@app.route("/editor/my_articles")
+def editor_my_articles():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_id = session.get("userID")
+
+    keyword = request.args.get("keyword", "").strip()
+    status = request.args.get("status", "").strip()
+
+    if keyword or status:
+        articles = article_controller.search_my_articles(
+            user_id, keyword, None, status
+        )
+    else:
+        articles = article_controller.get_my_articles(user_id)
+
+    return render_template(
+        "editor_my_articles.html",
+        articles=articles,
+        keyword=keyword,
+        status=status,
+        active_page="my_articles"
+    )
+
 @app.route("/editor/create_article", methods=["GET", "POST"])
 def editor_create_article():
     if "userID" not in session:
@@ -1034,8 +1086,11 @@ def editor_create_article():
         ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
         ai_fact_check_status = request.form.get("ai_fact_check_status")
 
-        status = request.form.get("submit_action")
-        if not status:
+        submit_action = request.form.get("submit_action", "").strip().lower()
+
+        if submit_action == "submit":
+            status = "published"
+        else:
             status = "draft"
 
         featured_image = request.files.get("featured_image")
@@ -1064,7 +1119,12 @@ def editor_create_article():
                 targetID=articleID,
                 targetType="Article"
             )
-            flash("Article created successfully!", "success")
+
+            if status == "published":
+                flash("Article published successfully!", "success")
+            else:
+                flash("Article saved as draft successfully!", "success")
+
             return redirect(url_for("editor_my_articles"))
 
     categories = article_controller.get_categories()
@@ -1083,11 +1143,113 @@ def editor_approval_articles():
     if "userID" not in session:
         return redirect(url_for("login.login"))
 
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor" or editor_status != "approved":
+        return redirect(url_for("login.login"))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT a.articleID,
+               a.articleTitle,
+               a.articleStatus,
+               a.created_by,
+               a.created_at,
+               c.categoryName
+        FROM Article a
+        JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        WHERE a.articleStatus = 'pending review'
+        ORDER BY a.created_at DESC
+    """)
+    articles = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
     return render_template(
         "editor_approval_articles.html",
-        active_page="approval"
+        active_page="approval",
+        articles=articles
     )
 
+@app.route("/editor/approve_article", methods=["POST"])
+def approve_article():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor" or editor_status != "approved":
+        return redirect(url_for("login.login"))
+
+    article_id = request.form.get("article_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE Article
+            SET articleStatus = 'published',
+                approved_at = NOW(),
+                updated_at = NOW()
+            WHERE articleID = %s
+        """, (article_id,))
+        conn.commit()
+        flash("Article approved successfully.", "success")
+
+    except Exception as e:
+        conn.rollback()
+        print("APPROVE ARTICLE ERROR:", e)
+        flash("Failed to approve article.", "error")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("editor_approval_articles"))
+
+
+@app.route("/editor/reject_article", methods=["POST"])
+def reject_article():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor" or editor_status != "approved":
+        return redirect(url_for("login.login"))
+
+    article_id = request.form.get("article_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE Article
+            SET articleStatus = 'rejected',
+                updated_at = NOW()
+            WHERE articleID = %s
+        """, (article_id,))
+        conn.commit()
+        flash("Article rejected successfully.", "warning")
+
+    except Exception as e:
+        conn.rollback()
+        print("REJECT ARTICLE ERROR:", e)
+        flash("Failed to reject article.", "error")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("editor_approval_articles"))
     
 @app.route("/editor/manage_profile", methods=["GET", "POST"])
 def editor_manage_profile():
