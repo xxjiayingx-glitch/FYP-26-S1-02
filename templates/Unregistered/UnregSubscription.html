@@ -19,7 +19,7 @@
     </div>
 
     <nav class="navLinks">
-      <a href="{{ url_for('companyprofile.unreg_companyprof') }}"
+      <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}"
         >Company Profile</a
       >
       <a href="{{ url_for('home.unreg_home') }}#product-feature"
@@ -27,7 +27,7 @@
       >
       <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
       <a href="{{ url_for('unregsub.unreg_sub') }}">Subscription</a>
-      <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+      <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
       <a href="{{ url_for('login.login') }}">Log In</a>
     </nav>
   </header>

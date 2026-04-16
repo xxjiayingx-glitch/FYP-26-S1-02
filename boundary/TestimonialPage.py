@@ -16,9 +16,7 @@ def testimonial_page():
 
     # Redirect to unregistered testimonial page if user not logged in
     if not user_logged_in:
-        return render_template(
-            "Unregistered/UnregTestimonial.html", testimonials=testimonials
-        )
+        return redirect(url_for('home.unreg_home') + '#testimonials')
 
     return render_template(
         "testimonial_page.html",
