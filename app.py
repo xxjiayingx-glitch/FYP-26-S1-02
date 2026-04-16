@@ -1112,14 +1112,6 @@ def editor_approval_articles():
     )
 
     
-# @app.route("/editor/articles_reported")
-# def editor_articles_reported():
-#     return render_template(
-#         "editor_articles_reported.html",
-#         active_page="reported"
-#     )    
-
-
 @app.route("/editor/manage_profile", methods=["GET", "POST"])
 def editor_manage_profile():
     if "userID" not in session:
@@ -1229,10 +1221,19 @@ def editor_manage_profile():
         cursor.execute("SELECT * FROM UserAccount WHERE userID = %s", (user_id,))
         profile = cursor.fetchone()
 
+        cursor.execute("""
+            SELECT categoryID, categoryName
+            FROM ArticleCategory
+            WHERE categoryStatus = 'active'
+            ORDER BY categoryName ASC
+        """)
+        categories = cursor.fetchall()
+
         return render_template(
             "editor_manage_profile.html",
             active_page="profile",
-            profile=profile
+            profile=profile,
+            categories=categories
         )
 
     except Exception as e:
@@ -1243,15 +1244,27 @@ def editor_manage_profile():
         cursor.execute("SELECT * FROM UserAccount WHERE userID = %s", (user_id,))
         profile = cursor.fetchone()
 
+        cursor.execute("""
+            SELECT categoryID, categoryName
+            FROM ArticleCategory
+            WHERE categoryStatus = 'active'
+            ORDER BY categoryName ASC
+        """)
+        categories = cursor.fetchall()
+
         return render_template(
             "editor_manage_profile.html",
             active_page="profile",
-            profile=profile
+            profile=profile,
+            categories=categories
         )
 
     finally:
         cursor.close()
         conn.close()
+        
+
+
 
 @app.route("/logout")
 def logout():
