@@ -296,14 +296,12 @@
                         <label>Primary Area of Expertise</label>
                         <select name="expertise_area">
                             <option value="">Select expertise</option>
-
                             {% for category in categories %}
-                                <option value="{{ category.categoryID }}"
-                                    {% if profile and profile.expertiseArea == category.categoryID %}selected{% endif %}>
+                                <option value="{{ category.categoryName }}"
+                                    {% if profile and profile.expertiseArea == category.categoryName %}selected{% endif %}>
                                     {{ category.categoryName }}
                                 </option>
                             {% endfor %}
-
                         </select>
                     </div>
 

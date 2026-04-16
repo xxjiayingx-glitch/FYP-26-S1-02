@@ -991,45 +991,22 @@ def editor_article_preview(article_id):
     if "userID" not in session:
         return redirect(url_for("login.login"))
 
-    user_id = session.get("userID")
-    
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor" or editor_status != "approved":
+        return redirect(url_for("login.login"))
+
     article = article_controller.get_article(article_id)
 
     if not article:
-        return jsonify({"error": "Not found"})
-
-    return jsonify({
-        "title": article["articleTitle"],
-        "content": article["content"],
-        "author": article["created_by"],
-        "category": article["categoryName"],
-        "created_at": article["created_at"],
-        "approved_at": article["approved_at"]
-    })
-
-@app.route("/editor/my_articles")
-def editor_my_articles():
-    if "userID" not in session:
-        return redirect(url_for("login.login"))
-
-    user_id = session.get("userID")
-
-    keyword = request.args.get("keyword", "").strip()
-    status = request.args.get("status", "").strip()
-
-    if keyword or status:
-        articles = article_controller.search_my_articles(
-            user_id, keyword, None, status
-        )
-    else:
-        articles = article_controller.get_my_articles(user_id)
+        flash("Article not found.", "error")
+        return redirect(url_for("editor_category_articles"))
 
     return render_template(
-        "editor_my_articles.html",
-        articles=articles,
-        keyword=keyword,
-        status=status,
-        active_page="my_articles"
+        "editor_article_preview.html",
+        article=article,
+        active_page="category"
     )
 
 @app.route("/editor/create_article", methods=["GET", "POST"])
