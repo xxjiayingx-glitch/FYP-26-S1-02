@@ -6,18 +6,27 @@
     <h1 class="page-title">Edit Subscription Plans</h1>
 
     <!-- PLAN SWITCHER -->
-    <div class="form-row" style="max-width: 260px; margin-bottom: 24px;">
-        <label>Select Plan</label>
-        <form method="GET" action="{{ url_for('edit_subscription_plans_bp.edit_subscription_plans_page') }}">
-            <select 
-            name="planID"
-            class="input-modern"
-            onchange="this.form.submit()"
-        >
-               <option value="8" {% if selected_plan_id == 8 %}selected{% endif %}>Free Plan</option>
-               <option value="9" {% if selected_plan_id == 9 %}selected{% endif %}>Premium Plan</option>
-            </select>
-        </form>
+    <div class="plan-toolbar">
+        <div class="form-row plan-select-group">
+            <label>Select Plan</label>
+            <form method="GET" action="{{ url_for('edit_subscription_plans_bp.edit_subscription_plans_page') }}">
+                <select 
+                    name="planID"
+                    class="input-modern"
+                    onchange="this.form.submit()"
+                >
+                    {% for p in plans %}
+                    <option value="{{ p.planID }}" {% if selected_plan_id == p.planID %}selected{% endif %}>
+                        {{ p.planName }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <button type="button" class="btn-primary" onclick="prepareNewPlan()">
+            + Add New Plan
+        </button>
     </div>
 
     <div class="form-card-large">
@@ -39,7 +48,18 @@
             <textarea 
                 id="planDescription"
                 class="textarea-modern form-textarea"
+                placeholder="Short description shown below the price"
             >{{ plan.planDescription if plan else '' }}</textarea>
+        </div>
+
+        <!-- PLAN FEATURES -->
+        <div class="form-row">
+            <label>Plan Features</label>
+            <textarea 
+                id="planFeatures"
+                class="textarea-modern form-textarea"
+                placeholder="Enter features separated by commas"
+            >{{ plan.planFeatures if plan else '' }}</textarea>
         </div>
 
         <!-- PRICE + BILLING -->
@@ -75,8 +95,8 @@
                 id="planStatus"
                 class="input-modern"
             >
-                <option value="Active" {% if plan and plan.planStatus == "active" %}selected{% endif %}>Active</option>
-                <option value="Inactive" {% if plan and plan.planStatus == "inactive" %}selected{% endif %}>Inactive</option>
+                <option value="active" {% if plan and plan.planStatus == "active" %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if plan and plan.planStatus == "inactive" %}selected{% endif %}>Inactive</option>
             </select>
         </div>
 
@@ -96,29 +116,45 @@
 </div>
 
 <script>
-const currentPlanID = {{ plan.planID if plan else 'null' }};
+let currentPlanID = {{ plan.planID if plan else 'null' }};
 
-async function savePlan(){
+function prepareNewPlan() {
+    currentPlanID = null;
 
+    document.getElementById("planName").value = "";
+    document.getElementById("planDescription").value = "";
+    document.getElementById("planFeatures").value = "";
+    document.getElementById("price").value = "";
+    document.getElementById("billingCycle").value = "month";
+    document.getElementById("planStatus").value = "active";
+}
+
+async function savePlan() {
     const payload = {
         planID: currentPlanID,
-        planName: document.getElementById("planName").value,
-        planDescription: document.getElementById("planDescription").value,
+        planName: document.getElementById("planName").value.trim(),
+        planDescription: document.getElementById("planDescription").value.trim(),
+        planFeatures: document.getElementById("planFeatures").value.trim(),
         price: document.getElementById("price").value,
-        billingCycle: document.getElementById("billingCycle").value,
+        billingCycle: document.getElementById("billingCycle").value.trim(),
         planStatus: document.getElementById("planStatus").value
     };
 
+    const method = currentPlanID ? "PUT" : "POST";
+
     const res = await fetch("/admin/subscription-plan", {
-        method: "PUT",
+        method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     });
 
-    if(res.ok){
-        alert("Saved Successfully");
-    }else{
-        alert("Failed to Save");
+    const result = await res.json();
+
+    if (res.ok) {
+        alert(result.message || "Saved Successfully");
+        location.reload();
+    } else {
+        alert(result.message || "Failed to Save");
     }
 }
 </script>

@@ -76,7 +76,7 @@ class Subscription:
         cursor = conn.cursor()
 
         query = """
-        SELECT planID, planName, planDescription, price, billingCycle
+        SELECT planID, planName, planDescription, planFeatures, price, billingCycle
         FROM SubscriptionPlan
         WHERE planStatus = 'Active'
         """

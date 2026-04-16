@@ -512,9 +512,9 @@
 
             {% else %}
                 <a href="{{ url_for('home.unreg_home') }}">Home</a>
-                <a href="{{ url_for('companyprofile.unreg_companyprof') }}">Company Profile</a>
+                <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">Company Profile</a>
                 <a href="{{ url_for('subscription.subscription_page') }}">Subscription</a>
-                <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+                <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
                 <a href="{{ url_for('login.login') }}">Log In</a>
             {% endif %}
         </nav>

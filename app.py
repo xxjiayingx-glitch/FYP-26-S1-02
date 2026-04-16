@@ -61,7 +61,7 @@ from boundary.ArticlePage import comment_bp
 from boundary.ViewandManagePage import subscription_bp
 from boundary.TestimonialPage import testimonial_bp
 from boundary.HomePage import home_bp
-from boundary.CompanyProfilePage import companyprof_bp
+# from boundary.CompanyProfilePage import companyprof_bp
 from boundary.UnregSubscriptionPage import unregSub_bp
 from boundary.RegisterPage import register_bp
 from boundary.CategoryManagementPage import category_management_bp
@@ -102,7 +102,7 @@ app.register_blueprint(comment_bp, url_prefix="/comments")
 app.register_blueprint(subscription_bp, url_prefix="/subscription")
 app.register_blueprint(testimonial_bp, url_prefix="/testimonial")
 app.register_blueprint(home_bp)
-app.register_blueprint(companyprof_bp, url_prefix="/company")
+# app.register_blueprint(companyprof_bp, url_prefix="/company")
 app.register_blueprint(unregSub_bp, url_prefix="/subscribe")
 app.register_blueprint(register_bp)
 app.register_blueprint(category_management_bp)

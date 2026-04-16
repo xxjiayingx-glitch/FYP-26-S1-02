@@ -2,11 +2,15 @@ from flask import Blueprint, render_template, session, jsonify, request
 from control.ArticleController import ArticleController
 from control.TestimonialsCTL import TestimonialController
 from control.UnregisteredUser.FeaturesCTL import FeaturesController
+from control.UnregisteredUser.ViewCompanyProfileCTL import CompanyProfileController
+from control.UnregisteredUser.SubscriptionCTL import SubscriptionCTL
 
 home_bp = Blueprint("home", __name__)
 articleCTL = ArticleController()
 featuresCTL = FeaturesController()
 testimonialCTL = TestimonialController()
+companyProfileCTL = CompanyProfileController()
+subscriptionCTL = SubscriptionCTL()
 
 @home_bp.route("/")
 def unreg_home():
@@ -31,18 +35,26 @@ def unreg_home():
     else:
         latest_articles = articleCTL.get_home_latest_articles(limit=3, offset=0)
     
-    # For testimonials, to display 4 on guest homepage on load
-    testimonials=testimonialCTL.getHomeTestimonials(offset=0, limit=4)
+    # Display testimonial
+    testimonials=testimonialCTL.getHomeTestimonials()
+    print("testimonial count:", len(testimonials))
 
     # For product features, to display 4 on guest homepage on load
     features = featuresCTL.get_features(offset=0, limit=4)
+
+    # Display company profile
+    profile = companyProfileCTL.getCompanyProfile()
+
+    plans = subscriptionCTL.getSubscriptionPlans()
 
     return render_template(
         "Unregistered/UnregHome.html",
         headline=headline,
         articles=latest_articles,
         testimonials=testimonials,
-        features=features
+        features=features,
+        profile=profile,
+        plans=plans["plans"]
     )
 
 @home_bp.route("/load_more_articles")
