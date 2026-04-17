@@ -376,8 +376,7 @@
                         </div>
 
                         <div class="article-actions">
-                            <a href="{{ url_for('article_detail', article_id=article.articleID) }}" class="btn my_view-btn">
-                                View
+                            <a href="{{ url_for('editor_article_detail', article_id=article.articleID) }}" class="btn my_view-btn">                                View
                             </a>
 
                             <a href="{{ url_for('edit_article', article_id=article.articleID) }}" class="btn my_edit-btn">

@@ -1,0 +1,145 @@
+{% extends "editor_master.html" %}
+
+{% block title %}{{ article.articleTitle }}{% endblock %}
+
+{% block content %}
+<div class="article-container" style="max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.08);">
+
+    <h1>{{ article.articleTitle }}</h1>
+
+    <!-- ARTICLE STATS -->
+
+    {% if article.featured_image %}
+    <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}"
+         alt="Article Image"
+         style="width:100%; max-height:400px; object-fit:cover; margin:15px 0;">
+    {% endif %}
+
+    <div style="color:gray; font-size:0.9em; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:10px;">
+        <span>Created: {{ article.created_at.strftime('%d %b %Y %H:%M') if article.created_at else 'N/A' }}</span>
+        <span>|</span>
+        <span>First Edited: {{ article.first_edited_at.strftime('%d %b %Y %H:%M') if article.first_edited_at else 'Not edited' }}</span>
+        <span>|</span>
+        <span>Last Edited: {{ article.last_edited_at.strftime('%d %b %Y %H:%M') if article.last_edited_at else 'Not edited' }}</span>
+        <span>|</span>
+        <span>Author: {{ article.full_name }}</span>
+        <span>|</span>
+        <span>Category: {{ article.categoryName }}</span>
+    </div>
+    <div class="article_detail-news">
+        <div class="article_detail-news-item">
+            👁 <span>{{ article.views }}</span>
+        </div>
+        <div class="article_detail-news-item like">
+            ❤️ <span>{{ article.likes }}</span>
+        </div>
+    </div>
+    <div style="margin-bottom:20px; white-space: pre-line;">
+        {{ article.content }}
+    </div>
+
+ 
+
+    <div style="background:#eef3ff; padding:20px; border-radius:8px;">
+        <h3>Comments</h3>
+
+        {% for comment in comments %}
+            <p><strong>{{ comment.username }}</strong>: {{ comment.commentText }}</p>
+        {% else %}
+            <p>No comments yet.</p>
+        {% endfor %}
+    </div>
+
+    {% if session.get('userID') %}
+    <form method="POST" action="{{ url_for('add_comment_route') }}" class="comment-form">
+        <input type="hidden" name="articleID" value="{{ article.articleID }}">
+
+        <textarea name="commentText" placeholder="Write your comment..." required></textarea>
+
+        <button type="submit">Post Comment</button>
+    </form>
+    {% else %}
+    <div style="margin-top:15px; padding:15px; background:#f3f4f6; border-radius:10px; text-align:center;">
+        <p style="margin:0; color:#555;">
+            <a href="{{ url_for('login.login') }}" style="color:#2563eb; font-weight:600;">Log in</a> 
+            to leave a comment.
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+
+
+
+
+
+
+
+<style>
+.article-action-bar {
+    display: flex;
+    gap: 15px;
+    margin: 25px 0;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+
+.comment-form {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    min-height: 90px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.comment-form button {
+    align-self: flex-end;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.comment-form button:hover {
+    background: #1d4ed8;
+}
+
+
+@keyframes popupFade {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+</style>
+
+{% endblock %}

@@ -1402,7 +1402,30 @@ def editor_manage_profile():
         cursor.close()
         conn.close()
         
+@app.route("/editor/article/<int:article_id>")
+def editor_article_detail(article_id):
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
 
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor" or editor_status != "approved":
+        return redirect(url_for("login.login"))
+
+    article = article_controller.get_article(article_id)
+    comments = article_controller.get_comments_for_article(article_id)
+
+    if not article:
+        flash("Article not found.", "error")
+        return redirect(url_for("editor_my_articles"))
+
+    return render_template(
+        "editor_article_detail.html",
+        article=article,
+        comments=comments,
+        active_page="my_articles"
+    )
 
 
 @app.route("/logout")
