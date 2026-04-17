@@ -1,0 +1,58 @@
+{% extends "editor_master.html" %}
+
+{% block title %}My Editor Profile{% endblock %}
+
+{% block content %}
+<div class="profile-view-container">
+
+    <h2>Editor Background Profile</h2>
+
+    <div class="profile-card">
+
+        <div class="profile-header">
+            <img src="{{ url_for('static', filename='uploads/' ~ profile.profileImage) if profile.profileImage else '' }}" class="profile-img">
+
+            <h3>{{ profile.first_name }} {{ profile.last_name }}</h3>
+            <p>@{{ profile.username }}</p>
+        </div>
+
+        <div class="profile-section">
+            <strong>Primary Expertise:</strong>
+            <p>{{ profile.expertiseArea }}</p>
+        </div>
+
+        <div class="profile-section">
+            <strong>Years of Experience:</strong>
+            <p>{{ profile.yearsExperience }}</p>
+        </div>
+
+        <div class="profile-section">
+            <strong>Professional Bio:</strong>
+            <p>{{ profile.editorBio }}</p>
+        </div>
+
+        <div class="profile-section">
+            <strong>Portfolio:</strong>
+            <p>
+                <a href="{{ profile.portfolioLink }}" target="_blank">
+                    {{ profile.portfolioLink }}
+                </a>
+            </p>
+        </div>
+
+        <div class="profile-section">
+            <strong>Supporting Document:</strong>
+            {% if profile.supportingDocument %}
+                <p>
+                    <a href="{{ url_for('static', filename='uploads/' ~ profile.supportingDocument) }}" target="_blank">
+                        View Document
+                    </a>
+                </p>
+            {% else %}
+                <p>No document uploaded</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

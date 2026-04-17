@@ -1401,7 +1401,35 @@ def editor_manage_profile():
     finally:
         cursor.close()
         conn.close()
-        
+
+
+@app.route("/editor/profile_background")
+def editor_profile_background():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_id = session.get("userID")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM UserAccount
+        WHERE userID = %s
+    """, (user_id,))
+
+    profile = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "editor_profile_background.html",
+        profile=profile,
+        active_page="profile"
+    )
+
 @app.route("/editor/article/<int:article_id>")
 def editor_article_detail(article_id):
     if "userID" not in session:
