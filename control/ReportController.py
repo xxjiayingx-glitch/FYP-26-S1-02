@@ -1,7 +1,7 @@
-from entity.Report import report_article
+# from entity.Report import report_article
 
-def report(articleID,userID,reason):
+# def report(articleID,userID,reason):
 
-    report_article(articleID,userID,reason)
+#     report_article(articleID,userID,reason)
 
-    print("Article Reported")
+#     print("Article Reported")

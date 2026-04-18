@@ -15,31 +15,79 @@ class Article:
         conn.close()
         return result["total_articles"]
 
+    # @staticmethod
+    # def updateStatus(articleID, action):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+
+    #     if action == "suspend":
+    #         new_status = "suspended"
+    #     elif action == "unsuspend":
+    #         new_status = "published"
+    #     else:
+    #         conn.close()
+    #         return False
+
+    #     cursor.execute(
+    #         """
+    #         UPDATE Article SET articleStatus = %s WHERE articleID = %s 
+    #     """,
+    #         (new_status, articleID),
+    #     )
+
+    #     conn.commit()
+    #     updated = cursor.rowcount > 0
+    #     conn.close()
+
+    #     return updated
+
     @staticmethod
-    def updateStatus(articleID, action):
+    def update_status_and_complete_reports(articleID, action, reviewed_by):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        if action == "suspend":
-            new_status = "Suspended"
-        elif action == "unsuspend":
-            new_status = "Active"
-        else:
-            conn.close()
+        try:
+            new_status = None
+            report_status = "completed"
+
+            if action == "suspend":
+                new_status = "suspended"
+            elif action == "unsuspend":
+                new_status = "published"
+            elif action == "complete":
+                pass
+            else:
+                conn.close()
+                return False
+            
+            # 1. Update the article status
+            if new_status is not None:
+                cursor.execute("""
+                    UPDATE Article
+                    SET articleStatus = %s
+                    WHERE articleID = %s
+                """, (new_status, articleID))
+
+            # 2. Complete all related reports for this article
+            cursor.execute("""
+                UPDATE ReportedArticle
+                SET reportStatus = %s,
+                    reviewed_by = %s,
+                    reviewed_at = NOW()
+                WHERE articleID = %s
+                AND reportStatus = %s
+            """, (report_status, reviewed_by, articleID, "pending review"))
+
+            conn.commit()
+            return True
+
+        except Exception as e:
+            conn.rollback()
+            print("update_status_and_complete_reports error:", e)
             return False
 
-        cursor.execute(
-            """
-            UPDATE Article SET articleStatus = %s WHERE articleID = %s 
-        """,
-            (new_status, articleID),
-        )
-
-        conn.commit()
-        updated = cursor.rowcount > 0
-        conn.close()
-
-        return updated
+        finally:
+            conn.close()
 
     @staticmethod
     def get_articles_last_7_days():

@@ -2,9 +2,9 @@ from entity.db_connection import get_db_connection
 from datetime import datetime, timedelta
 
 class ReportedArticle:
-    #-------#
-    # Admin #
-    #-------#
+    #--------#
+    # Editor #
+    #--------#
     @staticmethod
     def get_total_reported_articles():
         conn = get_db_connection()
@@ -128,7 +128,7 @@ class ReportedArticle:
         conn.close()
 
         return reportDetails
-
+        
     @staticmethod
     def get_total_reports_before_days(days):
         conn = get_db_connection()
