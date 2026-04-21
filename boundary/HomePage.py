@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, jsonify, request
+from flask import Blueprint, render_template, session, jsonify, request, redirect, url_for
 from control.ArticleController import ArticleController
 from control.TestimonialsCTL import TestimonialController
 from control.UnregisteredUser.FeaturesCTL import FeaturesController
@@ -14,22 +14,13 @@ subscriptionCTL = SubscriptionCTL()
 
 @home_bp.route("/")
 def unreg_home():
-
-    # Ensure user is not signed in otherwise redirect to the respective homepage
-    user_type = session.get("userType")
-
-    if user_type == "free":
-        return render_template("free_homepage.html")
-
-    if user_type == "premium":
-        return render_template("premium_homepage.html")
-
     # For articles, to display latest and 3 article on guest homepage on load
     headline = articleCTL.get_home_headline()
 
     if headline:
         latest_articles = articleCTL.get_home_latest_articles(
-            limit=3, offset=1 
+            limit=3, offset=0,
+            exclude_id=headline["articleID"]
         )
 
     else:
@@ -37,7 +28,6 @@ def unreg_home():
     
     # Display testimonial
     testimonials=testimonialCTL.getHomeTestimonials()
-    print("testimonial count:", len(testimonials))
 
     # For product features, to display 4 on guest homepage on load
     features = featuresCTL.get_features(offset=0, limit=4)
@@ -47,10 +37,29 @@ def unreg_home():
 
     plans = subscriptionCTL.getSubscriptionPlans()
 
+    categories = articleCTL.get_categories()
+    category_featured_articles = []
+
+    exclude_id = headline["articleID"] if headline else None
+
+    for category in categories:
+        article = articleCTL.get_featured_article_by_category(
+            category["categoryID"],
+            exclude_id=exclude_id
+        )
+
+        if article:
+            category_featured_articles.append({
+                "category": category,
+                "article": article
+            })
+
     return render_template(
         "Unregistered/UnregHome.html",
+        categories=categories,
         headline=headline,
         articles=latest_articles,
+        category_featured_articles=category_featured_articles,
         testimonials=testimonials,
         features=features,
         profile=profile,
@@ -87,21 +96,22 @@ def load_more_articles():
     return jsonify(articles_json)
 
 # Function for getting more testimonials 
-@home_bp.route("/load-more-testimonials")
-def load_more_testimonials():
+# @home_bp.route("/load-more-testimonials")
+# def load_more_testimonials():
 
-    offset = int(request.args.get("offset", 4))  # default 3
-    limit = 8
+#     offset = int(request.args.get("offset", 4))  # default 3
+#     limit = 8
 
-    testimonials = testimonialCTL.getHomeTestimonials(offset=offset, limit=limit + 1)
+#     testimonials = testimonialCTL.getHomeTestimonials(offset=offset, limit=limit + 1)
 
-    has_more = len(testimonials) > limit
-    testimonials = testimonials[:limit]
+#     has_more = len(testimonials) > limit
+#     testimonials = testimonials[:limit]
 
-    return jsonify({
-        "testimonials": testimonials,
-        "has_more": has_more
-    })
+#     return jsonify({
+#         "testimonials": testimonials,
+#         "has_more": has_more
+#     })
+
 # Function for getting more product features 
 @home_bp.route("/load_more_features")
 def load_more_features():
@@ -141,4 +151,58 @@ def unreg_article_detail(article_id):
         comments=comments,
         is_saved=is_saved,
         is_premium=is_premium
+    )
+
+@home_bp.route("/all-articles")
+def all_articles():
+    categories = articleCTL.get_categories()
+    headline = articleCTL.get_home_headline()
+    articles = articleCTL.get_home_latest_articles(
+        limit=12,
+        exclude_id=headline["articleID"] if headline else None
+    )
+
+    return render_template(
+        "Unregistered/category_articles.html",
+        categories=categories,
+        selected_category=None,
+        headline=headline,
+        articles=articles,
+        is_all_page=True
+    )
+
+@home_bp.route("/category/<int:category_id>")
+def category_articles(category_id):
+    categories = articleCTL.get_categories()
+
+    selected_category = None
+    for category in categories:
+        if category["categoryID"] == category_id:
+            selected_category = category
+            break
+
+    if not selected_category:
+        return "Category not found", 404
+
+    headline = articleCTL.get_featured_article_by_category(category_id)
+
+    if headline:
+        articles = articleCTL.home_article_by_category(
+            category_id=category_id,
+            limit=6,
+            exclude_id=headline["articleID"]
+        )
+    else:
+        articles = articleCTL.home_article_by_category(
+            category_id=category_id,
+            limit=6
+        )
+
+    return render_template(
+        "Unregistered/category_articles.html",
+        categories=categories,
+        selected_category=selected_category,
+        headline=headline,
+        articles=articles,
+        is_all_page=False
     )

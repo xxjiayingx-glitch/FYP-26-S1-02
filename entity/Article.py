@@ -287,6 +287,48 @@ class Article:
 
         conn.close()
         return categories
+    
+    @staticmethod
+    def home_article_by_category(category_id, limit=6, exclude_id=None):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        sql = """
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                a.created_at,
+                a.articleStatus,
+                a.categoryID,
+                ac.categoryName,
+                ai.imageURL,
+                IFNULL(aa.views, 0) AS views,
+                IFNULL(aa.likes, 0) AS likes
+            FROM Article a
+            LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN ArticleAnalytics aa ON a.articleID = aa.articleID
+            WHERE a.articleStatus = 'published'
+            AND a.categoryID = %s
+        """
+
+        params = [category_id]
+
+        if exclude_id is not None:
+            sql += " AND a.articleID != %s"
+            params.append(exclude_id)
+
+        sql += """
+            ORDER BY a.created_at DESC
+            LIMIT %s
+        """
+        params.append(limit)
+
+        cursor.execute(sql, params)
+        result = cursor.fetchall()
+        conn.close()
+        return result
 
     def insert_article(self, user_id, title, category_id, content, status,
                    ai_fact_check_score=0, ai_fact_check_status=None):
@@ -526,13 +568,92 @@ class Article:
         conn.close()
         return articles
 
+    # def get_home_headline_article(self):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+
+    #     sql = """
+    #     SELECT a.*, c.categoryName, ai.imageURL, u.username,
+    #         IFNULL(an.views, 0) AS views, 
+    #         IFNULL(an.likes, 0) AS likes,
+    #         IFNULL(a.credibilityScore, 0) AS credibilityScore
+    #     FROM Article a
+    #     LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+    #     LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+    #     LEFT JOIN UserAccount u ON a.created_by = u.userID
+    #     LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+    #     WHERE a.articleStatus = 'published'
+    #     ORDER BY IFNULL(an.views, 0) DESC, a.created_at DESC
+    #     LIMIT 1
+    #     """
+
+    #     cursor.execute(sql)
+    #     article = cursor.fetchone()
+
+    #     conn.close()
+    #     return article
+
     def get_home_headline_article(self):
         conn = get_db_connection()
         cursor = conn.cursor()
 
+        try:
+            base_select = """
+                SELECT a.*, c.categoryName, ai.imageURL, u.username,
+                    IFNULL(an.views, 0) AS views,
+                    IFNULL(an.likes, 0) AS likes,
+                    IFNULL(a.credibilityScore, 0) AS credibilityScore
+                FROM Article a
+                LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+                LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+                LEFT JOIN UserAccount u ON a.created_by = u.userID
+                LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+                WHERE a.articleStatus = 'published'
+            """
+
+            # 1) Most viewed in the last 1 day
+            sql_1_day = base_select + """
+                AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+                ORDER BY IFNULL(an.views, 0) DESC, a.created_at DESC
+                LIMIT 1
+            """
+            cursor.execute(sql_1_day)
+            article = cursor.fetchone()
+
+            # 2) Fallback: most viewed in the last 3 days
+            if not article:
+                sql_3_day = base_select + """
+                    AND a.created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+                    ORDER BY IFNULL(an.views, 0) DESC, a.created_at DESC
+                    LIMIT 1
+                """
+                cursor.execute(sql_3_day)
+                article = cursor.fetchone()
+
+            # 3) Final fallback: latest published article
+            if not article:
+                sql_latest = base_select + """
+                    ORDER BY a.created_at DESC
+                    LIMIT 1
+                """
+                cursor.execute(sql_latest)
+                article = cursor.fetchone()
+
+            return article
+
+        finally:
+            conn.close()
+
+    def get_featured_article_by_category(self, category_id, exclude_id=None):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        params = [category_id]
         sql = """
-        SELECT a.*, c.categoryName, ai.imageURL, u.username,
-            IFNULL(an.views, 0) AS views, 
+        SELECT a.articleID, a.articleTitle, a.content, a.created_at,
+            a.categoryID, a.articleStatus,
+            c.categoryName, ai.imageURL, u.username,
+            IFNULL(an.views, 0) AS views,
             IFNULL(an.likes, 0) AS likes,
             IFNULL(a.credibilityScore, 0) AS credibilityScore
         FROM Article a
@@ -541,12 +662,52 @@ class Article:
         LEFT JOIN UserAccount u ON a.created_by = u.userID
         LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
         WHERE a.articleStatus = 'published'
+        AND a.categoryID = %s
+        AND a.created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+        """
+
+        if exclude_id:
+            sql += " AND a.articleID != %s"
+            params.append(exclude_id)
+
+        sql += """
         ORDER BY IFNULL(an.views, 0) DESC, a.created_at DESC
         LIMIT 1
         """
 
-        cursor.execute(sql)
+        cursor.execute(sql, params)
         article = cursor.fetchone()
+
+        # fallback: if no recent result, use latest article in that category
+        if not article:
+            params = [category_id]
+            fallback_sql = """
+            SELECT a.articleID, a.articleTitle, a.content, a.created_at,
+                a.categoryID, a.articleStatus,
+                c.categoryName, ai.imageURL, u.username,
+                IFNULL(an.views, 0) AS views,
+                IFNULL(an.likes, 0) AS likes,
+                IFNULL(a.credibilityScore, 0) AS credibilityScore
+            FROM Article a
+            LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN UserAccount u ON a.created_by = u.userID
+            LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+            WHERE a.articleStatus = 'published'
+            AND a.categoryID = %s
+            """
+
+            if exclude_id:
+                fallback_sql += " AND a.articleID != %s"
+                params.append(exclude_id)
+
+            fallback_sql += """
+            ORDER BY a.created_at DESC
+            LIMIT 1
+            """
+
+            cursor.execute(fallback_sql, params)
+            article = cursor.fetchone()
 
         conn.close()
         return article

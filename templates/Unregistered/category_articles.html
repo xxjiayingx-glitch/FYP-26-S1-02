@@ -1,0 +1,195 @@
+{% extends "master.html" %}
+
+{% block title %}
+  {% if selected_category %}
+    {{ selected_category.categoryName }} - Daily Scoop
+  {% else %}
+    All Articles - Daily Scoop
+  {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/Unregistered/UnregHome.css') }}">
+{% endblock %}
+
+{% block brand_href %}{{ url_for('home.unreg_home') }}{% endblock %}
+{% block premium_badge %}{% endblock %}
+
+{% block topbar_nav %}
+  <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">Company Profile</a>
+  <a href="{{ url_for('home.unreg_home') + '#product-feature' }}">Product Feature</a>
+  <a href="{{ url_for('home.unreg_home') + '#articles' }}">Articles</a>
+  <a href="{{ url_for('home.unreg_home') + '#pricing' }}">Subscription</a>
+  <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
+  <a href="{{ url_for('login.login') }}">Log In</a>
+{% endblock %}
+
+{% block content %}
+<div class="unreg-home">
+  <div class="category-nav">
+    {% set visible_category_ids = categories[:7] | map(attribute='categoryID') | list %}
+    <div class="category-nav-inner">
+      <a href="{{ url_for('home.all_articles') }}"
+        class="category-nav-link {% if is_all_page %}active{% endif %}">
+        All
+      </a>
+      {% for category in categories[:7] %}
+        <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-nav-link {% if category.categoryID == selected_category.categoryID %}active{% endif %}">
+          {{ category.categoryName }}
+        </a>
+      {% endfor %}
+
+      {% if categories|length > 7 %}
+        <button class="category-more-btn {% if selected_category and selected_category.categoryID not in visible_category_ids %}active{% endif %}" type="button" onclick="toggleCategoryPanel()">
+          More <span class="dropdown-arrow">▼</span>
+        </button>
+      {% endif %}
+    </div>
+
+    {% if categories|length > 7 %}
+    <div class="category-expand-panel" id="categoryExpandPanel">
+      <div class="category-expand-grid">
+        <a href="{{ url_for('home.all_articles') }}"
+          class="category-expand-link {% if is_all_page %}active{% endif %}">
+          All
+        </a>
+        {% for category in categories %}
+          <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-expand-link {% if selected_category and category.categoryID == selected_category.categoryID %}active{% endif %}">
+            {{ category.categoryName }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <section class="headline">
+    <div class="container">
+      <div class="news-card">
+        {% if headline %}
+        <div class="featured-news">
+          <div class="featured-left">
+            <span class="headline-tag">
+              {% if selected_category %}
+                Top Story In {{ selected_category.categoryName }}
+              {% else %}
+                Top Story
+              {% endif %}
+            </span>
+            <h1 class="featured-title">{{ headline.articleTitle }}</h1>
+
+            <div class="article-meta">
+              <span class="meta-item views">👁 {{ headline.views }}</span>
+              <span class="meta-item likes">❤️ {{ headline.likes }}</span>
+            </div>
+
+            <p class="featured-desc">
+              {{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif %}
+            </p>
+
+            <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=headline.articleID) }}">
+              Read more......
+            </a>
+          </div>
+
+          <div class="featured-right">
+            {% if headline.imageURL %}
+              <img src="{{ url_for('static', filename='uploads/' + headline.imageURL) }}">
+            {% else %}
+              <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
+            {% endif %}
+          </div>
+        </div>
+        {% else %}
+          <p class="no-headline">No articles available in this category.</p>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="news">
+    <h3 class="latest-title">
+      {% if selected_category %}
+        Latest in {{ selected_category.categoryName }}
+      {% else %}
+        All Latest Articles
+      {% endif %}
+    </h3>
+
+    <div class="latest-grid">
+      {% for article in articles %}
+      <div class="news-card">
+        {% if article.imageURL %}
+          <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}">
+        {% else %}
+          <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
+        {% endif %}
+
+        <h4 class="news-title">{{ article.articleTitle }}</h4>
+
+        <div class="article-meta">
+          <span class="meta-item views">👁 {{ article.views }}</span>
+          <span class="meta-item likes">❤️ {{ article.likes }}</span>
+        </div>
+
+        <p class="news-para">
+          {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
+        </p>
+
+        <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=article.articleID) }}">
+          Read more......
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function toggleCategoryDropdown() {
+      const menu = document.getElementById("categoryDropdownMenu");
+      if (menu) {
+        menu.classList.toggle("show");
+      }
+    }
+
+    document.addEventListener("click", function (e) {
+      const dropdown = document.querySelector(".category-dropdown");
+      const menu = document.getElementById("categoryDropdownMenu");
+
+      if (!dropdown || !menu) return;
+
+      if (!dropdown.contains(e.target)) {
+        menu.classList.remove("show");
+      }
+    });
+
+  function toggleCategoryPanel() {
+    const panel = document.getElementById("categoryExpandPanel");
+    const moreBtn = document.querySelector(".category-more-btn");
+
+    if (panel) {
+      panel.classList.toggle("show");
+    }
+
+    if (moreBtn) {
+      moreBtn.classList.toggle("active");
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    const panel = document.getElementById("categoryExpandPanel");
+    const moreBtn = document.querySelector(".category-more-btn");
+    const nav = document.querySelector(".category-nav");
+
+    if (!panel || !moreBtn || !nav) return;
+
+    if (!nav.contains(e.target)) {
+      panel.classList.remove("show");
+      moreBtn.classList.remove("active");
+    }
+  });
+</script>
+{% endblock %}

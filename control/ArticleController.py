@@ -39,9 +39,19 @@ class ArticleController:
 
     def get_home_headline(self):
         return self.article_entity.get_home_headline_article()
+    
+    def get_featured_article_by_category(self, category_id, exclude_id=None):
+        return self.article_entity.get_featured_article_by_category(category_id, exclude_id)
 
     def get_home_latest_articles(self, limit=5, offset=0, exclude_id=None):
         return self.article_entity.get_home_latest_articles(limit, offset, exclude_id)
+    
+    def home_article_by_category(self, category_id, limit=6, exclude_id=None):
+        return self.article_entity.home_article_by_category(
+            category_id=category_id,
+            limit=limit,
+            exclude_id=exclude_id
+        )
 
     def delete_article(self, article_id):
         return self.article_entity.delete_article(article_id)

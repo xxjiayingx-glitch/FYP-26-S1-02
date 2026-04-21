@@ -1,55 +1,80 @@
-<!doctype html>
-<html lang="en">
- 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily Scoop</title>
-  <link rel="stylesheet" href="../../static/css/Unregistered/UnregHome.css" />
-</head>
- 
-<header class="navbar">
-  <div class="logo">
-    <a href="{{ url_for('home.unreg_home') }}">
-      <h1>Daily Scoop</h1>
-      <h1>News System</h1>
-    </a>
+{% extends "master.html" %}
+
+{% block title %}Daily Scoop{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/Unregistered/UnregHome.css') }}">
+{% endblock %}
+
+{% block brand_href %}{{ url_for('home.unreg_home') }}{% endblock %}
+{% block premium_badge %}{% endblock %}
+
+{% block topbar_nav %}
+  <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">Company Profile</a>
+  <a href="{{ url_for('home.unreg_home') + '#product-feature' }}">Product Feature</a>
+  <a href="{{ url_for('home.unreg_home') + '#articles' }}">Articles</a>
+  <a href="{{ url_for('home.unreg_home') + '#pricing' }}">Subscription</a>
+  <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
+  <a href="{{ url_for('login.login') }}">Log In</a>
+{% endblock %}
+
+{% block content %}
+<div class="unreg-home">
+  <div class="category-nav">
+    <div class="category-nav-inner">
+      <a href="{{ url_for('home.all_articles') }}" class="category-nav-link category-all-link">
+        All
+      </a>
+      {% for category in categories[:7] %}
+        <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-nav-link">
+          {{ category.categoryName }}
+        </a>
+      {% endfor %}
+
+      {% if categories|length > 7 %}
+        <button class="category-more-btn" type="button" onclick="toggleCategoryPanel()">
+          More <span class="dropdown-arrow">▼</span>
+        </button>
+      {% endif %}
+    </div>
+
+    {% if categories|length > 7 %}
+    <div class="category-expand-panel" id="categoryExpandPanel">
+      <div class="category-expand-grid">
+        <a href="{{ url_for('home.all_articles') }}" class="category-nav-link category-all-link">
+          All
+        </a>
+        {% for category in categories %}
+          <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-nav-link">
+            {{ category.categoryName }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
   </div>
- 
-  <nav class="navLinks">
-    <a href="#companyinfo">Company Profile</a>
-    <a href="#product-feature">Product Feature</a>
-    <a href="#articles">Articles</a>
-    <a href="#pricing">Subscription</a>
-    <a href="#testimonials">Testimonials</a>
-    <a href="{{ url_for('login.login') }}">Log In</a>
-  </nav>
-</header>
- 
-<body>
-  <section class="headline">
+
+  <section class="headline reveal">
     <div class="container">
       <div class="news-card">
         {% if headline %}
         <div class="featured-news">
-  
-          {% set featured = headline %}
           <div class="featured-left">
+            <span class="headline-tag">Top Story</span>
             <h1 class="featured-title">{{ headline.articleTitle }}</h1>
-  
-            <!-- Views & Likes between title and description -->
+
             <div class="article-meta">
               <span class="meta-item views">👁 {{ headline.views }}</span>
               <span class="meta-item likes">❤️ {{ headline.likes }}</span>
             </div>
-  
+
             <p class="featured-desc">{{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif %}</p>
-  
+
             <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=headline.articleID) }}">
               Read more......
             </a>
           </div>
-  
+
           <div class="featured-right">
             {% if headline.imageURL %}
             <img src="{{ url_for('static', filename='uploads/' + headline.imageURL) }}" />
@@ -57,7 +82,6 @@
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
             {% endif %}
           </div>
-  
         </div>
         {% else %}
         <p class="no-headline">No headline available</p>
@@ -65,47 +89,89 @@
       </div>
     </div>
   </section>
- 
-  <section id="articles" class="news">
+
+  <section class="category-carousel-section reveal">
+    <h3 class="latest-title">Top Stories by Category</h3>
+
+    <div class="category-carousel-wrapper">
+      <button class="carousel-btn category-prev" onclick="moveCategoryCarousel(-1)">&#10094;</button>
+
+      <div class="category-carousel-viewport">
+        <div class="category-carousel-track" id="categoryCarouselTrack">
+          {% for item in category_featured_articles %}
+          <div class="category-carousel-card">
+            {% if item.article.imageURL %}
+              <img src="{{ url_for('static', filename='uploads/' + item.article.imageURL) }}" alt="{{ item.article.articleTitle }}">
+            {% else %}
+              <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
+            {% endif %}
+
+            <div class="category-carousel-content">
+              <span class="category-badge">{{ item.category.categoryName }}</span>
+              <h4>{{ item.article.articleTitle }}</h4>
+
+              <div class="article-meta">
+                <span class="meta-item views">👁 {{ item.article.views }}</span>
+                <span class="meta-item likes">❤️ {{ item.article.likes }}</span>
+              </div>
+
+              <p>{{ item.article.content[:120] }}{% if item.article.content|length > 120 %}...{% endif %}</p>
+
+              <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=item.article.articleID) }}">
+                Read more......
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button class="carousel-btn category-next" onclick="moveCategoryCarousel(1)">&#10095;</button>
+    </div>
+  </section>
+
+  <section id="articles" class="news reveal">
     <h3 class="latest-title">Latest News</h3>
     <div class="latest-grid" id="latest-articles">
       {% if articles %}
-      {% for article in articles %}
- 
-      <div class="news-card">
-        {% if article.imageURL %}
-        <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}"
-          alt="{{ article['articleTitle'] }}" />
-        {% else %}
-        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" />
-        {% endif %}
- 
-        <h4 class="news-title">{{ article['articleTitle'] }}</h4>
- 
-        <!-- Views & Likes between title and body -->
-        <div class="article-meta">
-          <span class="meta-item views">👁 {{ article.views }}</span>
-          <span class="meta-item likes">❤️ {{ article.likes }}</span>
+        {% for article in articles %}
+        <div class="news-card">
+          {% if article.imageURL %}
+          <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="{{ article['articleTitle'] }}" />
+          {% else %}
+          <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" />
+          {% endif %}
+
+          <h4 class="news-title">{{ article['articleTitle'] }}</h4>
+
+          <div class="article-meta">
+            <span class="meta-item views">👁 {{ article.views }}</span>
+            <span class="meta-item likes">❤️ {{ article.likes }}</span>
+          </div>
+
+          <p class="news-para">{{ article['content'][:120] }}...</p>
+          <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=article.articleID) }}">
+            Read more......
+          </a>
         </div>
- 
-        <p class="news-para">{{ article['content'][:120] }}...</p>
-        <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=article.articleID) }}">
-          Read more......
-        </a>
-      </div>
-      {% endfor %} {% else %}
-      <p>No latest news available.</p>
+        {% endfor %}
+      {% else %}
+        <p>No latest news available.</p>
       {% endif %}
     </div>
+
     <div class="news-btn">
       <button class="view-more-articles" data-section="articles" onclick="loadMoreArticles(this)">
         View More
       </button>
+      <button class="view-less-articles" id="viewLessArticlesBtn" onclick="viewLessArticles()" style="display: none;">
+        View Less
+      </button>
     </div>
   </section>
- 
-  <section class="testimonials" id="testimonials">
-    <h2 class="testimonial-title">Testimonials</h2>
+
+  <section class="testimonials reveal" id="testimonials">
+    <h2 class="testimonial-title">What People Are Saying</h2>
     <p class="testimonial-desc">Here's what people are saying</p>
 
     <div class="container">
@@ -138,8 +204,8 @@
       {% endif %}
     </div>
   </section>
- 
-  <section id="product-feature" class="feature">
+
+  <section id="product-feature" class="feature reveal">
     <div class="container">
       <h1 class="features-title">Product Feature</h1>
       <div class="features-grid" id="prodfeatures">
@@ -147,11 +213,9 @@
           {% for f in features[:4] %}
           <div class="feature-card">
             <h4>{{ f.featureName }}</h4>
-
             <div class="feature-img">
               <img src="{{ url_for('static', filename='images/webpage/' ~ f.featureImage) }}" alt="{{ f.featureName }}">
             </div>
-
             <p>{{ f.featureDescription }}</p>
           </div>
           {% endfor %}
@@ -164,20 +228,21 @@
         <button class="view-more-features" data-section="features" onclick="loadMoreFeatures(this)">
           View More
         </button>
+        <button class="view-less-features" id="viewLessFeaturesBtn" onclick="viewLessFeatures()" style="display: none;">
+          View Less
+        </button>
       </div>
     </div>
   </section>
 
-  <section class="company-luxe" id="companyinfo">
+  <section class="company-luxe reveal" id="companyinfo">
     <div class="company-luxe-container">
       {% if profile %}
         <div class="company-luxe-grid">
           <div class="company-luxe-intro">
             <span class="company-luxe-tag">About the Company</span>
             <h2>{{ profile.companyName }}</h2>
-            <p class="company-luxe-desc">
-              {{ profile.description }}
-            </p>
+            <p class="company-luxe-desc">{{ profile.description }}</p>
           </div>
 
           <div class="company-luxe-panel">
@@ -214,7 +279,7 @@
     </div>
   </section>
 
-  <section class="pricing" id="pricing">
+  <section class="pricing reveal" id="pricing">
     <div class="pricing-header">
       <span class="pricing-tag">SUBSCRIPTION</span>
       <h2 class="pricing-title">Plans and Pricing</h2>
@@ -227,21 +292,16 @@
       {% if plans %}
         {% for plan in plans %}
         <div class="plan-card {% if plan.planName == 'Premium Plan' %}featured-plan{% endif %}">
-          
           {% if plan.planName == "Premium Plan" %}
             <div class="plan-badge">Most Popular</div>
           {% endif %}
 
           <div class="plan-top">
             <h3>{{ plan.planName }}</h3>
-
             <div class="price">
               ${{ plan.price }} <span>/ {{ plan.billingCycle }}</span>
             </div>
-
-            <p class="plan-note">
-              {{ plan.planDescription }}
-            </p>
+            <p class="plan-note">{{ plan.planDescription }}</p>
           </div>
 
           <ul class="features">
@@ -266,157 +326,191 @@
         </div>
         {% endfor %}
       {% else %}
-        <p class="no-plan-message">
-          No subscription plans available at the moment.
-        </p>
+        <p class="no-plan-message">No subscription plans available at the moment.</p>
       {% endif %}
     </div>
   </section>
+</div>
+{% endblock %}
 
-  <script>
-    // Script to show more latest articles
-    let articleOffset = 4;
-    const articleLimit = 6;
- 
-    function loadMoreArticles(button) {
-      fetch(
-        `/load_more_articles?offset=${articleOffset}&limit=${articleLimit}`,
-      )
-        .then((res) => res.json())
-        .then((data) => {
-          const container = document.getElementById("latest-articles");
-          data.forEach((article) => {
-            const card = document.createElement("div");
-            card.classList.add("news-card");
- 
-            const articleDetailBase = "{{ url_for('home.unreg_article_detail', article_id=0) }}".replace('/0', '/');
-            card.innerHTML = `
-              <img src="/static/uploads/${article.imageURL}" alt="${article.articleTitle}">
-              <h5 class="news-title">${article.articleTitle}</h5>
-              <div class="article-meta">
-                <span class="meta-item views">👁 ${article.views ?? 0}</span>
-                <span class="meta-item likes">❤️ ${article.likes ?? 0}</span>
-              </div>
-              <p class="news-para">${article.content}...</p>
-              <a class="read-more" href="${articleDetailBase}${article.articleID}">Read more......</a>
-            `;
-            container.appendChild(card);
-          });
- 
-          articleOffset += data.length;
- 
-          if (data.length < articleLimit) {
-            button.style.display = "none";
-          }
+{% block extra_scripts %}
+<script>
+  let articleOffset = 4;
+  const articleLimit = 6;
+  let loadedArticleCount = 0;
+
+  function loadMoreArticles(button) {
+    fetch(`/load_more_articles?offset=${articleOffset}&limit=${articleLimit}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const container = document.getElementById("latest-articles");
+        const viewLessBtn = document.getElementById("viewLessArticlesBtn");
+
+        data.forEach((article) => {
+          const card = document.createElement("div");
+          card.classList.add("news-card", "extra-article-card");
+
+          const articleDetailBase = "{{ url_for('home.unreg_article_detail', article_id=0) }}".replace('/0', '/');
+
+          card.innerHTML = `
+            <img src="/static/uploads/${article.imageURL}" alt="${article.articleTitle}">
+            <h5 class="news-title">${article.articleTitle}</h5>
+            <div class="article-meta">
+              <span class="meta-item views">👁 ${article.views ?? 0}</span>
+              <span class="meta-item likes">❤️ ${article.likes ?? 0}</span>
+            </div>
+            <p class="news-para">${article.content}...</p>
+            <a class="read-more" href="${articleDetailBase}${article.articleID}">Read more......</a>
+          `;
+
+          container.appendChild(card);
         });
-    }
- 
-    // Testimonial carousel script
-    let testimonialPage = 0;
-    let testimonialCardsPerPage = getTestimonialCardsPerPage();
 
-    const testimonialTrack = document.getElementById("testimonialTrack");
-    const testimonialItems = document.querySelectorAll(".testimonial-item");
-    const testimonialDotsContainer = document.getElementById("testimonialDots");
-    const testimonialViewport = document.querySelector(".testimonial-viewport");
+        loadedArticleCount += data.length;
+        articleOffset += data.length;
 
-    function getTestimonialCardsPerPage() {
-      if (window.innerWidth <= 576) return 1;
-      if (window.innerWidth <= 992) return 2;
-      return 3;
-    }
-
-    function getTestimonialTotalPages() {
-      return Math.ceil(testimonialItems.length / testimonialCardsPerPage);
-    }
-
-    function renderTestimonialDots() {
-      if (!testimonialDotsContainer) return;
-
-      testimonialDotsContainer.innerHTML = "";
-      const totalPages = getTestimonialTotalPages();
-
-      for (let i = 0; i < totalPages; i++) {
-        const dot = document.createElement("span");
-        dot.classList.add("dot");
-
-        if (i === testimonialPage) {
-          dot.classList.add("active");
+        if (loadedArticleCount > 0) {
+          viewLessBtn.style.display = "inline-flex";
         }
 
-        dot.onclick = () => goToTestimonialPage(i);
-        testimonialDotsContainer.appendChild(dot);
-      }
+        if (data.length < articleLimit) {
+          button.style.display = "none";
+        }
+      });
+  }
+
+  function viewLessArticles() {
+    const extraCards = document.querySelectorAll(".extra-article-card");
+    const viewMoreBtn = document.querySelector(".view-more-articles");
+    const viewLessBtn = document.getElementById("viewLessArticlesBtn");
+    const latestSection = document.getElementById("articles");
+
+    extraCards.forEach((card) => card.remove());
+
+    articleOffset = 4;
+    loadedArticleCount = 0;
+
+    if (viewMoreBtn) {
+      viewMoreBtn.style.display = "inline-flex";
     }
 
-    function updateTestimonialCarousel() {
-      if (!testimonialTrack || !testimonialViewport || testimonialItems.length === 0) return;
+    if (viewLessBtn) {
+      viewLessBtn.style.display = "none";
+    }
 
-      const itemWidth = testimonialItems[0].offsetWidth;
-      const moveX = testimonialPage * testimonialCardsPerPage * itemWidth;
-
-      testimonialTrack.style.transform = `translateX(-${moveX}px)`;
-
-      const dots = testimonialDotsContainer.querySelectorAll(".dot");
-      dots.forEach((dot, index) => {
-        dot.classList.toggle("active", index === testimonialPage);
+    if (latestSection) {
+      latestSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
       });
     }
+  }
 
-    function moveTestimonialGroup(direction) {
-      const totalPages = getTestimonialTotalPages();
-      testimonialPage += direction;
+  let testimonialPage = 0;
+  let testimonialCardsPerPage = getTestimonialCardsPerPage();
 
-      if (testimonialPage < 0) {
-        testimonialPage = totalPages - 1;
-      } else if (testimonialPage >= totalPages) {
-        testimonialPage = 0;
+  const testimonialTrack = document.getElementById("testimonialTrack");
+  const testimonialItems = document.querySelectorAll(".testimonial-item");
+  const testimonialDotsContainer = document.getElementById("testimonialDots");
+  const testimonialViewport = document.querySelector(".testimonial-viewport");
+
+  function getTestimonialCardsPerPage() {
+    if (window.innerWidth <= 576) return 1;
+    if (window.innerWidth <= 992) return 2;
+    return 3;
+  }
+
+  function getTestimonialTotalPages() {
+    return Math.ceil(testimonialItems.length / testimonialCardsPerPage);
+  }
+
+  function renderTestimonialDots() {
+    if (!testimonialDotsContainer) return;
+
+    testimonialDotsContainer.innerHTML = "";
+    const totalPages = getTestimonialTotalPages();
+
+    for (let i = 0; i < totalPages; i++) {
+      const dot = document.createElement("span");
+      dot.classList.add("dot");
+
+      if (i === testimonialPage) {
+        dot.classList.add("active");
       }
 
-      updateTestimonialCarousel();
+      dot.onclick = () => goToTestimonialPage(i);
+      testimonialDotsContainer.appendChild(dot);
+    }
+  }
+
+  function updateTestimonialCarousel() {
+    if (!testimonialTrack || !testimonialViewport || testimonialItems.length === 0) return;
+
+    const itemWidth = testimonialItems[0].offsetWidth;
+    const moveX = testimonialPage * testimonialCardsPerPage * itemWidth;
+
+    testimonialTrack.style.transform = `translateX(-${moveX}px)`;
+
+    const dots = testimonialDotsContainer.querySelectorAll(".dot");
+    dots.forEach((dot, index) => {
+      dot.classList.toggle("active", index === testimonialPage);
+    });
+  }
+
+  function moveTestimonialGroup(direction) {
+    const totalPages = getTestimonialTotalPages();
+    testimonialPage += direction;
+
+    if (testimonialPage < 0) {
+      testimonialPage = totalPages - 1;
+    } else if (testimonialPage >= totalPages) {
+      testimonialPage = 0;
     }
 
-    function goToTestimonialPage(page) {
-      testimonialPage = page;
-      updateTestimonialCarousel();
-    }
+    updateTestimonialCarousel();
+  }
 
-    function handleTestimonialResize() {
-      const newCardsPerPage = getTestimonialCardsPerPage();
+  function goToTestimonialPage(page) {
+    testimonialPage = page;
+    updateTestimonialCarousel();
+  }
 
-      if (newCardsPerPage !== testimonialCardsPerPage) {
-        testimonialCardsPerPage = newCardsPerPage;
-        testimonialPage = 0;
-        renderTestimonialDots();
-      }
+  function handleTestimonialResize() {
+    const newCardsPerPage = getTestimonialCardsPerPage();
 
-      updateTestimonialCarousel();
-    }
-
-    if (testimonialTrack && testimonialItems.length > 0) {
+    if (newCardsPerPage !== testimonialCardsPerPage) {
+      testimonialCardsPerPage = newCardsPerPage;
+      testimonialPage = 0;
       renderTestimonialDots();
-      updateTestimonialCarousel();
-      window.addEventListener("resize", handleTestimonialResize);
-
-      setInterval(() => {
-        moveTestimonialGroup(1);
-      }, 5000);
     }
-  
-    // Script to show more product features
-    let featureOffset = 4;
-    const featureLimit = 4;
-    
-    
-    function loadMoreFeatures(button) {
+
+    updateTestimonialCarousel();
+  }
+
+  if (testimonialTrack && testimonialItems.length > 0) {
+    renderTestimonialDots();
+    updateTestimonialCarousel();
+    window.addEventListener("resize", handleTestimonialResize);
+
+    setInterval(() => {
+      moveTestimonialGroup(1);
+    }, 5000);
+  }
+
+  let featureOffset = 4;
+  const featureLimit = 4;
+  let loadedFeatureCount = 0;
+
+  function loadMoreFeatures(button) {
     fetch(`/load_more_features?offset=${featureOffset}&limit=${featureLimit}`)
       .then((res) => res.json())
       .then((data) => {
         const container = document.getElementById("prodfeatures");
+        const viewLessBtn = document.getElementById("viewLessFeaturesBtn");
 
         data.features.forEach((feature) => {
           const card = document.createElement("div");
-          card.classList.add("feature-card");
+          card.classList.add("feature-card", "extra-feature-card");
 
           card.innerHTML = `
             <h4>${feature.featureName}</h4>
@@ -429,48 +523,139 @@
           container.appendChild(card);
         });
 
+        loadedFeatureCount += data.features.length;
         featureOffset += data.features.length;
+
+        if (loadedFeatureCount > 0) {
+          viewLessBtn.style.display = "inline-flex";
+        }
 
         if (!data.has_more) {
           button.style.display = "none";
         }
       });
   }
+
+  function viewLessFeatures() {
+    const extraCards = document.querySelectorAll(".extra-feature-card");
+    const viewMoreBtn = document.querySelector(".view-more-features");
+    const viewLessBtn = document.getElementById("viewLessFeaturesBtn");
+    const featureSection = document.getElementById("product-feature");
+
+    extraCards.forEach((card) => card.remove());
+
+    featureOffset = 4;
+    loadedFeatureCount = 0;
+
+    if (viewMoreBtn) {
+      viewMoreBtn.style.display = "inline-flex";
+    }
+
+    if (viewLessBtn) {
+      viewLessBtn.style.display = "none";
+    }
+
+    if (featureSection) {
+      featureSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  }
+
+  let categoryCarouselPage = 0;
+
+  function moveCategoryCarousel(direction) {
+    const track = document.getElementById("categoryCarouselTrack");
+    const cards = document.querySelectorAll(".category-carousel-card");
+    const viewport = document.querySelector(".category-carousel-viewport");
+
+    if (!track || !viewport || cards.length === 0) return;
+
+    let visibleCards = 3;
+    if (window.innerWidth <= 576) {
+      visibleCards = 1;
+    } else if (window.innerWidth <= 992) {
+      visibleCards = 2;
+    }
+
+    const totalCards = cards.length;
+    const maxPage = Math.max(0, Math.ceil(totalCards / visibleCards) - 1);
+
+    categoryCarouselPage += direction;
+
+    if (categoryCarouselPage < 0) categoryCarouselPage = 0;
+    if (categoryCarouselPage > maxPage) categoryCarouselPage = maxPage;
+
+    const moveAmount = viewport.offsetWidth * categoryCarouselPage;
+    track.style.transform = `translateX(-${moveAmount}px)`;
+  }
+
+  window.addEventListener("resize", () => {
+    categoryCarouselPage = 0;
+    const track = document.getElementById("categoryCarouselTrack");
+    if (track) {
+      track.style.transform = "translateX(0)";
+    }
+  });
+
+  const revealItems = document.querySelectorAll(".reveal");
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("show");
+      } else {
+        entry.target.classList.remove("show");
+      }
+    });
+  }, { threshold: 0.15 });
+
+  revealItems.forEach((item) => revealObserver.observe(item));
+
+  function toggleCategoryDropdown() {
+    const menu = document.getElementById("categoryDropdownMenu");
+    if (menu) {
+      menu.classList.toggle("show");
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    const dropdown = document.querySelector(".category-dropdown");
+    const menu = document.getElementById("categoryDropdownMenu");
+
+    if (!dropdown || !menu) return;
+
+    if (!dropdown.contains(e.target)) {
+      menu.classList.remove("show");
+    }
+  });
+
+  function toggleCategoryPanel() {
+    const panel = document.getElementById("categoryExpandPanel");
+    const moreBtn = document.querySelector(".category-more-btn");
+
+    if (panel) {
+      panel.classList.toggle("show");
+    }
+
+    if (moreBtn) {
+      moreBtn.classList.toggle("active");
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    const panel = document.getElementById("categoryExpandPanel");
+    const moreBtn = document.querySelector(".category-more-btn");
+    const nav = document.querySelector(".category-nav");
+
+    if (!panel || !moreBtn || !nav) return;
+
+    if (!nav.contains(e.target)) {
+      panel.classList.remove("show");
+      moreBtn.classList.remove("active");
+    }
+  });
+
 </script>
-</body>
- 
-<footer class="footer">
-  <div class="footer-container">
-    <!-- Brand Section -->
-    <div class="footer-brand">
-      <h3 class="footer-title">Daily Scoop News</h3>
- 
-      <p class="footer-description">
-        Delivering reliable and AI-powered news to keep readers informed with
-        credible and up-to-date stories.
-      </p>
- 
-      <div class="footer-social">
-        <a href="https://facebook.com" target="_blank" class="footer-social-icon facebook" rel="noopener">f</a>
-        <a href="https://linkedin.com" target="_blank" class="footer-social-icon linkedin" rel="noopener">in</a>
-        <a href="https://x.com" target="_blank" class="footer-social-icon twitter" rel="noopener">in</a>
-      </div>
-    </div>
- 
-    <!-- Links Section -->
-    <div class="footer-links-section">
-      <h4 class="footer-links-title">Social Links</h4>
- 
-      <div class="footer-links">
-        <a href="{{ url_for('info', page='contact') }}">Contact Us</a>
-        <a href="{{ url_for('info', page='privacy') }}">Privacy Policy</a>
-        <a href="{{ url_for('info', page='about') }}">About Us</a>
-        <a href="{{ url_for('info', page='terms') }}">Terms and Conditions</a>
-        <a href="{{ url_for('info', page='help') }}">Need help? Reach us here.</a>
-        <a href="{{ url_for('info', page='advertise') }}">Advertise with us</a>
-      </div>
-    </div>
-  </div>
-</footer>
- 
-</html>
+{% endblock %}

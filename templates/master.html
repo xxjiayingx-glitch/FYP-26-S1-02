@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Daily Scoop News System{% endblock %}</title>
+    <title>{% block title %}Daily Scoop News{% endblock %}</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <style>
         *{
@@ -464,6 +464,7 @@
         }
 
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <script>
     setTimeout(() => {
@@ -481,42 +482,52 @@
     <!-- TOP NAVBAR -->
     <header class="topbar">
         <div class="brand-wrap">
-            <a href="{% if session.get('userID') %}{{ url_for('dashboard') }}{% else %}{{ url_for('home.unreg_home') }}{% endif %}" class="brand">
-                Daily Scoop<br>
-                News System
+            <a href="{% block brand_href %}
+                {% if session.get('userID') %}
+                    {{ url_for('dashboard') }}
+                {% else %}
+                    {{ url_for('home.unreg_home') }}
+                {% endif %}
+            {% endblock %}" class="brand">
+                Daily Scoop News
             </a>
 
-            {% if session.get("userType", "").strip().lower() == "premium" %}
-            <span class="premium-badge">
-                <i class="fa-solid fa-crown"></i> PREMIUM
-            </span>
-            {% endif %}
+            {% block premium_badge %}
+                {% if session.get("userType", "").strip().lower() == "premium" %}
+                <span class="premium-badge">
+                    <i class="fa-solid fa-crown"></i> PREMIUM
+                </span>
+                {% endif %}
+            {% endblock %}
         </div>
 
         <nav class="nav-links">
-            {% if session.get("userID") %}
-                <span class="user-icon">
-                    <i class="fa-regular fa-user"></i>
-                    Hi, {{ session.get('username','User') }}
-                </span>
+            {% block topbar_nav %}
+                {% if session.get("userID") %}
+                    <span class="user-icon">
+                        <i class="fa-regular fa-user"></i>
+                        Hi, {{ session.get('username','User') }}
+                    </span>
 
-                <a href="{{ url_for('my_articles') }}">My Articles</a>
-                <a href="{{ url_for('profile.profile_page') }}">My Profile</a>                
-                <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
+                    <a href="{{ url_for('my_articles') }}">My Articles</a>
+                    <a href="{{ url_for('profile.profile_page') }}">My Profile</a>
+                    <a href="{{ url_for('testimonial.testimonial_page') }}">Testimonials</a>
 
-                {% if session.get("userType","").lower() == "premium" %}
-                    <a href="{{ url_for('insight') }}">Insights</a>
+                    {% if session.get("userType","").lower() == "premium" %}
+                        <a href="{{ url_for('insight') }}">Insights</a>
+                    {% endif %}
+
+                    <a href="{{ url_for('logout') }}">Log Out</a>
+                {% else %}
+                    <a href="{{ url_for('home.unreg_home') }}">Home</a>
+                    <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">Company Profile</a>
+                    <a href="{{ url_for('home.unreg_home') + '#product-feature' }}">Product Feature</a>
+                    <a href="{{ url_for('home.unreg_home') + '#articles' }}">Articles</a>
+                    <a href="{{ url_for('home.unreg_home') + '#pricing' }}">Subscription</a>
+                    <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
+                    <a href="{{ url_for('login.login') }}">Log In</a>
                 {% endif %}
-
-                <a href="{{ url_for('logout') }}">Log Out</a>
-
-            {% else %}
-                <a href="{{ url_for('home.unreg_home') }}">Home</a>
-                <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">Company Profile</a>
-                <a href="{{ url_for('subscription.subscription_page') }}">Subscription</a>
-                <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
-                <a href="{{ url_for('login.login') }}">Log In</a>
-            {% endif %}
+            {% endblock %}
         </nav>
     </header>
 
@@ -576,6 +587,6 @@
             </div>
         </div>
     </footer>
-
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>
