@@ -5,51 +5,54 @@
 {% block extra_css %}
 <style>
     .page-header {
-        margin-bottom: 22px;
+        margin-bottom: 24px;
     }
 
     .page-header h1 {
-        font-size: 38px;
+        font-size: 42px;
         font-weight: 800;
-        margin: 0 0 6px 0;
-        color: #111827;
-        letter-spacing: -0.4px;
+        margin: 0 0 8px 0;
+        color: #0f172a;
+        letter-spacing: -0.6px;
     }
 
     .page-header p {
         margin: 0;
-        color: #6b7280;
-        font-size: 14px;
+        color: #64748b;
+        font-size: 15px;
     }
 
     .profile-layout {
         display: grid;
-        grid-template-columns: 290px 1fr;
-        gap: 26px;
+        grid-template-columns: 300px 1fr;
+        gap: 28px;
         align-items: start;
     }
 
     .left-panel {
-        background: #ffffff;
-        border: 1px solid #dbe3ee;
-        border-radius: 18px;
-        padding: 22px;
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        border: 1px solid #dbe7f3;
+        border-radius: 22px;
+        padding: 26px 22px;
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+        position: sticky;
+        top: 20px;
     }
 
     .profile-image-box {
-        width: 130px;
-        height: 130px;
-        margin: 0 auto 18px;
-        border-radius: 18px;
-        background: #f3f4f8;
-        border: 1px solid #e5e7eb;
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 20px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #eef4fb, #f8fafc);
+        border: 1px solid #dbe7f3;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 62px;
-        color: #6b7280;
+        font-size: 68px;
+        color: #64748b;
         overflow: hidden;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
     }
 
     .profile-image-box img {
@@ -60,63 +63,65 @@
 
     .editor-name {
         text-align: center;
-        font-size: 18px;
-        font-weight: 700;
-        color: #111827;
-        margin-bottom: 4px;
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 6px;
     }
 
     .editor-username {
         text-align: center;
         font-size: 14px;
-        color: #6b7280;
-        margin-bottom: 22px;
+        color: #64748b;
+        margin-bottom: 20px;
     }
 
     .side-badge {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 10px;
-        border: 1px solid #d7e3f1;
-        background: #f8fbff;
-        color: #1f3a5f;
-        border-radius: 12px;
+        border: 1px solid #cfe0f2;
+        background: linear-gradient(90deg, #f7fbff, #eef6ff);
+        color: #1d4ed8;
+        border-radius: 14px;
         padding: 14px 16px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 14px;
     }
 
     .right-panel {
         display: flex;
         flex-direction: column;
-        gap: 24px;
+        gap: 26px;
     }
 
     .section-card {
         background: #ffffff;
-        border: 1px solid #dbe3ee;
-        border-radius: 18px;
+        border: 1px solid #dbe7f3;
+        border-radius: 22px;
         padding: 28px;
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
     }
 
     .section-title {
-        font-size: 16px;
+        font-size: 22px;
         font-weight: 800;
         color: #2563eb;
         margin-bottom: 6px;
     }
 
     .section-subtitle {
-        font-size: 13px;
-        color: #6b7280;
+        font-size: 14px;
+        color: #64748b;
         margin-bottom: 24px;
+        line-height: 1.5;
     }
 
     .form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 18px 22px;
+        gap: 20px 20px;
     }
 
     .form-group {
@@ -130,8 +135,8 @@
 
     .form-group label {
         font-size: 13px;
-        font-weight: 700;
-        color: #111827;
+        font-weight: 800;
+        color: #0f172a;
         margin-bottom: 8px;
     }
 
@@ -139,32 +144,42 @@
     .form-group select,
     .form-group textarea {
         width: 100%;
-        border: 1px solid #cfd8e3;
-        border-radius: 10px;
-        padding: 12px 13px;
+        border: 1px solid #cfdceb;
+        border-radius: 12px;
+        padding: 13px 14px;
         font-size: 14px;
-        background: #fff;
+        background: #ffffff;
         box-sizing: border-box;
         transition: all 0.2s ease;
+        color: #0f172a;
     }
 
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
         outline: none;
-        border-color: #7aa7dc;
-        box-shadow: 0 0 0 3px rgba(122, 167, 220, 0.15);
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.16);
     }
 
     .form-group textarea {
         min-height: 120px;
         resize: vertical;
+        line-height: 1.5;
+    }
+
+    .readonly-input {
+        background: #f8fafc !important;
+        color: #475569;
+        cursor: not-allowed;
+        border-style: dashed !important;
     }
 
     .hint-text {
-        margin-top: 6px;
+        margin-top: 8px;
         font-size: 12px;
-        color: #6b7280;
+        color: #64748b;
+        line-height: 1.5;
     }
 
     .file-stack {
@@ -176,25 +191,32 @@
     .action-row {
         display: flex;
         justify-content: flex-end;
-        margin-top: 20px;
+        margin-top: 24px;
     }
 
     .primary-btn {
-        background: linear-gradient(90deg, #2f80ed, #256dd1);
+        background: linear-gradient(90deg, #3b82f6, #2563eb);
         color: #fff;
         border: none;
-        border-radius: 10px;
-        padding: 12px 20px;
+        border-radius: 12px;
+        padding: 13px 22px;
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 800;
         cursor: pointer;
-        box-shadow: 0 8px 18px rgba(47, 128, 237, 0.18);
-        transition: 0.2s ease;
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.22);
+        transition: all 0.2s ease;
     }
 
     .primary-btn:hover {
         transform: translateY(-1px);
-        background: linear-gradient(90deg, #256dd1, #1f5fba);
+        box-shadow: 0 14px 24px rgba(37, 99, 235, 0.26);
+    }
+
+    .primary-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
     }
 
     .security-grid {
@@ -203,19 +225,148 @@
         gap: 16px;
     }
 
+    .flash-box {
+        margin-bottom: 18px;
+    }
+
+    .flash-message {
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        border: 1px solid transparent;
+    }
+
+    .flash-success {
+        background: #ecfdf3;
+        color: #166534;
+        border-color: #bbf7d0;
+    }
+
+    .flash-error,
+    .flash-danger {
+        background: #fef2f2;
+        color: #991b1b;
+        border-color: #fecaca;
+    }
+
+    .flash-warning {
+        background: #fffbeb;
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+    .flash-info {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+    }
+
+    .request-summary {
+        background: linear-gradient(180deg, #fffdf7 0%, #fffaf0 100%);
+        border: 1px solid #f4d58d;
+        border-radius: 18px;
+        padding: 18px;
+        margin-bottom: 20px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: capitalize;
+        margin-bottom: 14px;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-approved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 18px;
+    }
+
+    .status-item {
+        background: rgba(255,255,255,0.65);
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 12px;
+        padding: 12px 14px;
+    }
+
+    .status-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .status-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .status-note {
+        margin-top: 14px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .status-note.pending {
+        color: #92400e;
+    }
+
+    .status-note.approved {
+        color: #166534;
+    }
+
+    .status-note.rejected {
+        color: #991b1b;
+    }
+
+    .request-form-shell {
+        border-top: 1px solid #e5edf6;
+        padding-top: 18px;
+    }
+
     @media (max-width: 1100px) {
         .profile-layout {
             grid-template-columns: 1fr;
         }
+
+        .left-panel {
+            position: static;
+        }
     }
 
     @media (max-width: 768px) {
-        .form-grid {
+        .form-grid,
+        .status-grid {
             grid-template-columns: 1fr;
         }
 
         .page-header h1 {
-            font-size: 30px;
+            font-size: 32px;
         }
 
         .section-card {
@@ -229,6 +380,18 @@
 <div class="page-header">
     <h1>Manage My Profile</h1>
     <p>Manage your professional editor information and account security.</p>
+</div>
+
+<div class="flash-box">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 </div>
 
 <div class="profile-layout">
@@ -256,10 +419,11 @@
     </div>
 
     <div class="right-panel">
+        <!-- PROFILE -->
         <div class="section-card">
             <div class="section-title">Profile Information</div>
             <div class="section-subtitle">
-                Update your editor profile details, expertise, credentials, and supporting information.
+                Update your editor profile details, credentials, and supporting information.
             </div>
 
             <form method="POST" action="{{ url_for('editor_manage_profile') }}" enctype="multipart/form-data">
@@ -294,15 +458,13 @@
 
                     <div class="form-group">
                         <label>Primary Area of Expertise</label>
-                        <select name="expertise_area">
-                            <option value="">Select expertise</option>
-                            {% for category in categories %}
-                                <option value="{{ category.categoryName }}"
-                                    {% if profile and profile.expertiseArea == category.categoryName %}selected{% endif %}>
-                                    {{ category.categoryName }}
-                                </option>
-                            {% endfor %}
-                        </select>
+                        <input type="text"
+                               value="{{ profile.expertiseArea if profile else '' }}"
+                               readonly
+                               class="readonly-input">
+                        <div class="hint-text">
+                            Your expertise cannot be edited directly here. Any changes require system admin approval.
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -355,6 +517,104 @@
             </form>
         </div>
 
+        <!-- REQUEST -->
+        <div class="section-card">
+            <div class="section-title">Request Expertise Change</div>
+            <div class="section-subtitle">
+                Submit a request if you want to change or add your editorial expertise. Requests will be reviewed by the system admin before any update is applied.
+            </div>
+
+            {% if latest_expertise_request %}
+                <div class="request-summary">
+                    <div class="status-badge status-{{ latest_expertise_request.status|lower }}">
+                        <i class="fa-solid fa-clock"></i>
+                        {{ latest_expertise_request.status }}
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-label">Current Expertise</div>
+                            <div class="status-value">{{ latest_expertise_request.currentExpertise }}</div>
+                        </div>
+
+                        <div class="status-item">
+                            <div class="status-label">Requested Expertise</div>
+                            <div class="status-value">{{ latest_expertise_request.requestedExpertise }}</div>
+                        </div>
+
+                        <div class="status-item">
+                            <div class="status-label">Requested At</div>
+                            <div class="status-value">{{ latest_expertise_request.requested_at }}</div>
+                        </div>
+
+                        {% if latest_expertise_request.reviewed_at %}
+                        <div class="status-item">
+                            <div class="status-label">Reviewed At</div>
+                            <div class="status-value">{{ latest_expertise_request.reviewed_at }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if latest_expertise_request.status|lower == "pending" %}
+                        <div class="status-note pending">
+                            Your request is currently pending admin approval. You cannot submit another request yet.
+                        </div>
+                    {% elif latest_expertise_request.status|lower == "approved" %}
+                        <div class="status-note approved">
+                            Your expertise request has been approved.
+                        </div>
+                    {% elif latest_expertise_request.status|lower == "rejected" %}
+                        <div class="status-note rejected">
+                            Your request was rejected. You may submit a new request.
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="request-form-shell">
+                <form method="POST" action="{{ url_for('request_expertise') }}">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Current Expertise</label>
+                            <input type="text"
+                                   value="{{ profile.expertiseArea if profile else '' }}"
+                                   readonly
+                                   class="readonly-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Requested Expertise</label>
+                            <select name="new_expertise" required
+                                {% if latest_expertise_request and latest_expertise_request.status|lower == "pending" %}disabled{% endif %}>
+                                <option value="">Select new expertise</option>
+                                {% for category in categories %}
+                                    {% if not profile or profile.expertiseArea != category.categoryName %}
+                                        <option value="{{ category.categoryName }}"
+                                            {% if latest_expertise_request and latest_expertise_request.requestedExpertise == category.categoryName and latest_expertise_request.status|lower == "pending" %}selected{% endif %}>
+                                            {{ category.categoryName }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        {% if latest_expertise_request and latest_expertise_request.status|lower == "pending" %}
+                            <button type="submit" class="primary-btn" disabled>
+                                Request Submitted
+                            </button>
+                        {% else %}
+                            <button type="submit" class="primary-btn">
+                                Submit Request
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- SECURITY -->
         <div class="section-card">
             <div class="section-title">Security</div>
             <div class="section-subtitle">

@@ -1276,7 +1276,6 @@ def editor_manage_profile():
                 username = request.form.get("username", "").strip()
                 email = request.form.get("email", "").strip()
                 phone = request.form.get("phone", "").strip()
-                expertise_area = request.form.get("expertise_area", "").strip()
                 years_experience = request.form.get("years_experience", "").strip()
                 editor_bio = request.form.get("editor_bio", "").strip()
                 portfolio_link = request.form.get("portfolio_link", "").strip()
@@ -1292,7 +1291,6 @@ def editor_manage_profile():
                         username = %s,
                         email = %s,
                         phone = %s,
-                        expertiseArea = %s,
                         yearsExperience = %s,
                         editorBio = %s,
                         portfolioLink = %s,
@@ -1306,7 +1304,6 @@ def editor_manage_profile():
                     username,
                     email,
                     phone,
-                    expertise_area,
                     years_experience if years_experience else None,
                     editor_bio,
                     portfolio_link,
@@ -1368,11 +1365,21 @@ def editor_manage_profile():
         """)
         categories = cursor.fetchall()
 
+        cursor.execute("""
+            SELECT requestID, currentExpertise, requestedExpertise, status, requested_at, reviewed_at
+            FROM EditorExpertiseRequest
+            WHERE userID = %s
+            ORDER BY requested_at DESC
+            LIMIT 1
+        """, (user_id,))
+        latest_expertise_request = cursor.fetchone()
+
         return render_template(
             "editor_manage_profile.html",
             active_page="profile",
             profile=profile,
-            categories=categories
+            categories=categories,
+            latest_expertise_request=latest_expertise_request
         )
 
     except Exception as e:
@@ -1391,17 +1398,96 @@ def editor_manage_profile():
         """)
         categories = cursor.fetchall()
 
+        cursor.execute("""
+            SELECT requestID, currentExpertise, requestedExpertise, status, requested_at, reviewed_at
+            FROM EditorExpertiseRequest
+            WHERE userID = %s
+            ORDER BY requested_at DESC
+            LIMIT 1
+        """, (user_id,))
+        latest_expertise_request = cursor.fetchone()
+
         return render_template(
             "editor_manage_profile.html",
             active_page="profile",
             profile=profile,
-            categories=categories
+            categories=categories,
+            latest_expertise_request=latest_expertise_request
         )
 
     finally:
         cursor.close()
         conn.close()
 
+@app.route("/editor/request_expertise", methods=["POST"])
+def request_expertise():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor" or editor_status != "approved":
+        return redirect(url_for("login.login"))
+
+    user_id = session.get("userID")
+    new_expertise = request.form.get("new_expertise", "").strip()
+
+    if not new_expertise:
+        flash("Please select a new expertise area.", "error")
+        return redirect(url_for("editor_manage_profile"))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT expertiseArea
+            FROM UserAccount
+            WHERE userID = %s
+        """, (user_id,))
+        user = cursor.fetchone()
+
+        current_expertise = user["expertiseArea"] if user else None
+
+        if current_expertise == new_expertise:
+            flash("Requested expertise cannot be the same as your current expertise.", "warning")
+            return redirect(url_for("editor_manage_profile"))
+
+        cursor.execute("""
+            SELECT *
+            FROM EditorExpertiseRequest
+            WHERE userID = %s
+              AND requestedExpertise = %s
+              AND status = 'pending'
+            ORDER BY requested_at DESC
+            LIMIT 1
+        """, (user_id, new_expertise))
+        existing_request = cursor.fetchone()
+
+        if existing_request:
+            flash("You already have a pending request for this expertise.", "warning")
+            return redirect(url_for("editor_manage_profile"))
+
+        cursor.execute("""
+            INSERT INTO EditorExpertiseRequest
+            (userID, currentExpertise, requestedExpertise, status, requested_at)
+            VALUES (%s, %s, %s, 'pending', NOW())
+        """, (user_id, current_expertise, new_expertise))
+
+        conn.commit()
+        flash("Expertise change request submitted successfully for admin approval.", "success")
+
+    except Exception as e:
+        conn.rollback()
+        print("REQUEST EXPERTISE ERROR:", e)
+        flash("Failed to submit expertise request.", "error")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("editor_manage_profile"))
 
 @app.route("/editor/profile_background")
 def editor_profile_background():
