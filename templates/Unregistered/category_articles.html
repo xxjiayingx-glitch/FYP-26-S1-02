@@ -49,11 +49,7 @@
     {% if categories|length > 7 %}
     <div class="category-expand-panel" id="categoryExpandPanel">
       <div class="category-expand-grid">
-        <a href="{{ url_for('home.all_articles') }}"
-          class="category-expand-link {% if is_all_page %}active{% endif %}">
-          All
-        </a>
-        {% for category in categories %}
+        {% for category in categories[7:] %}
           <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-expand-link {% if selected_category and category.categoryID == selected_category.categoryID %}active{% endif %}">
             {{ category.categoryName }}
           </a>
