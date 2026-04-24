@@ -12,7 +12,7 @@
 }
 
 .report-page .page-title{
-    font-size:34px;
+    font-size:28px;
     font-weight:800;
     color:#111;
     margin-bottom:26px;
@@ -21,28 +21,35 @@
 /* ================= LAYOUT ================= */
 .category-layout{
     display:flex;
-    gap:30px;
+    gap:28px;
+    padding:30px;
     width:100%;
     box-sizing:border-box;
-    align-items:flex-start;
 }
 
 /* ================= TABLE CARD ================= */
 .category-table-card{
     flex:1;
-    background:#fff;
-    border-radius:24px;
-    padding:30px 34px;
-    box-shadow:0 10px 28px rgba(0,0,0,0.06);
+    background:white;
+    border-radius:22px;
+    padding:30px 32px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.06);
 }
 
 /* ================= FORM CARD ================= */
 .category-form-card{
-    width:340px;
+    /* width:340px;
     background:#fff;
     border-radius:24px;
     padding:34px 30px;
-    box-shadow:0 10px 28px rgba(0,0,0,0.06);
+    box-shadow:0 10px 28px rgba(0,0,0,0.06); */
+    width:320px;
+    background:white;
+    border-radius:22px;
+    padding:30px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.06);
+    text-align:center;
+    margin-bottom: auto;
 }
 
 /* ================= TABLE ================= */
@@ -53,20 +60,17 @@
 }
 
 .modern-table thead th{
-    background:#f4f5ff;
-    color:#111;
-    text-align:left;
-    padding:16px 14px;
     font-size:18px;
-    font-weight:800;
+    font-weight:700;
+    padding-bottom:10px;
 }
 
 .modern-table tbody td{
-    padding:24px 14px;
-    border-bottom:1px solid #eeeeee;
+    padding:22px 6px;
+    border-bottom:1px solid #f1f2f4;
     vertical-align:middle;
     font-size:16px;
-    color:#222;
+    font-weight:500;
 }
 
 .modern-table tbody tr:last-child td{
@@ -78,27 +82,31 @@
 .modern-table td:nth-child(1){
     width:10%;
     text-align:left;
+    padding-left:4px;
 }
 
 .modern-table th:nth-child(2),
 .modern-table td:nth-child(2){
-    width:43%;
+    width:46%;
+    text-align:left;
 }
 
 .modern-table th:nth-child(3),
 .modern-table td:nth-child(3){
     width:18%;
+    text-align:center;
 }
 
 .modern-table th:nth-child(4),
 .modern-table td:nth-child(4){
-    width:29%;
+    width:26%;
+    text-align:left;
 }
 
 /* ================= CONTENT STYLE ================= */
 .id-text{
-    font-size:18px;
-    font-weight:700;
+    font-size:16px;
+    font-weight:500;
     color:#222;
 }
 
@@ -111,17 +119,17 @@
     background:#f4f4f6;
     border-radius:16px;
     font-size:16px;
-    font-weight:700;
+    font-weight:600;
     color:#555;
     line-height:1.2;
 }
 
 .status-badge{
     display:inline-block;
-    padding:8px 16px;
-    border-radius:999px;
-    font-size:14px;
-    font-weight:800;
+    padding:8px 18px;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:700;
     line-height:1;
     white-space:nowrap;
     text-transform:capitalize;
@@ -147,15 +155,13 @@
 
 .edit-btn,
 .delete-btn{
-    border:none;
+    padding:8px 18px;
     border-radius:999px;
-    padding:10px 18px;
-    font-size:14px;
-    font-weight:800;
+    font-weight:700;
+    font-size:16px;
+    border:none;
     cursor:pointer;
-    line-height:1;
-    min-width:78px;
-    transition:0.18s ease;
+    transition:.2s;
 }
 
 .edit-btn{
@@ -178,11 +184,11 @@
 
 /* ================= FORM ================= */
 .form-title{
-    font-size:30px;
+    font-size:22px;
     font-weight:800;
     color:#111;
     line-height:1.15;
-    margin-bottom:28px;
+    margin-bottom:24px;
 }
 
 .category-input,
@@ -191,35 +197,35 @@
     width:100%;
     border:none;
     outline:none;
-    background:#f4f4f6;
+    background:#f2f3f5;
     border-radius:18px;
-    padding:17px 18px;
+    padding:16px;
     font-size:16px;
     color:#333;
     box-sizing:border-box;
+    margin-bottom:14px;
 }
 
-.category-input{
+/* .category-input{
     margin-bottom:22px;
-}
+} */
 
-.category-input::placeholder,
+/* .category-input::placeholder,
 .modal-input::placeholder{
     color:#9a9a9a;
     font-weight:500;
-}
+} */
 
 .add-btn{
     width:100%;
+    padding:16px;
     border:none;
-    border-radius:18px;
-    padding:16px 18px;
-    background:linear-gradient(90deg, #5a72f1, #4f6df5);
-    color:#fff;
-    font-size:18px;
+    border-radius:16px;
+    background:linear-gradient(90deg,#5b73ea,#4A6CF7);
+    color:white;
+    font-size:16px;
     font-weight:800;
     cursor:pointer;
-    transition:0.18s ease;
 }
 
 .add-btn:hover{
@@ -386,8 +392,11 @@
                 <tbody>
                     {% for category in categories %}
                     <tr>
-                        <td class="id-text">
-                            {{ category.reportCategoryID }}
+                        <td>
+                            <span class="id-text">
+                                {{ category.reportCategoryID }}  
+                            </span>
+                            
                         </td>
 
                         <td>

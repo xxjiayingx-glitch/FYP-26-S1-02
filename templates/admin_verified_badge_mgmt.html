@@ -1,5 +1,5 @@
 {% extends "admin_base.html" %}
-{% block categories_active %}active{% endblock %}
+{% block verified_active %}active{% endblock %}
 {% block content %}
 <style>
 
@@ -55,43 +55,41 @@
 
 <div class="category-main-wrapper">
 
-    <h1 class="page-title">Category Management</h1>
+    <h1 class="page-title">Verified Badge Management</h1>
 
 
-    <!-- ARTICLE CATEGORY -->
+    <!-- Update eligibility rule -->
     <div class="section-card">
 
         <div class="section-left">
-            <h2>Article Category Section</h2>
+            <h2>Update Eligibility Rule</h2>
             <p>
-                Manage categories used to organise articles such as technology,
-                politics, health and business.
+                Set eligibility rule for the application of premium verified badge.
             </p>
         </div>
 
         <button
             class="edit-btn"
-            onclick="window.location.href='{{ url_for('article_category_page_bp.article_category_page_view') }}'">
-            Edit Section
+            onclick="window.location.href='{{ url_for('admin_verified.verified_badge_rule_page') }}'">
+            Edit
         </button>
 
     </div>
 
-    <!-- REPORT CATEGORY -->
+    <!-- View requests -->
     <div class="section-card">
 
         <div class="section-left">
-            <h2>Report Category Section</h2>
+            <h2>View Requests</h2>
             <p>
-                Manage report category types used when users flag inappropriate
-                or misleading articles.
+                Review application requests and make approval decision.
             </p>
         </div>
 
         <button
             class="edit-btn"
-            onclick="window.location.href='/admin/report-category'">
-            Edit Section
+            onclick="window.location.href='/admin/verified-requests'">
+            View
         </button>
 
     </div>

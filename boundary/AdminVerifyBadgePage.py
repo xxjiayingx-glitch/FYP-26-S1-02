@@ -1,9 +1,23 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash,request
 from control.VerifiedBadgeAdminCTL import VerifiedBadgeAdminCTL
 from control.AdminDashboardCTL import AdminDashboardControl
+from control.UpdateProfileCTL import UpdateProfileCTL
 import math
 
 admin_verified_bp = Blueprint("admin_verified", __name__)
+
+@admin_verified_bp.route("/admin/verified-badge-mgmt")
+def verified_badge_mgmt_pg():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+    
+    if session.get("userType") != "system admin":
+        return redirect("login.login")
+    
+    dashboard_control = AdminDashboardControl()
+    admin_data = dashboard_control.get_dashboard_data()
+    
+    return render_template("admin_verified_badge_mgmt.html", admin=admin_data["admin"])
 
 # View Page
 @admin_verified_bp.route("/admin/verified-requests")
@@ -73,3 +87,41 @@ def reject_verified(userID):
         flash(str(e))
 
     return redirect(url_for("admin_verified.view_verified_requests"))
+
+@admin_verified_bp.route("/admin/verified-badge-rule", methods=["GET"])
+def verified_badge_rule_page():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+    
+    if session.get("userType") != "system admin":
+        return redirect("login.login")
+    
+    dashboard_control = AdminDashboardControl()
+    admin_data = dashboard_control.get_dashboard_data()
+
+    eligibility_rule = UpdateProfileCTL.get_verified_badge_rule()
+
+    return render_template(
+        "admin_verified_badge_rule.html",
+        eligibility_rule=eligibility_rule,
+        admin=admin_data["admin"]
+    )
+
+@admin_verified_bp.route("/admin/verified-badge-rule/update", methods=["POST"])
+def update_verified_badge_rule():
+    required_article_count = int(request.form.get("required_article_count", 0))
+    minimum_factcheck_score = float(request.form.get("minimum_factcheck_score", 0))
+    admin_id = session.get("userID")
+
+    result = VerifiedBadgeAdminCTL.update_verified_badge_rule(
+        required_article_count,
+        minimum_factcheck_score,
+        admin_id
+    )
+
+    if result:
+        flash("Verified badge rule updated successfully.", "success")
+    else:
+        flash("Failed to update verified badge rule.", "error")
+
+    return redirect(url_for("admin_verified.verified_badge_rule_page"))

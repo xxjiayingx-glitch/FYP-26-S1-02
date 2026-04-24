@@ -33,10 +33,18 @@ def profile_page():
     ]
 
     eligible_article_count = UpdateProfileCTL.verify_count(session["userID"])
+    eligibility_rule = UpdateProfileCTL.get_verified_badge_rule()
+    is_eligible = eligible_article_count >= eligibility_rule["required_article_count"]
+
+    if not eligibility_rule:
+        return {
+            "required_article_count": 5,
+            "minimum_factcheck_score": 80
+        }
 
     categories = UserAccount.get_all_categories()
     
-    return render_template("profile.html", user=user, eligible_article_count=eligible_article_count, force_complete=False, categories=categories)
+    return render_template("profile.html", user=user, eligibility_rule=eligibility_rule, eligible_article_count=eligible_article_count, is_eligible=is_eligible, force_complete=False, categories=categories)
 
 
 @profile_bp.route("/update", methods=["POST"])

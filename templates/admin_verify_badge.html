@@ -24,6 +24,7 @@
                     <th>Email</th>
                     <th>Qualifying Articles</th>
                     <th>Published Articles</th>
+                    <th>Total Articles Reported</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -36,7 +37,7 @@
                     <td>{{ request.email }}</td>
                     <td>{{ request.qualifying_articles }}</td>
                     <td>{{ request.total_published_articles }}</td>
-
+                    <td>{{ request.totalArticlesReported }}</td>
                     <td>
                         <div class="action-buttons">
                             <form method="POST" action="/admin/verified-approve/{{ request.userID }}" style="display:inline;">

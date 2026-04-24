@@ -6,6 +6,7 @@
     <title>{% block title %}Admin Panel{% endblock %}</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_base.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -13,8 +14,7 @@
     <header class="topbar">
         <div class="brand-wrap">
             <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" class="brand">
-                Daily Scoop<br>
-                News System
+                Daily Scoop News
             </a>
         </div>
 
@@ -80,34 +80,42 @@
 
             <nav class="menu">
                 <a href="/admin/dashboard" class="{% block dashboard_active %}{% endblock %}">
+                    <i class="fa fa-home"></i>
                     <span class="menu-text">Dashboard</span>
                 </a>
 
                 <a href="/admin/user-accounts" class="{% block users_active %}{% endblock %}">
+                    <i class="fa-solid fa-user"></i>
                     <span class="menu-text">User Accounts</span>
                 </a>
 
                 <a href="/admin/category-management" class="{% block categories_active %}{% endblock %}">
+                    <i class="fa-solid fa-table-cells-large"></i>
                     <span class="menu-text">Category Management</span>
                 </a>
 
                 <a href="/admin/webpage-management" class="{% block webpage_active %}{% endblock %}">
+                    <i class="fa-solid fa-display"></i>
                     <span class="menu-text">Webpage Management</span>
                 </a>
 
                 <a href="/admin/system-monitoring" class="{% block monitoring_active %}{% endblock %}">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
                     <span class="menu-text">System Monitoring</span>
                 </a>
 
                 <a href="/admin/auto-publish-rules" class="{% block auto_publish_active %}{% endblock %}">
+                    <i class="fa-solid fa-square-check"></i>
                     <span class="menu-text">Auto-Publish Rules</span>
                 </a>
 
-                <a href="/admin/verified-requests" class="{% block verified_active %}{% endblock %}">
-                    <span class="menu-text">Verified Badge Requests</span>
+                <a href="/admin/verified-badge-mgmt" class="{% block verified_active %}{% endblock %}">
+                    <i class="fa-solid fa-award"></i>
+                    <span class="menu-text">Verified Badge Management</span>
                 </a>
                 
                 <a href="/admin/editor-applications" class="{% block applications_active %}{% endblock %}">
+                    <i class="fa-solid fa-pen-to-square"></i>
                     <span class="menu-text">Applications Management</span>
                 </a>
             </nav>

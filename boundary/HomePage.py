@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, jsonify, request, redirect, url_for
+from flask import Blueprint, render_template, session, jsonify, request
 from control.ArticleController import ArticleController
 from control.TestimonialsCTL import TestimonialController
 from control.UnregisteredUser.FeaturesCTL import FeaturesController
@@ -38,6 +38,11 @@ def unreg_home():
     plans = subscriptionCTL.getSubscriptionPlans()
 
     categories = articleCTL.get_categories()
+
+    visible_count = 8
+    visible_categories = categories[:visible_count]
+    more_categories = categories[visible_count:]
+
     category_featured_articles = []
 
     exclude_id = headline["articleID"] if headline else None
@@ -57,6 +62,8 @@ def unreg_home():
     return render_template(
         "Unregistered/UnregHome.html",
         categories=categories,
+        visible_categories=visible_categories,
+        more_categories=more_categories,
         headline=headline,
         articles=latest_articles,
         category_featured_articles=category_featured_articles,
@@ -156,6 +163,10 @@ def unreg_article_detail(article_id):
 @home_bp.route("/all-articles")
 def all_articles():
     categories = articleCTL.get_categories()
+    visible_count = 8
+    visible_categories = categories[:visible_count]
+    more_categories = categories[visible_count:]
+
     headline = articleCTL.get_home_headline()
     articles = articleCTL.get_home_latest_articles(
         limit=12,
@@ -165,6 +176,8 @@ def all_articles():
     return render_template(
         "Unregistered/category_articles.html",
         categories=categories,
+        visible_categories=visible_categories,
+        more_categories=more_categories,
         selected_category=None,
         headline=headline,
         articles=articles,
@@ -174,6 +187,9 @@ def all_articles():
 @home_bp.route("/category/<int:category_id>")
 def category_articles(category_id):
     categories = articleCTL.get_categories()
+    visible_count = 8
+    visible_categories = categories[:visible_count]
+    more_categories = categories[visible_count:]
 
     selected_category = None
     for category in categories:
@@ -201,6 +217,8 @@ def category_articles(category_id):
     return render_template(
         "Unregistered/category_articles.html",
         categories=categories,
+        visible_categories=visible_categories,
+        more_categories=more_categories,
         selected_category=selected_category,
         headline=headline,
         articles=articles,

@@ -1,12 +1,42 @@
 {% extends "admin_base.html" %}
 {% block content %}
+<style>
+    .features-breadcrumb-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+    }
+
+    .features-breadcrumb {
+        font-size: 15px;
+        color: #2a7db8;
+    }
+
+    .features-breadcrumb a {
+        color: #2a7db8;
+        text-decoration: none;
+    }
+
+    .features-breadcrumb span {
+        color: #555;
+        margin: 0 4px;
+    }
+</style>
+
+<div class="features-breadcrumb-row">
+    <div class="features-breadcrumb">
+        <a href="/admin/webpage-management">Webpage Management</a>
+        <span>/</span>
+        <span>Edit Company Profile</span>
+    </div>
+</div>
+
+<div class="page-header">
+  <h1>Edit Company Profile</h1>
+</div>
 
 <div class="page-wrapper">
-
-    <h1 class="page-title">
-        Edit Company Profile
-    </h1>
-
     <div class="form-card-large">
 
         <div class="form-row">

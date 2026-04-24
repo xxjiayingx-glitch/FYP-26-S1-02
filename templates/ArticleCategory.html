@@ -3,6 +3,19 @@
 
 <style>
 
+/* ================= PAGE ================= */
+.category-page{
+    width:100%;
+    box-sizing:border-box;
+}
+
+.category-page .page-title{
+    font-size:28px;
+    font-weight:800;
+    color:#111;
+    margin-bottom:26px;
+}
+
 /* ================= LAYOUT ================= */
 
 .category-layout{
@@ -31,15 +44,13 @@
     table-layout:fixed;
 }
 
-/* ⭐⭐⭐ 表头字体变大 */
 
 .modern-table th{
-    font-size:20px;
+    font-size:18px;
     font-weight:700;
     padding-bottom:10px;
 }
 
-/* ⭐⭐⭐ 固定列宽 */
 
 .modern-table th:nth-child(1),
 .modern-table td:nth-child(1){
@@ -72,11 +83,9 @@
     padding:22px 6px;
     border-bottom:1px solid #f1f2f4;
     vertical-align:middle;
-    font-size:18px;
+    font-size:16px;
     font-weight:500;
 }
-
-/* ⭐⭐⭐ ID 数字再向左 */
 
 .modern-table td:nth-child(1){
     padding-left:2px;
@@ -89,7 +98,7 @@
     max-width:320px;
 
     padding:14px 18px;
-    font-size:18px;
+    font-size:16px;
     font-weight:600;
 
     border-radius:14px;
@@ -156,13 +165,14 @@
     width:320px;
     background:white;
     border-radius:22px;
-    padding:34px;
+    padding:30px;
     box-shadow:0 12px 30px rgba(0,0,0,0.06);
     text-align:center;
+    margin-bottom: auto;
 }
 
 .category-form-card h2{
-    font-size:28px;
+    font-size:22px;
     font-weight:800;
     margin-bottom:24px;
 }
@@ -173,9 +183,13 @@
     border-radius:16px;
     border:none;
     background:#f2f3f5;
-    font-size:18px;
-    margin-bottom:18px;
+    font-size:16px;
+    margin-bottom:28px;
 }
+
+/* .category-input {
+    margin-bottom:18px;
+} */
 
 .category-form-card button{
     width:100%;
@@ -184,35 +198,39 @@
     border-radius:16px;
     background:linear-gradient(90deg,#5b73ea,#4A6CF7);
     color:white;
-    font-size:18px;
+    font-size:16px;
     font-weight:800;
     cursor:pointer;
 }
 
 </style>
 
-<div class="category-layout">
+<div class="category-page">
+    <h1 class="page-title">Article Category Management</h1>
 
-    <div class="category-table-card">
-        <table class="modern-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="categoryTable"></tbody>
-        </table>
+    <div class="category-layout">
+
+        <div class="category-table-card">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryTable"></tbody>
+            </table>
+        </div>
+
+        <div class="category-form-card">
+            <h2>Add New Category</h2>
+            <input type="text" class="category-input" id="categoryName" placeholder="Category Name">
+            <button type="button" onclick="addCategory()">Add</button>
+        </div>
+
     </div>
-
-    <div class="category-form-card">
-        <h2>Add New Category</h2>
-        <input type="text" id="categoryName" placeholder="Category Name">
-        <button type="button" onclick="addCategory()">Add</button>
-    </div>
-
 </div>
 
 <script>

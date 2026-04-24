@@ -25,25 +25,25 @@
       <a href="{{ url_for('home.all_articles') }}" class="category-nav-link category-all-link">
         All
       </a>
-      {% for category in categories[:7] %}
+      {% for category in visible_categories %}
         <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-nav-link">
-          {{ category.categoryName }}
+          {{ category.categoryName if category.categoryName is defined else category }}
         </a>
       {% endfor %}
 
-      {% if categories|length > 7 %}
+      {% if  more_categories %}
         <button class="category-more-btn" type="button" onclick="toggleCategoryPanel()">
           More <span class="dropdown-arrow">▼</span>
         </button>
       {% endif %}
     </div>
 
-    {% if categories|length > 7 %}
+    {% if more_categories %}
     <div class="category-expand-panel" id="categoryExpandPanel">
       <div class="category-expand-grid">
-        {% for category in categories[7:] %}  {# Only show categories beyond the first 7 #}
+        {% for category in more_categories %}
           <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-nav-link">
-            {{ category.categoryName }}
+            {{ category.categoryName if category.categoryName is defined else category }}
           </a>
         {% endfor %}
       </div>

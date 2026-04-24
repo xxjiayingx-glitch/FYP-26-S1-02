@@ -17,6 +17,7 @@ def view_users_page():
 
     dashboard_control = AdminDashboardControl()
     admin_data = dashboard_control.get_dashboard_data()
+    user_roles = SearchUsersCTL.get_all_user_roles()
 
     # If search/filter exists, use SearchUsersCTL
     if q or user_type or account_status:
@@ -40,6 +41,7 @@ def view_users_page():
         page=page,
         total_pages=total_pages,
         q=q,
+        user_roles=user_roles,
         user_type=user_type,
         account_status=account_status
     )

@@ -1,0 +1,129 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<style>
+    .rule-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+        max-width: 760px;
+    }
+
+    .rule-card-header h2 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .rule-card-header p {
+        margin: 0 0 28px;
+        font-size: 15px;
+        color: #6b7280;
+        line-height: 1.6;
+    }
+
+    .rule-form {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .rule-form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .rule-form-row label {
+        font-size: 15px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .rule-form-row input {
+        width: 100%;
+        max-width: 320px;
+        padding: 14px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 14px;
+        font-size: 15px;
+        color: #111827;
+        background: #ffffff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .rule-form-row input:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+    }
+
+    .rule-form-actions {
+        margin-top: 6px;
+    }
+
+    .save-rule-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 24px;
+        border: none;
+        border-radius: 14px;
+        background: #2563eb;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .save-rule-btn:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+}
+</style>
+<div class="page-header">
+    <h1>Verified Badge Eligibility Rule</h1>
+    <p>Set the minimum requirements for users to qualify for a verified badge.</p>
+</div>
+<section class="rule-card">
+    <div class="rule-card-header">
+        <h2>Set Eligibility Rule</h2>
+        <p>Set the minimum requirements for users to qualify for a verified badge.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin_verified.update_verified_badge_rule') }}" class="rule-form">
+        <div class="rule-form-row">
+            <label for="required_article_count">Required Qualifying Articles</label>
+            <input
+                type="number"
+                id="required_article_count"
+                name="required_article_count"
+                min="1"
+                value="{{ eligibility_rule.required_article_count if eligibility_rule else 5 }}"
+                required
+            >
+        </div>
+
+        <div class="rule-form-row">
+            <label for="minimum_factcheck_score">Minimum AI Fact-Check Score</label>
+            <input
+                type="number"
+                id="minimum_factcheck_score"
+                name="minimum_factcheck_score"
+                min="0"
+                max="100"
+                step="0.1"
+                value="{{ eligibility_rule.minimum_factcheck_score if eligibility_rule else 90 }}"
+                required
+            >
+        </div>
+
+        <div class="rule-form-actions">
+            <button type="submit" class="save-rule-btn">Save Rule</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

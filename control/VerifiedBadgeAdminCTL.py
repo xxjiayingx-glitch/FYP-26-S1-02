@@ -1,4 +1,5 @@
 from entity.UserAccount import UserAccount
+from entity.VerifiedBadgeRule import VerifiedBadgeRule
 
 class VerifiedBadgeAdminCTL:
 
@@ -17,3 +18,7 @@ class VerifiedBadgeAdminCTL:
         success = UserAccount.reject_verified_badge(userID)
         if not success:
             raise ValueError("Failed to reject verification.")
+        
+    @staticmethod
+    def update_verified_badge_rule(required_article_count, minimum_factcheck_score, admin_id):
+        return VerifiedBadgeRule.save_verified_badge_rule(required_article_count, minimum_factcheck_score, admin_id)

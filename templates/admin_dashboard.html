@@ -80,46 +80,46 @@
 
 <section class="review-section">
     <h2 class="action-title">Action needed !</h2>
-    <h3 class="subheading">⚠ Reported Articles Needing Review</h3>
+    <h3 class="subheading">⚠ Editor Applications Needing Review</h3>
 
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Report On</th>
-                <th>Report Count</th>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Applied On</th>
+                <th>Role Applied</th>
             </tr>
         </thead>
         <tbody>
-            {% if reported_list %}
-                {% for report in reported_list %}
+            {% if application_list %}
+                {% for application in application_list %}
                 <tr>
-                    <td>{{ report.reportID }}</td>
-                    <td>{{ report.articleTitle }}</td>
+                    <td>{{ application.userID }}</td>
+                    <td>{{ application.username }}</td>
                     <td>
-                        {% if report.latestReportDate %}
-                            {{ report.latestReportDate.strftime('%d/%m/%Y') if report.latestReportDate.__class__.__name__ == 'datetime' else report.latestReportDate }}
+                        {% if application.created_at %}
+                            {{ application.created_at.strftime('%d/%m/%Y') if application.created_at.__class__.__name__ == 'datetime' else application.created_at }}
                         {% else %}
                             -
                         {% endif %}
                     </td>
-                    <td>{{ report.totalReports }}</td>
+                    <td>{{ application.userType }}</td>
                 </tr>
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="4">No reported articles for review.</td>
+                    <td colspan="4">No pending applications for review.</td>
                 </tr>
             {% endif %}
         </tbody>
     </table>
 
-    <a class="primary-btn" href="/admin/article-reported">Review Now</a>
+    <a class="primary-btn" href="/admin/editor-applications">Review Now</a>
 </section>
 
 <section class="activity-section">
-    <h2>Recent Activity</h2>
+    <h3 class="subheading">Recent Activity</h3>
 
     {% if recent_logs %}
         <div class="activity-list">

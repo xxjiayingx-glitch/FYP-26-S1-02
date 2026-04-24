@@ -350,7 +350,7 @@ def report_article_route(article_id):
     user_id = session.get("userID")  # Get the logged-in user ID from session
     if not user_id:
         flash("You need to be logged in to report an article.", "warning")
-        return redirect(url_for("login"))  # Redirect to login page if not logged in
+        return redirect(url_for("login.login"))  # Redirect to login page if not logged in
     
     optional_comment = request.form.get('optionalComment', '')
     report_category_id = request.form.get('report_category_id')  # Get the category ID from the form

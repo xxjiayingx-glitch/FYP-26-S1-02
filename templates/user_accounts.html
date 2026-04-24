@@ -1,6 +1,7 @@
 {% extends "admin_base.html" %}
 
 {% block title %}User Accounts{% endblock %}
+{% block users_active %}active{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/user_accounts.css') }}">
@@ -21,8 +22,11 @@
 
         <select name="userType" class="status-select">
             <option value="">--Select--</option>
-            <option value="System Admin" {% if user_type == 'System Admin' %}selected{% endif %}>System Admin</option>
-            <option value="Premium" {% if user_type == 'Premium' %}selected{% endif %}>Premium</option>
+            {% for role in user_roles %}
+                <option value="{{ role }}" {% if user_type == role %}selected{% endif %}>
+                    {{ role }}
+                </option>
+            {% endfor %}
         </select>
 
         <select name="accountStatus" class="status-select">

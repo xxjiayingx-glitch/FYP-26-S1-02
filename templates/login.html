@@ -7,19 +7,31 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         /* Body background */
-        body {
+        /* body {
             font-family: 'Inter', Arial, sans-serif;
             margin: 0;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            flex-direction: column; */
+            /* overflow-x: hidden; */
             /* Full-page gradient */
-            background: linear-gradient(135deg, #c4def4, #f0f2f5);
+            /* background: linear-gradient(135deg, #c4def4, #f0f2f5);
+        } */
+
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+        }
+
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background:#f3f3f3;
+            color:#111;
         }
 
         /* ── Header ── */
-        .login-header {
+        /* .login-header {
             background: #c4def4;
             display: flex;
             justify-content: space-between;
@@ -53,6 +65,86 @@
 
         .nav-links a:hover {
             color: #2a5bd7;
+        } */
+
+        .topbar{
+            background:#c4def4;
+            min-height:90px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:18px 42px;
+            gap:30px;
+            border-bottom:1px solid rgba(0,0,0,0.06);
+
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+        }
+
+        .brand-wrap{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            flex-shrink:0;
+        }
+
+        .brand{
+            font-weight:900;
+            font-size:32px;
+            line-height:1;
+            color:#1f3a5f;
+            cursor:pointer;
+            letter-spacing:-0.5px;
+            text-decoration: none;
+            transition: all 0.3s ease; 
+        }
+
+        .brand:hover{
+            color:#3f8ec4;   /* lighter blue glow */
+            text-decoration: none;
+
+            text-shadow:
+                0 0 6px rgba(63,142,196,0.35),
+                0 0 12px rgba(63,142,196,0.25);
+
+            transform: scale(1.03);
+        }
+
+        .brand:active{
+            transform: scale(0.98);
+        }
+
+        .nav-links{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:14px;
+            flex-wrap:wrap;
+        }
+
+        .nav-links a,
+        .nav-links .user-icon{
+            font-size:16px;
+            font-weight:700;
+            color:#111;
+            white-space:nowrap;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            line-height:1.2;
+        }
+
+        .nav-links a{
+            padding:10px 16px;
+            border-radius:999px;
+            transition:all 0.2s ease;
+        }
+
+        .nav-links a:hover{
+            background:rgba(255,255,255,0.55);
+            color:#2f6f95;
+            text-decoration: none; 
         }
 
         /* ── Messages ── */
@@ -257,9 +349,25 @@
 </head>
 
 <body>
+    <!-- TOP NAVBAR -->
+    <header class="topbar">
+        <div class="brand-wrap">
+            <a href="{{ url_for('home.unreg_home') }}" class="brand">
+                Daily Scoop News
+            </a>
+        </div>
 
+        <nav class="nav-links">
+            <a href="{{ url_for('home.unreg_home') + '#articles' }}">Articles</a>
+            <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
+            <a href="{{ url_for('home.unreg_home') + '#product-feature' }}">Product Feature</a>
+            <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">Company Profile</a>
+            <a href="{{ url_for('home.unreg_home') + '#pricing' }}">Subscription</a>
+        </nav>
+    </header>
+    
     <!-- HEADER -->
-    <div class="login-header">
+    <!-- <div class="login-header">
         <a href="{{ url_for('home.unreg_home') }}" class="brand">
             Daily Scoop<br>News System
         </a>
@@ -268,7 +376,7 @@
             <a href="{{ url_for('home.unreg_home') + '#pricing' }}">Subscription</a>
             <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
         </div>
-    </div>
+    </div> -->
 
     <!-- Messages -->
     {% if success %}

@@ -341,26 +341,38 @@ class UserAccount:
         cursor = conn.cursor()
 
         cursor.execute("""
+            SELECT minimum_factcheck_score
+            FROM VerifiedBadgeRule
+            WHERE ruleStatus = "active"
+        """)
+
+        rule = cursor.fetchone()
+        min_score = rule["minimum_factcheck_score"] if rule else 0
+
+        cursor.execute("""
             SELECT
                 u.userID,
                 u.username,
                 u.email,
-                COUNT(CASE 
-                    WHEN a.articleStatus = 'Published' THEN 1 
+                COUNT(DISTINCT CASE 
+                    WHEN a.articleStatus = 'Published' THEN a.articleID
                 END) AS total_published_articles,
-                COUNT(CASE 
-                    WHEN a.articleStatus = 'Published' AND a.credibilityScore >= 90 THEN 1 
-                END) AS qualifying_articles
+                COUNT(DISTINCT CASE 
+                    WHEN a.articleStatus = 'Published' AND a.aiFactCheckScore >= %s THEN a.articleID 
+                END) AS qualifying_articles,
+                COUNT(DISTINCT ra.articleID) AS totalArticlesReported
             FROM UserAccount u
             LEFT JOIN Article a ON u.userID = a.created_by
+            LEFT JOIN ReportedArticle ra ON ra.articleID = a.articleID
             WHERE u.verifiedBadgeStatus = 'Pending'
             GROUP BY u.userID, u.username, u.email
             ORDER BY u.userID ASC
-        """)
+        """, (min_score,))
 
         requests = cursor.fetchall()
         conn.close()
         return requests
+    
     # ==============================
     # ADMIN / USER MANAGEMENT
     # ==============================
@@ -408,6 +420,26 @@ class UserAccount:
         conn.close()
 
         return users
+    
+    @staticmethod
+    def get_all_user_roles():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT DISTINCT userType
+            FROM UserAccount
+            WHERE userType IS NOT NULL
+            AND userType != ''
+            ORDER BY userType ASC
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return [row["userType"] for row in result]
 
     @staticmethod
     def findUsersByCriteria(q, userType, accountStatus):
@@ -501,21 +533,21 @@ class UserAccount:
 
         return updated
     
-    @staticmethod
-    def update_verified_status(user_id, is_verified):
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    # @staticmethod
+    # def update_verified_status(user_id, is_verified):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
 
-        cursor.execute("""
-            UPDATE UserAccount
-            SET isVerified = %s
-            WHERE userID = %s
-        """, (is_verified, user_id))
+    #     cursor.execute("""
+    #         UPDATE UserAccount
+    #         SET isVerified = %s
+    #         WHERE userID = %s
+    #     """, (is_verified, user_id))
 
-        conn.commit()
-        updated = cursor.rowcount > 0
-        conn.close()
-        return updated
+    #     conn.commit()
+    #     updated = cursor.rowcount > 0
+    #     conn.close()
+    #     return updated
     
     @staticmethod
     def get_total_users_before_days(days):
@@ -550,6 +582,60 @@ class UserAccount:
         conn.close()
 
         return success
+    
+    @staticmethod
+    def count_premium():
+        conn = get_db_connection()
+        
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                select count(*) as active_subscriptions from UserAccount where userType = %s
+            """, ("premium",))
+
+            result = cursor.fetchone()
+            return result["active_subscriptions"]
+            
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def count_premium_before_days(days):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT COUNT(*) AS total
+            FROM UserAccount
+            WHERE userType = %s
+            AND created_at < NOW() - INTERVAL %s DAY
+        """
+        cursor.execute(query, ("premium", days))
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return result["total"] if result else 0
+    
+    @staticmethod
+    def get_applications_needing_review():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT 
+                userID,
+                username,
+                created_at,
+                userType
+            FROM UserAccount WHERE editorApprovalStatus = %s
+            ORDER BY created_at ASC
+            LIMIT 5
+        """, ("pending",))
+        result = cursor.fetchall()
+        conn.close()
+        print(result)
+        return result
 
     # ==============================
     # SUBSCRIPTION / INTERESTS

@@ -25,6 +25,6 @@ def admin_dashboard():
         "admin_dashboard.html",
         admin=admin,
         stats=dashboard_data["stats"],
-        reported_list=dashboard_data["reported_list"],
+        application_list=dashboard_data["application_list"],
         recent_logs=dashboard_data["recent_logs"]
     )

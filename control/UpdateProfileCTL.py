@@ -1,5 +1,6 @@
 from entity.UserAccount import UserAccount
 from entity.Article import Article
+from entity.VerifiedBadgeRule import VerifiedBadgeRule
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import re
@@ -184,6 +185,11 @@ class UpdateProfileCTL:
     @staticmethod
     def verify_count(userID):
         return Article.count_eligible_verified_articles(userID)
+    
+    @staticmethod
+    def get_verified_badge_rule():
+        return VerifiedBadgeRule.get_verified_badge_rule()
+
     
     @staticmethod
     def update_required_fields(userID, gender, dob, interests):

@@ -257,14 +257,14 @@
                     <div class="info-box">
                         <span class="info-label">Eligibility Progress</span>
                         <span class="info-value">
-                            {{ eligible_article_count }}/5 qualifying articles
+                            {{ eligible_article_count }}/{{ eligibility_rule.required_article_count }} qualifying articles
                         </span>
                     </div>
 
                     <div class="info-box">
                         <span class="info-label">Requirement</span>
                         <span class="info-value">
-                            Published articles with AI fact-check score ≥ 90
+                            Published articles with AI fact-check score ≥ {{ eligibility_rule.minimum_factcheck_score }}
                         </span>
                     </div>
                 </div>
@@ -285,11 +285,11 @@
                         <button type="button" class="btn" disabled>Not Eligible Yet</button>
                     {% endif %}
 
-                    {% if eligible_article_count < 5 
+                    {% if is_eligible 
                         and user.get('isVerifiedPublisher') != 1 
                         and user.get('verifiedBadgeStatus') != 'Pending' %}
                         <p class="eligibility-note">
-                            You need {{ 5 - eligible_article_count }} more qualifying article(s) to apply.
+                            You need {{ eligibility_rule.required_article_count - eligible_article_count }} more qualifying article(s) to apply.
                         </p>
                     {% endif %}
                 </div>

@@ -27,29 +27,38 @@
 {% block content %}
 <div class="unreg-home">
   <div class="category-nav">
-    {% set visible_category_ids = categories[:7] | map(attribute='categoryID') | list %}
+    {% set more_category_ids = more_categories | map(attribute='categoryID') | list %}
     <div class="category-nav-inner">
       <a href="{{ url_for('home.all_articles') }}"
         class="category-nav-link {% if is_all_page %}active{% endif %}">
         All
       </a>
-      {% for category in categories[:7] %}
-        <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-nav-link {% if category.categoryID == selected_category.categoryID %}active{% endif %}">
+      {% for category in visible_categories %}
+        <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-nav-link {% if selected_category and category.categoryID == selected_category.categoryID %}active{% endif %}">
           {{ category.categoryName }}
         </a>
       {% endfor %}
 
-      {% if categories|length > 7 %}
-        <button class="category-more-btn {% if selected_category and selected_category.categoryID not in visible_category_ids %}active{% endif %}" type="button" onclick="toggleCategoryPanel()">
+      <!-- {% if more_categories %}
+        <button class="category-more-btn {% if selected_category and selected_category.categoryID not in visible_categories %}active{% endif %}" type="button" onclick="toggleCategoryPanel()">
+          More <span class="dropdown-arrow">▼</span>
+        </button>
+      {% endif %} -->
+
+      {% if more_categories %}
+        <button
+          class="category-more-btn {% if selected_category and selected_category.categoryID in more_category_ids %}selected{% endif %}"
+          type="button"
+          onclick="toggleCategoryPanel()">
           More <span class="dropdown-arrow">▼</span>
         </button>
       {% endif %}
     </div>
 
-    {% if categories|length > 7 %}
+    {% if more_categories %}
     <div class="category-expand-panel" id="categoryExpandPanel">
       <div class="category-expand-grid">
-        {% for category in categories[7:] %}
+        {% for category in more_categories %}
           <a href="{{ url_for('home.category_articles', category_id=category.categoryID) }}" class="category-expand-link {% if selected_category and category.categoryID == selected_category.categoryID %}active{% endif %}">
             {{ category.categoryName }}
           </a>
@@ -162,6 +171,32 @@
       }
     });
 
+  // function toggleCategoryPanel() {
+  //   const panel = document.getElementById("categoryExpandPanel");
+  //   const moreBtn = document.querySelector(".category-more-btn");
+
+  //   if (panel) {
+  //     panel.classList.toggle("show");
+  //   }
+
+  //   if (moreBtn) {
+  //     moreBtn.classList.toggle("active");
+  //   }
+  // }
+
+  // document.addEventListener("click", function (e) {
+  //   const panel = document.getElementById("categoryExpandPanel");
+  //   const moreBtn = document.querySelector(".category-more-btn");
+  //   const nav = document.querySelector(".category-nav");
+
+  //   if (!panel || !moreBtn || !nav) return;
+
+  //   if (!nav.contains(e.target)) {
+  //     panel.classList.remove("show");
+  //     moreBtn.classList.remove("active");
+  //   }
+  // });
+
   function toggleCategoryPanel() {
     const panel = document.getElementById("categoryExpandPanel");
     const moreBtn = document.querySelector(".category-more-btn");
@@ -171,7 +206,7 @@
     }
 
     if (moreBtn) {
-      moreBtn.classList.toggle("active");
+      moreBtn.classList.toggle("open");
     }
   }
 
@@ -184,7 +219,7 @@
 
     if (!nav.contains(e.target)) {
       panel.classList.remove("show");
-      moreBtn.classList.remove("active");
+      moreBtn.classList.remove("open");
     }
   });
 </script>

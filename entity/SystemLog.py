@@ -161,18 +161,18 @@ class SystemLog:
                 params.extend([keyword, keyword, keyword, keyword, keyword])
 
         if start_date and end_date:
-            sql += " AND DATE(created_at) BETWEEN %s AND %s"
+            sql += " AND DATE(sl.created_at) BETWEEN %s AND %s"
             params.extend([start_date, end_date])
 
         elif start_date:
-            sql += " AND DATE(created_at) >= %s"
+            sql += " AND DATE(sl.created_at) >= %s"
             params.append(start_date)
 
         elif end_date:
-            sql += " AND DATE(created_at) <= %s"
+            sql += " AND DATE(sl.created_at) <= %s"
             params.append(end_date)
 
-        sql += " ORDER BY created_at DESC"
+        sql += " ORDER BY sl.created_at DESC"
 
         cursor.execute(sql, tuple(params))
         logs = cursor.fetchall()
