@@ -661,3 +661,58 @@ class ArticleController:
             return []
         today = datetime.now().date()
         return [(article["views"], article["likes"], today)]
+    
+    
+    # For User Interests 
+    def get_user_interests(self, user_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT interests FROM UserAccount WHERE userID = %s", (user_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        if result and result.get("interests"):
+            return [x.strip() for x in result["interests"].split(",")]
+        return []
+        
+    def get_category_ids_from_names(self, category_names):
+        if not category_names:
+            return []
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        placeholders = ",".join(["%s"] * len(category_names))
+        query = f"""
+            SELECT categoryID
+            FROM ArticleCategory
+            WHERE categoryName IN ({placeholders})
+        """
+        cursor.execute(query, category_names)
+        results = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return [row["categoryID"] for row in results]
+    
+    def get_articles_by_multiple_categories(self, category_ids, limit=6):
+        if not category_ids:
+            return []
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        placeholders = ",".join(["%s"] * len(category_ids))
+        query = f"""
+            SELECT a.articleID, a.articleTitle, a.content,
+                IFNULL(ai.imageURL, NULL) AS featured_image,
+                IFNULL(an.views, 0) AS views,
+                IFNULL(an.likes, 0) AS likes
+            FROM Article a
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+            WHERE a.articleStatus = 'published'
+            AND a.categoryID IN ({placeholders})
+            ORDER BY views DESC
+            LIMIT %s
+        """
+        cursor.execute(query, (*category_ids, limit))
+        articles = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return articles

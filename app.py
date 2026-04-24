@@ -188,14 +188,16 @@ def free_homepage():
     top_viewed = article_controller.get_top_viewed_articles(limit=5)
 
     # User interest category top articles
-    categories = article_controller.get_categories()
-    category_top_articles = []
+    interest_names = article_controller.get_user_interests(user_id)
+    category_ids = article_controller.get_category_ids_from_names(interest_names)
 
-    if categories:
-        # Just pick first category OR trending category
-        category_id = categories[0]["categoryID"]
-        category_top_articles = article_controller.get_top_articles_by_category(category_id, limit=5)
-
+    if category_ids:
+        category_top_articles = article_controller.get_articles_by_multiple_categories(
+            category_ids, limit=5
+        )
+    else:
+        category_top_articles = []
+    
     # Latest articles
     if search_query:
         latest_articles = article_controller.search(search_query) 
@@ -222,10 +224,20 @@ def premium_homepage():
     # Top viewed articles
     top_viewed = article_controller.get_top_viewed_articles(limit=5)
     
-    # User interest category top articles
+    # User saved articles 
     saved_articles = article_controller.get_user_saved_articles(user_id, limit=5)
     user_top_category_id = saved_articles[0]["categoryID"] if saved_articles else None
-    category_top_articles = article_controller.get_top_articles_by_category(user_top_category_id, limit=5) if user_top_category_id else []
+
+    # User interest category top articles
+    interest_names = article_controller.get_user_interests(user_id)
+    category_ids = article_controller.get_category_ids_from_names(interest_names)
+
+    if category_ids:
+        category_top_articles = article_controller.get_articles_by_multiple_categories(
+            category_ids, limit=5
+        )
+    else:
+        category_top_articles = []
 
     # Latest articles
     if search_query:
