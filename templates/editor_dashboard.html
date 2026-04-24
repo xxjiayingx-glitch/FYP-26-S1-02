@@ -28,6 +28,28 @@
     transition: transform 0.2s ease;
 }
 
+/* ===== STAT CARD VARIANTS ===== */
+.stat-card.total {
+    border-left: 6px solid #4a7cff;
+}
+
+.stat-card.pending {
+    border-left: 6px solid #f59e0b;
+}
+
+.stat-card.reported {
+    border-left: 6px solid #ef4444;
+}
+
+.stat-card.approved {
+    border-left: 6px solid #22c55e;
+}
+
+.stat-card.pending { background: #fffbeb; }
+.stat-card.reported { background: #fef2f2; }
+.stat-card.approved { background: #f0fdf4; }
+.stat-card.total { background: #f7f9ff; }
+
 .stat-card:hover {
     transform: translateY(-4px);
 }
@@ -117,6 +139,48 @@ tr:hover {
     opacity: 0.95;
 }
 
+/* ===== STATUS BADGES ===== */
+.status {
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 8px;
+    display: inline-block;
+    font-size: 12px;
+}
+
+/* Article statuses */
+.status-pending-review {
+    background: #fff4d6;
+    color: #b7791f;
+}
+
+.status-published {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.status-draft {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+/* Report statuses */
+.status-report-pending-review {
+    background: #fee2e2;
+    color: #b91c1c;
+    font-weight: 700;
+}
+
+.status-report-completed {
+    background: #dcfce7;
+    color: #15803d;
+}
+
 </style>
 {% endblock %}
 
@@ -126,22 +190,22 @@ tr:hover {
 
 <!-- STAT CARDS -->
 <div class="stats">
-    <div class="stat-card">
+    <div class="stat-card total">
         <div class="stat-title">Total Articles</div>
         <div class="stat-value">{{ total_articles }}</div>
     </div>
 
-    <div class="stat-card">
+    <div class="stat-card pending">
         <div class="stat-title">Pending Approval</div>
         <div class="stat-value">{{ pending_count }}</div>
     </div>
 
-    <div class="stat-card">
+    <div class="stat-card reported">
         <div class="stat-title">Reported Articles</div>
         <div class="stat-value">{{ reported_count }}</div>
     </div>
 
-    <div class="stat-card">
+    <div class="stat-card approved">
         <div class="stat-title">Approved Articles</div>
         <div class="stat-value">{{ approved_count }}</div>
     </div>
@@ -167,7 +231,11 @@ tr:hover {
             <tr>
                 <td>{{ a.articleID }}</td>
                 <td>{{ a.articleTitle }}</td>
-                <td>{{ a.articleStatus }}</td>
+                <td>
+                    <span class="status status-{{ a.articleStatus|lower|replace(' ', '-') }}">
+                        {{ a.articleStatus }}
+                    </span>
+                </td>
                 <td>{{ a.created_at }}</td>
             </tr>
         {% else %}
@@ -204,7 +272,11 @@ tr:hover {
                 <td>{{ r.reportID }}</td>
                 <td>{{ r.articleTitle }}</td>
                 <td>{{ r.totalReports }}</td>
-                <td>{{ r.reportStatus }}</td>
+                <td>
+                    <span class="status status-report-{{ r.reportStatus|lower|replace(' ', '-') }}">
+                        {{ r.reportStatus }}
+                    </span>
+                </td>
             </tr>
         {% else %}
             <tr>
