@@ -13,30 +13,37 @@
 
 /* Cards */
 .stats {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
     margin-bottom: 30px;
 }
 
 .stat-card {
-    flex: 1;
-    min-width: 200px;
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
+    background: linear-gradient(135deg, #ffffff, #f7f9ff);
+    padding: 22px;
+    border-radius: 14px;
     border: 1px solid #e6e9ef;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
 }
 
 .stat-title {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 8px;
+    font-size: 13px;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .stat-value {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 800;
+    margin-top: 6px;
+    color: #2b2b2b;
 }
 
 .stat-change {
@@ -56,16 +63,18 @@
 }
 
 .warning {
-    margin-bottom: 15px;
+    margin-bottom: 25px;
+    margin-top: 35px;
     font-weight: 600;
 }
 
 /* Table */
 .table-box {
     background: #fff;
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid #e6e9ef;
-    padding: 15px;
+    padding: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
 }
 
 table {
@@ -75,31 +84,39 @@ table {
 
 th {
     text-align: left;
-    font-size: 14px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #e6e9ef;
+    font-size: 13px;
+    color: #666;
+    padding: 12px;
+    background: #f8f9ff;
 }
 
 td {
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 14px 12px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+tr:hover {
+    background: #f9fbff;
 }
 
 /* Button */
 .review-btn {
-    margin-top: 20px;
-    background: #4a7cff;
-    color: #fff;
+    margin-top: 18px;
+    background: linear-gradient(135deg, #4a7cff, #3a65d6);
+    color: white;
     border: none;
     padding: 10px 18px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
+    transition: 0.2s ease;
 }
 
 .review-btn:hover {
-    background: #3a65d6;
+    transform: translateY(-2px);
+    opacity: 0.95;
 }
+
 </style>
 {% endblock %}
 
@@ -116,20 +133,23 @@ td {
 
     <div class="stat-card">
         <div class="stat-title">Pending Approval</div>
+        <div class="stat-value">{{ pending_count }}</div>
     </div>
 
     <div class="stat-card">
-        <div class="stat-title">Rejected Articles</div>
+        <div class="stat-title">Reported Articles</div>
+        <div class="stat-value">{{ reported_count }}</div>
     </div>
 
     <div class="stat-card">
         <div class="stat-title">Approved Articles</div>
+        <div class="stat-value">{{ approved_count }}</div>
     </div>
 </div>
 
 <!-- ACTION SECTION -->
 <div class="action-title">Action needed !</div>
-<div class="warning">⚠ Pending Approval for Articles</div>
+<div class="warning">⏳ Pending Approval for Articles</div>
 
 <div class="table-box">
     <table>
@@ -141,9 +161,62 @@ td {
                 <th>Submitted On</th>
             </tr>
         </thead>
+
+        <tbody>
+        {% for a in pending_articles %}
+            <tr>
+                <td>{{ a.articleID }}</td>
+                <td>{{ a.articleTitle }}</td>
+                <td>{{ a.articleStatus }}</td>
+                <td>{{ a.created_at }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">No pending articles</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+
     </table>
 </div>
 
-<button class="review-btn">Review Now</button>
+<a href="/editor/approval_articles">
+    <button class="review-btn">Review Now</button>
+</a>
+
+
+<div class="warning">🚨 Reported Articles</div>
+
+<div class="table-box">
+    <table>
+        <thead>
+            <tr>
+                <th>Report ID</th>
+                <th>Article Title</th>
+                <th>Total Reports</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for r in reported_articles %}
+            <tr>
+                <td>{{ r.reportID }}</td>
+                <td>{{ r.articleTitle }}</td>
+                <td>{{ r.totalReports }}</td>
+                <td>{{ r.reportStatus }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">No reported articles</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="/editor/article-reported">
+    <button class="review-btn">View Reported Articles</button>
+</a>
 
 {% endblock %}

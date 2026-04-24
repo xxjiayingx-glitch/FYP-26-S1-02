@@ -939,7 +939,6 @@ def generate_ai_review_ajax(article_id):
 # ---------- EDITOR ----------
 # ----------------------------
 
-
 @app.route("/editor/dashboard")
 def editor_dashboard():
     if "userID" not in session:
@@ -948,18 +947,85 @@ def editor_dashboard():
     user_type = (session.get("userType") or "").strip().lower()
     editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
 
-    if user_type != "editor":
-        return redirect(url_for("login.login"))
-
-    if editor_status != "approved":
+    if user_type != "editor" or editor_status != "approved":
         return redirect(url_for("login.login"))
 
     conn = get_db_connection()
     cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT expertiseArea
+        FROM UserAccount
+        WHERE userID = %s
+    """, (session["userID"],))
+    editor = cursor.fetchone()
+    expertise = editor["expertiseArea"] if editor else None 
 
-    cursor.execute("SELECT COUNT(articleID) FROM Article")
-    result = cursor.fetchone()
-    total_articles = list(result.values())[0]
+    # ===== TOTAL =====
+    cursor.execute("SELECT COUNT(articleID) AS total FROM Article")
+    total_articles = cursor.fetchone()["total"]
+
+    # ===== PENDING (own category only) =====
+    cursor.execute("""
+        SELECT a.articleID, a.articleTitle, a.articleStatus, a.created_at
+        FROM Article a
+        JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        WHERE a.articleStatus = 'pending review'
+        AND c.categoryName = %s
+        ORDER BY a.created_at DESC
+        LIMIT 5
+    """, (expertise,))
+    pending_articles = cursor.fetchall()
+    pending_count = len(pending_articles)
+
+    # ===== APPROVED COUNT =====
+    cursor.execute("SELECT COUNT(*) AS count FROM Article WHERE articleStatus = 'published'")
+    approved_count = cursor.fetchone()["count"]
+
+    # ===== PENDING REVIEW COUNT =====
+    cursor.execute("""
+        SELECT COUNT(DISTINCT r.articleID) AS count
+        FROM ReportedArticle r
+        JOIN Article a ON r.articleID = a.articleID
+        JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        WHERE r.reportStatus = 'pending review'
+        AND c.categoryName = %s
+    """, (expertise,))
+
+    reported_count = cursor.fetchone()["count"]
+    
+    cursor.execute("""
+        SELECT expertiseArea
+        FROM UserAccount
+        WHERE userID = %s
+    """, (session["userID"],))
+    editor = cursor.fetchone()
+    expertise = editor["expertiseArea"] if editor else None
+    
+    # ===== REPORTED ARTICLES (own category + pending only) =====
+    cursor.execute("""
+        SELECT 
+            MIN(r.reportID) AS reportID,
+            r.articleID,
+            a.articleTitle,
+            c.categoryName AS category,
+            COUNT(r.reportID) AS totalReports,
+            MAX(r.reported_at) AS latestReportDate,
+            a.articleStatus,
+            CASE 
+                WHEN SUM(CASE WHEN r.reportStatus = 'pending review' THEN 1 ELSE 0 END) > 0 
+                THEN 'pending review'
+                ELSE 'completed'
+            END AS reportStatus
+        FROM ReportedArticle r
+        JOIN Article a ON r.articleID = a.articleID
+        JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        WHERE r.reportStatus = 'pending review'
+        AND c.categoryName = %s
+        GROUP BY r.articleID, a.articleTitle, c.categoryName, a.articleStatus
+        ORDER BY latestReportDate DESC
+    """, (expertise,))
+    reported_articles = cursor.fetchall()
 
     cursor.close()
     conn.close()
@@ -967,7 +1033,12 @@ def editor_dashboard():
     return render_template(
         "editor_dashboard.html",
         active_page="dashboard",
-        total_articles=total_articles
+        total_articles=total_articles,
+        pending_articles=pending_articles,
+        pending_count=pending_count,
+        approved_count=approved_count,
+        reported_count=reported_count,
+        reported_articles=reported_articles
     )
     
 @app.route("/editor/category_articles")
