@@ -1,100 +1,133 @@
-{% extends "master.html" %}
+<!doctype html>
+<html lang="en">
 
-{% block title %}Sign Up — Daily Scoop{% endblock %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Scoop</title>
+  <link rel="stylesheet" href="../../static/css/Unregistered/UnregRegAcc.css" />
+</head>
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/Unregistered/UnregRegAcc.css') }}">
-<style>
-  .page-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-</style>
-{% endblock %}
-
-{% block brand_href %}{{ url_for('home.unreg_home') }}{% endblock %}
-{% block premium_badge %}{% endblock %}
-
-{% block topbar_nav %}
-  <a href="{{ url_for('home.unreg_home') + '#articles' }}">Articles</a>
-  <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
-  <a href="{{ url_for('home.unreg_home') + '#product-feature' }}">Product Feature</a>  
-  <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">Company Profile</a>  
-  <a href="{{ url_for('home.unreg_home') + '#pricing' }}">Subscription</a>
-  <a href="{{ url_for('login.login') }}">Log In</a>
-{% endblock %}
-
-{% block content %}
-<div class="form-container">
-  <h2>Welcome!</h2>
-  <p>Sign Up</p>
-
-  <form action="{{ url_for('register.register') }}" method="POST">
-
-    <div class="form-row-two">
-      <input type="text" id="firstName" name="firstName" placeholder="First Name" />
-      <input type="text" id="lastName" name="lastName" placeholder="Last Name" />
+<body>
+  <header class="navbar">
+    <div class="logo">
+      <a href="{{ url_for('home.unreg_home') }}">
+        <h1>Daily Scoop</h1>
+        <h1>News System</h1>
+      </a>
     </div>
 
-    <input type="email" id="email" name="email" placeholder="Enter your email" />
+    <nav class="navLinks">
+      <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">Company Profile</a>
+      <a href="{{ url_for('home.unreg_home') }}#product-feature">Product Feature</a>
+      <a href="{{ url_for('home.unreg_home') }}#articles">Articles</a>
+      <a href="{{ url_for('home.unreg_home') + '#pricing' }}">Subscription</a>
+      <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
+      <a href="{{ url_for('login.login') }}">Log In</a>
+    </nav>
+  </header>
 
-    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" />
+  <main class="page-content">
+    <div class="form-container">
+      <h2>Welcome!</h2>
+      <p>Sign Up</p>
 
-    <input type="text" id="username" name="username" placeholder="Enter your username" />
+      <form action="{{ url_for('register.register') }}" method="POST">
 
-    <div class="password-group">
-      <input type="password" id="password" name="password" placeholder="Password" />
-      <small>Minimum 10 Characters</small>
+        <!-- First + Last Name side by side -->
+        <div class="form-row-two">
+          <input type="text" id="firstName" name="firstName" placeholder="First Name" />
+          <input type="text" id="lastName" name="lastName" placeholder="Last Name" />
+        </div>
+
+        <input type="email" id="email" name="email" placeholder="Enter your email" />
+
+        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" />
+
+        <input type="text" id="username" name="username" placeholder="Enter your username" />
+
+        <div class="password-group">
+          <input type="password" id="password" name="password" placeholder="Password" />
+          <small>Minimum 10 Characters</small>
+        </div>
+
+        <input type="password" id="retypePassword" name="retypePassword" placeholder="Retype Password" />
+
+        <button type="submit" class="signup-btn">Sign Up</button>
+      </form>
+
+      <p class="signin-link">
+        Have an account? <a href="{{ url_for('login.login') }}">Sign In</a>
+      </p>
     </div>
+  </main>
 
-    <input type="password" id="retypePassword" name="retypePassword" placeholder="Retype Password" />
-
-    <button type="submit" class="signup-btn">Sign Up</button>
-  </form>
-
-  <p class="signin-link">
-    Have an account? <a href="{{ url_for('login.login') }}">Sign In</a>
-  </p>
-</div>
-
-<!-- Popup Overlay -->
-<div id="popup-overlay" class="popup-overlay hidden">
-  <div class="popup-box" id="popup-box">
-    <p id="popup-message"></p>
+  <!-- Popup Overlay -->
+  <div id="popup-overlay" class="popup-overlay hidden">
+    <div class="popup-box" id="popup-box">
+      <p id="popup-message"></p>
+    </div>
   </div>
-</div>
 
-<div id="flash-data"
-  data-success="{{ success or '' }}"
-  data-error="{{ error or '' }}">
-</div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-  function showPopup(message, type = "success") {
-    const overlay = document.getElementById("popup-overlay");
-    const box = document.getElementById("popup-box");
-    const text = document.getElementById("popup-message");
-    text.innerText = message;
-    box.classList.remove("popup-success", "popup-error");
-    box.classList.add(type === "success" ? "popup-success" : "popup-error");
-    overlay.classList.remove("hidden");
-  }
-
-  document.getElementById("popup-overlay").addEventListener("click", function (e) {
-    if (!document.getElementById("popup-box").contains(e.target)) {
-      this.classList.add("hidden");
+  <script>
+    function showPopup(message, type = "success") {
+      const overlay = document.getElementById("popup-overlay");
+      const box = document.getElementById("popup-box");
+      const text = document.getElementById("popup-message");
+      text.innerText = message;
+      box.classList.remove("popup-success", "popup-error");
+      box.classList.add(type === "success" ? "popup-success" : "popup-error");
+      overlay.classList.remove("hidden");
     }
-  });
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const flashEl = document.getElementById("flash-data");
-    const successMsg = flashEl.dataset.success;
-    const errorMsg = flashEl.dataset.error;
-    if (successMsg) showPopup(successMsg, "success");
-    else if (errorMsg) showPopup(errorMsg, "error");
-  });
-</script>
-{% endblock %}
+    document.getElementById("popup-overlay").addEventListener("click", function (e) {
+      if (!document.getElementById("popup-box").contains(e.target)) {
+        this.classList.add("hidden");
+      }
+    });
+  </script>
+
+  <div id="flash-data"
+    data-success="{{ success or '' }}"
+    data-error="{{ error or '' }}">
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const flashEl = document.getElementById("flash-data");
+      const successMsg = flashEl.dataset.success;
+      const errorMsg = flashEl.dataset.error;
+      if (successMsg) showPopup(successMsg, "success");
+      else if (errorMsg) showPopup(errorMsg, "error");
+    });
+  </script>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <h3 class="footer-title">Daily Scoop News</h3>
+        <p class="footer-description">
+          Delivering reliable and AI-powered news to keep readers informed
+          with credible and up-to-date stories.
+        </p>
+        <div class="footer-social">
+          <a href="https://facebook.com" target="_blank" class="footer-social-icon facebook" rel="noopener">f</a>
+          <a href="https://linkedin.com" target="_blank" class="footer-social-icon linkedin" rel="noopener">in</a>
+          <a href="https://x.com" target="_blank" class="footer-social-icon twitter" rel="noopener">X</a>
+        </div>
+      </div>
+      <div class="footer-links-section">
+        <h4 class="footer-links-title">Social Links</h4>
+        <div class="footer-links">
+          <a href="{{ url_for('info', page='contact') }}">Contact Us</a>
+          <a href="{{ url_for('info', page='privacy') }}">Privacy Policy</a>
+          <a href="{{ url_for('info', page='about') }}">About Us</a>
+          <a href="{{ url_for('info', page='terms') }}">Terms and Conditions</a>
+          <a href="{{ url_for('info', page='help') }}">Need help? Reach us here.</a>
+          <a href="{{ url_for('info', page='advertise') }}">Advertise with us</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
