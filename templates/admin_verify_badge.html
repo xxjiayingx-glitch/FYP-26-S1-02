@@ -1,4 +1,5 @@
 {% extends "admin_base.html" %}
+{% block verified_active %}active{% endblock %}
 
 {% block title %}Verified Badge Approval{% endblock %}
 
@@ -7,6 +8,13 @@
 {% endblock %}
 
 {% block content %}
+
+<div class="breadcrumb">
+    <a href="/admin/verified-badge-mgmt" class="breadcrumb-link">Verified Badge Management</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Verified Badge Requests</span>
+</div>
+
 <section class="page-header">
     <div>
         <h1>Verified Badge Requests</h2>

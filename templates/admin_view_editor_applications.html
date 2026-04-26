@@ -11,21 +11,45 @@
     box-sizing:border-box;
 }
 
-.page-header{
+/* .page-header{
     margin-bottom:22px;
-}
+} */
 
-.page-title{
+/* .page-title{
     font-size:34px;
     font-weight:800;
     color:#111;
     margin-bottom:6px;
-}
+} */
 
-.page-subtitle{
+/* .page-subtitle{
     font-size:15px;
     color:#5f6b7a;
     margin:0;
+} */
+
+.breadcrumb {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.breadcrumb-link {
+    color: #2a7db8;        
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    margin: 0 6px;
+    color: #555;
+}
+
+.breadcrumb-current {
+    color: #555;         
 }
 
 /* ================= TOP STATS ================= */
@@ -566,10 +590,16 @@
 }
 </style>
 
+<div class="breadcrumb">
+    <a href="/admin/editor-applications" class="breadcrumb-link">Editor Application Management</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Editor Applications</span>
+</div>
+
 <div class="editor-app-page">
     <div class="page-header">
-        <h1 class="page-title">Editor Applications</h1>
-        <p class="page-subtitle">Review and manage editor registration requests.</p>
+        <h1>Editor Applications</h1>
+        <p>Review and manage editor registration requests.</p>
     </div>
 
     <div class="stats-row">
@@ -866,13 +896,13 @@ function showDetails(appData) {
 
     approveBtn.onclick = function(e) {
         e.preventDefault();
-        decisionForm.action = "/admin/editor-applications/approve/" + appData.applicationID;
+        decisionForm.action = "/admin/view-editor-applications/approve/" + appData.applicationID;
         decisionForm.submit();
     };
 
     rejectBtn.onclick = function(e) {
         e.preventDefault();
-        decisionForm.action = "/admin/editor-applications/reject/" + appData.applicationID;
+        decisionForm.action = "/admin/view-editor-applications/reject/" + appData.applicationID;
         decisionForm.submit();
     };
 }
@@ -1002,7 +1032,7 @@ function quickDecision(action, applicationId) {
     if (!ok) return;
 
     const form = document.getElementById("quickDecisionForm");
-    form.action = "/admin/editor-applications/" + action + "/" + applicationId;
+    form.action = "/admin/view-editor-applications/" + action + "/" + applicationId;
     form.submit();
 }
 

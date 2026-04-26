@@ -1,6 +1,31 @@
 {% extends "admin_base.html" %}
+{% block verified_active %}active{% endblock %}
 {% block content %}
 <style>
+    .breadcrumb {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .breadcrumb-link {
+        color: #2a7db8;        
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .breadcrumb-link:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        margin: 0 6px;
+        color: #555;
+    }
+
+    .breadcrumb-current {
+        color: #555;          
+    }
+
     .rule-card {
         background: #ffffff;
         border: 1px solid #e5e7eb;
@@ -84,6 +109,13 @@
         transform: translateY(-1px);
 }
 </style>
+
+<div class="breadcrumb">
+    <a href="/admin/verified-badge-mgmt" class="breadcrumb-link">Verified Badge Management</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Edit Eligibility Rule</span>
+</div>
+
 <div class="page-header">
     <h1>Verified Badge Eligibility Rule</h1>
     <p>Set the minimum requirements for users to qualify for a verified badge.</p>

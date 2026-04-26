@@ -1,0 +1,110 @@
+{% extends "admin_base.html" %}
+{% block applications_active %}active{% endblock %}
+
+{% block content %}
+<style>
+.page-header {
+    margin-bottom: 45px;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+/* .page-header p {
+    color: #54aee8;
+    font-size: 16px;
+    margin-bottom: 34px;
+} */
+
+.page-title{
+    font-size:28px;
+    margin-bottom:45px;
+}
+
+.section-card{
+    max-width: 520px;
+    background:white;
+    border-radius:18px;
+    padding: 32px 28px;
+    margin-bottom:28px;
+    margin-right: 80px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+    align-items:center;
+}
+
+.section-left h2{
+    font-size:24px;
+    margin-bottom:6px;
+}
+
+.section-left p{
+    color:#54aee8;
+    width:420px;
+    line-height: 22px;
+}
+
+.view-btn{
+    font-size: 14px;
+    background:#4A6CF7;
+    color:white;
+    border:none;
+    padding:12px 22px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top: 20px;
+}
+
+.view-btn:hover{
+    background:#3b5de0;
+}
+
+</style>
+
+<section class="page-header">
+    <h1>Editor Application And Change Management</h1>
+</section>
+
+<div class="category-main-wrapper">
+
+    <!-- Update eligibility rule -->
+    <div class="section-card">
+
+        <div class="section-left">
+            <h2>View Editor Applications</h2>
+            <p>
+                Review editor's application and make approval decision. 
+            </p>
+        </div>
+
+        <button
+            class="view-btn"
+            onclick="window.location.href='{{ url_for('editor_applications_page_bp.editor_applications_page') }}'">
+            Review
+        </button>
+
+    </div>
+
+    <!-- View requests -->
+    <div class="section-card">
+
+        <div class="section-left">
+            <h2>View Editor Change Requests</h2>
+            <p>
+                Review change requests made by editor and make approval decision.
+            </p>
+        </div>
+
+        <button
+            class="view-btn"
+            onclick="window.location.href='{{ url_for('editor_applications_page_bp.change_requests_page') }}'">
+            Review
+        </button>
+
+    </div>
+
+</div>
+
+{% endblock %}

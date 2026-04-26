@@ -1,0 +1,652 @@
+{% extends "admin_base.html" %}
+{% block applications_active %}active{% endblock %}
+
+{% block content %}
+
+<style>
+    /* .change-page {
+        padding: 25px 30px;
+    } */
+
+    /* .change-header {
+        margin-bottom: 32px;
+    }
+
+    .change-header h1 {
+        font-size: 34px;
+        font-weight: 800;
+        color: #151515;
+        margin-bottom: 6px;
+    }
+
+    .change-header p {
+        color: #4aa8f5;
+        font-size: 18px;
+        font-weight: 600;
+    } */
+
+    /* .change-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+        margin-bottom: 28px;
+    }
+
+    .change-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 26px;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .change-card-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .icon-pending {
+        background: #fff1c9;
+        color: #a76a00;
+    }
+
+    .icon-change {
+        background: #e4f0ff;
+        color: #2d7be8;
+    }
+
+    .icon-review {
+        background: #e5faec;
+        color: #1c944b;
+    }
+
+    .icon-total {
+        background: #f0f2f6;
+        color: #4b5563;
+    }
+
+    .change-card-info h2 {
+        font-size: 34px;
+        font-weight: 800;
+        color: #111827;
+        margin: 0;
+    }
+
+    .change-card-info span {
+        color: #5d6b7a;
+        font-weight: 700;
+        font-size: 15px;
+    } */
+
+    .breadcrumb {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .breadcrumb-link {
+        color: #2a7db8;        
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .breadcrumb-link:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        margin: 0 6px;
+        color: #555;
+    }
+
+    .breadcrumb-current {
+        color: #555;          
+    }
+
+    .filter-row {
+        display: grid;
+        grid-template-columns: 1fr 220px 220px;
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+
+    .filter-row input,
+    .filter-row select {
+        height: 54px;
+        border: none;
+        outline: none;
+        border-radius: 15px;
+        padding: 0 18px;
+        font-size: 16px;
+        background: #ffffff;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+        color: #222;
+    }
+
+    .request-table-card {
+        background: #ffffff;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.08);
+    }
+
+    .request-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .request-table thead {
+        background: #f0f1ff;
+    }
+
+    .request-table th {
+        text-align: left;
+        padding: 20px 18px;
+        font-size: 15px;
+        color: #151515;
+        font-weight: 800;
+    }
+
+    .request-table td {
+        padding: 22px 18px;
+        border-bottom: 1px solid #edf0f4;
+        font-size: 15px;
+        color: #222;
+        vertical-align: middle;
+    }
+
+    .editor-name {
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .editor-email {
+        color: #374151;
+    }
+
+    .expertise-change-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .expertise-pill {
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-block;
+    }
+
+    .old-expertise {
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+
+    .new-expertise {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .arrow-icon {
+        color: #6b7280;
+        font-weight: 800;
+    }
+
+    .status-badge {
+        padding: 9px 17px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 800;
+        display: inline-block;
+        text-transform: capitalize;
+    }
+
+    .status-badge.pending {
+        background: #fff0c2;
+        color: #c98100;
+    }
+
+    .status-badge.approved {
+        background: #d8f8df;
+        color: #178b43;
+    }
+
+    .status-badge.rejected {
+        background: #ffdada;
+        color: #d63b3b;
+    }
+
+    .action-group {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .action-btn {
+        border: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 17px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s ease;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .view-btn {
+        background: #e8ecff;
+        color: #3949ab;
+    }
+
+    .approve-btn {
+        background: #d9fbe5;
+        color: #149447;
+    }
+
+    .reject-btn {
+        background: #ffe0e0;
+        color: #db3434;
+    }
+
+    .table-footer {
+        padding: 18px 22px;
+        color: #666;
+        font-weight: 600;
+        background: #ffffff;
+    }
+
+    .empty-state {
+        padding: 45px;
+        text-align: center;
+        color: #6b7280;
+        font-weight: 600;
+    }
+
+    .empty-state-icon {
+        font-size: 42px;
+        margin-bottom: 10px;
+    }
+
+    .request-modal-bg {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .request-modal {
+        width: 460px;
+        background: #ffffff;
+        border-radius: 22px;
+        padding: 28px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    }
+
+    .request-modal h2 {
+        margin-bottom: 8px;
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    .request-modal p {
+        color: #5f6b7a;
+        margin-bottom: 18px;
+    }
+
+    .modal-detail {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 15px;
+        margin-bottom: 12px;
+    }
+
+    .modal-detail small {
+        display: block;
+        color: #6b7280;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .modal-detail span {
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .close-modal-btn {
+        width: 100%;
+        height: 44px;
+        border: none;
+        border-radius: 13px;
+        background: #111827;
+        color: #ffffff;
+        font-weight: 800;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+
+    @media (max-width: 1100px) {
+        .change-summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filter-row {
+            grid-template-columns: 1fr;
+        }
+
+        .request-table-card {
+            overflow-x: auto;
+        }
+
+        .request-table {
+            min-width: 950px;
+        }
+    }
+
+    @media (max-width: 650px) {
+        .change-summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .change-page {
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="breadcrumb">
+    <a href="/admin/editor-applications" class="breadcrumb-link">Editor Application Management</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Change Requests</span>
+</div>
+
+ <div class="page-header">
+    <h1>Editor Change Requests</h1>
+    <p>Review and manage requests from editors who want to change their expertise area.</p>
+</div>
+
+<div class="change-page">
+
+    <!-- <div class="change-summary-grid">
+        <div class="change-card">
+            <div class="change-card-icon icon-pending">⏳</div>
+            <div class="change-card-info">
+                <h2>{{ applications|length }}</h2>
+                <span>Pending Requests</span>
+            </div>
+        </div>
+
+        <div class="change-card">
+            <div class="change-card-icon icon-change">↔</div>
+            <div class="change-card-info">
+                <h2>{{ applications|length }}</h2>
+                <span>Expertise Changes</span>
+            </div>
+        </div>
+
+        <div class="change-card">
+            <div class="change-card-icon icon-review">✓</div>
+            <div class="change-card-info">
+                <h2>Admin</h2>
+                <span>Review Required</span>
+            </div>
+        </div>
+
+        <div class="change-card">
+            <div class="change-card-icon icon-total">≡</div>
+            <div class="change-card-info">
+                <h2>{{ applications|length }}</h2>
+                <span>Total Displayed</span>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="filter-row">
+        <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search by editor name or email"
+            onkeyup="filterRequests()"
+        >
+
+        <select id="statusFilter" onchange="filterRequests()">
+            <option value="all">Status: All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+        </select>
+
+        
+        <select id="expertiseFilter" onchange="filterRequests()">
+            <option value="all">Requested Expertise: All</option>
+
+            {% for category in expertise_categories %}
+                <option value="{{ category.categoryName|lower }}">
+                    {{ category.categoryName }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="request-table-card">
+        {% if applications %}
+            <table class="request-table">
+                <thead>
+                    <tr>
+                        <th>Editor</th>
+                        <th>Email</th>
+                        <th>Requested Change</th>
+                        <th>Requested On</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="requestTableBody">
+                    {% for app in applications %}
+                    <tr 
+                        class="request-row"
+                        data-name="{{ app.fullName|lower }}"
+                        data-email="{{ app.email|lower }}"
+                        data-status="{{ app.status|lower }}"
+                        data-expertise="{{ app.newExpertise|lower }}"
+                    >
+                        <td>
+                            <div class="editor-name">{{ app.fullName }}</div>
+                        </td>
+
+                        <td>
+                            <div class="editor-email">{{ app.email }}</div>
+                        </td>
+
+                        <td>
+                            <div class="expertise-change-box">
+                                <span class="expertise-pill old-expertise">
+                                    {{ app.currentExpertise }}
+                                </span>
+
+                                <span class="arrow-icon">→</span>
+
+                                <span class="expertise-pill new-expertise">
+                                    {{ app.newExpertise }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>{{ app.requested_at }}</td>
+
+                        <td>
+                            <span class="status-badge {{ app.status }}">
+                                {{ app.status }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="action-group">
+
+                                <button 
+                                    type="button"
+                                    class="action-btn view-btn"
+                                    title="View request"
+                                    onclick="openRequestModal(
+                                        '{{ app.fullName|e }}',
+                                        '{{ app.email|e }}',
+                                        '{{ app.currentExpertise|e }}',
+                                        '{{ app.newExpertise|e }}',
+                                        '{{ app.requested_at|e }}',
+                                        '{{ app.status|e }}'
+                                    )"
+                                >
+                                    👁
+                                </button>
+
+                                <form 
+                                    method="POST" 
+                                    action="{{ url_for('editor_applications_page_bp.approve_change', request_id=app.requestID) }}"
+                                    onsubmit="return confirm('Approve this expertise change request?');"
+                                >
+                                    <button type="submit" class="action-btn approve-btn" title="Approve request">
+                                        ✓
+                                    </button>
+                                </form>
+
+                                <form 
+                                    method="POST" 
+                                    action="{{ url_for('editor_applications_page_bp.reject_change', request_id=app.requestID) }}"
+                                    onsubmit="return confirm('Reject this expertise change request?');"
+                                >
+                                    <button type="submit" class="action-btn reject-btn" title="Reject request">
+                                        ×
+                                    </button>
+                                </form>
+
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="table-footer">
+                Showing <span id="visibleCount">{{ applications|length }}</span> of {{ applications|length }} request(s)
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                No pending editor expertise change requests found.
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<div class="request-modal-bg" id="requestModalBg">
+    <div class="request-modal">
+        <h2>Change Request Details</h2>
+        <p>Review the editor's current and requested expertise area before approving or rejecting.</p>
+
+        <div class="modal-detail">
+            <small>Editor</small>
+            <span id="modalName"></span>
+        </div>
+
+        <div class="modal-detail">
+            <small>Email</small>
+            <span id="modalEmail"></span>
+        </div>
+
+        <div class="modal-detail">
+            <small>Current Expertise</small>
+            <span id="modalCurrent"></span>
+        </div>
+
+        <div class="modal-detail">
+            <small>Requested Expertise</small>
+            <span id="modalNew"></span>
+        </div>
+
+        <div class="modal-detail">
+            <small>Requested On</small>
+            <span id="modalDate"></span>
+        </div>
+
+        <div class="modal-detail">
+            <small>Status</small>
+            <span id="modalStatus"></span>
+        </div>
+
+        <button class="close-modal-btn" onclick="closeRequestModal()">Close</button>
+    </div>
+</div>
+
+<script>
+    function filterRequests() {
+        const searchValue = document.getElementById("searchInput").value.toLowerCase();
+        const statusValue = document.getElementById("statusFilter").value.toLowerCase();
+        const expertiseValue = document.getElementById("expertiseFilter").value.toLowerCase();
+
+        const rows = document.querySelectorAll(".request-row");
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.dataset.name;
+            const email = row.dataset.email;
+            const status = row.dataset.status;
+            const expertise = row.dataset.expertise;
+
+            const matchesSearch = name.includes(searchValue) || email.includes(searchValue);
+            const matchesStatus = statusValue === "all" || status === statusValue;
+            const matchesExpertise = expertiseValue === "all" || expertise === expertiseValue;
+
+            if (matchesSearch && matchesStatus && matchesExpertise) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        document.getElementById("visibleCount").textContent = visibleCount;
+    }
+
+    function openRequestModal(name, email, currentExpertise, newExpertise, requestedAt, status) {
+        document.getElementById("modalName").textContent = name;
+        document.getElementById("modalEmail").textContent = email;
+        document.getElementById("modalCurrent").textContent = currentExpertise;
+        document.getElementById("modalNew").textContent = newExpertise;
+        document.getElementById("modalDate").textContent = requestedAt;
+        document.getElementById("modalStatus").textContent = status;
+
+        document.getElementById("requestModalBg").style.display = "flex";
+    }
+
+    function closeRequestModal() {
+        document.getElementById("requestModalBg").style.display = "none";
+    }
+
+    document.getElementById("requestModalBg").addEventListener("click", function(event) {
+        if (event.target === this) {
+            closeRequestModal();
+        }
+    });
+</script>
+
+{% endblock %}
