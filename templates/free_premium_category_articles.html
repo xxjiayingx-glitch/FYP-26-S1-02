@@ -1,0 +1,774 @@
+{% extends "master.html" %}
+
+{% block title %}
+  {% if selected_category %}
+    {{ selected_category.categoryName }} - Daily Scoop
+  {% else %}
+    Daily Scoop - All Articles
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    /* =========================
+       PAGE LAYOUT
+    ========================= */
+    .page-wrapper {
+        padding: 0;
+    }
+
+    .news-home {
+        width: 100%;
+        min-height: 100vh;
+        background: #f3f3f3;
+    }
+
+    .news-home .container,
+    .news-home .news {
+        width: min(88%, 1320px);
+        margin: 0 auto;
+    }
+
+    /* =========================
+       CATEGORY NAVIGATION
+    ========================= */
+    .news-home .category-nav {
+        width: 100%;
+        background: #ffffff;
+        border-bottom: 1px solid #e8eef6;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+        position: sticky;
+        top: 90px;
+        z-index: 1000;
+    }
+
+    .news-home .category-nav-inner {
+        width: min(88%, 1320px);
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .news-home .category-nav-inner::-webkit-scrollbar {
+        display: none;
+    }
+
+    .news-home .category-nav-link,
+    .news-home .category-more-btn,
+    .news-home .category-expand-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: #eef2f7;
+        color: #35527a;
+        font-size: 0.95rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .news-home .category-nav-link:hover,
+    .news-home .category-more-btn:hover,
+    .news-home .category-expand-link:hover,
+    .news-home .category-nav-link.active,
+    .news-home .category-expand-link.active,
+    .news-home .category-more-btn.selected,
+    .news-home .category-more-btn.open {
+        background: #e7f0ff;
+        color: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .news-home .category-more-btn {
+        gap: 6px;
+    }
+
+    .news-home .dropdown-arrow {
+        margin-top: 2px;
+        font-size: 0.8rem;
+        font-weight: 900;
+    }
+
+    .news-home .category-expand-panel {
+        display: none;
+        width: 100%;
+        background: #ffffff;
+        border-top: 1px solid #eef2f7;
+        border-bottom: 1px solid #e8eef6;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .news-home .category-expand-panel.show {
+        display: block;
+    }
+
+    .news-home .category-expand-grid {
+        width: min(88%, 1320px);
+        margin: 0 auto;
+        padding: 18px 0 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    /* =========================
+    CATEGORY-AWARE SEARCH
+    ========================= */
+    /* .news-home .category-search-section {
+        width: min(88%, 1320px);
+        margin: 32px auto 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .news-home .category-search-form {
+        width: min(100%, 720px);
+    }
+
+    .news-home .category-search-wrapper {
+        width: 100%;
+        height: 56px;
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        padding: 0 8px 0 22px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+    }
+
+    .news-home .category-search-icon {
+        color: #64748b;
+        font-size: 1rem;
+        margin-right: 12px;
+    }
+
+    .news-home .category-search-input {
+        flex: 1;
+        height: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: #111827;
+        font-size: 1rem;
+        font-weight: 600;
+    } 
+
+    .news-home .category-search-input::placeholder {
+        color: #9ca3af;
+    } */
+
+    /* .news-home .category-search-btn {
+        background: #3b82f6;
+        color: #ffffff;
+    }
+
+    .news-home .category-search-btn:hover {
+        background: #2563eb;
+    } */
+
+    /* .news-home .category-clear-btn {
+        background: #f1f5f9;
+        color: #475569;
+        margin-right: 8px;
+        text-decoration: none;
+    }
+
+    .news-home .category-clear-btn:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    } */
+
+    .news-home .category-clear-btn {
+        position: absolute;
+        right: 96px;
+        top: 50%;
+        transform: translateY(-50%);
+
+        height: 34px;
+        padding: 0 16px;
+        border-radius: 999px;
+
+        background: #eef2f7;
+        color: #334155;
+
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        transition: all 0.2s ease;
+    }
+
+    .news-home .category-clear-btn:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+        text-decoration: none;
+    }
+
+    .news-home .search-input-modern {
+        padding-right: 175px;
+    }
+
+    /* =========================
+    HEADLINE SECTION
+    ========================= */
+    /* .news-home .headline {
+        padding: 28px 0 32px;
+    } */
+
+    .news-home .headline .container {
+        width: min(88%, 1320px);
+        margin: 0 auto;
+    }
+
+    /* Outer card should not look like another huge card */
+    .news-home .headline > .container > .news-card {
+        background: transparent;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    /* .news-home .headline .news-card {
+        background: #ffffff;
+        border-radius: 28px;
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+        padding: 30px 32px;
+    } */
+
+    .news-home .featured-news {
+        display: grid;
+        grid-template-columns: 1.12fr 0.88fr;
+        gap: 34px;
+        align-items: center;
+    }
+
+    .news-home .featured-left {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-top: 46px;
+    }
+
+    /* .news-home .headline-tag {
+        display: inline-block;
+        margin-bottom: 10px;
+        color: #111827;
+        font-size: 1rem;
+        font-weight: 800;
+    } */
+
+    .news-home .featured-title {
+        font-size: clamp(1.9rem, 2vw, 3.4rem);
+        line-height: 1.08;
+        font-weight: 800;
+        margin: 0 0 14px;
+        color: #0f172a;
+        max-width: 28ch;
+    }
+
+    .news-home .featured-desc {
+        font-size: 0.98rem;
+        line-height: 1.72;
+        color: #526072;
+        margin: 12px 0 16px;
+        max-width: 58ch;
+    }
+
+    .news-home .featured-right {
+        min-height: 280px;
+        border-radius: 22px;
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .news-home .featured-right img {
+        width: 100%;
+        height: 280px;
+        min-height: 280px;
+        object-fit: cover;
+        display: block;
+    }
+    .news-home .no-headline {
+        text-align: center;
+        color: #667085;
+        font-size: 1rem;
+        padding: 30px 0;
+    }
+
+    .news-home .headline-tag {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: inline-flex;
+        width: fit-content;
+        padding: 6px 12px;
+        margin-bottom: 14px;
+        border-radius: 999px;
+        background: #e9f2ff;
+        color: #2563eb;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    /* =========================
+       ARTICLE META
+    ========================= */
+    /* .news-home .article-meta {
+        display: flex;
+        align-items: left;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin: 12px 0;
+    } */
+/* 
+    .news-home .meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #374151;
+        font-size: 0.95rem;
+        font-weight: 600;
+    } */
+
+    /* .news-home .article-meta .meta-item.views {
+        background: #f2f2f2 !important;
+        color: #444 !important;
+    }
+
+    .news-home .article-meta .meta-item.likes {
+        background: #fff1f2 !important;
+        color: #d1435b !important;
+    }
+
+    .news-home .featured-left .article-meta {
+        align-self: flex-start !important;
+    } */
+
+    /* =========================
+       READ MORE LINK
+    ========================= */
+    .news-home .read-more {
+        display: inline-block;
+        margin-top: 6px;
+        color: #3b82f6;
+        font-size: 1rem;
+        font-weight: 800;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .news-home .read-more:hover {
+        color: #1d4ed8;
+        transform: translateX(3px);
+    }
+
+    /* =========================
+       LATEST ARTICLES
+    ========================= */
+    .news-home .news {
+        padding: 0 0 60px;
+    }
+
+    .news-home .latest-title {
+        margin-bottom: 18px;
+        color: #111827;
+        font-size: 1.45rem;
+        font-weight: 900;
+    }
+
+    .news-home .latest-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+
+    .news-home .latest-grid .news-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+        transition: all 0.25s ease;
+        overflow: hidden;
+    }
+
+    .news-home .latest-grid .news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.13);
+    }
+
+    .news-home .latest-grid .news-card img {
+        width: 100%;
+        height: 230px;
+        object-fit: cover;
+        display: block;
+        border-radius: 14px;
+        background: #f3f4f6;
+        margin-bottom: 16px;
+    }
+
+    .news-home .news-title {
+        margin-bottom: 10px;
+        color: #111827;
+        font-size: 1.05rem;
+        font-weight: 850;
+        line-height: 1.35;
+    }
+
+    .news-home .news-para {
+        margin: 10px 0 12px;
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .news-home .no-headline {
+        color: #6b7280;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 30px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+    @media (max-width: 1100px) {
+        .news-home .headline .news-card {
+            padding: 40px;
+        }
+
+        .news-home .featured-news {
+            grid-template-columns: 1fr;
+            gap: 28px;
+        }
+
+        .news-home .featured-right {
+            height: 280px;
+        }
+
+        .news-home .latest-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+    }
+
+    @media (max-width: 768px) {
+        .news-home .category-nav {
+            top: 0;
+        }
+
+        .news-home .category-nav-inner {
+            width: 94%;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        .news-home .category-expand-grid {
+            width: 94%;
+        }
+
+        .news-home .container,
+        .news-home .news {
+            width: 94%;
+        }
+
+        .news-home .headline {
+            padding: 28px 0;
+        }
+
+        .news-home .headline .news-card {
+            padding: 22px;
+        }
+
+        .news-home .featured-news {
+            padding: 20px;
+        }
+
+        .news-home .featured-title {
+            font-size: 1.8rem;
+        }
+
+        .news-home .featured-right {
+            height: 230px;
+        }
+
+        .news-home .latest-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .news-home .category-nav-link,
+        .news-home .category-more-btn,
+        .news-home .category-expand-link {
+            padding: 8px 14px;
+            font-size: 0.88rem;
+        }
+    }
+
+    .news-home .featured-title {
+        font-size: 1.55rem;
+    }
+
+    .news-home .latest-grid .news-card img {
+        height: 180px;
+    }
+
+    .news-home .search-bar-container {
+        margin: 30px 0 8px !important;
+    }
+
+    /* .news-home .headline {
+        padding: 0 0 0 !important;
+    } */
+
+    .news-home .news {
+        padding-top: 10px;
+    }
+</style>
+
+<div class="news-home">
+
+  <!-- CATEGORY NAVIGATION -->
+  <div class="category-nav">
+    {% set more_category_ids = more_categories | map(attribute='categoryID') | list %}
+
+    <div class="category-nav-inner">
+
+      <a href="{{ url_for('user_category_articles') }}"
+         class="category-nav-link {% if is_all_page %}active{% endif %}">
+        All
+      </a>
+
+      {% for category in visible_categories %}
+        <a href="{{ url_for('user_category_articles', category_id=category.categoryID) }}"
+           class="category-nav-link {% if selected_category and category.categoryID == selected_category.categoryID %}active{% endif %}">
+          {{ category.categoryName }}
+        </a>
+      {% endfor %}
+
+      {% if more_categories %}
+        <button
+          class="category-more-btn {% if selected_category and selected_category.categoryID in more_category_ids %}selected{% endif %}"
+          type="button"
+          onclick="toggleCategoryPanel()">
+          More <span class="dropdown-arrow">▼</span>
+        </button>
+      {% endif %}
+    </div>
+
+    {% if more_categories %}
+    <div class="category-expand-panel" id="categoryExpandPanel">
+      <div class="category-expand-grid">
+        {% for category in more_categories %}
+          <a href="{{ url_for('user_category_articles', category_id=category.categoryID) }}"
+             class="category-expand-link {% if selected_category and category.categoryID == selected_category.categoryID %}active{% endif %}">
+            {{ category.categoryName }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+    <!-- CATEGORY-AWARE SEARCH -->
+    <div class="search-bar-container">
+        <form 
+            method="GET"
+            action="{% if selected_category %}
+                        {{ url_for('user_category_articles', category_id=selected_category.categoryID) }}
+                    {% else %}
+                        {{ url_for('user_category_articles') }}
+                    {% endif %}"
+            class="search-form"
+        >
+            <div class="search-wrapper">
+                <i class="fa fa-search search-icon"></i>
+
+                <input 
+                    type="text"
+                    name="q"
+                    value="{{ search_query or '' }}"
+                    placeholder="{% if selected_category %}Search within {{ selected_category.categoryName }}...{% else %}Search all articles...{% endif %}"
+                    class="search-input-modern"
+                >
+
+                {% if search_query %}
+                    <a 
+                        href="{% if selected_category %}
+                                {{ url_for('user_category_articles', category_id=selected_category.categoryID) }}
+                            {% else %}
+                                {{ url_for('user_category_articles') }}
+                            {% endif %}"
+                        class="category-clear-btn"
+                    >
+                        Clear
+                    </a>
+                {% endif %}
+
+                <button type="submit" class="search-btn-modern">
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- HEADLINE ARTICLE -->
+    {% if not search_query %}
+    <section class="headline">
+        <div class="container">
+        <div class="news-card">
+
+            {% if headline %}
+            <div class="featured-news">
+
+            <div class="featured-left">
+                <span class="headline-tag">
+                {% if selected_category %}
+                    Top Story In {{ selected_category.categoryName }}
+                {% else %}
+                    Top Story
+                {% endif %}
+                </span>
+
+                <h1 class="featured-title">{{ headline.articleTitle }}</h1>
+
+                <div class="top-article-meta">
+                    <span class="top-article-badge">👁 {{ headline.views }}</span>
+                    <span class="top-article-badge like">❤️ {{ headline.likes }}</span>
+                </div>
+
+                <p class="featured-desc">
+                {{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif %}
+                </p>
+
+                <a class="read-more" href="{{ url_for('article_detail', article_id=headline.articleID) }}">
+                Read more......
+                </a>
+            </div>
+
+            <div class="featured-right">
+                {% set headline_image = headline.get('imageURL') or headline.get('featured_image') %}
+
+                {% if headline_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + headline_image) }}" alt="Headline article image">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder image">
+                {% endif %}
+            </div>
+
+            </div>
+            {% else %}
+            <p class="no-headline">No articles available in this category.</p>
+            {% endif %}
+
+        </div>
+        </div>
+    </section>
+    {% endif %}
+
+  <!-- LATEST ARTICLES -->
+  <section class="news">
+    <h3 class="latest-title">
+      {% if selected_category %}
+        Latest in {{ selected_category.categoryName }}
+      {% else %}
+        All Latest Articles
+      {% endif %}
+    </h3>
+
+    <div class="latest-grid">
+      {% if articles %}
+        {% for article in articles %}
+        <div class="news-card">
+
+            {% set article_image = article.get('imageURL') or article.get('featured_image') %}
+
+            {% if article_image %}
+                <img src="{{ url_for('static', filename='uploads/' + article_image) }}" alt="Article image">
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder image">
+            {% endif %}
+
+            <span class="category-badge">{{ article.categoryName }}</span>
+            <h4 class="news-title">{{ article.articleTitle }}</h4>
+
+            <!-- <div class="article-meta">
+                <span class="meta-item views">👁 {{ article.views }}</span>
+                <span class="meta-item likes">❤️ {{ article.likes }}</span>
+            </div> -->
+
+            <div class="article-news-meta">
+                <div class="article-news-item">
+                    👁 <span>{{ article.views }}</span>
+                </div>
+                <div class="article-news-item like">
+                    ❤️ <span>{{ article.likes }}</span>
+                </div>
+            </div>
+
+            <p class="news-para">
+                {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
+            </p>
+
+            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                Read more......
+            </a>
+
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="no-headline">No articles found.</p>
+      {% endif %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleCategoryPanel() {
+  const panel = document.getElementById("categoryExpandPanel");
+  const moreBtn = document.querySelector(".category-more-btn");
+
+  if (panel) {
+    panel.classList.toggle("show");
+  }
+
+  if (moreBtn) {
+    moreBtn.classList.toggle("open");
+  }
+}
+
+document.addEventListener("click", function (e) {
+  const panel = document.getElementById("categoryExpandPanel");
+  const moreBtn = document.querySelector(".category-more-btn");
+  const nav = document.querySelector(".category-nav");
+
+  if (!panel || !moreBtn || !nav) return;
+
+  if (!nav.contains(e.target)) {
+    panel.classList.remove("show");
+    moreBtn.classList.remove("open");
+  }
+});
+</script>
+{% endblock %}

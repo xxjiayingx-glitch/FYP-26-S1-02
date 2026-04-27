@@ -610,24 +610,6 @@
 
   revealItems.forEach((item) => revealObserver.observe(item));
 
-  function toggleCategoryDropdown() {
-    const menu = document.getElementById("categoryDropdownMenu");
-    if (menu) {
-      menu.classList.toggle("show");
-    }
-  }
-
-  document.addEventListener("click", function (e) {
-    const dropdown = document.querySelector(".category-dropdown");
-    const menu = document.getElementById("categoryDropdownMenu");
-
-    if (!dropdown || !menu) return;
-
-    if (!dropdown.contains(e.target)) {
-      menu.classList.remove("show");
-    }
-  });
-
   function toggleCategoryPanel() {
     const panel = document.getElementById("categoryExpandPanel");
     const moreBtn = document.querySelector(".category-more-btn");

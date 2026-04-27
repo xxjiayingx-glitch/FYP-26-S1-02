@@ -1,6 +1,187 @@
 {% extends "master.html" %}
-{% block title %}Premium User Home{% endblock %}
+{% block title %}Daily Scoop-Premium User Home{% endblock %}
 {% block content %}
+<style>
+    /* Remove master page gap for this page only */
+    .page-wrapper {
+        padding: 0;
+    }
+
+    /* Free homepage wrapper */
+    .premium-home {
+        width: 100%;
+    }
+
+    /* CATEGORY NAVIGATION BAR */
+    .premium-home .category-nav {
+        width: 100%;
+        background: #ffffff;
+        border-bottom: 1px solid #e8eef6;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+        position: sticky;
+        top: 90px;
+        z-index: 1000;
+    }
+
+    .premium-home .category-nav-inner {
+        width: min(88%, 1320px);
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .premium-home .category-nav-inner::-webkit-scrollbar {
+        display: none;
+    }
+
+    .premium-home .category-nav-link,
+    .premium-home .category-more-btn,
+    .premium-home .category-expand-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: #eef2f7;
+        color: #35527a;
+        font-size: 0.95rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .premium-home .category-nav-link:hover,
+    .premium-home .category-more-btn:hover,
+    .premium-home .category-expand-link:hover {
+        background: #e7f0ff;
+        color: #2563eb;
+    }
+
+    .premium-home .category-more-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .premium-home .dropdown-arrow {
+        margin-top: 2px;
+        font-size: 0.8rem;
+        font-weight: 900;
+    }
+
+    .premium-home .category-expand-panel {
+        display: none;
+        width: 100%;
+        background: #ffffff;
+        border-top: 1px solid #eef2f7;
+        border-bottom: 1px solid #e8eef6;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .premium-home .category-expand-panel.show {
+        display: block;
+    }
+
+    .premium-home .category-expand-grid {
+        width: min(88%, 1320px);
+        margin: 0 auto;
+        padding: 18px 0 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    /* Give spacing back to the rest of the page */
+    .premium-home .search-bar-container,
+    .premium-home .featured-news,
+    .premium-home h2,
+    .premium-home .article-grid {
+        width: min(88%, 1320px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .premium-home .search-bar-container {
+        margin-top: 40px;
+        margin-bottom: 35px;
+    }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 900px) {
+        .premium-home .category-nav-inner {
+            justify-content: flex-start;
+            width: 94%;
+            gap: 10px;
+        }
+
+        .premium-home .category-nav-link,
+        .premium-home .category-more-btn {
+            padding: 8px 15px;
+            font-size: 0.92rem;
+        }
+
+        .premium-home .category-expand-grid {
+            width: 94%;
+            justify-content: flex-start;
+        }
+    }
+
+    .headline-tag {
+        display: inline-flex;
+        width: fit-content;
+        padding: 6px 12px;
+        margin-bottom: 14px;
+        border-radius: 999px;
+        background: #e9f2ff;
+        color: #2563eb;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+</style>
+
+
+<!-- Filter by category -->
+<div class="premium-home">
+    <div class="category-nav">
+        <div class="category-nav-inner">
+        <a href="{{ url_for('user_category_articles') }}" class="category-nav-link category-all-link">
+            All
+        </a>
+        {% for category in visible_categories %}
+            <a href="{{ url_for('user_category_articles', category_id=category.categoryID) }}" class="category-nav-link">
+            {{ category.categoryName if category.categoryName is defined else category }}
+            </a>
+        {% endfor %}
+
+        {% if  more_categories %}
+            <button class="category-more-btn" type="button" onclick="toggleCategoryPanel()">
+            More <span class="dropdown-arrow">▼</span>
+            </button>
+        {% endif %}
+        </div>
+
+        {% if more_categories %}
+        <div class="category-expand-panel" id="categoryExpandPanel">
+        <div class="category-expand-grid">
+            {% for category in more_categories %}
+            <a href="{{ url_for('user_category_articles', category_id=category.categoryID) }}" class="category-nav-link">
+                {{ category.categoryName if category.categoryName is defined else category }}
+            </a>
+            {% endfor %}
+        </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
 
 <!-- SEARCH ARTICLE -->
 <div class="search-bar-container">
@@ -29,6 +210,10 @@
 <div class="featured-news" style="margin-bottom:40px;">
     {% set featured = top_viewed[0] %}
     <div class="featured-left">
+        <span class="headline-tag">Top Story</span>
+        <br>
+
+        <span class="category-badge">{{ featured.categoryName }}</span>
         <h1 class="featured-title">{{ featured.articleTitle }}</h1>
 
         <div class="top-article-meta">
@@ -53,6 +238,53 @@
 </div>
 {% endif %}
 
+<!-- Latest and top article from each category -->
+<section class="category-carousel-section reveal">
+    <h2 style="margin-bottom:15px;">Top Stories by Category</h2>
+    <!-- <h3 class="latest-title">Top Stories by Category</h3> -->
+
+    <div class="category-carousel-wrapper">
+      <button class="carousel-btn category-prev" onclick="moveCategoryCarousel(-1)">&#10094;</button>
+
+      <div class="category-carousel-viewport">
+        <div class="category-carousel-track" id="categoryCarouselTrack">
+          {% for item in category_featured_articles %}
+          <div class="category-carousel-card">
+            {% if item.article.imageURL %}
+              <img src="{{ url_for('static', filename='uploads/' + item.article.imageURL) }}" alt="{{ item.article.articleTitle }}">
+            {% else %}
+              <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
+            {% endif %}
+
+            <div class="category-carousel-content">
+              <span class="category-badge">{{ item.category.categoryName }}</span>
+              <h4>{{ item.article.articleTitle }}</h4>
+
+              <!-- <div class="article-meta">
+                <span class="meta-item views">👁 {{ item.article.views }}</span>
+                <span class="meta-item likes">❤️ {{ item.article.likes }}</span>
+              </div> -->
+
+            <div class="top-article-meta">
+                <span class="top-article-badge">👁 {{ item.article.views }}</span>
+                <span class="top-article-badge like">❤️ {{ item.article.likes }}</span>
+            </div>
+
+              <p>{{ item.article.content[:120] }}{% if item.article.content|length > 120 %}...{% endif %}</p>
+
+              <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=item.article.articleID) }}">
+                Read more......
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button class="carousel-btn category-next" onclick="moveCategoryCarousel(1)">&#10095;</button>
+    </div>
+</section>
+
 <!-- CATEGORY TOP ARTICLES -->
 <h2 style="margin-bottom:15px;">Articles from Your Favorite Category</h2>
 <div class="article-grid" style="margin-bottom:40px;">
@@ -65,6 +297,7 @@
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
             {% endif %}
 
+            <span class="category-badge">{{ article.categoryName }}</span>
             <h4>{{ article.articleTitle }}</h4>
 
             <div class="article-news-meta">
@@ -100,6 +333,7 @@
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
             {% endif %}
 
+            <span class="category-badge">{{ article.categoryName }}</span>
             <h4>{{ article.articleTitle }}</h4>
 
             <div class="article-news-meta">
@@ -135,6 +369,7 @@
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
             {% endif %}
 
+            <span class="category-badge">{{ article.categoryName }}</span>
             <h4>{{ article.articleTitle }}</h4>
 
             <div class="article-news-meta">
@@ -157,5 +392,86 @@
         <p>No latest articles available.</p>
     {% endif %}
 </div>
-
 {% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function toggleCategoryPanel() {
+    const panel = document.getElementById("categoryExpandPanel");
+    const moreBtn = document.querySelector(".category-more-btn");
+
+    if (panel) {
+      panel.classList.toggle("show");
+    }
+
+    if (moreBtn) {
+      moreBtn.classList.toggle("active");
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    const panel = document.getElementById("categoryExpandPanel");
+    const moreBtn = document.querySelector(".category-more-btn");
+    const nav = document.querySelector(".category-nav");
+
+    if (!panel || !moreBtn || !nav) return;
+
+    if (!nav.contains(e.target)) {
+      panel.classList.remove("show");
+      moreBtn.classList.remove("active");
+    }
+  });
+
+  let categoryCarouselPage = 0;
+
+  function moveCategoryCarousel(direction) {
+    const track = document.getElementById("categoryCarouselTrack");
+    const cards = document.querySelectorAll(".category-carousel-card");
+    const viewport = document.querySelector(".category-carousel-viewport");
+
+    if (!track || !viewport || cards.length === 0) return;
+
+    let visibleCards = 3;
+    if (window.innerWidth <= 576) {
+      visibleCards = 1;
+    } else if (window.innerWidth <= 992) {
+      visibleCards = 2;
+    }
+
+    const totalCards = cards.length;
+    const maxPage = Math.max(0, Math.ceil(totalCards / visibleCards) - 1);
+
+    categoryCarouselPage += direction;
+
+    if (categoryCarouselPage < 0) categoryCarouselPage = 0;
+    if (categoryCarouselPage > maxPage) categoryCarouselPage = maxPage;
+
+    const moveAmount = viewport.offsetWidth * categoryCarouselPage;
+    track.style.transform = `translateX(-${moveAmount}px)`;
+  }
+
+  window.addEventListener("resize", () => {
+    categoryCarouselPage = 0;
+    const track = document.getElementById("categoryCarouselTrack");
+    if (track) {
+      track.style.transform = "translateX(0)";
+    }
+  });
+
+  const revealItems = document.querySelectorAll(".reveal");
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("show");
+      } else {
+        entry.target.classList.remove("show");
+      }
+    });
+  }, { threshold: 0.15 });
+
+  revealItems.forEach((item) => revealObserver.observe(item));
+</script>
+{% endblock %}
+
+

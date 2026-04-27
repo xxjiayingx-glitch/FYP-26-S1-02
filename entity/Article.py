@@ -156,6 +156,92 @@ class Article:
         articles = cursor.fetchall()
         conn.close()
         return articles
+    
+    def search_article_in_category(self, keyword, category_id=None, limit=12):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        search_term = f"%{keyword}%"
+
+        if category_id:
+            query = """
+                SELECT 
+                    a.articleID,
+                    a.articleTitle,
+                    a.content,
+                    c.categoryName,
+                    u.username,
+                    IFNULL(ai.imageURL, NULL) AS imageURL,
+                    IFNULL(an.views, 0) AS views,
+                    IFNULL(an.likes, 0) AS likes
+                FROM Article a
+                JOIN UserAccount u ON a.created_by = u.userID
+                JOIN ArticleCategory c ON a.categoryID = c.categoryID
+                LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+                LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+                WHERE a.articleStatus = 'published'
+                AND a.categoryID = %s
+                AND (
+                        a.articleTitle LIKE %s
+                        OR a.content LIKE %s
+                        OR c.categoryName LIKE %s
+                    )
+                GROUP BY 
+                    a.articleID,
+                    a.articleTitle,
+                    a.content,
+                    c.categoryName,
+                    u.username,
+                    ai.imageURL,
+                    an.views,
+                    an.likes
+                ORDER BY a.created_at DESC
+                LIMIT %s
+            """
+            cursor.execute(query, (category_id, search_term, search_term, search_term, limit))
+
+        else:
+            query = """
+                SELECT 
+                    a.articleID,
+                    a.articleTitle,
+                    a.content,
+                    c.categoryName,
+                    u.username,
+                    IFNULL(ai.imageURL, NULL) AS imageURL,
+                    IFNULL(an.views, 0) AS views,
+                    IFNULL(an.likes, 0) AS likes
+                FROM Article a
+                JOIN UserAccount u ON a.created_by = u.userID
+                JOIN ArticleCategory c ON a.categoryID = c.categoryID
+                LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+                LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+                WHERE a.articleStatus = 'published'
+                AND (
+                        a.articleTitle LIKE %s
+                        OR a.content LIKE %s
+                        OR c.categoryName LIKE %s
+                    )
+                GROUP BY 
+                    a.articleID,
+                    a.articleTitle,
+                    a.content,
+                    c.categoryName,
+                    u.username,
+                    ai.imageURL,
+                    an.views,
+                    an.likes
+                ORDER BY a.created_at DESC
+                LIMIT %s
+            """
+            cursor.execute(query, (search_term, search_term, search_term, limit))
+
+        articles = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return articles
 
     def get_my_articles(self, user_id):
         conn = get_db_connection()
@@ -245,7 +331,7 @@ class Article:
         conn.close()
         return article
 
-    def get_latest_articles_by_category(self, limit=6):
+    def get_latest_articles_by_category(self, limit=6, exclude_id=None):
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -269,11 +355,21 @@ class Article:
         ON a.categoryID = latest_per_category.categoryID
         AND a.created_at = latest_per_category.latest_created
         WHERE a.articleStatus = 'published'
+        """
+        params = []
+
+        if exclude_id:
+            sql += " AND a.articleID != %s"
+            params.append(exclude_id)
+
+        sql += """
         ORDER BY a.created_at DESC
         LIMIT %s
         """
 
-        cursor.execute(sql, (limit,))
+        params.extend([limit])
+
+        cursor.execute(sql, params)
         articles = cursor.fetchall()
         conn.close()
         return articles
@@ -652,7 +748,7 @@ class Article:
         sql = """
         SELECT a.articleID, a.articleTitle, a.content, a.created_at,
             a.categoryID, a.articleStatus,
-            c.categoryName, ai.imageURL, u.username,
+            c.categoryName, ai.imageURL As featured_image, u.username,
             IFNULL(an.views, 0) AS views,
             IFNULL(an.likes, 0) AS likes,
             IFNULL(a.credibilityScore, 0) AS credibilityScore

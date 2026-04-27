@@ -14,6 +14,9 @@ class ArticleController:
     
     def search(self, keyword):
         return self.article_entity.search_articles(keyword)
+    
+    def search_article_in_category(self, keyword, category_id=None, limit=12):
+        return self.article_entity.search_article_in_category(keyword, category_id, limit)
 
     def get_categories(self):
         return self.article_entity.get_categories()
@@ -34,8 +37,8 @@ class ArticleController:
     def get_headline(self):
         return self.article_entity.get_headline_article()
 
-    def get_latest_articles_by_category(self, limit=6):
-        return self.article_entity.get_latest_articles_by_category(limit)
+    def get_latest_articles_by_category(self, limit=6, exclude_id=None):
+        return self.article_entity.get_latest_articles_by_category(limit, exclude_id)
 
     def get_home_headline(self):
         return self.article_entity.get_home_headline_article()
@@ -699,13 +702,14 @@ class ArticleController:
         cursor = conn.cursor()
         placeholders = ",".join(["%s"] * len(category_ids))
         query = f"""
-            SELECT a.articleID, a.articleTitle, a.content,
+            SELECT a.articleID, a.articleTitle, a.content, c.categoryName,
                 IFNULL(ai.imageURL, NULL) AS featured_image,
                 IFNULL(an.views, 0) AS views,
                 IFNULL(an.likes, 0) AS likes
             FROM Article a
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
             LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+            LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
             WHERE a.articleStatus = 'published'
             AND a.categoryID IN ({placeholders})
             ORDER BY views DESC
