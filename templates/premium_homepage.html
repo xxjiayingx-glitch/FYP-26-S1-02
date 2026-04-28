@@ -1,15 +1,48 @@
 {% extends "master.html" %}
 {% block title %}Daily Scoop-Premium User Home{% endblock %}
+
+{% block full_width_content %}
+<!-- Filter by category -->
+<div class="premium-home">
+    <div class="category-nav">
+        <div class="category-nav-inner">
+        <a href="{{ url_for('user_category_articles') }}" class="category-nav-link category-all-link">
+            All
+        </a>
+        {% for category in visible_categories %}
+            <a href="{{ url_for('user_category_articles', category_id=category.categoryID) }}" class="category-nav-link">
+            {{ category.categoryName if category.categoryName is defined else category }}
+            </a>
+        {% endfor %}
+
+        {% if  more_categories %}
+            <button class="category-more-btn" type="button" onclick="toggleCategoryPanel()">
+            More <span class="dropdown-arrow">▼</span>
+            </button>
+        {% endif %}
+        </div>
+
+        {% if more_categories %}
+        <div class="category-expand-panel" id="categoryExpandPanel">
+        <div class="category-expand-grid">
+            {% for category in more_categories %}
+            <a href="{{ url_for('user_category_articles', category_id=category.categoryID) }}" class="category-nav-link">
+                {{ category.categoryName if category.categoryName is defined else category }}
+            </a>
+            {% endfor %}
+        </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <style>
-    /* Remove master page gap for this page only */
-    .page-wrapper {
-        padding: 0;
-    }
-
-    /* Free homepage wrapper */
+    /* Premium homepage wrapper */
     .premium-home {
         width: 100%;
+        padding-top: 40px;
     }
 
     /* CATEGORY NAVIGATION BAR */
@@ -18,8 +51,13 @@
         background: #ffffff;
         border-bottom: 1px solid #e8eef6;
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-        position: sticky;
+        /* position: sticky;
+        top: 0px;
+        z-index: 1000; */
+        position: fixed;
         top: 90px;
+        left: 0;
+        right: 0;
         z-index: 1000;
     }
 
@@ -99,18 +137,123 @@
     }
 
     /* Give spacing back to the rest of the page */
-    .premium-home .search-bar-container,
+    /* .premium-home .search-bar-container,
     .premium-home .featured-news,
     .premium-home h2,
     .premium-home .article-grid {
         width: min(88%, 1320px);
         margin-left: auto;
         margin-right: auto;
+    } */
+
+    .search-bar-container,
+    .featured-news,
+    .home-section {
+        width: min(88%, 1320px);
+        margin-left: auto;
+        margin-right: auto;
     }
 
-    .premium-home .search-bar-container {
+    .home-section {
+        margin-top: 45px;
+        margin-bottom: 80px;
+    }
+
+    .home-section-title {
+        margin: 0 0 22px;
+        color: #111827;
+        font-size: 1.5rem;
+        font-weight: 900;
+        line-height: 1.2;
+        text-align: left;
+    }
+
+    .home-section .article-grid {
+        width: 100%;
+        margin: 0;
+        margin-top: 40px;
+    }
+
+    .home-section .category-carousel-wrapper {
+        width: 100%;
+    }
+
+    .home-section .home-section-title::after {
+        content: "";
+        display: block;
+        width: 72px;
+        height: 4px;
+        margin: 12px 0 0;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #60a5fa, #3b82f6);
+        opacity: 0.95;
+    }
+
+    .search-bar-container {
         margin-top: 40px;
         margin-bottom: 35px;
+    }
+
+    .is-hidden {
+        display: none !important;
+    }
+
+    .home-section .news-btn {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 32px;
+    }
+
+    .view-more-articles {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 14px 28px !important;
+        border: none !important;
+        border-radius: 999px !important;
+        background: linear-gradient(135deg, #5aa3cb, #3b82f6) !important;
+        color: #ffffff !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+        box-shadow: 0 10px 24px rgba(79, 148, 184, 0.2) !important;
+        transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease !important;
+    }
+
+    .view-more-articles:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 14px 28px rgba(79, 148, 184, 0.28) !important;
+        background: linear-gradient(135deg, #4f97c2, #2563eb) !important;
+    }
+
+    .view-less-articles {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 28px;
+        border: 1px solid #cfe0f2;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #35608f;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-left: 12px;
+        transition: all 0.22s ease;
+    }
+
+    .view-less-articles:hover {
+        background: #eef5ff;
+        color: #2563eb;
+    }
+
+    .view-more-articles.is-hidden,
+    .view-less-articles.is-hidden,
+    .news-card.is-hidden {
+        display: none !important;
     }
 
     /* MOBILE RESPONSIVE */
@@ -146,43 +289,15 @@
         letter-spacing: 0.04em;
         text-transform: uppercase;
     }
+
+    .headline-badges {
+        display: flex;
+        align-items: center;
+        gap: 12px;           
+        flex-wrap: wrap;     
+        margin-bottom: 20px;
+    }
 </style>
-
-
-<!-- Filter by category -->
-<div class="premium-home">
-    <div class="category-nav">
-        <div class="category-nav-inner">
-        <a href="{{ url_for('user_category_articles') }}" class="category-nav-link category-all-link">
-            All
-        </a>
-        {% for category in visible_categories %}
-            <a href="{{ url_for('user_category_articles', category_id=category.categoryID) }}" class="category-nav-link">
-            {{ category.categoryName if category.categoryName is defined else category }}
-            </a>
-        {% endfor %}
-
-        {% if  more_categories %}
-            <button class="category-more-btn" type="button" onclick="toggleCategoryPanel()">
-            More <span class="dropdown-arrow">▼</span>
-            </button>
-        {% endif %}
-        </div>
-
-        {% if more_categories %}
-        <div class="category-expand-panel" id="categoryExpandPanel">
-        <div class="category-expand-grid">
-            {% for category in more_categories %}
-            <a href="{{ url_for('user_category_articles', category_id=category.categoryID) }}" class="category-nav-link">
-                {{ category.categoryName if category.categoryName is defined else category }}
-            </a>
-            {% endfor %}
-        </div>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
 <!-- SEARCH ARTICLE -->
 <div class="search-bar-container">
     <form method="get" action="{{ url_for('premium_homepage') }}" class="search-form">
@@ -206,31 +321,41 @@
 </div>
 
 <!-- TOP VIEWED ARTICLE AS HEADER -->
-{% if top_viewed %}
+{% if not search_query and headline %}
 <div class="featured-news" style="margin-bottom:40px;">
-    {% set featured = top_viewed[0] %}
     <div class="featured-left">
-        <span class="headline-tag">Top Story</span>
-        <br>
+        <div class="headline-badges">
+            <span class="headline-tag">TOP STORY</span>
+            <span class="category-badge">{{ headline.categoryName }}</span>
+        </div>
 
-        <span class="category-badge">{{ featured.categoryName }}</span>
-        <h1 class="featured-title">{{ featured.articleTitle }}</h1>
+        <h1 class="featured-title">{{ headline.articleTitle }}</h1>
+
+        <div class="ai-factcheck-row">
+            <span class="ai-score-badge">
+                AI Score: {{ "%.0f"|format(headline.aiFactCheckScore|float) }}
+            </span>
+
+            <span class="ai-status-badge status-{{ headline.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                {{ headline.aiFactCheckStatus }}
+            </span>
+        </div>
 
         <div class="top-article-meta">
-            <span class="top-article-badge">👁 {{ featured.views }}</span>
-            <span class="top-article-badge like">❤️ {{ featured.likes }}</span>
+            <span class="top-article-badge">👁 {{ headline.views }}</span>
+            <span class="top-article-badge like">❤️ {{ headline.likes }}</span>
         </div>
 
         <p class="featured-desc">
-            {{ featured.content[:170] }}{% if featured.content|length > 170 %}...{% endif %}
+            {{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif %}
         </p>
-        <a class="read-more" href="{{ url_for('article_detail', article_id=featured.articleID) }}">
+        <a class="read-more" href="{{ url_for('article_detail', article_id=headline.articleID) }}">
             Read more...
         </a>
     </div>
     <div class="featured-right">
-        {% if featured.featured_image %}
-        <img src="{{ url_for('static', filename='uploads/' + featured.featured_image) }}" alt="Top Viewed Article">
+        {% if headline.featured_image %}
+        <img src="{{ url_for('static', filename='uploads/' + headline.featured_image) }}" alt="Top Viewed Article">
         {% else %}
         <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
         {% endif %}
@@ -239,8 +364,9 @@
 {% endif %}
 
 <!-- Latest and top article from each category -->
-<section class="category-carousel-section reveal">
-    <h2 style="margin-bottom:15px;">Top Stories by Category</h2>
+{% if not search_query %}
+<section class="home-section category-carousel-section reveal" style="margin-top:80px;">
+    <h2 class="home-section-title">Top Stories by Category</h2>
     <!-- <h3 class="latest-title">Top Stories by Category</h3> -->
 
     <div class="category-carousel-wrapper">
@@ -250,8 +376,8 @@
         <div class="category-carousel-track" id="categoryCarouselTrack">
           {% for item in category_featured_articles %}
           <div class="category-carousel-card">
-            {% if item.article.imageURL %}
-              <img src="{{ url_for('static', filename='uploads/' + item.article.imageURL) }}" alt="{{ item.article.articleTitle }}">
+            {% if item.article.featured_image %}
+              <img src="{{ url_for('static', filename='uploads/' + item.article.featured_image) }}" alt="{{ item.article.articleTitle }}">
             {% else %}
               <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
             {% endif %}
@@ -264,6 +390,16 @@
                 <span class="meta-item views">👁 {{ item.article.views }}</span>
                 <span class="meta-item likes">❤️ {{ item.article.likes }}</span>
               </div> -->
+
+            <div class="ai-factcheck-row">
+                <span class="ai-score-badge">
+                    AI Score: {{ "%.0f"|format(item.article.aiFactCheckScore|float) }}
+                </span>
+
+                <span class="ai-status-badge status-{{ item.article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                    {{ item.article.aiFactCheckStatus }}
+                </span>
+            </div>
 
             <div class="top-article-meta">
                 <span class="top-article-badge">👁 {{ item.article.views }}</span>
@@ -284,114 +420,202 @@
       <button class="carousel-btn category-next" onclick="moveCategoryCarousel(1)">&#10095;</button>
     </div>
 </section>
+{% endif %}
 
 <!-- CATEGORY TOP ARTICLES -->
-<h2 style="margin-bottom:15px;">Articles from Your Favorite Category</h2>
-<div class="article-grid" style="margin-bottom:40px;">
-    {% if category_top_articles %}
-        {% for article in category_top_articles %}
-        <div class="news-card">
-            {% if article.featured_image %}
-            <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
-            {% else %}
-            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
-            {% endif %}
+{% if not search_query %}
+<section class="home-section" id="premiumFavoriteSection">
+    <h2 class="home-section-title" id="premiumFavoriteTitle">Articles From Your Favorite Category</h2>
+    <div class="article-grid" style="margin-bottom:40px;">
+        {% if category_top_articles %}
+            {% for article in category_top_articles %}
+            <div class="news-card {% if loop.index > 4 %}extra-premium-favorite-card is-hidden{% endif %}">
+                {% if article.featured_image %}
+                <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+                {% else %}
+                <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+                {% endif %}
 
-            <span class="category-badge">{{ article.categoryName }}</span>
-            <h4>{{ article.articleTitle }}</h4>
+                <span class="category-badge">{{ article.categoryName }}</span>
+                <h4>{{ article.articleTitle }}</h4>
 
-            <div class="article-news-meta">
-                <div class="article-news-item">
-                    👁 <span>{{ article.views }}</span>
+                <div class="ai-factcheck-row">
+                    <span class="ai-score-badge">
+                        AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+                    </span>
+
+                    <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                        {{ article.aiFactCheckStatus }}
+                    </span>
                 </div>
-                <div class="article-news-item like">
-                    ❤️ <span>{{ article.likes }}</span>
+
+                <div class="article-news-meta">
+                    <div class="article-news-item">
+                        👁 <span>{{ article.views }}</span>
+                    </div>
+                    <div class="article-news-item like">
+                        ❤️ <span>{{ article.likes }}</span>
+                    </div>
                 </div>
+
+                <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
+
+                <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                    Read more...
+                </a>
             </div>
+            {% endfor %}
+        {% else %}
+            <p>No articles in your favorite category yet.</p>
+        {% endif %}
+    </div>
 
-            <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
+    {% if category_top_articles|length > 4 %}
+    <div class="news-btn">
+        <button class="view-more-articles" type="button" id="viewMorePremiumFavoriteBtn" onclick="showMorePremiumFavoriteArticles()">
+            View More
+        </button>
 
-            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
-                Read more...
-            </a>
-        </div>
-        {% endfor %}
-    {% else %}
-        <p>No articles in your favorite category yet.</p>
+        <button class="view-less-articles is-hidden" type="button" id="viewLessPremiumFavoriteBtn" onclick="showLessPremiumFavoriteArticles()">
+            View Less
+        </button>
+    </div>
     {% endif %}
-</div>
+</section>
+{% endif %}
 
 <!-- USER SAVED ARTICLES -->
-<h2 style="margin-bottom:15px;">Your Saved Articles</h2>
-<div class="article-grid" style="margin-bottom:40px;">
-    {% if saved_articles %}
-        {% for article in saved_articles %}
-        <div class="news-card">
-            {% if article.featured_image %}
-            <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
-            {% else %}
-            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
-            {% endif %}
+{% if not search_query %}
+ <section class="home-section" id="premiumSavedSection">
+    <h2 class="home-section-title" id="premiumSavedTitle">Your Saved Articles</h2>
+    <div class="article-grid" style="margin-bottom:40px;">
+        {% if saved_articles %}
+            {% for article in saved_articles %}
+            <div class="news-card {% if loop.index > 4 %}extra-premium-saved-card is-hidden{% endif %}">
+                {% if article.featured_image %}
+                <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+                {% else %}
+                <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+                {% endif %}
 
-            <span class="category-badge">{{ article.categoryName }}</span>
-            <h4>{{ article.articleTitle }}</h4>
+                <span class="category-badge">{{ article.categoryName }}</span>
+                <h4>{{ article.articleTitle }}</h4>
 
-            <div class="article-news-meta">
-                <div class="article-news-item">
-                    👁 <span>{{ article.views }}</span>
+                <div class="ai-factcheck-row">
+                    <span class="ai-score-badge">
+                        AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+                    </span>
+
+                    <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                        {{ article.aiFactCheckStatus }}
+                    </span>
                 </div>
-                <div class="article-news-item like">
-                    ❤️ <span>{{ article.likes }}</span>
+
+                <div class="article-news-meta">
+                    <div class="article-news-item">
+                        👁 <span>{{ article.views }}</span>
+                    </div>
+                    <div class="article-news-item like">
+                        ❤️ <span>{{ article.likes }}</span>
+                    </div>
                 </div>
+
+                <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
+
+                <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                    Read more...
+                </a>
             </div>
+            {% endfor %}
+        {% else %}
+            <p>You have not saved any articles yet.</p>
+        {% endif %}
+    </div>
 
-            <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
+    {% if saved_articles|length > 4 %}
+    <div class="news-btn">
+        <button class="view-more-articles" type="button" id="viewMorePremiumSavedBtn" onclick="showMorePremiumSavedArticles()">
+            View More
+        </button>
 
-            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
-                Read more...
-            </a>
-        </div>
-        {% endfor %}
-    {% else %}
-        <p>You have not saved any articles yet.</p>
+        <button class="view-less-articles is-hidden" type="button" id="viewLessPremiumSavedBtn" onclick="showLessPremiumSavedArticles()">
+            View Less
+        </button>
+    </div>
     {% endif %}
-</div>
+ </section>
+ {% endif %}
 
 <!-- LATEST ARTICLES -->
-<h2 style="margin-bottom:15px;">Latest Articles</h2>
-<div class="article-grid">
-    {% if latest_articles %}
-        {% for article in latest_articles %}
-        <div class="news-card">
-            {% if article.featured_image %}
-            <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
-            {% else %}
-            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
-            {% endif %}
+<section class="home-section" id="premiumLatestSection">
+    <h2 class="home-section-title" id="premiumLatestTitle">
+        {% if search_query %}
+            Search results for "{{ search_query }}"
+        {% else %}
+            Latest Articles
+        {% endif %}
+    </h2>
 
-            <span class="category-badge">{{ article.categoryName }}</span>
-            <h4>{{ article.articleTitle }}</h4>
+    <div class="article-grid">
+        {% if latest_articles %}
+            {% for article in latest_articles %}
+            <div class="news-card {% if loop.index > 4 %}extra-premium-latest-card is-hidden{% endif %}">
+                {% if article.featured_image %}
+                <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+                {% else %}
+                <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+                {% endif %}
 
-            <div class="article-news-meta">
-                <div class="article-news-item">
-                    👁 <span>{{ article.views }}</span>
+                <span class="category-badge">{{ article.categoryName }}</span>
+                <h4>{{ article.articleTitle }}</h4>
+
+                <div class="ai-factcheck-row">
+                    <span class="ai-score-badge">
+                        AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+                    </span>
+
+                    <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                        {{ article.aiFactCheckStatus }}
+                    </span>
                 </div>
-                <div class="article-news-item like">
-                    ❤️ <span>{{ article.likes }}</span>
+
+                <div class="article-news-meta">
+                    <div class="article-news-item">
+                        👁 <span>{{ article.views }}</span>
+                    </div>
+                    <div class="article-news-item like">
+                        ❤️ <span>{{ article.likes }}</span>
+                    </div>
                 </div>
+
+                <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
+
+                <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                    Read more...
+                </a>
             </div>
+            {% endfor %}
+        {% else %}
+            {% if search_query %}
+                <p>No articles found for "{{ search_query }}".</p>
+            {% else %}
+                <p>No latest articles available.</p>
+            {% endif %}
+        {% endif %}
+    </div>
 
-            <p>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</p>
+    {% if latest_articles|length > 4 %}
+    <div class="news-btn">
+        <button class="view-more-articles" type="button" id="viewMorePremiumLatestBtn" onclick="showMorePremiumLatestArticles()">
+            View More
+        </button>
 
-            <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
-                Read more...
-            </a>
-        </div>
-        {% endfor %}
-    {% else %}
-        <p>No latest articles available.</p>
+        <button class="view-less-articles is-hidden" type="button" id="viewLessPremiumLatestBtn" onclick="showLessPremiumLatestArticles()">
+            View Less
+        </button>
+    </div>
     {% endif %}
-</div>
+</section>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -471,6 +695,82 @@
   }, { threshold: 0.15 });
 
   revealItems.forEach((item) => revealObserver.observe(item));
+
+  function showBatch(extraSelector, moreBtnId, lessBtnId) {
+    const batchSize = 4;
+    const allExtraCards = Array.from(document.querySelectorAll(extraSelector));
+    const viewMoreBtn = document.getElementById(moreBtnId);
+    const viewLessBtn = document.getElementById(lessBtnId);
+
+    const hiddenCards = allExtraCards.filter(card => card.classList.contains("is-hidden"));
+
+    hiddenCards.slice(0, batchSize).forEach(card => {
+        card.classList.remove("is-hidden");
+    });
+
+    const stillHiddenCards = allExtraCards.filter(card => card.classList.contains("is-hidden"));
+
+    if (stillHiddenCards.length === 0 && viewMoreBtn) {
+        viewMoreBtn.classList.add("is-hidden");
+    }
+
+    if (viewLessBtn) {
+        viewLessBtn.classList.remove("is-hidden");
+    }
+}
+
+function hideBatch(extraSelector, moreBtnId, lessBtnId, titleId) {
+    const allExtraCards = document.querySelectorAll(extraSelector);
+    const viewMoreBtn = document.getElementById(moreBtnId);
+    const viewLessBtn = document.getElementById(lessBtnId);
+    const title = document.getElementById(titleId);
+
+    allExtraCards.forEach(card => {
+        card.classList.add("is-hidden");
+    });
+
+    if (viewMoreBtn) {
+        viewMoreBtn.classList.remove("is-hidden");
+    }
+
+    if (viewLessBtn) {
+        viewLessBtn.classList.add("is-hidden");
+    }
+
+    if (title) {
+        const offset = 160;
+        const titlePosition = title.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.scrollTo({
+            top: titlePosition,
+            behavior: "smooth"
+        });
+    }
+}
+
+function showMorePremiumFavoriteArticles() {
+    showBatch(".extra-premium-favorite-card", "viewMorePremiumFavoriteBtn", "viewLessPremiumFavoriteBtn");
+}
+
+function showLessPremiumFavoriteArticles() {
+    hideBatch(".extra-premium-favorite-card", "viewMorePremiumFavoriteBtn", "viewLessPremiumFavoriteBtn", "premiumFavoriteTitle");
+}
+
+function showMorePremiumSavedArticles() {
+    showBatch(".extra-premium-saved-card", "viewMorePremiumSavedBtn", "viewLessPremiumSavedBtn");
+}
+
+function showLessPremiumSavedArticles() {
+    hideBatch(".extra-premium-saved-card", "viewMorePremiumSavedBtn", "viewLessPremiumSavedBtn", "premiumSavedTitle");
+}
+
+function showMorePremiumLatestArticles() {
+    showBatch(".extra-premium-latest-card", "viewMorePremiumLatestBtn", "viewLessPremiumLatestBtn");
+}
+
+function showLessPremiumLatestArticles() {
+    hideBatch(".extra-premium-latest-card", "viewMorePremiumLatestBtn", "viewLessPremiumLatestBtn", "premiumLatestTitle");
+}
 </script>
 {% endblock %}
 

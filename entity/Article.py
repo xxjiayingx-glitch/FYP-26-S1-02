@@ -1,6 +1,7 @@
 # entity/Article.py
 from entity.db_connection import get_db_connection
 from datetime import datetime, timedelta
+import re
 
 class Article:
     #-------#
@@ -137,140 +138,304 @@ class Article:
         conn.close()
         return articles
 
-    def search_articles(self, keyword):
+    # def search_articles(self, keyword):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+
+    #     sql = """
+    #     SELECT a.*, c.categoryName, ai.imageURL, u.username
+    #     FROM Article a
+    #     LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+    #     LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+    #     LEFT JOIN UserAccount u ON a.created_by = u.userID
+    #     WHERE a.articleTitle LIKE %s OR a.content LIKE %s
+    #     AND a.articleStatus = 'published'
+    #     ORDER BY a.created_at DESC
+    #     """
+    #     keyword_param = f"%{keyword}%"
+    #     cursor.execute(sql, (keyword_param, keyword_param))
+    #     articles = cursor.fetchall()
+    #     conn.close()
+    #     return articles
+
+    def search_articles(self, keyword, limit=None):
+        if not keyword or not keyword.strip():
+            return []
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
+        search_terms = [
+            term.lower()
+            for term in keyword.strip().split()
+            if term.strip()
+        ]
+
         sql = """
-        SELECT a.*, c.categoryName, ai.imageURL, u.username
-        FROM Article a
-        LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
-        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-        LEFT JOIN UserAccount u ON a.created_by = u.userID
-        WHERE a.articleTitle LIKE %s OR a.content LIKE %s
-        AND a.articleStatus = 'published'
-        ORDER BY a.created_at DESC
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                a.categoryID,
+                a.created_at,
+                c.categoryName,
+                IFNULL(ai.imageURL, NULL) AS imageURL,
+                IFNULL(an.views, 0) AS views,
+                IFNULL(an.likes, 0) AS likes,
+                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus,
+                u.username
+            FROM Article a
+            LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+            LEFT JOIN UserAccount u ON a.created_by = u.userID
+            WHERE a.articleStatus = 'published'
         """
-        keyword_param = f"%{keyword}%"
-        cursor.execute(sql, (keyword_param, keyword_param))
+
+        params = []
+
+        for term in search_terms:
+            safe_term = re.escape(term)
+
+            # Whole-word search: "rice" will not match "price"
+            word_pattern = f"(^|[^a-z0-9]){safe_term}([^a-z0-9]|$)"
+
+            sql += """
+                AND (
+                    LOWER(a.articleTitle) REGEXP %s
+                    OR LOWER(a.content) REGEXP %s
+                    OR LOWER(c.categoryName) REGEXP %s
+                )
+            """
+
+            params.extend([word_pattern, word_pattern, word_pattern])
+
+        sql += """
+            GROUP BY 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                a.categoryID,
+                a.created_at,
+                c.categoryName,
+                ai.imageURL,
+                an.views,
+                an.likes,
+                u.username
+            ORDER BY a.created_at DESC, IFNULL(an.views, 0) DESC
+        """
+
+        if limit is not None:
+            sql += " LIMIT %s"
+            params.append(limit)
+
+        cursor.execute(sql, tuple(params))
         articles = cursor.fetchall()
+
+        cursor.close()
         conn.close()
+
         return articles
     
+    # def search_article_in_category(self, keyword, category_id=None, limit=12):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+
+    #     search_term = f"%{keyword}%"
+
+    #     if category_id:
+    #         query = """
+    #             SELECT 
+    #                 a.articleID,
+    #                 a.articleTitle,
+    #                 a.content,
+    #                 c.categoryName,
+    #                 u.username,
+    #                 IFNULL(ai.imageURL, NULL) AS imageURL,
+    #                 IFNULL(an.views, 0) AS views,
+    #                 IFNULL(an.likes, 0) AS likes
+    #             FROM Article a
+    #             JOIN UserAccount u ON a.created_by = u.userID
+    #             JOIN ArticleCategory c ON a.categoryID = c.categoryID
+    #             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+    #             LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+    #             WHERE a.articleStatus = 'published'
+    #             AND a.categoryID = %s
+    #             AND (
+    #                     a.articleTitle LIKE %s
+    #                     OR a.content LIKE %s
+    #                     OR c.categoryName LIKE %s
+    #                 )
+    #             GROUP BY 
+    #                 a.articleID,
+    #                 a.articleTitle,
+    #                 a.content,
+    #                 c.categoryName,
+    #                 u.username,
+    #                 ai.imageURL,
+    #                 an.views,
+    #                 an.likes
+    #             ORDER BY a.created_at DESC
+    #             LIMIT %s
+    #         """
+    #         cursor.execute(query, (category_id, search_term, search_term, search_term, limit))
+
+    #     else:
+    #         query = """
+    #             SELECT 
+    #                 a.articleID,
+    #                 a.articleTitle,
+    #                 a.content,
+    #                 c.categoryName,
+    #                 u.username,
+    #                 IFNULL(ai.imageURL, NULL) AS imageURL,
+    #                 IFNULL(an.views, 0) AS views,
+    #                 IFNULL(an.likes, 0) AS likes
+    #             FROM Article a
+    #             JOIN UserAccount u ON a.created_by = u.userID
+    #             JOIN ArticleCategory c ON a.categoryID = c.categoryID
+    #             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+    #             LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+    #             WHERE a.articleStatus = 'published'
+    #             AND (
+    #                     a.articleTitle LIKE %s
+    #                     OR a.content LIKE %s
+    #                     OR c.categoryName LIKE %s
+    #                 )
+    #             GROUP BY 
+    #                 a.articleID,
+    #                 a.articleTitle,
+    #                 a.content,
+    #                 c.categoryName,
+    #                 u.username,
+    #                 ai.imageURL,
+    #                 an.views,
+    #                 an.likes
+    #             ORDER BY a.created_at DESC
+    #             LIMIT %s
+    #         """
+    #         cursor.execute(query, (search_term, search_term, search_term, limit))
+
+    #     articles = cursor.fetchall()
+
+    #     cursor.close()
+    #     conn.close()
+
+    #     return articles
+
+    # def get_my_articles(self, user_id):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+
+    #     sql = """
+    #     SELECT 
+    #         a.articleID,
+    #         a.articleTitle,
+    #         a.content,
+    #         a.articleStatus,
+    #         a.categoryID,
+    #         a.created_at,
+    #         a.first_edited_at,
+    #         a.last_edited_at,
+    #         c.categoryName,
+    #         ai.imageURL
+    #     FROM Article a
+    #     LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+    #     LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+    #     WHERE a.created_by = %s
+    #     ORDER BY a.created_at DESC
+    #     """
+
+    #     cursor.execute(sql, (user_id,))
+    #     articles = cursor.fetchall()
+        
+    #     cursor.close()
+    #     conn.close()
+    #     return articles
+
     def search_article_in_category(self, keyword, category_id=None, limit=12):
+        if not keyword or not keyword.strip():
+            return []
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        search_term = f"%{keyword}%"
+        # Split search into separate words
+        search_terms = [
+            term.lower()
+            for term in keyword.strip().split()
+            if term.strip()
+        ]
 
-        if category_id:
-            query = """
-                SELECT 
-                    a.articleID,
-                    a.articleTitle,
-                    a.content,
-                    c.categoryName,
-                    u.username,
-                    IFNULL(ai.imageURL, NULL) AS imageURL,
-                    IFNULL(an.views, 0) AS views,
-                    IFNULL(an.likes, 0) AS likes
-                FROM Article a
-                JOIN UserAccount u ON a.created_by = u.userID
-                JOIN ArticleCategory c ON a.categoryID = c.categoryID
-                LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-                LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
-                WHERE a.articleStatus = 'published'
-                AND a.categoryID = %s
-                AND (
-                        a.articleTitle LIKE %s
-                        OR a.content LIKE %s
-                        OR c.categoryName LIKE %s
-                    )
-                GROUP BY 
-                    a.articleID,
-                    a.articleTitle,
-                    a.content,
-                    c.categoryName,
-                    u.username,
-                    ai.imageURL,
-                    an.views,
-                    an.likes
-                ORDER BY a.created_at DESC
-                LIMIT %s
-            """
-            cursor.execute(query, (category_id, search_term, search_term, search_term, limit))
-
-        else:
-            query = """
-                SELECT 
-                    a.articleID,
-                    a.articleTitle,
-                    a.content,
-                    c.categoryName,
-                    u.username,
-                    IFNULL(ai.imageURL, NULL) AS imageURL,
-                    IFNULL(an.views, 0) AS views,
-                    IFNULL(an.likes, 0) AS likes
-                FROM Article a
-                JOIN UserAccount u ON a.created_by = u.userID
-                JOIN ArticleCategory c ON a.categoryID = c.categoryID
-                LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-                LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
-                WHERE a.articleStatus = 'published'
-                AND (
-                        a.articleTitle LIKE %s
-                        OR a.content LIKE %s
-                        OR c.categoryName LIKE %s
-                    )
-                GROUP BY 
-                    a.articleID,
-                    a.articleTitle,
-                    a.content,
-                    c.categoryName,
-                    u.username,
-                    ai.imageURL,
-                    an.views,
-                    an.likes
-                ORDER BY a.created_at DESC
-                LIMIT %s
-            """
-            cursor.execute(query, (search_term, search_term, search_term, limit))
-
-        articles = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
-
-        return articles
-
-    def get_my_articles(self, user_id):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        sql = """
-        SELECT 
-            a.articleID,
-            a.articleTitle,
-            a.content,
-            a.articleStatus,
-            a.categoryID,
-            a.created_at,
-            a.first_edited_at,
-            a.last_edited_at,
-            c.categoryName,
-            ai.imageURL
-        FROM Article a
-        LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
-        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-        WHERE a.created_by = %s
-        ORDER BY a.created_at DESC
+        query = """
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                a.categoryID,
+                c.categoryName,
+                u.username,
+                IFNULL(ai.imageURL, NULL) AS imageURL,
+                IFNULL(an.views, 0) AS views,
+                IFNULL(an.likes, 0) AS likes,
+                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
+            FROM Article a
+            JOIN UserAccount u ON a.created_by = u.userID
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+            WHERE a.articleStatus = 'published'
         """
 
-        cursor.execute(sql, (user_id,))
+        params = []
+
+        # If user is inside a category, search only that category
+        if category_id:
+            query += " AND a.categoryID = %s"
+            params.append(category_id)
+
+        # Whole-word search
+        for term in search_terms:
+            safe_term = re.escape(term)
+
+            # This prevents "rice" from matching "price"
+            word_pattern = f"(^|[^a-z0-9]){safe_term}([^a-z0-9]|$)"
+
+            query += """
+                AND (
+                    LOWER(a.articleTitle) REGEXP %s
+                    OR LOWER(a.content) REGEXP %s
+                )
+            """
+
+            params.extend([word_pattern, word_pattern])
+
+        query += """
+            GROUP BY 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                a.categoryID,
+                c.categoryName,
+                u.username,
+                ai.imageURL,
+                an.views,
+                an.likes
+            ORDER BY a.created_at DESC, IFNULL(an.views, 0) DESC
+        """
+
+        if limit is not None:
+            query += " LIMIT %s"
+            params.append(limit)
+
+        cursor.execute(query, tuple(params))
         articles = cursor.fetchall()
-        
+
         cursor.close()
         conn.close()
+
         return articles
 
     def get_article(self, articleID):
@@ -291,7 +456,9 @@ class Article:
                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
                 c.categoryName,
                 a.created_by,
-                ai.imageURL AS featured_image
+                ai.imageURL AS featured_image,
+                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
             FROM Article a
             JOIN UserAccount u ON a.created_by = u.userID
             JOIN ArticleCategory c ON a.categoryID = c.categoryID
@@ -314,7 +481,9 @@ class Article:
 
         sql = """
         SELECT a.*, c.categoryName, ai.imageURL, u.username,
-            IFNULL(an.views, 0) AS views
+            IFNULL(an.views, 0) AS views,
+            IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+            COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
         FROM Article a
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -331,7 +500,7 @@ class Article:
         conn.close()
         return article
 
-    def get_latest_articles_by_category(self, limit=6, exclude_id=None):
+    def get_latest_articles_by_category(self, limit=12, exclude_id=None):
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -340,7 +509,9 @@ class Article:
             a.articleStatus, a.categoryID,
             c.categoryName, ai.imageURL, u.username,
             COALESCE(aa.views, 0) AS views,
-            COALESCE(aa.likes, 0) AS likes
+            COALESCE(aa.likes, 0) AS likes,
+            IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+            COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
         FROM Article a
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -385,7 +556,7 @@ class Article:
         return categories
     
     @staticmethod
-    def home_article_by_category(category_id, limit=6, exclude_id=None):
+    def home_article_by_category(category_id, exclude_id=None):
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -400,7 +571,9 @@ class Article:
                 ac.categoryName,
                 ai.imageURL,
                 IFNULL(aa.views, 0) AS views,
-                IFNULL(aa.likes, 0) AS likes
+                IFNULL(aa.likes, 0) AS likes,
+                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
             FROM Article a
             LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -417,13 +590,14 @@ class Article:
 
         sql += """
             ORDER BY a.created_at DESC
-            LIMIT %s
         """
-        params.append(limit)
 
         cursor.execute(sql, params)
         result = cursor.fetchall()
+
+        cursor.close()
         conn.close()
+
         return result
 
     def insert_article(self, user_id, title, category_id, content, status,
@@ -635,7 +809,9 @@ class Article:
                 a.first_edited_at,
                 a.last_edited_at,
                 c.categoryName,
-                ai.imageURL
+                ai.imageURL,
+                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
             FROM Article a
             LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -695,10 +871,12 @@ class Article:
 
         try:
             base_select = """
-                SELECT a.*, c.categoryName, ai.imageURL, u.username,
+                SELECT a.*, c.categoryName, ai.imageURL AS featured_image, u.username,
                     IFNULL(an.views, 0) AS views,
                     IFNULL(an.likes, 0) AS likes,
-                    IFNULL(a.credibilityScore, 0) AS credibilityScore
+                    IFNULL(a.credibilityScore, 0) AS credibilityScore,
+                    IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                    COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
                 FROM Article a
                 LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
                 LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -710,7 +888,7 @@ class Article:
             # 1) Most viewed in the last 1 day
             sql_1_day = base_select + """
                 AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)
-                ORDER BY IFNULL(an.views, 0) DESC, a.created_at DESC
+                ORDER BY a.created_at DESC, IFNULL(an.views, 0) DESC
                 LIMIT 1
             """
             cursor.execute(sql_1_day)
@@ -720,7 +898,7 @@ class Article:
             if not article:
                 sql_3_day = base_select + """
                     AND a.created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
-                    ORDER BY IFNULL(an.views, 0) DESC, a.created_at DESC
+                    ORDER BY a.created_at DESC, IFNULL(an.views, 0) DESC 
                     LIMIT 1
                 """
                 cursor.execute(sql_3_day)
@@ -751,7 +929,9 @@ class Article:
             c.categoryName, ai.imageURL As featured_image, u.username,
             IFNULL(an.views, 0) AS views,
             IFNULL(an.likes, 0) AS likes,
-            IFNULL(a.credibilityScore, 0) AS credibilityScore
+            IFNULL(a.credibilityScore, 0) AS credibilityScore,
+            IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+            COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
         FROM Article a
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -767,7 +947,7 @@ class Article:
             params.append(exclude_id)
 
         sql += """
-        ORDER BY IFNULL(an.views, 0) DESC, a.created_at DESC
+        ORDER BY a.created_at DESC, IFNULL(an.views, 0) DESC
         LIMIT 1
         """
 
@@ -780,10 +960,12 @@ class Article:
             fallback_sql = """
             SELECT a.articleID, a.articleTitle, a.content, a.created_at,
                 a.categoryID, a.articleStatus,
-                c.categoryName, ai.imageURL, u.username,
+                c.categoryName, ai.imageURL AS featured_image, u.username,
                 IFNULL(an.views, 0) AS views,
                 IFNULL(an.likes, 0) AS likes,
-                IFNULL(a.credibilityScore, 0) AS credibilityScore
+                IFNULL(a.credibilityScore, 0) AS credibilityScore,
+                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
             FROM Article a
             LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -808,22 +990,29 @@ class Article:
         conn.close()
         return article
 
-    def get_home_latest_articles(self, limit=4, offset=0, exclude_id=None):
+    def get_home_latest_articles(self, exclude_id=None):
         conn = get_db_connection()
         cursor = conn.cursor()
 
         sql = """
-        SELECT a.articleID, a.articleTitle, a.content, ai.imageURL, 
-            c.categoryName, u.username,
-            IFNULL(an.views, 0) AS views,
-            IFNULL(an.likes, 0) AS likes,
-            IFNULL(a.credibilityScore, 0) AS credibilityScore
-        FROM Article a
-        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-        LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
-        LEFT JOIN UserAccount u ON a.created_by = u.userID
-        LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
-        WHERE a.articleStatus = 'published'
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                a.content,
+                ai.imageURL,
+                c.categoryName,
+                u.username,
+                IFNULL(an.views, 0) AS views,
+                IFNULL(an.likes, 0) AS likes,
+                IFNULL(a.credibilityScore, 0) AS credibilityScore,
+                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
+            FROM Article a
+            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN UserAccount u ON a.created_by = u.userID
+            LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
+            WHERE a.articleStatus = 'published'
         """
 
         params = []
@@ -833,15 +1022,15 @@ class Article:
             params.append(exclude_id)
 
         sql += """
-        ORDER BY a.created_at DESC
-        LIMIT %s OFFSET %s
+            ORDER BY a.created_at DESC
         """
-
-        params.extend([limit, offset])
 
         cursor.execute(sql, params)
         articles = cursor.fetchall()
+
+        cursor.close()
         conn.close()
+
         return articles
 
     def get_latest_testimonials(self, limit=2):

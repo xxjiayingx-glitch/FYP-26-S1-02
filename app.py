@@ -183,7 +183,7 @@ def info(page):
 @app.route("/free_homepage", methods=["GET", "POST"])
 def free_homepage():
     user_id = session.get("userID")
-    search_query = request.args.get("q")
+    search_query = request.args.get("q", "").strip()
 
     # get all categories
     categories = article_controller.get_categories()
@@ -192,16 +192,23 @@ def free_homepage():
     more_categories = categories[visible_count:]
 
     # Top viewed (HEADER)
-    top_viewed = article_controller.get_top_viewed_articles(limit=5)
+    headline = article_controller.get_home_headline()
 
+   
     # First top viewed article used as headline/exclude reference
-    top_headline = top_viewed[0] if top_viewed else None
-    exclude_id = top_headline["articleID"] if top_headline else None
+    # top_headline = top_viewed[0] if top_viewed else None
+    
 
     # Latest and Top viewed by category (HEADER)
     category_featured_articles = []
 
+    exclude_id = headline["articleID"] if headline else None
+    exclude_category_id = headline["categoryID"] if headline else None
+
     for category in categories:
+        if exclude_category_id and category["categoryID"] == exclude_category_id:
+            continue
+
         article = article_controller.get_featured_article_by_category(
             category["categoryID"],
             exclude_id=exclude_id
@@ -219,7 +226,7 @@ def free_homepage():
 
     if category_ids:
         category_top_articles = article_controller.get_articles_by_multiple_categories(
-            category_ids, limit=5
+            category_ids, limit=12,  exclude_id=exclude_id
         )
     else:
         category_top_articles = []
@@ -230,7 +237,7 @@ def free_homepage():
     if search_query:
         latest_articles = article_controller.search(search_query) 
     else:
-        latest_articles = article_controller.get_latest_articles_by_category(limit=6)
+        latest_articles = article_controller.get_home_latest_articles(exclude_id=exclude_id)
 
     for article in latest_articles:
             article["featured_image"] = article.get("imageURL")
@@ -241,12 +248,11 @@ def free_homepage():
         visible_categories=visible_categories,
         more_categories=more_categories,
         search_query=search_query,
-        top_viewed=top_viewed,
+        headline=headline,
         category_featured_articles=category_featured_articles,
         category_top_articles=category_top_articles,
         latest_articles=latest_articles
     )
-
 
 @app.route("/premium_homepage", methods=["GET", "POST"])
 def premium_homepage():
@@ -260,16 +266,23 @@ def premium_homepage():
     more_categories = categories[visible_count:]
     
     # Top viewed articles
-    top_viewed = article_controller.get_top_viewed_articles(limit=5)
+    headline = article_controller.get_home_headline()
 
     # First top viewed article used as headline/exclude reference
-    top_headline = top_viewed[0] if top_viewed else None
-    exclude_id = top_headline["articleID"] if top_headline else None
+    # top_headline = top_viewed[0] if top_viewed else None
+    # exclude_id = top_headline["articleID"] if top_headline else None
 
-    # Latest and Top viewed by category (HEADER)
+    # Latest and top viewed by category
     category_featured_articles = []
 
+    exclude_id = headline["articleID"] if headline else None
+    exclude_category_id = headline["categoryID"] if headline else None
+
+
     for category in categories:
+        if exclude_category_id and category["categoryID"] == exclude_category_id:
+            continue
+
         article = article_controller.get_featured_article_by_category(
             category["categoryID"],
             exclude_id=exclude_id
@@ -282,7 +295,7 @@ def premium_homepage():
             })
     
     # User saved articles 
-    saved_articles = article_controller.get_user_saved_articles(user_id, limit=5)
+    saved_articles = article_controller.get_user_saved_articles(user_id)
     user_top_category_id = saved_articles[0]["categoryID"] if saved_articles else None
 
     # User interest category top articles
@@ -291,7 +304,7 @@ def premium_homepage():
 
     if category_ids:
         category_top_articles = article_controller.get_articles_by_multiple_categories(
-            category_ids, limit=5
+            category_ids, limit=12, exclude_id=exclude_id
         )
     else:
         category_top_articles = []
@@ -300,7 +313,7 @@ def premium_homepage():
     if search_query:
         latest_articles = article_controller.search(search_query) 
     else:
-        latest_articles = article_controller.get_latest_articles_by_category(limit=6)
+        latest_articles = article_controller.get_home_latest_articles(exclude_id=exclude_id)
 
     # Map imageURL → featured_image
     for article in latest_articles:
@@ -312,137 +325,13 @@ def premium_homepage():
         visible_categories=visible_categories,
         more_categories=more_categories,
         search_query=search_query,
-        top_viewed=top_viewed,
+        headline=headline,
         category_featured_articles=category_featured_articles,
         category_top_articles=category_top_articles,
         saved_articles=saved_articles,
         latest_articles=latest_articles
     )
 
-# @app.route("/all-articles-by-category")
-# def all_articles():
-#     categories = article_controller.get_categories()
-#     visible_count = 8
-#     visible_categories = categories[:visible_count]
-#     more_categories = categories[visible_count:]
-
-#     # Top viewed (HEADER)
-#     top_viewed = article_controller.get_top_viewed_articles(limit=5)
-#     # headline = article_controller.get_home_headline()
-#     # articles = article_controller.get_home_latest_articles(
-#     #     limit=12,
-#     #     exclude_id=headline["articleID"] if headline else None
-#     # )
-
-#     latest_articles = article_controller.get_latest_articles_by_category(limit=6, exclude_id=top_viewed["articleID"] if top_viewed else None)
-
-#     return render_template(
-#         "free_premium_category_articles.html",
-#         categories=categories,
-#         visible_categories=visible_categories,
-#         more_categories=more_categories,
-#         selected_category=None,
-#         top_viewed=top_viewed,
-#         latest_articles=latest_articles,
-#         is_all_page=True
-#     )
-
-# @home_bp.route("/category/<int:category_id>")
-# def category_articles(category_id):
-#     categories = article_controller.get_categories()
-#     visible_count = 8
-#     visible_categories = categories[:visible_count]
-#     more_categories = categories[visible_count:]
-
-#     selected_category = None
-#     for category in categories:
-#         if category["categoryID"] == category_id:
-#             selected_category = category
-#             break
-
-#     if not selected_category:
-#         return "Category not found", 404
-
-#     headline = article_controller.get_featured_article_by_category(category_id)
-
-#     if headline:
-#         articles = article_controller.home_article_by_category(
-#             category_id=category_id,
-#             limit=6,
-#             exclude_id=headline["articleID"]
-#         )
-#     else:
-#         articles = article_controller.home_article_by_category(
-#             category_id=category_id,
-#             limit=6
-#         )
-
-#     return render_template(
-#         "free-premium-category_articles.html",
-#         categories=categories,
-#         visible_categories=visible_categories,
-#         more_categories=more_categories,
-#         selected_category=selected_category,
-#         headline=headline,
-#         articles=articles,
-#         is_all_page=False
-#     )
-
-# @app.route("/user/articles", defaults={"category_id": None})
-# @app.route("/user/articles/category/<int:category_id>")
-# def user_category_articles(category_id=None):
-#     if "userID" not in session:
-#         return redirect(url_for("login.login"))
-
-#     categories = article_controller.get_categories()
-
-#     visible_count = 8
-#     visible_categories = categories[:visible_count]
-#     more_categories = categories[visible_count:]
-
-#     selected_category = None
-#     headline = None
-#     articles = []
-#     is_all_page = category_id is None
-
-#     if category_id is not None:
-#         for category in categories:
-#             if category["categoryID"] == category_id:
-#                 selected_category = category
-#                 break
-
-#         if not selected_category:
-#             return "Category not found", 404
-
-#         headline = article_controller.get_featured_article_by_category(category_id)
-
-#         articles = article_controller.home_article_by_category(
-#             category_id=category_id,
-#             limit=6,
-#             exclude_id=headline["articleID"] if headline else None
-#         )
-
-#     else:
-#         top_viewed = article_controller.get_top_viewed_articles(limit=1)
-
-#         if top_viewed:
-#             headline = top_viewed[0]
-
-#         articles = article_controller.get_latest_articles_by_category(
-#             limit=6,
-#             exclude_id=headline["articleID"] if headline else None
-#         )
-
-#     return render_template(
-#         "free_premium_category_articles.html",
-#         categories=categories,
-#         visible_categories=visible_categories,
-#         more_categories=more_categories,
-#         selected_category=selected_category,
-#         headline=headline,
-#         articles=articles,
-#         is_all_page=is_all_page
-#     )
 
 @app.route("/user/articles", defaults={"category_id": None})
 @app.route("/user/articles/category/<int:category_id>")
@@ -484,7 +373,6 @@ def user_category_articles(category_id=None):
 
             articles = article_controller.home_article_by_category(
                 category_id=category_id,
-                limit=6,
                 exclude_id=headline["articleID"] if headline else None
             )
 
@@ -497,13 +385,8 @@ def user_category_articles(category_id=None):
             )
             headline = None
         else:
-            top_viewed = article_controller.get_top_viewed_articles(limit=1)
-            headline = top_viewed[0] if top_viewed else None
-
-            articles = article_controller.get_latest_articles_by_category(
-                limit=6,
-                exclude_id=headline["articleID"] if headline else None
-            )
+            headline = article_controller.get_home_headline()
+            articles = article_controller.get_home_latest_articles(exclude_id=headline["articleID"] if headline else None)
 
     return render_template(
         "free_premium_category_articles.html",

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Login - Daily Scoop</title>
+    <title>Daily Scoop - Login  </title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         /* Body background */
@@ -240,6 +240,34 @@
             background-color: #f0f7fc;
         }
 
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            padding-right: 76px;
+        }
+
+        .toggle-password-btn {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            border: none;
+            background: transparent;
+            color: #2a5bd7;
+
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .toggle-password-btn:hover {
+            color: #1e3d7a;
+            text-decoration: underline;
+        }
         /* ── Forgot Password ── */
         .forgot {
             font-size: 13px;
@@ -409,8 +437,23 @@
                 <label>Email address</label>
                 <input type="email" name="email" required placeholder="you@example.com">
 
+                <!-- <label>Password</label>
+                <input type="password" name="password" required placeholder="Enter your password"> -->
+
                 <label>Password</label>
-                <input type="password" name="password" required placeholder="Enter your password">
+                <div class="password-wrapper">
+                    <input 
+                        type="password" 
+                        name="password" 
+                        id="passwordInput"
+                        required 
+                        placeholder="Enter your password"
+                    >
+
+                    <button type="button" class="toggle-password-btn" onclick="togglePassword()">
+                        Show
+                    </button>
+                </div>
 
                 <div class="forgot">
                     <a href="{{ url_for('login.forgot_password') }}">Forgot password?</a>
@@ -435,6 +478,20 @@
         </div>
     </div>
 
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById("passwordInput");
+            const toggleBtn = document.querySelector(".toggle-password-btn");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleBtn.textContent = "Hide";
+            } else {
+                passwordInput.type = "password";
+                toggleBtn.textContent = "Show";
+            }
+        }
+    </script>
 </body>
 
 </html>

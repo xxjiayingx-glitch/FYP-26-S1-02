@@ -57,8 +57,21 @@
         {% if headline %}
         <div class="featured-news">
           <div class="featured-left">
-            <span class="headline-tag">Top Story</span>
+            <div class="headline-badges">
+                <span class="headline-tag">TOP STORY</span>
+                <span class="category-badge">{{ headline.categoryName }}</span>
+            </div>
+  
             <h1 class="featured-title">{{ headline.articleTitle }}</h1>
+            <div class="ai-factcheck-row">
+                <span class="ai-score-badge">
+                    AI Score: {{ "%.0f"|format(headline.aiFactCheckScore|float) }}
+                </span>
+
+                <span class="ai-status-badge status-{{ headline.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                    {{ headline.aiFactCheckStatus }}
+                </span>
+            </div>
 
             <div class="article-meta">
               <span class="meta-item views">👁 {{ headline.views }}</span>
@@ -73,8 +86,8 @@
           </div>
 
           <div class="featured-right">
-            {% if headline.imageURL %}
-            <img src="{{ url_for('static', filename='uploads/' + headline.imageURL) }}" />
+            {% if headline.featured_image %}
+            <img src="{{ url_for('static', filename='uploads/' + headline.featured_image) }}" />
             {% else %}
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
             {% endif %}
@@ -97,8 +110,8 @@
         <div class="category-carousel-track" id="categoryCarouselTrack">
           {% for item in category_featured_articles %}
           <div class="category-carousel-card">
-            {% if item.article.imageURL %}
-              <img src="{{ url_for('static', filename='uploads/' + item.article.imageURL) }}" alt="{{ item.article.articleTitle }}">
+            {% if item.article.featured_image %}
+              <img src="{{ url_for('static', filename='uploads/' + item.article.featured_image) }}" alt="{{ item.article.articleTitle }}">
             {% else %}
               <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
             {% endif %}
@@ -106,6 +119,16 @@
             <div class="category-carousel-content">
               <span class="category-badge">{{ item.category.categoryName }}</span>
               <h4>{{ item.article.articleTitle }}</h4>
+
+              <div class="ai-factcheck-row">
+                  <span class="ai-score-badge">
+                      AI Score: {{ "%.0f"|format(item.article.aiFactCheckScore|float) }}
+                  </span>
+
+                  <span class="ai-status-badge status-{{ item.article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                      {{ item.article.aiFactCheckStatus }}
+                  </span>
+              </div>
 
               <div class="article-meta">
                 <span class="meta-item views">👁 {{ item.article.views }}</span>
@@ -128,18 +151,29 @@
   </section>
 
   <section id="articles" class="news reveal">
-    <h3 class="latest-title">Latest News</h3>
+    <h3 class="latest-title" id="latestNewsTitle">Latest News</h3>
     <div class="latest-grid" id="latest-articles">
       {% if articles %}
         {% for article in articles %}
-        <div class="news-card">
+        <div class="news-card latest-article-card {% if loop.index > 3 %}extra-latest-card is-hidden{% endif %}">
           {% if article.imageURL %}
           <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="{{ article['articleTitle'] }}" />
           {% else %}
           <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" />
           {% endif %}
-
+ 
+          <span class="category-badge">{{ article['categoryName'] }}</span>
           <h4 class="news-title">{{ article['articleTitle'] }}</h4>
+
+          <div class="ai-factcheck-row">
+              <span class="ai-score-badge">
+                  AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+              </span>
+
+              <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                  {{ article.aiFactCheckStatus }}
+              </span>
+          </div>
 
           <div class="article-meta">
             <span class="meta-item views">👁 {{ article.views }}</span>
@@ -157,14 +191,25 @@
       {% endif %}
     </div>
 
-    <div class="news-btn">
+    <!-- <div class="news-btn">
       <button class="view-more-articles" data-section="articles" onclick="loadMoreArticles(this)">
         View More
       </button>
       <button class="view-less-articles" id="viewLessArticlesBtn" onclick="viewLessArticles()" style="display: none;">
         View Less
       </button>
+    </div> -->
+    {% if articles|length > 3 %}
+    <div class="news-btn">
+        <button class="view-more-articles" type="button" id="viewMoreLatestBtn" onclick="showMoreLatestArticles()">
+            View More
+        </button>
+
+        <button class="view-less-articles is-hidden" type="button" id="viewLessLatestBtn" onclick="showLessLatestArticles()">
+            View Less
+        </button>
     </div>
+    {% endif %}
   </section>
 
   <section class="testimonials reveal" id="testimonials">
@@ -332,76 +377,58 @@
 
 {% block extra_scripts %}
 <script>
-  let articleOffset = 4;
-  const articleLimit = 6;
-  let loadedArticleCount = 0;
+  const latestBatchSize = 3;
 
-  function loadMoreArticles(button) {
-    fetch(`/load_more_articles?offset=${articleOffset}&limit=${articleLimit}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const container = document.getElementById("latest-articles");
-        const viewLessBtn = document.getElementById("viewLessArticlesBtn");
+function showMoreLatestArticles() {
+    const allExtraCards = Array.from(document.querySelectorAll(".extra-latest-card"));
+    const viewMoreBtn = document.getElementById("viewMoreLatestBtn");
+    const viewLessBtn = document.getElementById("viewLessLatestBtn");
 
-        data.forEach((article) => {
-          const card = document.createElement("div");
-          card.classList.add("news-card", "extra-article-card");
+    const hiddenCards = allExtraCards.filter(card => card.classList.contains("is-hidden"));
 
-          const articleDetailBase = "{{ url_for('home.unreg_article_detail', article_id=0) }}".replace('/0', '/');
+    hiddenCards.slice(0, latestBatchSize).forEach(card => {
+        card.classList.remove("is-hidden");
+    });
 
-          card.innerHTML = `
-            <img src="/static/uploads/${article.imageURL}" alt="${article.articleTitle}">
-            <h5 class="news-title">${article.articleTitle}</h5>
-            <div class="article-meta">
-              <span class="meta-item views">👁 ${article.views ?? 0}</span>
-              <span class="meta-item likes">❤️ ${article.likes ?? 0}</span>
-            </div>
-            <p class="news-para">${article.content}...</p>
-            <a class="read-more" href="${articleDetailBase}${article.articleID}">Read more......</a>
-          `;
+    const stillHiddenCards = allExtraCards.filter(card => card.classList.contains("is-hidden"));
 
-          container.appendChild(card);
-        });
-
-        loadedArticleCount += data.length;
-        articleOffset += data.length;
-
-        if (loadedArticleCount > 0) {
-          viewLessBtn.style.display = "inline-flex";
-        }
-
-        if (data.length < articleLimit) {
-          button.style.display = "none";
-        }
-      });
-  }
-
-  function viewLessArticles() {
-    const extraCards = document.querySelectorAll(".extra-article-card");
-    const viewMoreBtn = document.querySelector(".view-more-articles");
-    const viewLessBtn = document.getElementById("viewLessArticlesBtn");
-    const latestSection = document.getElementById("articles");
-
-    extraCards.forEach((card) => card.remove());
-
-    articleOffset = 4;
-    loadedArticleCount = 0;
-
-    if (viewMoreBtn) {
-      viewMoreBtn.style.display = "inline-flex";
+    if (stillHiddenCards.length === 0 && viewMoreBtn) {
+        viewMoreBtn.classList.add("is-hidden");
     }
 
     if (viewLessBtn) {
-      viewLessBtn.style.display = "none";
+        viewLessBtn.classList.remove("is-hidden");
+    }
+}
+
+function showLessLatestArticles() {
+    const allExtraCards = document.querySelectorAll(".extra-latest-card");
+    const viewMoreBtn = document.getElementById("viewMoreLatestBtn");
+    const viewLessBtn = document.getElementById("viewLessLatestBtn");
+    const title = document.getElementById("latestNewsTitle");
+
+    allExtraCards.forEach(card => {
+        card.classList.add("is-hidden");
+    });
+
+    if (viewMoreBtn) {
+        viewMoreBtn.classList.remove("is-hidden");
     }
 
-    if (latestSection) {
-      latestSection.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+    if (viewLessBtn) {
+        viewLessBtn.classList.add("is-hidden");
     }
-  }
+
+    if (title) {
+        const offset = 160;
+        const titlePosition = title.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.scrollTo({
+            top: titlePosition,
+            behavior: "smooth"
+        });
+    }
+}
 
   let testimonialPage = 0;
   let testimonialCardsPerPage = getTestimonialCardsPerPage();

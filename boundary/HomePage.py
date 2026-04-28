@@ -14,18 +14,42 @@ subscriptionCTL = SubscriptionCTL()
 
 @home_bp.route("/")
 def unreg_home():
-    # For articles, to display latest and 3 article on guest homepage on load
+    # Headline
     headline = articleCTL.get_home_headline()
 
-    if headline:
-        latest_articles = articleCTL.get_home_latest_articles(
-            limit=3, offset=0,
-            exclude_id=headline["articleID"]
+    exclude_id = headline["articleID"] if headline else None
+    exclude_category_id = headline["categoryID"] if headline else None
+
+    # Latest articles
+    latest_articles = articleCTL.get_home_latest_articles(
+        exclude_id=exclude_id
+    )
+
+    # Latest and top article for each category
+    categories = articleCTL.get_categories()
+
+    visible_count = 8
+    visible_categories = categories[:visible_count]
+    more_categories = categories[visible_count:]
+
+    category_featured_articles = []
+
+
+    for category in categories:
+        # skip the same category as the main headline
+        if exclude_category_id and category["categoryID"] == exclude_category_id:
+            continue
+
+        article = articleCTL.get_featured_article_by_category(
+            category["categoryID"],
+            exclude_id=exclude_id
         )
 
-    else:
-        latest_articles = articleCTL.get_home_latest_articles(limit=3, offset=0)
-    
+        if article:
+            category_featured_articles.append({
+                "category": category,
+                "article": article
+            })
     # Display testimonial
     testimonials=testimonialCTL.getHomeTestimonials()
 
@@ -37,27 +61,7 @@ def unreg_home():
 
     plans = subscriptionCTL.getSubscriptionPlans()
 
-    categories = articleCTL.get_categories()
-
-    visible_count = 8
-    visible_categories = categories[:visible_count]
-    more_categories = categories[visible_count:]
-
-    category_featured_articles = []
-
-    exclude_id = headline["articleID"] if headline else None
-
-    for category in categories:
-        article = articleCTL.get_featured_article_by_category(
-            category["categoryID"],
-            exclude_id=exclude_id
-        )
-
-        if article:
-            category_featured_articles.append({
-                "category": category,
-                "article": article
-            })
+    
 
     return render_template(
         "Unregistered/UnregHome.html",
@@ -76,23 +80,24 @@ def unreg_home():
 @home_bp.route("/load_more_articles")
 def load_more_articles():
    
-    try:
-        offset = int(request.args.get('offset', 0))
-        limit = int(request.args.get('limit', 6))
-    except ValueError:
-        offset = 0
-        limit = 6
+    # try:
+    #     offset = int(request.args.get('offset', 0))
+    #     limit = int(request.args.get('limit', 6))
+    # except ValueError:
+    #     offset = 0
+    #     limit = 6
 
     headline = articleCTL.get_headline()
     exclude_id = headline['articleID'] if headline else None
 
-    articles = articleCTL.get_home_latest_articles(limit=limit, offset=offset, exclude_id=exclude_id)
+    articles = articleCTL.get_home_latest_articles(exclude_id=exclude_id)
 
     # Convert to JSON
     articles_json = [
         {
             "articleID": a['articleID'],
             "articleTitle": a['articleTitle'],
+            "categoryName": a['categoryName'],
             "content": a['content'][:150],  # short preview
             "imageURL": a['imageURL'],
             "views": a['views']
@@ -168,10 +173,8 @@ def all_articles():
     more_categories = categories[visible_count:]
 
     headline = articleCTL.get_home_headline()
-    articles = articleCTL.get_home_latest_articles(
-        limit=12,
-        exclude_id=headline["articleID"] if headline else None
-    )
+    exclude_id = headline['articleID'] if headline else None
+    articles = articleCTL.get_home_latest_articles(exclude_id=exclude_id)
 
     return render_template(
         "Unregistered/category_articles.html",
@@ -205,13 +208,11 @@ def category_articles(category_id):
     if headline:
         articles = articleCTL.home_article_by_category(
             category_id=category_id,
-            limit=6,
             exclude_id=headline["articleID"]
         )
     else:
         articles = articleCTL.home_article_by_category(
             category_id=category_id,
-            limit=6
         )
 
     return render_template(

@@ -74,14 +74,23 @@
         {% if headline %}
         <div class="featured-news">
           <div class="featured-left">
-            <span class="headline-tag">
-              {% if selected_category %}
-                Top Story In {{ selected_category.categoryName }}
-              {% else %}
-                Top Story
-              {% endif %}
-            </span>
+
+            <div class="headline-badges">
+                <span class="headline-tag">TOP STORY</span>
+                <span class="category-badge">{{ headline.categoryName }}</span>
+            </div>
+
             <h1 class="featured-title">{{ headline.articleTitle }}</h1>
+
+            <div class="ai-factcheck-row">
+                <span class="ai-score-badge">
+                    AI Score: {{ "%.0f"|format(headline.aiFactCheckScore|float) }}
+                </span>
+
+                <span class="ai-status-badge status-{{ headline.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                    {{ headline.aiFactCheckStatus }}
+                </span>
+            </div>
 
             <div class="article-meta">
               <span class="meta-item views">👁 {{ headline.views }}</span>
@@ -98,8 +107,8 @@
           </div>
 
           <div class="featured-right">
-            {% if headline.imageURL %}
-              <img src="{{ url_for('static', filename='uploads/' + headline.imageURL) }}">
+            {% if headline.featured_image %}
+              <img src="{{ url_for('static', filename='uploads/' + headline.featured_image) }}">
             {% else %}
               <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
             {% endif %}
@@ -130,7 +139,18 @@
           <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
         {% endif %}
 
+        <span class="category-badge">{{ article.categoryName }}</span>
         <h4 class="news-title">{{ article.articleTitle }}</h4>
+
+        <div class="ai-factcheck-row">
+            <span class="ai-score-badge">
+                AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+            </span>
+
+            <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                {{ article.aiFactCheckStatus }}
+            </span>
+        </div>
 
         <div class="article-meta">
           <span class="meta-item views">👁 {{ article.views }}</span>

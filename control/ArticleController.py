@@ -37,8 +37,8 @@ class ArticleController:
     def get_headline(self):
         return self.article_entity.get_headline_article()
 
-    def get_latest_articles_by_category(self, limit=6, exclude_id=None):
-        return self.article_entity.get_latest_articles_by_category(limit, exclude_id)
+    def get_latest_articles_by_category(self, limit=12, exclude_id=None):
+        return self.article_entity.get_latest_articles_by_category(limit)
 
     def get_home_headline(self):
         return self.article_entity.get_home_headline_article()
@@ -46,13 +46,12 @@ class ArticleController:
     def get_featured_article_by_category(self, category_id, exclude_id=None):
         return self.article_entity.get_featured_article_by_category(category_id, exclude_id)
 
-    def get_home_latest_articles(self, limit=5, offset=0, exclude_id=None):
-        return self.article_entity.get_home_latest_articles(limit, offset, exclude_id)
+    def get_home_latest_articles(self, exclude_id=None):
+        return self.article_entity.get_home_latest_articles(exclude_id)
     
-    def home_article_by_category(self, category_id, limit=6, exclude_id=None):
+    def home_article_by_category(self, category_id, exclude_id=None):
         return self.article_entity.home_article_by_category(
             category_id=category_id,
-            limit=limit,
             exclude_id=exclude_id
         )
 
@@ -611,14 +610,16 @@ class ArticleController:
         conn.close()
         return articles
     
-    def get_user_saved_articles(self, user_id, limit=5):
+    def get_user_saved_articles(self, user_id):
         conn = get_db_connection()
         cursor = conn.cursor()
         query = """
             SELECT a.articleID, a.articleTitle, a.content, c.categoryID, c.categoryName, u.username,
                 IFNULL(ai.imageURL, NULL) AS featured_image,
                 IFNULL(an.views, 0) AS views,
-                IFNULL(an.likes, 0) AS likes
+                IFNULL(an.likes, 0) AS likes,
+                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
             FROM Favourite f
             JOIN Article a ON f.articleID = a.articleID
             JOIN UserAccount u ON a.created_by = u.userID
@@ -627,9 +628,8 @@ class ArticleController:
             LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
             WHERE f.userID = %s AND a.articleStatus = 'published'
             ORDER BY f.saved_at DESC
-            LIMIT %s
         """
-        cursor.execute(query, (user_id, limit))
+        cursor.execute(query, (user_id,))
         articles = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -695,7 +695,7 @@ class ArticleController:
         conn.close()
         return [row["categoryID"] for row in results]
     
-    def get_articles_by_multiple_categories(self, category_ids, limit=6):
+    def get_articles_by_multiple_categories(self, category_ids, limit=12, exclude_id=None):
         if not category_ids:
             return []
         conn = get_db_connection()
@@ -705,17 +705,32 @@ class ArticleController:
             SELECT a.articleID, a.articleTitle, a.content, c.categoryName,
                 IFNULL(ai.imageURL, NULL) AS featured_image,
                 IFNULL(an.views, 0) AS views,
-                IFNULL(an.likes, 0) AS likes
+                IFNULL(an.likes, 0) AS likes,
+                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
             FROM Article a
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
             LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
             LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
             WHERE a.articleStatus = 'published'
             AND a.categoryID IN ({placeholders})
-            ORDER BY views DESC
+        """
+
+        params = list(category_ids)
+
+        if exclude_id:
+            query += " AND a.articleID != %s"
+            params.append(exclude_id)
+
+        query += """
+            ORDER BY a.created_at DESC, IFNULL(an.views, 0) DESC
             LIMIT %s
         """
-        cursor.execute(query, (*category_ids, limit))
+
+        params.append(limit)
+
+        cursor.execute(query, tuple(params))
+        # cursor.execute(query, (*category_ids, limit))
         articles = cursor.fetchall()
         cursor.close()
         conn.close()

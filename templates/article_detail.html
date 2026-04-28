@@ -25,6 +25,17 @@
         <span>|</span>
         <span>Category: {{ article.categoryName }}</span>
     </div>
+
+    <div class="ai-factcheck-row">
+        <span class="ai-score-badge">
+            AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+        </span>
+
+        <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+            {{ article.aiFactCheckStatus }}
+        </span>
+    </div>
+
     <div class="article_detail-news">
         <div class="article_detail-news-item">
             👁 <span>{{ article.views }}</span>

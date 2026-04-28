@@ -256,12 +256,17 @@
         align-items: center;
     }
 
-    .news-home .featured-left {
+    /* .news-home .featured-left {
         position: relative;
         display: flex;
         flex-direction: column;
         justify-content: center;
         padding-top: 46px;
+    } */
+
+    .news-home .featured-left {
+        padding-top: 0 !important;
+        align-items: flex-start;
     }
 
     /* .news-home .headline-tag {
@@ -310,7 +315,7 @@
         padding: 30px 0;
     }
 
-    .news-home .headline-tag {
+    /* .news-home .headline-tag {
         position: absolute;
         top: 0;
         left: 0;
@@ -325,6 +330,21 @@
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
+    } */
+
+    .news-home .headline-tag {
+        position: static;
+        display: inline-flex;
+        width: fit-content;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #e9f2ff;
+        color: #2563eb;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin: 0;
     }
 
     /* =========================
@@ -387,10 +407,21 @@
     }
 
     .news-home .latest-title {
-        margin-bottom: 18px;
+        margin-bottom: 40px;
         color: #111827;
         font-size: 1.45rem;
         font-weight: 900;
+    }
+
+    .news-home .latest-title::after {
+        content: "";
+        display: block;
+        width: 72px;
+        height: 4px;
+        margin: 12px 0 0;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #60a5fa, #3b82f6);
+        opacity: 0.95;
     }
 
     .news-home .latest-grid {
@@ -542,6 +573,22 @@
     .news-home .news {
         padding-top: 10px;
     }
+
+    .news-home .headline-badges {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 0 0 16px 0;
+    }
+
+    .news-home .headline-tag,
+    .news-home .headline-badges .category-badge {
+        position: static !important;
+        margin: 0 !important;
+    }
+
 </style>
 
 <div class="news-home">
@@ -640,15 +687,22 @@
             <div class="featured-news">
 
             <div class="featured-left">
-                <span class="headline-tag">
-                {% if selected_category %}
-                    Top Story In {{ selected_category.categoryName }}
-                {% else %}
-                    Top Story
-                {% endif %}
-                </span>
+                <div class="headline-badges">
+                    <span class="headline-tag">TOP STORY</span>
+                    <span class="category-badge">{{ headline.categoryName }}</span>
+                </div>
 
                 <h1 class="featured-title">{{ headline.articleTitle }}</h1>
+
+                <div class="ai-factcheck-row">
+                    <span class="ai-score-badge">
+                        AI Score: {{ "%.0f"|format(headline.aiFactCheckScore|float) }}
+                    </span>
+
+                    <span class="ai-status-badge status-{{ headline.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                        {{ headline.aiFactCheckStatus }}
+                    </span>
+                </div>
 
                 <div class="top-article-meta">
                     <span class="top-article-badge">👁 {{ headline.views }}</span>
@@ -714,6 +768,16 @@
                 <span class="meta-item views">👁 {{ article.views }}</span>
                 <span class="meta-item likes">❤️ {{ article.likes }}</span>
             </div> -->
+
+            <div class="ai-factcheck-row">
+                <span class="ai-score-badge">
+                    AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+                </span>
+
+                <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+                    {{ article.aiFactCheckStatus }}
+                </span>
+            </div>
 
             <div class="article-news-meta">
                 <div class="article-news-item">
