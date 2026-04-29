@@ -160,6 +160,33 @@ form input::placeholder {
   text-align: right;
 }
 
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  padding-right: 76px;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #2a5bd7;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toggle-password-btn:hover {
+  color: #1e3d7a;
+  text-decoration: underline;
+}
+
 /* ── Buttons ── */
 .signup-btn {
   margin-top: 10px;
