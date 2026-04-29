@@ -1944,3 +1944,41 @@ a {
         grid-template-columns: 1fr;
     }
 }
+
+
+.article-author-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0 10px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.verified-publisher-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.article-author-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.verified-publisher-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 12px;
+    font-weight: 700;
+}

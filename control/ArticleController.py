@@ -58,7 +58,7 @@ class ArticleController:
     def delete_article(self, article_id):
         return self.article_entity.delete_article(article_id)
 
-    def search_my_articles(self, user_id, keyword="", category_id="", status=""):
+    def search_my_articles(self, user_id, keyword="", category_id="", status="", verified_only=False):
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -73,10 +73,16 @@ class ArticleController:
                 a.first_edited_at,
                 a.last_edited_at,
                 c.categoryName,
-                ai.imageURL
+                ai.imageURL,
+
+                u.userType,
+                u.verifiedBadgeStatus
+
             FROM Article a
             LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+            JOIN UserAccount u ON a.created_by = u.userID
+
             WHERE a.created_by = %s
         """
         params = [user_id]
@@ -92,6 +98,10 @@ class ArticleController:
         if status:
             query += " AND LOWER(a.articleStatus) = LOWER(%s)"
             params.append(status)
+
+        # Verified Only filter
+        if verified_only:
+            query += " AND u.userType = 'premium' AND u.verifiedBadgeStatus = 'approved'"
 
         query += " ORDER BY a.created_at DESC"
 
@@ -119,7 +129,12 @@ class ArticleController:
                 a.updated_at,
                 a.aiFactCheckScore,
                 a.aiFactCheckStatus,
+
                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                u.username,
+                u.userType,
+                u.verifiedBadgeStatus,
+
                 c.categoryName,
                 a.created_by,
                 ai.imageURL AS featured_image,

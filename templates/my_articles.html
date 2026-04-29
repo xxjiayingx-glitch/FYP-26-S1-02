@@ -34,6 +34,10 @@
                class="{% if status == 'published' %}active{% endif %}">
                 Published
             </a>
+            <a href="{{ url_for('my_articles', verified_only='true') }}" 
+                class="{% if verified_only %}active{% endif %}">
+                ✔ Verified Only
+            </a>
         </div>
 
         <a href="{{ url_for('create_article') }}" class="btn create-article-btn">
@@ -53,6 +57,14 @@
 
                     <div class="article-content">
                         <h3 class="article-title">{{ article.articleTitle }}</h3>
+
+                        <div class="article-author-line">
+                            <span>By {{ session.get('username') }}</span>
+
+                            {% if article.userType == 'premium' and article.verifiedBadgeStatus == 'approved' %}
+                                <span class="verified-publisher-badge">✔ Verified Publisher</span>
+                            {% endif %}
+                        </div>
 
                         <p class="article-desc">
                             {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}

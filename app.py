@@ -534,7 +534,7 @@ def is_valid_report_category(report_category_id):
 def my_articles():
     user_id = session.get("userID")
     if not user_id:
-        return redirect(url_for("login"))
+        return redirect(url_for("login.login"))
     
     if session.get("profileCompleted") == 0:
         flash("Please complete your profile before accessing this page.")
@@ -542,13 +542,18 @@ def my_articles():
 
     keyword = request.args.get("keyword", "").strip()
     category_id = request.args.get("category_id", "").strip()
-    status = request.args.get("status", "").strip()   # ✅ ADD THIS
+    status = request.args.get("status", "").strip()
+    verified_only = request.args.get("verified_only") == "true"
 
     categories = article_controller.get_categories()
 
-    if keyword or category_id or status:
+    if keyword or category_id or status or verified_only:
         articles = article_controller.search_my_articles(
-            user_id, keyword, category_id, status   # ✅ PASS IT
+            user_id=user_id,
+            keyword=keyword,
+            category_id=category_id,
+            status=status,
+            verified_only=verified_only
         )
     else:
         articles = article_controller.get_my_articles(user_id)
@@ -558,7 +563,8 @@ def my_articles():
         articles=articles,
         keyword=keyword,
         category_id=category_id,
-        status=status,   # ✅ SEND TO TEMPLATE
+        status=status,
+        verified_only=verified_only,
         categories=categories
     )
     

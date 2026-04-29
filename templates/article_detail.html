@@ -21,7 +21,13 @@
         <span>|</span>
         <span>Last Edited: {{ article.last_edited_at.strftime('%d %b %Y %H:%M') if article.last_edited_at else 'Not edited' }}</span>
         <span>|</span>
-        <span>Author: {{ article.full_name }}</span>
+        <div class="article-author-line">
+            <span>Author: {{ article.full_name }}</span>
+
+            {% if article.userType == 'premium' and article.verifiedBadgeStatus == 'approved' %}
+                <span class="verified-publisher-badge">✔ Verified Publisher</span>
+            {% endif %}
+        </div>        
         <span>|</span>
         <span>Category: {{ article.categoryName }}</span>
     </div>
