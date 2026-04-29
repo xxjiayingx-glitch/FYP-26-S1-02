@@ -1982,3 +1982,29 @@ a {
     font-size: 12px;
     font-weight: 700;
 }
+
+/* editor register page show password */
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 10px;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 50px;
+  top: 65%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #2a5bd7;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
