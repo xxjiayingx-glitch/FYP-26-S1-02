@@ -22,7 +22,7 @@ class ArticleController:
         return self.article_entity.get_categories()
     
     def get_my_articles(self, user_id):
-        return self.article_entity.get_my_articles(user_id)
+        return self.search_my_articles(user_id)    
     
     def create_article(self, user_id, title, category_id, content, status, featured_image=None,
                    ai_fact_check_score=0, ai_fact_check_status=None):
