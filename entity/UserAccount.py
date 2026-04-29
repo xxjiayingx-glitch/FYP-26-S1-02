@@ -180,6 +180,7 @@ class UserAccount:
         """, (new_password, userID))
 
         conn.commit()
+        cursor.close()
         conn.close()
     
     def find_by_email_excluding_user(self, email, userID):
@@ -225,6 +226,10 @@ class UserAccount:
                 updated_at = NOW()
             WHERE userID = %s
         """, (pending_email, token, userID))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     @staticmethod
     def verify_pending_email_change(token):
