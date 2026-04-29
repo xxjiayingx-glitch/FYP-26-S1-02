@@ -228,36 +228,38 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="full_name">Full Name</label>
-                        <input type="text" id="full_name" name="full_name" required>
+                        <input type="text" id="full_name" name="full_name" value="{{ form_data.full_name if form_data else '' }}" required>
                     </div>
 
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" id="username" name="username" required>
+                        <input type="text" id="username" name="username" value="{{ form_data.username if form_data else '' }}" required>
                     </div>
 
                     <div class="form-group">
                         <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" required>
+                        <input type="email" id="email" name="email" value="{{ form_data.email if form_data else '' }}" required oninvalid="this.setCustomValidity('Please enter a valid email address, for example name@example.com')"
+  oninput="this.setCustomValidity('')">
                     </div>
 
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
-                        <input type="text" id="phone" name="phone" required>
+                        <input type="tel" id="phone" name="phone" pattern="\d{8}" maxlength="8" placeholder="Enter 8-digit phone number" value="{{ form_data.phone if form_data else '' }}"required oninvalid="this.setCustomValidity('Phone number must be exactly 8 digits')"
+  oninput="this.setCustomValidity('')">
                     </div>
 
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required>
+                        <input type="password" id="password" name="password" placeholder="At least 10 characters">
                     </div>
 
                     <div class="form-group">
                         <label for="expertise_area">Area of Expertise</label>
                         <select id="expertise_area" name="expertise_area" required>
                             <option value="">Select expertise</option>
-
                             {% for c in categories %}
-                                <option value="{{ c.categoryName }}">
+                                <option value="{{ c.categoryName }}"
+                                    {% if form_data and form_data.expertise_area == c.categoryName %}selected{% endif %}>
                                     {{ c.categoryName }}
                                 </option>
                             {% endfor %}
@@ -266,17 +268,17 @@
 
                     <div class="form-group">
                         <label for="years_experience">Years of Experience</label>
-                        <input type="number" id="years_experience" name="years_experience" min="0" required>
+                        <input type="number" id="years_experience" name="years_experience" min="0" value="{{ form_data.years_experience if form_data else '' }}" required>
                     </div>
 
                     <div class="form-group full-width">
                         <label for="bio">Short Professional Bio</label>
-                        <textarea id="bio" name="bio" placeholder="Tell us about your editorial experience, credentials, or background." required></textarea>
+                        <textarea id="bio" name="bio" placeholder="Tell us about your editorial experience, credentials, or background." required>{{ form_data.bio if form_data else '' }}</textarea>
                     </div>
 
                     <div class="form-group full-width">
                         <label for="portfolio_link">Portfolio / LinkedIn / Published Work Link</label>
-                        <input type="url" id="portfolio_link" name="portfolio_link" placeholder="https://">
+                        <input type="url" id="portfolio_link" name="portfolio_link" placeholder="https://" value="{{ form_data.portfolio_link if form_data else '' }}">
                     </div>
 
                     <div class="form-group full-width">

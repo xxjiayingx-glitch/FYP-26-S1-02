@@ -324,35 +324,35 @@ class Article:
 
     #     return articles
 
-    # def get_my_articles(self, user_id):
-    #     conn = get_db_connection()
-    #     cursor = conn.cursor()
+    def get_my_articles(self, user_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    #     sql = """
-    #     SELECT 
-    #         a.articleID,
-    #         a.articleTitle,
-    #         a.content,
-    #         a.articleStatus,
-    #         a.categoryID,
-    #         a.created_at,
-    #         a.first_edited_at,
-    #         a.last_edited_at,
-    #         c.categoryName,
-    #         ai.imageURL
-    #     FROM Article a
-    #     LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
-    #     LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-    #     WHERE a.created_by = %s
-    #     ORDER BY a.created_at DESC
-    #     """
+        sql = """
+        SELECT 
+            a.articleID,
+            a.articleTitle,
+            a.content,
+            a.articleStatus,
+            a.categoryID,
+            a.created_at,
+            a.first_edited_at,
+            a.last_edited_at,
+            c.categoryName,
+            ai.imageURL
+        FROM Article a
+        LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+        WHERE a.created_by = %s
+        ORDER BY a.created_at DESC
+        """
 
-    #     cursor.execute(sql, (user_id,))
-    #     articles = cursor.fetchall()
+        cursor.execute(sql, (user_id,))
+        articles = cursor.fetchall()
         
-    #     cursor.close()
-    #     conn.close()
-    #     return articles
+        cursor.close()
+        conn.close()
+        return articles
 
     def search_article_in_category(self, keyword, category_id=None, limit=12):
         if not keyword or not keyword.strip():

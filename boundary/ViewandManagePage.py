@@ -33,6 +33,8 @@ def subscription_page():
     if "userType" in session:
         session["userType"] = normalize_plan_name(session.get("userType"))
 
+    auto_plan = request.args.get("auto_plan")
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -47,7 +49,7 @@ def subscription_page():
     cursor.close()
     conn.close()
 
-    return render_template("subscription.html", plans=plans)
+    return render_template("subscription.html", plans=plans, auto_plan=auto_plan)
 
 
 # -------------------------
@@ -200,15 +202,27 @@ def payment_success():
 
         cursor.execute("""
             UPDATE UserAccount
-            SET userType = %s
+            SET userType = %s,
+                       pendingPlan = NULL
             WHERE userID = %s
         """, (plan_name, user_id))
+
+        cursor.execute("""
+            SELECT profileCompleted
+            FROM UserAccount
+            WHERE userID = %s
+        """, (user_id,))
+        update_profile = cursor.fetchone()
 
         conn.commit()
         cursor.close()
         conn.close()
 
         session["userType"] = plan_name
+
+        if update_profile and update_profile.get("profileCompleted") == 0:
+            flash("Payment successful! Please complete your profile.", "success")
+            return redirect(url_for("profile.complete_profile"))
 
         flash("Payment successful! You are now a Premium user.", "success")
         return redirect("/dashboard")

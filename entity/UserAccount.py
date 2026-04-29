@@ -22,7 +22,7 @@ class UserAccount:
 
         if not user:
             print("No user with that email")
-            return None
+            return "no_account"
 
          # ADD THIS BLOCK
         if (user.get("accountStatus") or "").lower() == "pending":
@@ -37,7 +37,7 @@ class UserAccount:
             return user
 
         print("Password did not match")
-        return None
+        return "wrong_password"
 
     # ==============================
     # PROFILE
@@ -753,17 +753,17 @@ class UserAccount:
         conn.close()
         return result
 
-    def register_user(self, username, email, password, firstName, lastName, phone, token, profileCompleted = 0):
+    def register_user(self, username, email, password, firstName, lastName, phone, token, profileCompleted = 0, pending_plan=None):
         """Register a new user with pending account status and verification token."""
         conn = get_db_connection()
         cursor = conn.cursor()
 
         insert_query = """
             INSERT INTO UserAccount
-            (username, email, pwd, first_name, last_name, phone, userType, accountStatus, verificationToken, created_at, profileCompleted)
-            VALUES (%s, %s, %s, %s, %s, %s, 'free', 'pending', %s, NOW(), %s)
+            (username, email, pwd, first_name, last_name, phone, userType, accountStatus, verificationToken, created_at, profileCompleted, pendingPlan)
+            VALUES (%s, %s, %s, %s, %s, %s, 'free', 'pending', %s, NOW(), %s, %s)
         """
-        cursor.execute(insert_query, (username, email, password, firstName, lastName, phone, token, profileCompleted))
+        cursor.execute(insert_query, (username, email, password, firstName, lastName, phone, token, profileCompleted, pending_plan))
         conn.commit()
 
         new_user_id = cursor.lastrowid

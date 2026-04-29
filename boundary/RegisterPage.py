@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from control.RegisterCTL import RegisterController
 from entity.Article import Article
 
@@ -12,6 +12,7 @@ def get_categories():
 
 @register_bp.route("/register", methods=["GET", "POST"])
 def register():
+    selected_plan = request.args.get("plan") or request.form.get("selected_plan")
 
     if request.method == "POST":
         firstName = request.form["firstName"]
@@ -24,19 +25,34 @@ def register():
         interests = request.form.getlist("interests")
 
         result = registerCTL.register(
-            firstName, lastName, phone, username, email, password, retypePassword, interests=interests
+            firstName, lastName, phone, username, email, password, retypePassword, interests=interests, pending_plan=selected_plan
         )
 
         if result["success"]:
             return render_template(
                 "Unregistered/UnregRegAcc.html",
-                categories=get_categories(), 
-                success="Registration successful! Please check your email to verify your account."
+                categories=get_categories(),
+                selected_plan=selected_plan,
+                success="Registration successful! Please check your email to verify your account.",
+                form_data={}
             )
 
-        return render_template("Unregistered/UnregRegAcc.html", categories=get_categories(), error=result["message"])
+        return render_template(
+            "Unregistered/UnregRegAcc.html",
+            categories=get_categories(),
+            selected_plan=selected_plan,
+            error=result["message"],
+            form_data=request.form
+        )
 
-    return render_template("Unregistered/UnregRegAcc.html", categories=get_categories())
+
+    return render_template(
+        "Unregistered/UnregRegAcc.html",
+        categories=get_categories(),
+        selected_plan=selected_plan,
+        form_data={}
+    )
+
 
 @register_bp.route("/verify", methods=["GET"])
 def verify():

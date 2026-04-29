@@ -30,31 +30,40 @@
   <h2>Welcome!</h2>
   <p>Sign Up</p>
 
-  <form action="{{ url_for('register.register') }}" method="POST">
+  <form action="{{ url_for('register.register') }}" method="POST" novalidate>
+    <input type="hidden" name="selected_plan" value="{{ selected_plan or '' }}">
 
     <div class="form-row-two">
-      <input type="text" id="firstName" name="firstName" placeholder="First Name" />
-      <input type="text" id="lastName" name="lastName" placeholder="Last Name" />
+      <input type="text" id="firstName" name="firstName" placeholder="First Name" value="{{ form_data.get('firstName', '') if form_data else '' }}" required />
+      <input type="text" id="lastName" name="lastName" placeholder="Last Name" value="{{ form_data.get('lastName', '') if form_data else '' }}" required />
     </div>
 
-    <input type="email" id="email" name="email" placeholder="Enter your email" />
+    <input type="text" id="email" name="email" placeholder="Enter your email" value="{{ form_data.get('email', '') if form_data else '' }}" required />
+    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" value="{{ form_data.get('phone', '') if form_data else '' }}" required />
 
-    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" />
+    <input type="text" id="username" name="username" placeholder="Enter your username" value="{{ form_data.get('username', '') if form_data else '' }}" required />
 
-    <input type="text" id="username" name="username" placeholder="Enter your username" />
-
-    <div class="password-group">
-      <div class="password-wrapper">
-        <input type="password" id="password" name="password" placeholder="Password" />
-        <button type="button" class="toggle-password-btn" onclick="togglePassword('password', this)">Show</button>
-      </div>
-      <small>Minimum 10 Characters</small>
+    <div class="password-wrapper">
+      <input type="password" id="password" name="password" placeholder="Password" autocomplete="new-password" required>
+      <button type="button" class="toggle-password-btn" onclick="togglePassword('password', this)">
+        Show
+      </button>
     </div>
 
     <div class="password-wrapper">
-      <input type="password" id="retypePassword" name="retypePassword" placeholder="Retype Password" />
-      <button type="button" class="toggle-password-btn" onclick="togglePassword('retypePassword', this)">Show</button>
+      <input type="password" id="retypePassword" name="retypePassword" placeholder="Retype Password" autocomplete="new-password" required>
+      <button type="button" class="toggle-password-btn" onclick="togglePassword('retypePassword', this)">
+        Show
+      </button>
     </div>
+
+
+    <!-- <div class="password-group">
+      <input type="password" id="password" name="password" placeholder="Password" required />
+      <small>Minimum 10 Characters</small>
+    </div>
+
+    <input type="password" id="retypePassword" name="retypePassword" placeholder="Retype Password" required /> -->
 
     <button type="submit" class="signup-btn">Sign Up</button>
   </form>
@@ -113,5 +122,17 @@
     if (successMsg) showPopup(successMsg, "success");
     else if (errorMsg) showPopup(errorMsg, "error");
   });
+
+  function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+
+    if (input.type === "password") {
+      input.type = "text";
+      button.textContent = "Hide";
+    } else {
+      input.type = "password";
+      button.textContent = "Show";
+    }
+  }
 </script>
 {% endblock %}

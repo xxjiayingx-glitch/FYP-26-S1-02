@@ -5,8 +5,10 @@ from control.LoginCTL import AuthController
 from control.SystemLogCTL import SystemLogCTL
 import secrets
 from server.email_service import send_forgot_password_email
+from server.email_service import send_verification_email
 from entity.db_connection import get_db_connection
 import os
+import re
 from werkzeug.utils import secure_filename
 
 login_bp = Blueprint("login", __name__)
@@ -25,6 +27,12 @@ def login():
 
         if user == "pending":
             return render_template("login.html", pending=True)
+        
+        if user == "no_account":
+            return render_template("login.html", error="No account found with this email.")
+
+        if user == "wrong_password":
+            return render_template("login.html", error="Invalid email or password.")
 
         if user:
             # Extra check for editor approval flow
@@ -36,7 +44,7 @@ def login():
                 if editor_status == "pending":
                     return render_template(
                         "login.html",
-                        error="Your editor application is still pending admin approval."
+                        error="Your editor application is still pending admin approval. We will notify you the result by email."
                     )
                 elif editor_status == "rejected":
                     return render_template(
@@ -59,19 +67,23 @@ def login():
                 targetType="UserAccount"
             )
 
+        
             # Redirect by role
             if user_type == "system admin":
                 return redirect("/admin/dashboard")
 
             if user_type == "editor":
                 return redirect("/editor/dashboard")
+            
+            if (user.get("pendingPlan") or "").strip().lower() == "premium":
+                return redirect(url_for("subscription.subscription_page", auto_plan="premium"))
 
             if user.get("profileCompleted") == 0:
                 return redirect(url_for("profile.complete_profile"))
             else:
                 return redirect("/dashboard")
 
-        return render_template("login.html", error="Invalid email or password")
+        return render_template("login.html", error="Login failed.")
 
     return render_template("login.html", success=success_msg)
 
@@ -103,6 +115,17 @@ def editor_applicant():
             bio = request.form.get("bio", "").strip()
             portfolio_link = request.form.get("portfolio_link", "").strip()
 
+            form_data = {
+                "full_name": full_name,
+                "username": username,
+                "email": email,
+                "phone": phone,
+                "expertise_area": expertise_area,
+                "years_experience": years_experience,
+                "bio": bio,
+                "portfolio_link": portfolio_link
+            }
+
             # supporting_document = request.files.get("supporting_document")
             # document_filename = None
 
@@ -113,13 +136,39 @@ def editor_applicant():
             if not all([full_name, username, email, phone, password, expertise_area, years_experience, bio]):
                 return render_template(
                     "editor_applicant.html",
+                    categories=categories,
+                    form_data=form_data,
                     error="Please fill in all required fields."
                 )
 
             if len(password) < 10:
                 return render_template(
                     "editor_applicant.html",
+                    categories=categories,
+                    form_data=form_data,
                     error="Password must be at least 10 characters."
+                )
+            
+            # phone_pattern = r"^\d{8}$"
+            # if not re.match(phone_pattern, phone):
+            #     return {"success": False, "message": "Phone number must be 8 digits"}
+
+            email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+            if not re.match(email_pattern, email):
+                return render_template(
+                    "editor_applicant.html",
+                    categories=categories,
+                    form_data=form_data,
+                    error="Invalid email format."
+                )
+
+            phone_pattern = r"^\d{8}$"
+            if not re.match(phone_pattern, phone):
+                return render_template(
+                    "editor_applicant.html",
+                    categories=categories,
+                    form_data=form_data,
+                    error="Phone number must be 8 digits."
                 )
             
             name_parts = full_name.split()
@@ -154,6 +203,7 @@ def editor_applicant():
                 existing_document = existing_user.get("supportingDocument")
 
                 if existing_status == "rejected" and existing_email == email.lower() and existing_username == username.lower():
+                    token = secrets.token_urlsafe(32)
                     hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
                     final_document = document_filename if document_filename else existing_document
 
@@ -166,6 +216,7 @@ def editor_applicant():
                             phone = %s,
                             userType = %s,
                             accountStatus = %s,
+                            verificationToken = %s,
                             editorApprovalStatus = %s,
                             expertiseArea = %s,
                             yearsExperience = %s,
@@ -186,7 +237,8 @@ def editor_applicant():
                             last_name,
                             phone,
                             "editor",
-                            "active",
+                            "pending",
+                            token,
                             "pending",
                             expertise_area,
                             years_experience,
@@ -200,16 +252,22 @@ def editor_applicant():
 
                     conn.commit()
 
+                    try:
+                        send_verification_email(email, token)
+                    except Exception as e:
+                        print("Failed to send verification email:", e)
+
                     return redirect(
                         url_for(
                             "login.login",
-                            success="Editor application resubmitted successfully. Please wait for admin approval.We will notify you by email."
+                            success="Editor application resubmitted successfully. Please verify your email first, then wait for admin approval."
                         )
                     )
 
                 return render_template(
                     "editor_applicant.html",
                     categories=categories,
+                    form_data=form_data,
                     error="Email or username already exists."
                 )
 
@@ -218,6 +276,7 @@ def editor_applicant():
             # first_name = name_parts[0] if len(name_parts) > 0 else ""
             # last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
 
+            token = secrets.token_urlsafe(32)
             hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
             # Insert editor applicant into UserAccount
@@ -236,6 +295,7 @@ def editor_applicant():
                     phone,
                     userType,
                     accountStatus,
+                    verificationToken,
                     editorApprovalStatus,
                     expertiseArea,
                     yearsExperience,
@@ -244,7 +304,7 @@ def editor_applicant():
                     supportingDocument,
                     profileCompleted
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)
             """,(
                 username,
                 email,
@@ -253,7 +313,8 @@ def editor_applicant():
                 last_name,
                 phone,
                 "editor",
-                "active",
+                "pending",
+                token,
                 "pending",
                 expertise_area,
                 years_experience,
@@ -265,14 +326,18 @@ def editor_applicant():
 
             conn.commit()
 
+            try:
+                send_verification_email(email, token)
+            except Exception as e:
+                print("Failed to send verification email:", e)
+
             return redirect(
                 url_for(
                     "login.login",
-                    success="Editor application submitted successfully. Please wait for admin approval.We will notify you by email."
-                )
+                    success="Editor application submitted successfully. Please verify your email first, then wait for admin approval.")
             )
         
-        return render_template("editor_applicant.html", categories=categories)
+        return render_template("editor_applicant.html", categories=categories, form_data={})
 
     except Exception as e:
         if conn:
@@ -281,6 +346,7 @@ def editor_applicant():
         return render_template(
             "editor_applicant.html",
             categories=categories if 'categories' in locals() else [],
+            form_data=form_data if 'form_data' in locals() else {},
             error="Something went wrong while submitting your application."
         )
 

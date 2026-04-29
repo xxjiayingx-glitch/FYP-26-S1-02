@@ -9,7 +9,58 @@ class RegisterController:
     def __init__(self):
         self.user_entity = UserAccount()
 
-    def register(self, firstName, lastName, phone, username, email, password, retypePassword, interests=None):
+    # def register(self, firstName, lastName, phone, username, email, password, retypePassword, interests=None,  pending_plan=None):
+
+    #     # --- Validation ---
+    #     if len(password) < 10:
+    #         return {"success": False, "message": "Password must be at least 10 characters"}
+
+    #     if password != retypePassword:
+    #         return {"success": False, "message": "Passwords do not match"}
+
+    #     email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+    #     if not re.match(email_pattern, email):
+    #         return {"success": False, "message": "Invalid email format"}
+
+    #     phone_pattern = r"^\d{8}$"
+    #     if not re.match(phone_pattern, phone):
+    #         return {"success": False, "message": "Phone number must be 8 digits"}
+
+    #     # --- Duplicate checks (calls entity) ---
+    #     if self.user_entity.find_by_email(email):
+    #         return {"success": False, "message": "Email already registered"}
+
+    #     if self.user_entity.find_by_username(username):
+    #         return {"success": False, "message": "Username already taken"}
+
+    #     # Generate verification token
+    #     token = secrets.token_urlsafe(32)
+
+    #     hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
+
+    #     # Save user WITH token + unverified status
+    #     new_user_id = self.user_entity.register_user(
+    #         username, email, hashed_pw, firstName, lastName, phone, token, profileCompleted = 0, pending_plan=pending_plan
+    #     )
+
+    #     # --- Save category interests if provided ---
+    #     if interests:
+    #         category_ids = self.user_entity.get_category_ids_by_names(interests)  # convert names → IDs
+    #         if category_ids:
+    #             self.user_entity.save_category_interests(new_user_id, category_ids)
+
+    #     try:
+    #         send_verification_email(email, token)
+    #     except Exception as e:
+    #         print("Failed to send verification email:", e)
+        
+    #     return {"success": True, "message": "Registration successful", "userID": new_user_id}
+
+    def register(self, firstName, lastName, phone, username, email, password, retypePassword, interests=None, pending_plan=None):
+
+        # --- Required fields check first ---
+        if not firstName.strip() or not lastName.strip() or not phone.strip() or not username.strip() or not email.strip() or not password.strip() or not retypePassword.strip():
+            return {"success": False, "message": "Please fill in all required fields"}
 
         # --- Validation ---
         if len(password) < 10:
@@ -26,26 +77,23 @@ class RegisterController:
         if not re.match(phone_pattern, phone):
             return {"success": False, "message": "Phone number must be 8 digits"}
 
-        # --- Duplicate checks (calls entity) ---
+        # --- Duplicate checks ---
         if self.user_entity.find_by_email(email):
             return {"success": False, "message": "Email already registered"}
 
         if self.user_entity.find_by_username(username):
             return {"success": False, "message": "Username already taken"}
 
-        # Generate verification token
         token = secrets.token_urlsafe(32)
-
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
 
-        # Save user WITH token + unverified status
         new_user_id = self.user_entity.register_user(
-            username, email, hashed_pw, firstName, lastName, phone, token, profileCompleted = 0
+            username, email, hashed_pw, firstName, lastName, phone, token,
+            profileCompleted=0, pending_plan=pending_plan
         )
 
-        # --- Save category interests if provided ---
         if interests:
-            category_ids = self.user_entity.get_category_ids_by_names(interests)  # convert names → IDs
+            category_ids = self.user_entity.get_category_ids_by_names(interests)
             if category_ids:
                 self.user_entity.save_category_interests(new_user_id, category_ids)
 
@@ -53,5 +101,5 @@ class RegisterController:
             send_verification_email(email, token)
         except Exception as e:
             print("Failed to send verification email:", e)
-        
+
         return {"success": True, "message": "Registration successful", "userID": new_user_id}

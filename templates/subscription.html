@@ -106,19 +106,24 @@
 </style>
 
 <div class="subscription-wrapper">
-
-    <div class="subscription-title">Plans & Pricing</div>
-    <div class="subscription-subtitle">
-        No hidden fees. Simple, transparent pricing.
-    </div>
-
     {% set current_user_type = session.get('userType', '')|string|trim|lower %}
     {% set normalized_current = current_user_type|replace('plan', '')|trim %}
 
-    {% if session.get("userID") %}
-        <div class="free-banner">
-            You are currently on the {{ normalized_current|capitalize }} Plan
+    {% if auto_plan == "premium" %}
+      <div style="text-align:center; padding:60px 20px; font-size:20px; font-weight:700;">
+        Redirecting to payment...
+      </div>
+    {% else %}
+        <div class="subscription-title">Plans & Pricing</div>
+        <div class="subscription-subtitle">
+            No hidden fees. Simple, transparent pricing.
         </div>
+
+        {% if session.get("userID") %}
+            <div class="free-banner">
+                You are currently on the {{ normalized_current|capitalize }} Plan
+            </div>
+        {% endif %}
     {% endif %}
 
     <div class="pricing-container">
@@ -158,7 +163,7 @@
 
                     {% elif normalized_plan == "premium" %}
 
-                        <form method="POST" action="{{ url_for('subscription.create_checkout_session') }}">
+                        <form id="premiumCheckoutForm" method="POST" action="{{ url_for('subscription.create_checkout_session') }}">
                             <input type="hidden" name="plan_id" value="{{ plan.planID }}">
                             <button class="btn subscribe-btn" type="submit">
                                 Upgrade to Premium
@@ -183,5 +188,18 @@
 
     </div>
 </div>
-
 {% endblock %}
+
+{% block extra_scripts %}
+{% if auto_plan == "premium" %}
+<script>
+  window.addEventListener("load", function () {
+    const form = document.getElementById("premiumCheckoutForm");
+    if (form) {
+      form.submit();
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}
+

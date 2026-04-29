@@ -357,12 +357,11 @@
           </ul>
 
           <div class="register">
-            <a href="{{ url_for('register.register', plan='premium') }}">
-              {% if plan.price == 0 or plan.price == 0.00 %}
-                Register For Free
-              {% else %}
-                Subscribe Now
-              {% endif %}
+            {% if plan.price == 0 or plan.price == 0.00 %}
+              <a href="{{ url_for('register.register') }}"> Register For Free</a>
+            {% else %}
+              <a href="{{ url_for('register.register', plan='premium') }}">Subscribe Now</a>
+            {% endif %}
             </a>
           </div>
         </div>
