@@ -547,6 +547,16 @@
 
                 <div class="factcheck-grid">
                     <div class="factcheck-left">
+
+                        <div id="categoryCheckCard" class="factcheck-card" style="display:none;">
+                            <h4>Category Check</h4>
+                            <p><strong>Title Match:</strong> <span id="titleMatchText"></span></p>
+                            <p><strong>Selected Category:</strong> <span id="selectedCategoryText"></span></p>
+                            <p><strong>AI Suggestion:</strong> <span id="suggestedCategoryText"></span></p>
+                            <p><strong>Result:</strong> <span id="categoryMatchText"></span></p>
+                            <p><strong>Reason:</strong> <span id="categoryReasonText"></span></p>
+                        </div>
+
                         <div class="factcheck-card">
                             <h4>Why this score</h4>
                             <ul id="scoreReasons" class="score-reasons">
@@ -587,7 +597,9 @@
 
 <script>
 document.getElementById("checkScoreBtn").addEventListener("click", async function () {
-    const content = document.getElementById("content").value;
+    const title = document.querySelector('input[name="title"]').value;
+    const content = document.querySelector("textarea").value;
+    const category = document.querySelector('select[name="category"]').value;
 
     if (!content.trim()) {
         alert("Please enter article content first.");
@@ -597,7 +609,7 @@ document.getElementById("checkScoreBtn").addEventListener("click", async functio
     const response = await fetch("/fact-check-preview", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ title, content, category })
     });
 
     const data = await response.json();
@@ -609,6 +621,45 @@ document.getElementById("checkScoreBtn").addEventListener("click", async functio
     }
 
     document.getElementById("factCheckSection").style.display = "block";
+
+    // ===== CATEGORY CHECK =====
+    const categoryCheck = data.category_check;
+
+    if (categoryCheck) {
+        document.getElementById("categoryCheckCard").style.display = "block";
+
+        const selectedText = document.querySelector('select[name="category"] option:checked').textContent;
+
+        document.getElementById("selectedCategoryText").textContent = selectedText;
+        document.getElementById("suggestedCategoryText").textContent = categoryCheck.suggested_category || "-";
+        document.getElementById("categoryReasonText").textContent = categoryCheck.reason || "-";
+
+        const resultEl = document.getElementById("categoryMatchText");
+
+        if (categoryCheck.matched === true) {
+            resultEl.textContent = "Correct";
+            resultEl.style.color = "#16a34a";
+        } else if (categoryCheck.matched === false) {
+            resultEl.textContent = "Mismatch";
+            resultEl.style.color = "#dc2626";
+        } else {
+            resultEl.textContent = "Unknown";
+            resultEl.style.color = "#6b7280";
+        }
+
+        const titleMatchEl = document.getElementById("titleMatchText");
+
+        if (categoryCheck.title_matched === true) {
+            titleMatchEl.textContent = "Matched";
+            titleMatchEl.style.color = "#16a34a";
+        } else if (categoryCheck.title_matched === false) {
+            titleMatchEl.textContent = "Mismatch";
+            titleMatchEl.style.color = "#dc2626";
+        } else {
+            titleMatchEl.textContent = "Unknown";
+            titleMatchEl.style.color = "#6b7280";
+        }
+    }
 
     const scoreEl = document.getElementById("scoreValue");
     scoreEl.textContent = data.score;

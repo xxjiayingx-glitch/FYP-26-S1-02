@@ -1709,6 +1709,109 @@ class FactCheckController:
     #         return {"verdict": "Uncertain", "confidence": 0.5, "reason": str(e)}
 
     @staticmethod
+    def check_category_match(title, content, selected_category, available_categories):
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            return {
+                "ok": False,
+                "matched": None,
+                "suggested_category": None,
+                "confidence": 0,
+                "reason": "AI category check is unavailable."
+            }
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+
+        prompt = f"""
+            You are checking whether a news article is submitted correctly.
+
+            Selected category:
+            {selected_category}
+
+            Available categories:
+            {", ".join(available_categories)}
+
+            Article title:
+            {title}
+
+            Article content:
+            {content[:3000]}
+
+            Return only valid JSON:
+            {{
+            "matched": true,
+            "title_matched": true,
+            "suggested_category": "one category from available categories",
+            "confidence": 0.85,
+            "reason": "short explanation"
+            }}
+
+            Rules:
+            - "matched" checks whether the selected category fits the article content.
+            - "title_matched" checks whether the title fits the article content.
+            - If the selected category does not fit, set "matched" to false.
+            - If the title and content discuss different topics, set "title_matched" to false.
+            - "suggested_category" must be one category from the available categories.
+            - Do not invent categories.
+            - In the reason, mention both issues if both category and title are mismatched.
+            - Keep the reason short and user-friendly.
+        """
+
+        payload = {
+            "model": "llama-3.3-70b-versatile",
+            "temperature": 0.1,
+            "max_completion_tokens": 200,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a news category classification assistant. Return only valid JSON."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        }
+
+        try:
+            r = requests.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=10
+            )
+            r.raise_for_status()
+
+            raw = r.json()["choices"][0]["message"]["content"].strip()
+            parsed = json.loads(raw)
+
+            suggested = parsed.get("suggested_category")
+            if suggested not in available_categories:
+                suggested = selected_category
+
+            return {
+                "ok": True,
+                "matched": bool(parsed.get("matched")),
+                "suggested_category": suggested,
+                "confidence": float(parsed.get("confidence", 0)),
+                "reason": parsed.get("reason", "No reason provided."),
+                "title_matched": bool(parsed.get("title_matched", True)),
+            }
+
+        except Exception as e:
+            return {
+                "ok": False,
+                "matched": None,
+                "suggested_category": None,
+                "confidence": 0,
+                "reason": f"Category check failed: {str(e)}"
+            }
+    
+    @staticmethod
     def call_single_groq_model(sentence, model_name):
         log_llm(model_name, "Starting request")
 
@@ -2412,6 +2515,40 @@ class FactCheckController:
         stat_penalty_applied = False
         stat_bonus_applied = False
 
+        plausible_reasons = []
+        questionable_reasons = []
+        unlikely_reasons = []
+
+        plausible_count = sum(
+            1 for item in results
+            if item.get("general_result") and item["general_result"].get("verdict") == "Plausible"
+        )
+
+        questionable_count = sum(
+            1 for item in results
+            if item.get("general_result") and item["general_result"].get("verdict") == "Questionable"
+        )
+
+        unlikely_count = sum(
+            1 for item in results
+            if item.get("general_result") and item["general_result"].get("verdict") == "Unlikely"
+        )
+
+        total_checked = plausible_count + questionable_count + unlikely_count
+
+        def get_scope_prefix(count, total):
+            if total == 0:
+                return "The article"
+
+            ratio = count / total
+
+            if ratio >= 0.75:
+                return "The article"
+            elif ratio >= 0.4:
+                return "Several parts of the article"
+            else:
+                return "Some parts of the article"
+
         for item in results:
             route = item.get("route", [])
             google_result = item.get("google_factcheck_result")
@@ -2463,7 +2600,6 @@ class FactCheckController:
                 and google_result.get("matched")
             )
 
-            # 1. Official statistics: strongest evidence
             if has_stat_match and not stat_bonus_applied:
                 if stats_result.get("year_note"):
                     score += 8
@@ -2499,7 +2635,6 @@ class FactCheckController:
                     )
                 stat_penalty_applied = True
 
-            # 2. Published fact-check results: also strong
             if has_google_match:
                 rating = (google_result.get("rating") or "").lower()
 
@@ -2509,6 +2644,7 @@ class FactCheckController:
                     "unlikely", "no evidence", "lacks evidence", "disputed",
                     "unproven", "myth", "exaggerated"
                 ]
+
                 true_words = [
                     "true", "correct", "accurate", "verified", "confirmed"
                 ]
@@ -2536,7 +2672,6 @@ class FactCheckController:
                     )
                     factcheck_penalty_applied = True
 
-            # 3. Small authority bonus only when AI also supports plausibility
             if (
                 "reported_speech" in route
                 and "authority_source" in route
@@ -2562,7 +2697,6 @@ class FactCheckController:
                 )
                 authority_bonus_applied = True
 
-            # 4. AI is strong for non-structured claims, but does not override strong structured evidence
             strong_structured_evidence_exists = (
                 has_stat_match
                 or has_stat_mismatch
@@ -2596,9 +2730,7 @@ class FactCheckController:
                     else:
                         score -= 1
 
-                    reasons.append(
-                        f"Multi-LLM assessment suggests the claim is unlikely: {reason_text}"
-                    )
+                    unlikely_reasons.append(reason_text)
                     llm_penalty_applied = True
 
                 elif verdict == "Questionable" and not llm_penalty_applied:
@@ -2607,9 +2739,7 @@ class FactCheckController:
                     else:
                         score -= 3
 
-                    reasons.append(
-                        f"Multi-LLM assessment found the claim questionable: {reason_text}"
-                    )
+                    questionable_reasons.append(reason_text)
                     llm_penalty_applied = True
 
                 elif verdict == "Plausible" and not llm_bonus_applied:
@@ -2620,12 +2750,22 @@ class FactCheckController:
                     else:
                         score += 4
 
-                    reasons.append(
-                        f"Multi-LLM assessment suggests the claim is plausible: {reason_text}"
-                    )
+                    plausible_reasons.append(reason_text)
                     llm_bonus_applied = True
 
-        # 5. Style should not heavily punish supported facts
+        if plausible_reasons:
+            prefix = get_scope_prefix(plausible_count, total_checked)
+            verb = "appears" if prefix == "The article" else "appear"
+            reasons.append(f"{prefix} {verb} believable. {plausible_reasons[0]}")
+
+        if questionable_reasons:
+            prefix = get_scope_prefix(questionable_count, total_checked)
+            reasons.append(f"{prefix} may need review. {questionable_reasons[0]}")
+
+        if unlikely_reasons:
+            prefix = get_scope_prefix(unlikely_count, total_checked)
+            reasons.append(f"{prefix} may be doubtful. {unlikely_reasons[0]}")
+
         has_verified_evidence_anywhere = any(
             (
                 item.get("statistical_result")
@@ -2647,6 +2787,7 @@ class FactCheckController:
         if sensationalism and sensationalism.get("penalty", 0) > 0 and not has_verified_evidence_anywhere:
             reduced_penalty = min(sensationalism["penalty"], 6)
             score -= reduced_penalty
+
             if sensationalism.get("sensational_phrases"):
                 reasons.append(
                     f"Sensational wording detected: {', '.join(sensationalism['sensational_phrases'][:3])}."
@@ -2661,22 +2802,13 @@ class FactCheckController:
                     f"Cites trusted sources: {', '.join(source_credibility['trusted'][:3])}."
                 )
 
-        plausible_count = sum(
-            1 for item in results
-            if item.get("general_result") and item["general_result"].get("verdict") == "Plausible"
-        )
-
-        unlikely_count = sum(
-            1 for item in results
-            if item.get("general_result") and item["general_result"].get("verdict") == "Unlikely"
-        )
-
         if plausible_count >= 3 and unlikely_count <= 1:
             score += 3
             reasons.append("Most analysed sentences appear plausible overall.")
 
         score = max(0, min(score, 100))
         unique_reasons = list(dict.fromkeys(reasons))
+
         return score, unique_reasons
 
     # @staticmethod
@@ -2799,7 +2931,7 @@ class FactCheckController:
     # 9. MAIN PIPELINE
     # =========================
     @classmethod
-    def analyse_content(cls, content):
+    def analyse_content(cls, content, title=None, selected_category=None, available_categories=None):
         sentences = cls.split_sentences(content)
 
         sensationalism = cls.analyse_sensationalism(content)
@@ -2883,7 +3015,34 @@ class FactCheckController:
 
             results.append(routed)
 
+        category_result = None
+
+        if title and selected_category and available_categories:
+            category_result = cls.check_category_match(
+                title,
+                content,
+                selected_category,
+                available_categories
+            )
+
         score, score_reasons = cls.calculate_score(results, sensationalism, source_credibility)
+
+        # ===== CATEGORY & TITLE CHECK IMPACT =====
+        if category_result:
+            if category_result.get("matched") is False and category_result.get("title_matched") is False:
+                score -= 7
+                score_reasons.append("Both the selected category and article title may not match the content.")
+
+            else:
+                if category_result.get("matched") is False:
+                    score -= 3
+                    score_reasons.append("Selected category may not match the article content.")
+
+                if category_result.get("title_matched") is False:
+                    score -= 4
+                    score_reasons.append("Article title may not match the article content.")
+
+        score = max(0, min(score, 100))
         status = cls.get_status(score, score_reasons)
 
         logger = ClaimVerificationLog()
@@ -2909,7 +3068,8 @@ class FactCheckController:
             "reasons": score_reasons,
             "sensationalism": sensationalism,
             "source_credibility": source_credibility,
-            "sentences": results
+            "sentences": results,
+            "category_check": category_result,
         }
     
     @staticmethod
@@ -2953,6 +3113,22 @@ class FactCheckController:
                 "hint": "Check whether the event is planned, ongoing, or completed.",
                 "better_direction": "Rewrite the sentence so the timing is clear and consistent."
             }
+        
+        future_year_match = re.search(r"\b20\d{2}\b", sentence)
+        current_year = datetime.now().year
+
+        if future_year_match:
+            year = int(future_year_match.group())
+            
+            if year > current_year:
+                print("[FEEDBACK] Branch: future claim", flush=True)
+                return {
+                    "issue_code": FactCheckController.ISSUE_CODES["WEAK_SUPPORT"],
+                    "issue_type": "Future claim",
+                    "problem": "This sentence refers to a future event or policy that cannot be fully verified yet.",
+                    "hint": "Check whether this is an official announcement, plan, or speculation.",
+                    "better_direction": "Clarify that this is a planned or proposed change and include a source if available."
+                }
         
         if "opinion" in route:
             return {

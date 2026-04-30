@@ -638,6 +638,16 @@
 
                 <div class="factcheck-grid">
                     <div class="factcheck-left">
+
+                        <div id="categoryCheckCard" class="factcheck-card" style="display:none;">
+                            <h4>Category Check</h4>
+                            <p><strong>Title Match:</strong> <span id="titleMatchText"></span></p>
+                            <p><strong>Selected Category:</strong> <span id="selectedCategoryText"></span></p>
+                            <p><strong>AI Suggestion:</strong> <span id="suggestedCategoryText"></span></p>
+                            <p><strong>Result:</strong> <span id="categoryMatchText"></span></p>
+                            <p><strong>Reason:</strong> <span id="categoryReasonText"></span></p>
+                        </div>
+
                         <div class="factcheck-card">
                             <h4>Why this score</h4>
                             <ul id="scoreReasons" class="score-reasons"></ul>
@@ -672,470 +682,11 @@
     </div>
 </div>
 
-<!-- <script>
-document.getElementById("checkScoreBtn").addEventListener("click", async function () {
-    const content = document.querySelector("textarea").value;
-
-    const response = await fetch("/fact-check-preview", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ content })
-    });
-
-    const data = await response.json();
-    console.log("FACT CHECK RESPONSE:", data);
-
-    document.getElementById("factCheckSection").style.display = "block";
-    document.getElementById("scoreValue").textContent = data.score;
-    document.getElementById("statusValue").textContent = data.status;
-
-    const reasonsList = document.getElementById("scoreReasons");
-    reasonsList.innerHTML = "";
-
-    (data.reasons || []).forEach(reason => {
-        const li = document.createElement("li");
-        li.textContent = reason;
-        reasonsList.appendChild(li);
-    });
-
-    document.getElementById("ai_fact_check_score").value = data.score;
-    document.getElementById("ai_fact_check_status").value = data.status;
-
-    const previewPanel = document.getElementById("previewPanel");
-    const issuesList = document.getElementById("issuesList");
-
-    previewPanel.innerHTML = "";
-    issuesList.innerHTML = "";
-
-    if (!data.sentences || data.sentences.length === 0) {
-        previewPanel.innerHTML = "<p>No fact-check result found.</p>";
-        issuesList.innerHTML = "<li>No issues found.</li>";
-        return;
-    }
-
-    function formatRoute(route) {
-        if (!route || route.length === 0) return "general_check";
-
-        return route.map(r => {
-            if (r === "google_factcheck") return "Google Fact Check";
-            if (r === "news_check") return "News Check";
-            if (r === "statistical_check") return "Statistical Check";
-            if (r === "opinion") return "Opinion";
-            if (r === "general_check") return "General Check";
-            return r;
-        }).join(", ");
-    }
-
-    
-
-    data.sentences.forEach(item => {
-        const routeText = formatRoute(item.route);
-
-        let newsHtml = "";
-        let factCheckHtml = ""; 
-        let statsHtml = "";
-
-        if (item.news_result) {
-            newsHtml = `
-                <p><strong>Provider:</strong> ${item.news_result.provider || "-"}</p>
-                <p><strong>News Query:</strong> ${item.news_result.query_used || "-"}</p>
-                <p><strong>Support Level:</strong> ${item.news_result.support_level || "-"}</p>
-                <p><strong>Articles Found:</strong> ${item.news_result.articles_found || 0}</p>
-                <p><strong>Sources:</strong> ${(item.news_result.sources || []).join(", ")}</p>
-                <p><strong>Sample Titles:</strong> ${(item.news_result.sample_titles || []).join(" | ")}</p>
-            `;
-        }
-
-        if (item.google_factcheck_result) {
-            factCheckHtml = `
-                <p><strong>Fact Check Source:</strong> ${item.google_factcheck_result.publisher || "-"}</p>
-                <p><strong>Fact Check Rating:</strong> ${item.google_factcheck_result.rating || "-"}</p>
-                <p><strong>Fact Check Link:</strong> ${
-                    item.google_factcheck_result.url
-                        ? `<a href="${item.google_factcheck_result.url}" target="_blank">View Source</a>`
-                        : "-"
-                }</p>
-            `;
-        }
-
-        if (item.statistical_result && item.statistical_result.matched) {
-            const statsResultText =
-                item.statistical_result.result === "match"
-                    ? "Matches trusted data ✅"
-                    : "Mismatch with trusted data ❌";
-
-            statsHtml = `
-                <p><strong>Statistical Source:</strong> ${item.statistical_result.source || "-"}</p>
-                <p><strong>Year:</strong> ${item.statistical_result.year || "-"}</p>
-                <p><strong>Claimed Value:</strong> ${item.statistical_result.claimed_value ?? "-"} ${item.statistical_result.unit || ""}</p>
-                <p><strong>Official Value:</strong> ${item.statistical_result.official_value ?? "-"} ${item.statistical_result.unit || ""}</p>
-                <p><strong>Statistical Result:</strong> ${statsResultText}</p>
-                <p><strong>Source Link:</strong> ${
-                    item.statistical_result.source_url
-                        ? `<a href="${item.statistical_result.source_url}" target="_blank">View Source</a>`
-                        : "-"
-                }</p>
-            `;
-        }
-
-        const sentenceBlock = document.createElement("div");
-        sentenceBlock.classList.add("sentence-result");
-
-        sentenceBlock.innerHTML = `
-            <p><strong>Sentence:</strong> ${item.text}</p>
-            <p><strong>Label:</strong> ${routeText}</p>
-            <p><strong>Reason:</strong> ${item.reason}</p>
-            ${newsHtml}
-            ${factCheckHtml}
-            ${statsHtml}
-            <hr>
-        `;
-
-        previewPanel.appendChild(sentenceBlock);
-
-        if (!(item.route && item.route.length === 1 && item.route[0] === "general_check")) {
-            const li = document.createElement("li");
-            li.innerHTML = `<strong>${routeText}</strong>: ${item.text}<br><small>${item.reason}</small>`;
-            issuesList.appendChild(li);
-        }
-    });
-
-    if (issuesList.innerHTML.trim() === "") {
-        issuesList.innerHTML = "<li>No major issues found.</li>";
-    }
-});
-</script> -->
-
-<!-- <script>
-    document.getElementById("checkScoreBtn").addEventListener("click", async function () {
-    const content = document.querySelector("textarea").value;
-
-    // BUG FIX 1: Guard against empty submission on the frontend too
-    // WHY: Don't waste an API call if the textarea is blank
-    if (!content.trim()) {
-        alert("Please enter some content to fact-check.");
-        return;
-    }
-
-    const response = await fetch("/fact-check-preview", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ content })
-    });
-
-    const data = await response.json();
-    console.log("FACT CHECK RESPONSE:", data);
-
-    // BUG FIX 2: Handle error response from backend gracefully
-    // WHY: If the backend returns {"error": "..."}, your old code would
-    // still try to render score/status as undefined and crash silently
-    if (data.error) {
-        alert("Fact check failed: " + data.error);
-        return;
-    }
-
-    document.getElementById("factCheckSection").style.display = "block";
-
-    // NEW: Colour-code the score so it's immediately readable
-    const scoreEl = document.getElementById("scoreValue");
-    scoreEl.textContent = data.score;
-    scoreEl.style.color =
-        data.score >= 80 ? "green" :
-        data.score >= 60 ? "orange" :
-        data.score >= 40 ? "darkorange" : "red";
-
-    document.getElementById("statusValue").textContent = data.status;
-
-    const reasonsList = document.getElementById("scoreReasons");
-    reasonsList.innerHTML = "";
-    (data.reasons || []).forEach(reason => {
-        const li = document.createElement("li");
-        li.textContent = reason;
-        reasonsList.appendChild(li);
-    });
-
-    document.getElementById("ai_fact_check_score").value = data.score;
-    document.getElementById("ai_fact_check_status").value = data.status;
-
-    // NEW: Show sensationalism warning if penalty was applied
-    // WHY: Your backend now returns sensationalism data — surface it to the user
-    const sensationalism = data.sensationalism;
-    const sensWarnEl = document.getElementById("sensationalismWarning");
-    if (sensWarnEl) {
-        if (sensationalism && sensationalism.sensational_phrases && sensationalism.sensational_phrases.length > 0) {
-            sensWarnEl.style.display = "block";
-            sensWarnEl.textContent = "⚠ Sensationalist language detected: " +
-                sensationalism.sensational_phrases.slice(0, 3).join(", ");
-        } else {
-            sensWarnEl.style.display = "none";
-        }
-    }
-
-    const previewPanel = document.getElementById("previewPanel");
-    const issuesList = document.getElementById("issuesList");
-
-    previewPanel.innerHTML = "";
-    issuesList.innerHTML = "";
-
-    if (!data.sentences || data.sentences.length === 0) {
-        previewPanel.innerHTML = "<p>No fact-check result found.</p>";
-        issuesList.innerHTML = "<li>No issues found.</li>";
-        return;
-    }
-
-    function getAuthorityText(item) {
-        if (item.route && item.route.includes("authority_source")) {
-            return "Official source attributed";
-        }
-        return "";
-    }
-
-    function formatRoute(item) {
-        const route = item.route || [];
-
-        if (!route || route.length === 0) return "General Check";
-
-        return route.map(r => {
-
-            if (r === "google_factcheck") {
-                const fc = item.google_factcheck_result;
-
-                if (!fc || !fc.matched) {
-                    return "General Check (LLM Fallback)";
-                }
-
-                return "Google Fact Check";
-            }
-
-            if (r === "market_data") return "Market Data";
-
-            if (r === "statistical_check") {
-                const stats = item.statistical_result;
-
-                if (!stats || stats.result === "no_match") {
-                    return "General Check (LLM Fallback)";
-                }
-
-                if (stats.result === "mismatch") {
-                    return "Statistical Check (Mismatch)";
-                }
-
-                return "Statistical Check";
-            }
-
-            if (r === "sensationalism_only") return "Sensationalism Warning";
-
-            if (r === "reported_speech") return "Reported Statement";
-
-            if (r === "opinion") return "Opinion";
-
-            if (r === "authority_source") return "Authority Source";
-
-            if (r === "general_check") return "General Check";
-
-            return r;
-
-        }).join(", ");
-    }
-
-    function getReasonText(item) {
-        const stats = item.statistical_result;
-
-        if (item.time_check && item.time_check.inconsistent) {
-            return "Temporal inconsistency detected — the sentence mixes future/planned wording with completed-event wording.";
-        }
-
-        if (item.route && item.route.includes("market_data")) {
-            return "Financial market price movement detected.";
-        }
-
-        // Case 1: statistical result exists and worked
-        if (stats && stats.matched) {
-            if (stats.result === "match") {
-                return "Official statistical data verified the claim.";
-            }
-
-            if (stats.result === "mismatch") {
-                return "Claim contradicts official statistical data.";
-            }
-
-            if (stats.result === "no_match") {
-                return "No matching statistical data found — using LLM assessment.";
-            }
-        }
-
-        // Case 2: statistical route but no usable result → fallback
-        if (item.route && item.route.includes("statistical_check")) {
-            return "No matching statistical data found — using LLM assessment.";
-        }
-
-        // Case 3: general check
-        if (item.route && item.route.includes("general_check")) {
-            const lower = (item.text || "").toLowerCase();
-
-            const strongWords = ["never", "always", "definitely", "undeniably"];
-
-            if (strongWords.some(w => lower.includes(w))) {
-                return "General factual claim with strong absolute wording — using LLM assessment.";
-            }
-
-            return "General factual claim — using LLM assessment.";
-        }
-
-        // Google Fact Check fallback
-        if (item.route && item.route.includes("google_factcheck")) {
-            const fc = item.google_factcheck_result;
-
-            if (!fc || !fc.matched) {
-                return "No verified fact-check result found  — using LLM assessment.";
-            }
-
-            return "Verified using Google Fact Check data.";
-        }
-
-        // Default fallback
-        return item.reason || "LLM-based verification applied.";
-    }
-
-    data.sentences.forEach(item => {
-        const routeText = formatRoute(item)
-
-        console.log("statistical_result =", item.statistical_result);
-
-        let newsHtml = "";
-        let factCheckHtml = "";
-        let statsHtml = "";
-        let llmHtml = "";      // NEW
-        let quoteHtml = "";    // NEW
-
-        if (item.news_result) {
-            newsHtml = `
-                <p><strong>Provider:</strong> ${item.news_result.provider || "-"}</p>
-                <p><strong>News Query:</strong> ${item.news_result.query_used || "-"}</p>
-                <p><strong>Support Level:</strong> ${item.news_result.support_level || "-"}</p>
-                <p><strong>Articles Found:</strong> ${item.news_result.articles_found || 0}</p>
-                <p><strong>Sources:</strong> ${(item.news_result.sources || []).join(", ") || "-"}</p>
-                <p><strong>Sample Titles:</strong> ${(item.news_result.sample_titles || []).join(" | ") || "-"}</p>
-            `;
-        }
-
-        if (item.google_factcheck_result && item.google_factcheck_result.matched) {
-            factCheckHtml = `
-                <p><strong>Fact Check Source:</strong> ${item.google_factcheck_result.publisher || "-"}</p>
-                <p><strong>Fact Check Rating:</strong> ${item.google_factcheck_result.rating || "-"}</p>
-                <p><strong>Fact Check Link:</strong> ${
-                    item.google_factcheck_result.url
-                        ? `<a href="${item.google_factcheck_result.url}" target="_blank">View Source</a>`
-                        : "-"
-                }</p>
-            `;
-        }
-
-        if (item.statistical_result && item.statistical_result.matched) {
-            const hasYearNote = !!item.statistical_result.year_note;
-
-            let statsResultText;
-            if (item.statistical_result.result === "match") {
-                statsResultText = hasYearNote
-                    ? "Matches latest available data ⚠"
-                    : "Matches trusted data ✅";
-            } else if (item.statistical_result.result === "mismatch") {
-                statsResultText = hasYearNote
-                    ? "Mismatch with latest available data ⚠"
-                    : "Mismatch with trusted data ❌";
-            } else {
-                statsResultText = "No matching trusted statistic found";
-            }
-
-            statsHtml = `
-                <p><strong>Statistical Source:</strong> ${item.statistical_result.source || "-"}</p>
-                <p><strong>Year:</strong> ${item.statistical_result.year || "-"}</p>
-                ${
-                    item.statistical_result.year_note
-                        ? `<p style="color: orange;"><strong>Note:</strong> ${item.statistical_result.year_note}</p>`
-                        : ""
-                }
-                <p><strong>Claimed Value:</strong> ${item.statistical_result.claimed_value ?? "-"} ${item.statistical_result.unit || ""}</p>
-                <p><strong>Official Value:</strong> ${item.statistical_result.official_value ?? "-"} ${item.statistical_result.unit || ""}</p>
-                <p><strong>Result:</strong> ${statsResultText}</p>
-                <p><strong>Source Link:</strong> ${
-                    item.statistical_result.source_url
-                        ? `<a href="${item.statistical_result.source_url}" target="_blank">View Source</a>`
-                        : "-"
-                }</p>
-            `;
-        }
-
-        // NEW: Render LLM general check result
-        // WHY: Your backend now returns general_result for sentences that
-        // went through Groq. Without this block it was silently ignored.
-        if (item.general_result) {
-            const verdictColor =
-                item.general_result.verdict === "Plausible" ? "green" :
-                item.general_result.verdict === "Unlikely" ? "red" : "orange";
-
-            llmHtml = `
-                <p><strong>AI Assessment:</strong>
-                    <span style="color:${verdictColor}; font-weight:500">
-                        ${item.general_result.verdict || "-"}
-                    </span>
-                    (confidence: ${((item.general_result.confidence || 0) * 100).toFixed(0)}%)
-                </p>
-                <p><strong>AI Reason:</strong> ${item.general_result.reason || "-"}</p>
-            `;
-        }
-
-        // NEW: Render quote verification result
-        if (item.quote_result) {
-            quoteHtml = `
-                <p><strong>Quote Speaker:</strong> ${item.quote_result.speaker || "-"}</p>
-                <p><strong>Quote Verification:</strong> ${
-                    item.quote_result.matched
-                        ? `Found in news (support: ${item.quote_result.support_level || "-"})`
-                        : "Could not verify this quote in news sources"
-                }</p>
-            `;
-        }
-
-        const sentenceBlock = document.createElement("div");
-        sentenceBlock.classList.add("sentence-result");
-        const authorityText = getAuthorityText(item);
-
-        sentenceBlock.innerHTML = `
-            <p><strong>Sentence:</strong> ${item.text}</p>
-            <p><strong>Label:</strong> ${routeText}</p>
-            ${authorityText ? `<p><strong>Authority:</strong> <span style="color:#2563eb;">${authorityText}</span></p>` : ""}
-            <p><strong>Reason:</strong> ${getReasonText(item)}</p>
-            ${newsHtml}
-            ${factCheckHtml}
-            ${statsHtml}
-            ${llmHtml}
-            ${quoteHtml}
-            <hr>
-        `;
-
-        previewPanel.appendChild(sentenceBlock);
-
-        // BUG FIX 3: Your old condition excluded general_check from issuesList
-        // but now general_check sentences have real LLM results worth showing.
-        // Only skip pure opinions — everything else is worth listing.
-        const isOpinionOnly = item.route && item.route.length === 1 && item.route[0] === "opinion";
-        if (!isOpinionOnly) {
-            const li = document.createElement("li");
-            li.innerHTML = `<strong>${routeText}</strong>: ${item.text}<br><small>${item.reason}</small>`;
-            issuesList.appendChild(li);
-        }
-    });
-
-    if (issuesList.innerHTML.trim() === "") {
-        issuesList.innerHTML = "<li>No major issues found.</li>";
-    }
-});
-</script> -->
-
 <script>
 document.getElementById("checkScoreBtn").addEventListener("click", async function () {
+    const title = document.querySelector('input[name="title"]').value;
     const content = document.querySelector("textarea").value;
+    const category = document.querySelector('select[name="category"]').value;
 
     if (!content.trim()) {
         alert("Please enter some content to fact-check.");
@@ -1145,7 +696,7 @@ document.getElementById("checkScoreBtn").addEventListener("click", async functio
     const response = await fetch("/fact-check-preview", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ title, content, category })
     });
 
     const data = await response.json();
@@ -1158,6 +709,44 @@ document.getElementById("checkScoreBtn").addEventListener("click", async functio
 
     document.getElementById("factCheckSection").style.display = "block";
 
+    // ===== CATEGORY CHECK =====
+    const categoryCheck = data.category_check;
+
+    if (categoryCheck) {
+        document.getElementById("categoryCheckCard").style.display = "block";
+
+        const selectedText = document.querySelector('select[name="category"] option:checked').textContent;
+
+        document.getElementById("selectedCategoryText").textContent = selectedText;
+        document.getElementById("suggestedCategoryText").textContent = categoryCheck.suggested_category || "-";
+        document.getElementById("categoryReasonText").textContent = categoryCheck.reason || "-";
+
+        const resultEl = document.getElementById("categoryMatchText");
+
+        if (categoryCheck.matched === true) {
+            resultEl.textContent = "Correct";
+            resultEl.style.color = "#16a34a";
+        } else if (categoryCheck.matched === false) {
+            resultEl.textContent = "Mismatch";
+            resultEl.style.color = "#dc2626";
+        } else {
+            resultEl.textContent = "Unknown";
+            resultEl.style.color = "#6b7280";
+        }
+
+        const titleMatchEl = document.getElementById("titleMatchText");
+
+        if (categoryCheck.title_matched === true) {
+            titleMatchEl.textContent = "Matched";
+            titleMatchEl.style.color = "#16a34a";
+        } else if (categoryCheck.title_matched === false) {
+            titleMatchEl.textContent = "Mismatch";
+            titleMatchEl.style.color = "#dc2626";
+        } else {
+            titleMatchEl.textContent = "Unknown";
+            titleMatchEl.style.color = "#6b7280";
+        }
+    }
     const scoreEl = document.getElementById("scoreValue");
     scoreEl.textContent = data.score;
     scoreEl.style.color =
