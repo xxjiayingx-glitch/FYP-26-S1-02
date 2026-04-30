@@ -633,7 +633,7 @@ class UserAccount:
                 username,
                 created_at,
                 userType
-            FROM UserAccount WHERE editorApprovalStatus = %s
+            FROM UserAccount WHERE editorApprovalStatus = %s AND emailVerified = 1
             ORDER BY created_at ASC
             LIMIT 5
         """, ("pending",))
@@ -780,7 +780,7 @@ class UserAccount:
     def find_by_token(self, token):
         """Find a user using verification token."""
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor()
 
         cursor.execute("SELECT * FROM UserAccount WHERE verificationToken = %s", (token,))
         user = cursor.fetchone()
@@ -797,6 +797,7 @@ class UserAccount:
         cursor.execute("""
             UPDATE UserAccount
             SET accountStatus = 'active',
+                emailVerified = 1,
                 verificationToken = NULL
             WHERE verificationToken = %s
         """, (token,))

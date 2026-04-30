@@ -53,7 +53,9 @@ def editor_applications_page():
             updated_at,
             created_at
         FROM UserAccount
-        WHERE editorApprovalStatus IS NOT NULL
+        WHERE userType = 'editor'
+        AND editorApprovalStatus IS NOT NULL
+        AND emailVerified = 1
         ORDER BY userID DESC
     """)
     rows = cursor.fetchall()
@@ -115,7 +117,7 @@ def editor_applications_page():
     cursor.execute("""
         SELECT COUNT(*) AS total
         FROM UserAccount
-        WHERE editorApprovalStatus = 'pending'
+        WHERE editorApprovalStatus = 'pending' AND emailVerified = 1
     """)
     pending_count = cursor.fetchone().get("total", 0)
 
@@ -136,7 +138,7 @@ def editor_applications_page():
     cursor.execute("""
         SELECT COUNT(*) AS total
         FROM UserAccount
-        WHERE editorApprovalStatus IS NOT NULL
+        WHERE editorApprovalStatus IS NOT NULL and emailVerified = 1
     """)
     total_count = cursor.fetchone().get("total", 0)
 

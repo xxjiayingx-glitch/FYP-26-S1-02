@@ -54,13 +54,54 @@ def register():
     )
 
 
+# @register_bp.route("/verify", methods=["GET"])
+# def verify():
+#     token = request.args.get("token")
+#     if not token:
+#         return render_template("Unregistered/UnregRegAcc.html", categories=get_categories(), error="Missing token")
+
+#     success = registerCTL.user_entity.verify_user(token)
+#     if success:
+#         return redirect(url_for("login.login", success="Email verified successfully. Your application will now be processed. The result will be sent to your email."))
+#     return render_template("Unregistered/UnregRegAcc.html", categories=get_categories(), error="Invalid or expired verification link.")
+
 @register_bp.route("/verify", methods=["GET"])
 def verify():
     token = request.args.get("token")
     if not token:
-        return render_template("Unregistered/UnregRegAcc.html", categories=get_categories(), error="Missing token")
+        return render_template(
+            "Unregistered/UnregRegAcc.html",
+            categories=get_categories(),
+            error="Missing token"
+        )
+
+    user = registerCTL.user_entity.find_by_token(token)
+
+    if not user:
+        return render_template(
+            "Unregistered/UnregRegAcc.html",
+            categories=get_categories(),
+            error="Invalid or expired verification link."
+        )
 
     success = registerCTL.user_entity.verify_user(token)
+
     if success:
-        return redirect(url_for("login.login"))
-    return render_template("Unregistered/UnregRegAcc.html", categories=get_categories(), error="Invalid or expired verification link.")
+        user_type = (user.get("userType") or "").strip().lower()
+
+        if user_type == "editor":
+            return redirect(url_for(
+                "login.login",
+                success="Email verified successfully. Your application will now be processed. The result will be sent to your email."
+            ))
+
+        return redirect(url_for(
+            "login.login",
+            success="Email verified successfully. You may now log in."
+        ))
+
+    return render_template(
+        "Unregistered/UnregRegAcc.html",
+        categories=get_categories(),
+        error="Invalid or expired verification link."
+    )

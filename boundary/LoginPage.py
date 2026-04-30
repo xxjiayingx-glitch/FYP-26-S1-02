@@ -26,7 +26,7 @@ def login():
         user = auth.login(email, pwd)
 
         if user == "pending":
-            return render_template("login.html", pending=True)
+            return render_template("login.html", pending=True, error="Please verify your email before logging in.")
         
         if user == "no_account":
             return render_template("login.html", error="No account found with this email.")
@@ -188,87 +188,178 @@ def editor_applicant():
                 document_filename = f"uploads/editor_documents/{safe_filename}"
 
             # Check if email or username already exists
+            # cursor.execute("""
+            #     SELECT userID, email, username, editorApprovalStatus, supportingDocument
+            #     FROM UserAccount
+            #     WHERE email = %s OR username = %s
+            # """, (email, username))
+            # existing_user = cursor.fetchone()
+
+            # if existing_user:
+            #     existing_status = (existing_user.get("editorApprovalStatus") or "").strip().lower()
+            #     existing_user_id = existing_user.get("userID")
+            #     existing_email = (existing_user.get("email") or "").strip().lower()
+            #     existing_username = (existing_user.get("username") or "").strip().lower()
+            #     existing_document = existing_user.get("supportingDocument")
+
+            #     if existing_status == "rejected" and existing_email == email.lower() and existing_username == username.lower():
+            #         token = secrets.token_urlsafe(32)
+            #         hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
+            #         final_document = document_filename if document_filename else existing_document
+
+            #         update_sql = """
+            #             UPDATE UserAccount
+            #             SET
+            #                 pwd = %s,
+            #                 first_name = %s,
+            #                 last_name = %s,
+            #                 phone = %s,
+            #                 userType = %s,
+            #                 accountStatus = %s,
+            #                 verificationToken = %s,
+            #                 editorApprovalStatus = %s,
+            #                 expertiseArea = %s,
+            #                 yearsExperience = %s,
+            #                 editorBio = %s,
+            #                 portfolioLink = %s,
+            #                 supportingDocument = %s,
+            #                 editorAdminRemarks = NULL,
+            #                 profileCompleted = %s,
+            #                 updated_at = CURRENT_TIMESTAMP
+            #             WHERE userID = %s
+            #         """
+
+            #         cursor.execute(
+            #             update_sql,
+            #             (
+            #                 hashed_password,
+            #                 first_name,
+            #                 last_name,
+            #                 phone,
+            #                 "editor",
+            #                 "pending",
+            #                 token,
+            #                 "pending",
+            #                 expertise_area,
+            #                 years_experience,
+            #                 bio,
+            #                 portfolio_link,
+            #                 final_document,
+            #                 1,
+            #                 existing_user_id
+            #             )
+            #         )
+
+            #         conn.commit()
+
+            #         try:
+            #             send_verification_email(email, token)
+            #         except Exception as e:
+            #             print("Failed to send verification email:", e)
+
+            #         return redirect(
+            #             url_for(
+            #                 "login.login",
+            #                 success="Editor application resubmitted successfully. Please verify your email first, then wait for admin approval."
+            #             )
+            #         )
+
+            # First check for any existing account using this email or username
             cursor.execute("""
-                SELECT userID, email, username, editorApprovalStatus, supportingDocument
+                SELECT userID, email, username, userType, editorApprovalStatus, supportingDocument
                 FROM UserAccount
                 WHERE email = %s OR username = %s
             """, (email, username))
-            existing_user = cursor.fetchone()
+            matches = cursor.fetchall()
 
-            if existing_user:
-                existing_status = (existing_user.get("editorApprovalStatus") or "").strip().lower()
-                existing_user_id = existing_user.get("userID")
-                existing_email = (existing_user.get("email") or "").strip().lower()
-                existing_username = (existing_user.get("username") or "").strip().lower()
-                existing_document = existing_user.get("supportingDocument")
+            rejected_editor = None
+            conflict_user = None
 
-                if existing_status == "rejected" and existing_email == email.lower() and existing_username == username.lower():
-                    token = secrets.token_urlsafe(32)
-                    hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
-                    final_document = document_filename if document_filename else existing_document
+            for row in matches:
+                row_status = (row.get("editorApprovalStatus") or "").strip().lower()
+                row_type = (row.get("userType") or "").strip().lower()
+                row_email = (row.get("email") or "").strip().lower()
+                row_username = (row.get("username") or "").strip().lower()
 
-                    update_sql = """
-                        UPDATE UserAccount
-                        SET
-                            pwd = %s,
-                            first_name = %s,
-                            last_name = %s,
-                            phone = %s,
-                            userType = %s,
-                            accountStatus = %s,
-                            verificationToken = %s,
-                            editorApprovalStatus = %s,
-                            expertiseArea = %s,
-                            yearsExperience = %s,
-                            editorBio = %s,
-                            portfolioLink = %s,
-                            supportingDocument = %s,
-                            editorAdminRemarks = NULL,
-                            profileCompleted = %s,
-                            updated_at = CURRENT_TIMESTAMP
-                        WHERE userID = %s
-                    """
+                # same rejected editor account → allow resubmit
+                if row_type == "editor" and row_status == "rejected" and (row_email == email.lower() or row_username == username.lower()):
+                    rejected_editor = row
+                    break
 
-                    cursor.execute(
-                        update_sql,
-                        (
-                            hashed_password,
-                            first_name,
-                            last_name,
-                            phone,
-                            "editor",
-                            "pending",
-                            token,
-                            "pending",
-                            expertise_area,
-                            years_experience,
-                            bio,
-                            portfolio_link,
-                            final_document,
-                            1,
-                            existing_user_id
-                        )
-                    )
-
-                    conn.commit()
-
-                    try:
-                        send_verification_email(email, token)
-                    except Exception as e:
-                        print("Failed to send verification email:", e)
-
-                    return redirect(
-                        url_for(
-                            "login.login",
-                            success="Editor application resubmitted successfully. Please verify your email first, then wait for admin approval."
-                        )
-                    )
-
+            # if no rejected editor found, then any match is a real conflict
+            if not rejected_editor and matches:
                 return render_template(
                     "editor_applicant.html",
                     categories=categories,
                     form_data=form_data,
                     error="Email or username already exists."
+                )
+
+            if rejected_editor:
+                existing_user_id = rejected_editor.get("userID")
+                existing_document = rejected_editor.get("supportingDocument")
+
+                token = secrets.token_urlsafe(32)
+                hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
+                final_document = document_filename if document_filename else existing_document
+
+                update_sql = """
+                    UPDATE UserAccount
+                    SET
+                        pwd = %s,
+                        first_name = %s,
+                        last_name = %s,
+                        phone = %s,
+                        userType = %s,
+                        accountStatus = %s,
+                        emailVerified = %s,
+                        verificationToken = %s,
+                        editorApprovalStatus = %s,
+                        expertiseArea = %s,
+                        yearsExperience = %s,
+                        editorBio = %s,
+                        portfolioLink = %s,
+                        supportingDocument = %s,
+                        editorAdminRemarks = NULL,
+                        profileCompleted = %s,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE userID = %s
+                """
+
+                cursor.execute(
+                    update_sql,
+                    (
+                        hashed_password,
+                        first_name,
+                        last_name,
+                        phone,
+                        "editor",
+                        "pending",
+                        0,
+                        token,
+                        "pending",
+                        expertise_area,
+                        years_experience,
+                        bio,
+                        portfolio_link,
+                        final_document,
+                        1,
+                        existing_user_id
+                    )
+                )
+
+                conn.commit()
+
+                try:
+                    send_verification_email(email, token)
+                except Exception as e:
+                    print("Failed to send verification email:", e)
+
+                return redirect(
+                    url_for(
+                        "login.login",
+                        success="Editor application resubmitted successfully. Please check your email to verify your email first, then wait for admin approval."
+                    )
                 )
 
             # Split full name into first_name and last_name
@@ -295,6 +386,7 @@ def editor_applicant():
                     phone,
                     userType,
                     accountStatus,
+                    emailVerified,
                     verificationToken,
                     editorApprovalStatus,
                     expertiseArea,
@@ -304,7 +396,7 @@ def editor_applicant():
                     supportingDocument,
                     profileCompleted
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s)
             """,(
                 username,
                 email,
@@ -314,6 +406,7 @@ def editor_applicant():
                 phone,
                 "editor",
                 "pending",
+                0,
                 token,
                 "pending",
                 expertise_area,
@@ -334,7 +427,7 @@ def editor_applicant():
             return redirect(
                 url_for(
                     "login.login",
-                    success="Editor application submitted successfully. Please verify your email first, then wait for admin approval.")
+                    success="Editor application submitted successfully. Please check your email to verify your email first, then wait for admin approval.")
             )
         
         return render_template("editor_applicant.html", categories=categories, form_data={})
