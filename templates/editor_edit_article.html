@@ -117,91 +117,286 @@
         background: #1d4ed8;
     }
 
-    .fact-check-card {
-        margin-top: 18px;
+    .fact-check-section {
+        margin-top: 20px;
         border: 1px solid #e5e7eb;
         border-radius: 16px;
-        background: #fcfcfd;
-        padding: 18px;
+        padding: 20px;
+        background: #f8fafc;
     }
 
-    .fact-check-card h3 {
-        margin-top: 0;
-        margin-bottom: 14px;
+    .factcheck-header {
+        margin-bottom: 18px;
+    }
+
+    .factcheck-header h3 {
+        margin: 0 0 8px;
         color: #111827;
-        font-size: 22px;
     }
 
-    .score-row {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 14px;
+    .factcheck-meta {
+        margin: 0;
+        color: #374151;
+        font-size: 15px;
     }
 
-    .score-pill {
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 999px;
-        font-weight: 700;
+    .factcheck-divider {
+        margin: 0 10px;
+        color: #9ca3af;
+    }
+
+    .sensationalism-warning {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fff7ed;
+        border: 1px solid #fdba74;
+        color: #c2410c;
         font-size: 14px;
     }
 
-    .score-pill.score {
-        background: #eef2ff;
-        color: #3730a3;
+    .factcheck-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 18px;
+        align-items: start;
     }
 
-    .score-pill.status {
-        background: #ecfeff;
-        color: #155e75;
+    .factcheck-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 16px;
     }
 
-    #previewPanel {
-        border: 1px solid #d1d5db;
+    .factcheck-card h4 {
+        margin: 0 0 14px;
+        color: #111827;
+    }
+
+    .score-reasons {
+        max-height: 180px;
+        overflow-y: auto;
+        padding-right: 6px;
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .score-reasons li {
+        margin-bottom: 8px;
+        color: #374151;
+        line-height: 1.5;
+    }
+
+    .sentence-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .sentence-header-row h4 {
+        margin: 0;
+    }
+
+    .mini-filter-btn {
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #1e293b;
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .mini-filter-btn:hover {
+        background: #eef2f7;
+    }
+
+    .sentence-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 520px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .sentence-item {
+        border: 1px solid #e5e7eb;
+        border-left: 5px solid #cbd5e1;
         border-radius: 12px;
-        background: #fff;
-        min-height: 90px;
-        padding: 14px;
-        line-height: 1.8;
-        margin-top: 8px;
-        margin-bottom: 14px;
+        padding: 12px 14px;
+        background: #f9fafb;
+        cursor: pointer;
+        transition: 0.2s ease;
     }
 
-    #issuesList {
-        margin-top: 8px;
-        padding-left: 20px;
+    .sentence-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .sentence-item.active {
+        border-color: #94a3b8;
+        background: #f8fafc;
+        box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.18);
+    }
+
+    .sentence-item.good {
+        border-left-color: #16a34a;
+        background: #f0fdf4;
+    }
+
+    .sentence-item.neutral {
+        border-left-color: #cbd5e1;
+        background: #ffffff;
+    }
+
+    .sentence-item.warning {
+        border-left-color: #f59e0b;
+        background: #fff7ed;
+    }
+
+    .sentence-item.danger {
+        border-left-color: #dc2626;
+        background: #fef2f2;
+    }
+
+    .sentence-item-title {
+        font-size: 14px;
+        line-height: 1.55;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+
+    .sentence-item-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .sentence-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        background: #e5e7eb;
         color: #374151;
     }
 
-    .highlight-supported {
-        background-color: #d4edda;
-        padding: 2px 4px;
+    .sentence-tag.good {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .sentence-tag.warning {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .sentence-tag.danger {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .sentence-feedback-box {
+        margin: 14px 0 16px;
+        padding: 14px 16px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+    }
+
+    .sentence-feedback-box p {
+        margin: 0 0 10px;
+        line-height: 1.6;
+    }
+
+    .sentence-feedback-box p:last-child {
+        margin-bottom: 0;
+    }
+
+    .preview-panel {
+        min-height: 220px;
+    }
+
+    .preview-placeholder {
+        color: #6b7280;
+        font-style: italic;
+        margin: 0;
+    }
+
+    .preview-block {
+        font-size: 15px;
+    }
+
+    .preview-block p {
+        margin: 0 0 14px;
+        line-height: 1.7;
+        color: #374151;
+    }
+
+    .preview-block strong {
+        color: #111827;
+    }
+
+    .preview-verdict {
+        font-weight: 700;
+    }
+
+    .preview-verdict.good {
+        color: #15803d;
+    }
+
+    .preview-verdict.warning {
+        color: #c2410c;
+    }
+
+    .preview-verdict.danger {
+        color: #b91c1c;
+    }
+
+    .preview-link {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .preview-link:hover {
+        text-decoration: underline;
+    }
+
+    .confidence-bar {
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        margin-top: 6px;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .confidence-fill {
+        height: 6px;
+        background: #16a34a;
         border-radius: 4px;
     }
 
-    .highlight-warning {
-        background-color: #fff3cd;
-        padding: 2px 4px;
-        border-radius: 4px;
+    .confidence-fill.good {
+        background: #16a34a;
     }
 
-    .highlight-danger {
-        background-color: #f8d7da;
-        padding: 2px 4px;
-        border-radius: 4px;
+    .confidence-fill.warning {
+        background: #f59e0b;
     }
 
-    .highlight-opinion {
-        background-color: #e5e7eb;
-        padding: 2px 4px;
-        border-radius: 4px;
-    }
-
-    .highlight-reported {
-        background-color: #dbeafe;
-        padding: 2px 4px;
-        border-radius: 4px;
+    .confidence-fill.danger {
+        background: #dc2626;
     }
 
     .action-row {
@@ -296,21 +491,58 @@
 
             <button type="button" id="checkScoreBtn" class="check-btn">Recheck Current Score</button>
 
-            <div class="fact-check-card">
-                <h3>Fact Check Result</h3>
-
-                <div class="score-row">
-                    <span class="score-pill score">Score: <span id="scoreValue">{{ article.aiFactCheckScore or 0 }}</span>/100</span>
-                    <span class="score-pill status">Status: <span id="statusValue">{{ article.aiFactCheckStatus or 'Not checked yet' }}</span></span>
+            <div id="factCheckSection" class="fact-check-section">
+                <div class="factcheck-header">
+                    <div>
+                        <h3>AI Fact Check Result</h3>
+                        <p class="factcheck-meta">
+                            <strong>Score:</strong> <span id="scoreValue">{{ article.aiFactCheckScore or 0 }}</span>
+                            <span class="factcheck-divider">•</span>
+                            <strong>Status:</strong> <span id="statusValue">{{ article.aiFactCheckStatus or 'Not checked yet' }}</span>
+                        </p>
+                        <div id="sensationalismWarning" class="sensationalism-warning" style="display:none;"></div>
+                    </div>
                 </div>
 
-                <label><strong>Highlighted Preview</strong></label>
-                <div id="previewPanel">Run the fact check again to refresh the highlighted preview.</div>
+                <div class="factcheck-grid">
+                    <div class="factcheck-left">
 
-                <label><strong>Issues Found</strong></label>
-                <ul id="issuesList">
-                    <li>Run the fact check again to see updated issues.</li>
-                </ul>
+                        <div id="categoryCheckCard" class="factcheck-card" style="display:none;">
+                            <h4>Category Check</h4>
+                            <p><strong>Title Match:</strong> <span id="titleMatchText"></span></p>
+                            <p><strong>Selected Category:</strong> <span id="selectedCategoryText"></span></p>
+                            <p><strong>AI Suggestion:</strong> <span id="suggestedCategoryText"></span></p>
+                            <p><strong>Result:</strong> <span id="categoryMatchText"></span></p>
+                            <p><strong>Reason:</strong> <span id="categoryReasonText"></span></p>
+                        </div>
+
+                        <div class="factcheck-card">
+                            <h4>Why this score</h4>
+                            <ul id="scoreReasons" class="score-reasons">
+                                <li>Run the fact check again to refresh the reasons.</li>
+                            </ul>
+                        </div>
+
+                        <div class="factcheck-card">
+                            <div class="sentence-header-row">
+                                <h4>AI Sentence Review</h4>
+                                <button type="button" id="toggleFlaggedBtn" class="mini-filter-btn">Show Flagged Only</button>
+                            </div>
+                            <div id="sentenceList" class="sentence-list">
+                                <p>Run the fact check again to refresh the sentence analysis.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="factcheck-right">
+                        <div class="factcheck-card preview-card-wrap">
+                            <h4>Selected Sentence Analysis</h4>
+                            <div id="previewPanel" class="preview-panel">
+                                <p class="preview-placeholder">Click a sentence to view its fact-check details.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="action-row">
@@ -323,88 +555,388 @@
 
 <script>
 document.getElementById("checkScoreBtn").addEventListener("click", async function () {
-    const content = document.getElementById("content").value.trim();
+    const title = document.querySelector('input[name="title"]').value;
+    const content = document.querySelector("textarea").value;
+    const category = document.querySelector('select[name="category"]').value;
 
-    if (!content) {
+    if (!content.trim()) {
         alert("Please enter article content first.");
         return;
     }
 
-    try {
-        const response = await fetch("/fact-check-preview", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ content: content })
-        });
+    const response = await fetch("/fact-check-preview", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ title, content, category })
+    });
 
-        const data = await response.json();
+    const data = await response.json();
+    console.log("FACT CHECK RESPONSE:", data);
 
-        if (!response.ok) {
-            alert(data.error || "Fact check failed.");
+    if (data.error) {
+        alert("Fact check failed: " + data.error);
+        return;
+    }
+
+    document.getElementById("factCheckSection").style.display = "block";
+
+    // ===== CATEGORY CHECK =====
+    const categoryCheck = data.category_check;
+
+    if (categoryCheck) {
+        document.getElementById("categoryCheckCard").style.display = "block";
+
+        const selectedText = document.querySelector('select[name="category"] option:checked').textContent;
+
+        document.getElementById("selectedCategoryText").textContent = selectedText;
+        document.getElementById("suggestedCategoryText").textContent = categoryCheck.suggested_category || "-";
+        document.getElementById("categoryReasonText").textContent = categoryCheck.reason || "-";
+
+        const resultEl = document.getElementById("categoryMatchText");
+
+        if (categoryCheck.matched === true) {
+            resultEl.textContent = "Correct";
+            resultEl.style.color = "#16a34a";
+        } else if (categoryCheck.matched === false) {
+            resultEl.textContent = "Mismatch";
+            resultEl.style.color = "#dc2626";
+        } else {
+            resultEl.textContent = "Unknown";
+            resultEl.style.color = "#6b7280";
+        }
+
+        const titleMatchEl = document.getElementById("titleMatchText");
+
+        if (categoryCheck.title_matched === true) {
+            titleMatchEl.textContent = "Matched";
+            titleMatchEl.style.color = "#16a34a";
+        } else if (categoryCheck.title_matched === false) {
+            titleMatchEl.textContent = "Mismatch";
+            titleMatchEl.style.color = "#dc2626";
+        } else {
+            titleMatchEl.textContent = "Unknown";
+            titleMatchEl.style.color = "#6b7280";
+        }
+    }
+
+    const scoreEl = document.getElementById("scoreValue");
+    scoreEl.textContent = data.score;
+    scoreEl.style.color =
+        data.score >= 90 ? "#15803d" :
+        data.score >= 75 ? "#16a34a" :
+        data.score >= 65 ? "#ca8a04" :
+        data.score >= 50 ? "#ea580c" : "#dc2626";
+
+    document.getElementById("statusValue").textContent = data.status;
+
+    const reasonsList = document.getElementById("scoreReasons");
+    reasonsList.innerHTML = "";
+    (data.reasons || []).forEach(reason => {
+        const li = document.createElement("li");
+        li.textContent = reason;
+        reasonsList.appendChild(li);
+    });
+
+    document.getElementById("ai_fact_check_score").value = data.score;
+    document.getElementById("ai_fact_check_status").value = data.status;
+
+    const sensationalism = data.sensationalism;
+    const sensWarnEl = document.getElementById("sensationalismWarning");
+    if (sensationalism && sensationalism.sensational_phrases && sensationalism.sensational_phrases.length > 0) {
+        sensWarnEl.style.display = "block";
+        sensWarnEl.textContent = "⚠ Sensationalist language detected: " +
+            sensationalism.sensational_phrases.slice(0, 3).join(", ");
+    } else {
+        sensWarnEl.style.display = "none";
+        sensWarnEl.textContent = "";
+    }
+
+    const sentenceList = document.getElementById("sentenceList");
+    const previewPanel = document.getElementById("previewPanel");
+    const toggleBtn = document.getElementById("toggleFlaggedBtn");
+
+    sentenceList.innerHTML = "";
+    previewPanel.innerHTML = `<p class="preview-placeholder">Click a sentence to view its fact-check details.</p>`;
+
+    if (!data.sentences || data.sentences.length === 0) {
+        sentenceList.innerHTML = "<p>No sentence analysis found.</p>";
+        return;
+    }
+
+    let flaggedOnly = false;
+    let currentItems = [];
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) return "";
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function formatRoute(item) {
+        let route = [...(item.route || [])];
+
+        if (route.length > 1) {
+            route = route.filter(r => r !== "general_check");
+        }
+
+        if (!route.length) return "General Check";
+
+        return route.map(r => {
+            if (r === "google_factcheck") return "Google Fact Check";
+            if (r === "market_data") return "Market Data";
+
+            if (r === "statistical_check") {
+                const stats = item.statistical_result;
+                if (!stats || !stats.ok || stats.result === "no_match") return "Statistical Check";
+                if (stats.result === "mismatch") return "Statistical Check (Mismatch)";
+                if (stats.result === "close") return "Statistical Check (Close)";
+                return "Statistical Check";
+            }
+
+            if (r === "sensationalism_only") return "Sensationalism Warning";
+            if (r === "reported_speech") return "Reported Statement";
+            if (r === "opinion") return "Opinion";
+            if (r === "authority_source") return "Authority Source";
+            if (r === "general_check") return "General Check";
+
+            return r;
+        }).join(", ");
+    }
+
+    function getReasonText(item) {
+        const stats = item.statistical_result;
+
+        if (item.time_inconsistent) {
+            return "Temporal inconsistency detected — the sentence mixes future/planned wording with completed-event wording.";
+        }
+
+        if (item.route && item.route.includes("market_data")) {
+            return "Financial market price movement detected.";
+        }
+
+        if (stats && stats.ok && stats.matched) {
+            if (stats.result === "match") return "Official statistical data verified the claim.";
+            if (stats.result === "close") return "The claim is close to official statistical data but not an exact match.";
+            if (stats.result === "mismatch") return "Claim contradicts official statistical data.";
+            if (stats.result === "no_match") return "No official statistics were found to verify this claim, so the system relied on AI analysis instead.";
+        }
+
+        if (item.route && item.route.includes("statistical_check")) {
+            return "No official statistics were found to verify this claim, so the system relied on AI analysis instead.";
+        }
+
+        if (item.route && item.route.includes("google_factcheck")) {
+            const fc = item.google_factcheck_result;
+            if (!fc || !fc.ok || !fc.matched) {
+                return "No verified fact-check result found — using LLM assessment.";
+            }
+
+            const rating = (fc.rating || "").toLowerCase();
+
+            if (["missing context", "partly true", "half true", "needs context", "out of context", "mixed"].some(w => rating.includes(w))) {
+                return "A published fact-check found that this claim may need more context.";
+            }
+
+            return "Verified using Google Fact Check data.";
+        }
+
+        if (item.route && item.route.includes("general_check")) {
+            const lower = (item.text || "").toLowerCase();
+            const strongWords = ["never", "always", "definitely", "undeniably"];
+            if (strongWords.some(w => lower.includes(w))) {
+                return "General factual claim with strong absolute wording — using LLM assessment.";
+            }
+            return "This sentence makes a factual claim. The system analysed it using AI models to determine whether it appears reasonable.";
+        }
+
+        return item.reason || "LLM-based verification applied.";
+    }
+
+    function getSeverity(item) {
+        return item.display?.severity || "neutral";
+    }
+
+    function isFlagged(item) {
+        return !!item.display?.flagged;
+    }
+
+    function getTagText(item) {
+        return item.display?.tag || "Checked";
+    }
+
+    function buildPreview(item) {
+        const routeText = formatRoute(item);
+        const reasonText = getReasonText(item);
+        const severity = getSeverity(item);
+
+        let verdictClass = severity === "danger" ? "danger" :
+                           severity === "warning" ? "warning" : "good";
+
+        let generalHtml = "";
+        let statsHtml = "";
+        let factCheckHtml = "";
+        let authorityHtml = "";
+        let timeHtml = "";
+        let feedbackHtml = "";
+
+        if (item.route && item.route.includes("authority_source")) {
+            authorityHtml = `<p><strong>Authority:</strong> Official source attributed</p>`;
+        }
+
+        if (item.time_inconsistent) {
+            timeHtml = `<p><strong>Time Check:</strong> <span class="preview-verdict danger">Potential inconsistency detected</span></p>`;
+        }
+
+        if (item.feedback) {
+            feedbackHtml = `
+                <div class="sentence-feedback-box">
+                    <p><strong>Assessment:</strong> ${escapeHtml(item.feedback.problem || "-")}</p>
+                    <p><strong>Hint:</strong> ${escapeHtml(item.feedback.hint || "-")}</p>
+                    <p><strong>How to improve:</strong> ${escapeHtml(item.feedback.better_direction || "-")}</p>
+                </div>
+            `;
+        }
+
+        if (item.general_result) {
+            const confidence = ((item.general_result.confidence || 0) * 100).toFixed(0);
+
+            generalHtml = `
+                <p>
+                    <strong>AI Assessment:</strong>
+                    <span class="preview-verdict ${verdictClass}">
+                        ${escapeHtml(item.general_result.verdict || "-")}
+                    </span>
+                    (confidence: ${confidence}%)
+                </p>
+
+                <div class="confidence-bar">
+                    <div class="confidence-fill ${verdictClass}" style="width:${confidence}%"></div>
+                </div>
+                <p><strong>AI Reason:</strong> ${escapeHtml(item.general_result.reason || "-")}</p>
+            `;
+        }
+
+        if (item.statistical_result && item.statistical_result.matched) {
+            let statResultText = "No matching trusted statistic found";
+
+            if (item.statistical_result.result === "match") {
+                statResultText = item.statistical_result.year_note
+                    ? "Matches latest available data ⚠"
+                    : "Matches trusted data ✅";
+            } else if (item.statistical_result.result === "close") {
+                statResultText = "Close to trusted data ⚠";
+            } else if (item.statistical_result.result === "mismatch") {
+                statResultText = item.statistical_result.year_note
+                    ? "Mismatch with latest available data ⚠"
+                    : "Mismatch with trusted data ❌";
+            }
+
+            statsHtml = `
+                <p><strong>Statistical Source:</strong> ${escapeHtml(item.statistical_result.source || "-")}</p>
+                <p><strong>Year:</strong> ${escapeHtml(item.statistical_result.year || "-")}</p>
+                ${
+                    item.statistical_result.year_note
+                        ? `<p><strong>Note:</strong> ${escapeHtml(item.statistical_result.year_note)}</p>`
+                        : ""
+                }
+                <p><strong>Claimed Value:</strong> ${escapeHtml(item.statistical_result.claimed_value ?? "-")} ${escapeHtml(item.statistical_result.unit || "")}</p>
+                <p><strong>Official Value:</strong> ${escapeHtml(item.statistical_result.official_value ?? "-")} ${escapeHtml(item.statistical_result.unit || "")}</p>
+                <p><strong>Result:</strong> ${statResultText}</p>
+                <p><strong>Source Link:</strong> ${
+                    item.statistical_result.source_url
+                        ? `<a class="preview-link" href="${item.statistical_result.source_url}" target="_blank">View Source</a>`
+                        : "-"
+                }</p>
+            `;
+        }
+
+        if (item.google_factcheck_result && item.google_factcheck_result.ok && item.google_factcheck_result.matched) {
+            factCheckHtml = `
+                <p><strong>Fact Check Source:</strong> ${escapeHtml(item.google_factcheck_result.publisher || "-")}</p>
+                <p><strong>Fact Check Rating:</strong> ${escapeHtml(item.google_factcheck_result.rating || "-")}</p>
+                <p><strong>Fact Check Link:</strong> ${
+                    item.google_factcheck_result.url
+                        ? `<a class="preview-link" href="${item.google_factcheck_result.url}" target="_blank">View Source</a>`
+                        : "-"
+                }</p>
+            `;
+        }
+
+        return `
+            <div class="preview-block">
+                <p><strong>Sentence:</strong> ${escapeHtml(item.text || "")}</p>
+                <p><strong>Check Type:</strong> ${escapeHtml(routeText)}</p>
+                ${authorityHtml}
+                ${timeHtml}
+                <p><strong>Reason:</strong> ${escapeHtml(reasonText)}</p>
+                ${feedbackHtml}
+                ${factCheckHtml}
+                ${statsHtml}
+                ${generalHtml}
+            </div>
+        `;
+    }
+
+    function renderSentenceList(items) {
+        sentenceList.innerHTML = "";
+
+        const renderItems = flaggedOnly ? items.filter(isFlagged) : items;
+
+        if (!renderItems.length) {
+            sentenceList.innerHTML = "<p>No matching sentences to display.</p>";
+            previewPanel.innerHTML = `<p class="preview-placeholder">No sentence selected.</p>`;
             return;
         }
 
-        document.getElementById("scoreValue").textContent = data.score;
-        document.getElementById("statusValue").textContent = data.status;
-        document.getElementById("ai_fact_check_score").value = data.score;
-        document.getElementById("ai_fact_check_status").value = data.status;
+        renderItems.forEach((item, index) => {
+            const severity = getSeverity(item);
+            const block = document.createElement("div");
+            block.className = `sentence-item ${severity}`;
+            const tagText = getTagText(item);
 
-        renderPreview(data.sentences);
-        renderIssues(data.sentences);
+            let tagClass = "";
+            if (["Unlikely", "Stat mismatch", "Fact-check flagged", "Time issue"].includes(tagText)) {
+                tagClass = "danger";
+            } else if (["Needs review", "Year caution", "Stat close"].includes(tagText)) {
+                tagClass = "warning";
+            } else if (["Verified", "Plausible"].includes(tagText)) {
+                tagClass = "good";
+            }
 
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Something went wrong while checking the article.");
+            block.innerHTML = `
+                <div class="sentence-item-title">${escapeHtml(item.text || "")}</div>
+                <div class="sentence-item-meta">
+                    <span class="sentence-tag ${tagClass}">${escapeHtml(tagText)}</span>
+                    <span class="sentence-tag">${escapeHtml(formatRoute(item))}</span>
+                </div>
+            `;
+
+            block.addEventListener("click", function () {
+                document.querySelectorAll(".sentence-item").forEach(el => el.classList.remove("active"));
+                block.classList.add("active");
+                previewPanel.innerHTML = buildPreview(item);
+            });
+
+            sentenceList.appendChild(block);
+
+            if (index === 0) {
+                setTimeout(() => block.click(), 0);
+            }
+        });
     }
+
+    currentItems = data.sentences;
+    renderSentenceList(currentItems);
+
+    toggleBtn.onclick = function () {
+        flaggedOnly = !flaggedOnly;
+        toggleBtn.textContent = flaggedOnly ? "Show All Sentences" : "Show Flagged Only";
+        renderSentenceList(currentItems);
+    };
 });
-
-function renderPreview(results) {
-    const previewPanel = document.getElementById("previewPanel");
-    previewPanel.innerHTML = "";
-
-    results.forEach(item => {
-        const span = document.createElement("span");
-        span.textContent = item.text + " ";
-
-        if (item.label === "reported_fact") {
-            span.className = "highlight-reported";
-        } else if (item.label === "supported") {
-            span.className = "highlight-supported";
-        } else if (item.label === "needs_evidence") {
-            span.className = "highlight-warning";
-        } else if (item.label === "contradicted") {
-            span.className = "highlight-danger";
-        } else {
-            span.className = "highlight-opinion";
-        }
-
-        span.title = item.reason;
-        previewPanel.appendChild(span);
-    });
-}
-
-function renderIssues(results) {
-    const issuesList = document.getElementById("issuesList");
-    issuesList.innerHTML = "";
-
-    let foundIssue = false;
-
-    results.forEach((item, index) => {
-        if (item.label === "needs_evidence" || item.label === "contradicted" || item.label === "opinion") {
-            foundIssue = true;
-            const li = document.createElement("li");
-            li.textContent = "Sentence " + (index + 1) + ": " + item.reason;
-            issuesList.appendChild(li);
-        }
-    });
-
-    if (!foundIssue) {
-        const li = document.createElement("li");
-        li.textContent = "No major credibility issues found.";
-        issuesList.appendChild(li);
-    }
-}
 </script>
 {% endblock %}
