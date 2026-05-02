@@ -77,11 +77,11 @@ from boundary.AdminViewLogsPage import system_monitoring_bp
 from boundary.EditKeyProductFeatures import web_management_bp
 from boundary.CategoryReportedPage import category_reported_page_bp
 from boundary.EditorApplicationsPage import editor_applications_page_bp
+from ai_model.detector import detect_image, detect_video, classify_score, check_image_metadata
 
 # Controllers
 from control.ArticleController import ArticleController
 from control.SystemLogCTL import SystemLogCTL
-from control.ArticleController import ArticleController
 article_controller = ArticleController()
 
 
@@ -120,6 +120,7 @@ app.register_blueprint(system_monitoring_bp)
 app.register_blueprint(web_management_bp)
 app.register_blueprint(category_reported_page_bp)
 app.register_blueprint(editor_applications_page_bp)
+
 
 # Image File Size
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
@@ -183,42 +184,10 @@ def info(page):
 @app.route("/free_homepage", methods=["GET", "POST"])
 def free_homepage():
     user_id = session.get("userID")
-    search_query = request.args.get("q", "").strip()
-
-    # get all categories
-    categories = article_controller.get_categories()
-    visible_count = 8
-    visible_categories = categories[:visible_count]
-    more_categories = categories[visible_count:]
+    search_query = request.args.get("q")
 
     # Top viewed (HEADER)
-    headline = article_controller.get_home_headline()
-
-   
-    # First top viewed article used as headline/exclude reference
-    # top_headline = top_viewed[0] if top_viewed else None
-    
-
-    # Latest and Top viewed by category (HEADER)
-    category_featured_articles = []
-
-    exclude_id = headline["articleID"] if headline else None
-    exclude_category_id = headline["categoryID"] if headline else None
-
-    for category in categories:
-        if exclude_category_id and category["categoryID"] == exclude_category_id:
-            continue
-
-        article = article_controller.get_featured_article_by_category(
-            category["categoryID"],
-            exclude_id=exclude_id
-        )
-
-        if article:
-            category_featured_articles.append({
-                "category": category,
-                "article": article
-            })
+    top_viewed = article_controller.get_top_viewed_articles(limit=5)
 
     # User interest category top articles
     interest_names = article_controller.get_user_interests(user_id)
@@ -226,76 +195,39 @@ def free_homepage():
 
     if category_ids:
         category_top_articles = article_controller.get_articles_by_multiple_categories(
-            category_ids, limit=12,  exclude_id=exclude_id
+            category_ids, limit=5
         )
     else:
         category_top_articles = []
-
-    
     
     # Latest articles
     if search_query:
         latest_articles = article_controller.search(search_query) 
     else:
-        latest_articles = article_controller.get_home_latest_articles(exclude_id=exclude_id)
+        latest_articles = article_controller.get_latest_articles_by_category(limit=6)
 
     for article in latest_articles:
             article["featured_image"] = article.get("imageURL")
 
     return render_template(
         "free_homepage.html",
-        categories=categories,
-        visible_categories=visible_categories,
-        more_categories=more_categories,
         search_query=search_query,
-        headline=headline,
-        category_featured_articles=category_featured_articles,
+        top_viewed=top_viewed,
         category_top_articles=category_top_articles,
         latest_articles=latest_articles
     )
+
 
 @app.route("/premium_homepage", methods=["GET", "POST"])
 def premium_homepage():
     user_id = session.get("userID")
     search_query = request.args.get("q")
-
-    # get all categories
-    categories = article_controller.get_categories()
-    visible_count = 8
-    visible_categories = categories[:visible_count]
-    more_categories = categories[visible_count:]
     
     # Top viewed articles
-    headline = article_controller.get_home_headline()
-
-    # First top viewed article used as headline/exclude reference
-    # top_headline = top_viewed[0] if top_viewed else None
-    # exclude_id = top_headline["articleID"] if top_headline else None
-
-    # Latest and top viewed by category
-    category_featured_articles = []
-
-    exclude_id = headline["articleID"] if headline else None
-    exclude_category_id = headline["categoryID"] if headline else None
-
-
-    for category in categories:
-        if exclude_category_id and category["categoryID"] == exclude_category_id:
-            continue
-
-        article = article_controller.get_featured_article_by_category(
-            category["categoryID"],
-            exclude_id=exclude_id
-        )
-
-        if article:
-            category_featured_articles.append({
-                "category": category,
-                "article": article
-            })
+    top_viewed = article_controller.get_top_viewed_articles(limit=5)
     
     # User saved articles 
-    saved_articles = article_controller.get_user_saved_articles(user_id)
+    saved_articles = article_controller.get_user_saved_articles(user_id, limit=5)
     user_top_category_id = saved_articles[0]["categoryID"] if saved_articles else None
 
     # User interest category top articles
@@ -304,7 +236,7 @@ def premium_homepage():
 
     if category_ids:
         category_top_articles = article_controller.get_articles_by_multiple_categories(
-            category_ids, limit=12, exclude_id=exclude_id
+            category_ids, limit=5
         )
     else:
         category_top_articles = []
@@ -313,7 +245,7 @@ def premium_homepage():
     if search_query:
         latest_articles = article_controller.search(search_query) 
     else:
-        latest_articles = article_controller.get_home_latest_articles(exclude_id=exclude_id)
+        latest_articles = article_controller.get_latest_articles_by_category(limit=6)
 
     # Map imageURL → featured_image
     for article in latest_articles:
@@ -321,84 +253,13 @@ def premium_homepage():
     
     return render_template(
         "premium_homepage.html",
-        categories=categories,
-        visible_categories=visible_categories,
-        more_categories=more_categories,
         search_query=search_query,
-        headline=headline,
-        category_featured_articles=category_featured_articles,
+        top_viewed=top_viewed,
         category_top_articles=category_top_articles,
         saved_articles=saved_articles,
         latest_articles=latest_articles
     )
 
-
-@app.route("/user/articles", defaults={"category_id": None})
-@app.route("/user/articles/category/<int:category_id>")
-def user_category_articles(category_id=None):
-    if "userID" not in session:
-        return redirect(url_for("login.login"))
-
-    search_query = request.args.get("q", "").strip()
-
-    categories = article_controller.get_categories()
-
-    visible_count = 8
-    visible_categories = categories[:visible_count]
-    more_categories = categories[visible_count:]
-
-    selected_category = None
-    headline = None
-    articles = []
-    is_all_page = category_id is None
-
-    if category_id is not None:
-        for category in categories:
-            if category["categoryID"] == category_id:
-                selected_category = category
-                break
-
-        if not selected_category:
-            return "Category not found", 404
-
-        if search_query:
-            articles = article_controller.search_article_in_category(
-                keyword=search_query,
-                category_id=category_id,
-                limit=12
-            )
-            headline = None
-        else:
-            headline = article_controller.get_featured_article_by_category(category_id)
-
-            articles = article_controller.home_article_by_category(
-                category_id=category_id,
-                exclude_id=headline["articleID"] if headline else None
-            )
-
-    else:
-        if search_query:
-            articles = article_controller.search_article_in_category(
-                keyword=search_query,
-                category_id=None,
-                limit=12
-            )
-            headline = None
-        else:
-            headline = article_controller.get_home_headline()
-            articles = article_controller.get_home_latest_articles(exclude_id=headline["articleID"] if headline else None)
-
-    return render_template(
-        "free_premium_category_articles.html",
-        categories=categories,
-        visible_categories=visible_categories,
-        more_categories=more_categories,
-        selected_category=selected_category,
-        headline=headline,
-        articles=articles,
-        is_all_page=is_all_page,
-        search_query=search_query
-    )
 
 @app.route("/dashboard")
 def dashboard():
@@ -534,7 +395,7 @@ def is_valid_report_category(report_category_id):
 def my_articles():
     user_id = session.get("userID")
     if not user_id:
-        return redirect(url_for("login.login"))
+        return redirect(url_for("login"))
     
     if session.get("profileCompleted") == 0:
         flash("Please complete your profile before accessing this page.")
@@ -542,18 +403,13 @@ def my_articles():
 
     keyword = request.args.get("keyword", "").strip()
     category_id = request.args.get("category_id", "").strip()
-    status = request.args.get("status", "").strip()
-    verified_only = request.args.get("verified_only") == "true"
+    status = request.args.get("status", "").strip()   # ✅ ADD THIS
 
     categories = article_controller.get_categories()
 
-    if keyword or category_id or status or verified_only:
+    if keyword or category_id or status:
         articles = article_controller.search_my_articles(
-            user_id=user_id,
-            keyword=keyword,
-            category_id=category_id,
-            status=status,
-            verified_only=verified_only
+            user_id, keyword, category_id, status   # ✅ PASS IT
         )
     else:
         articles = article_controller.get_my_articles(user_id)
@@ -563,8 +419,7 @@ def my_articles():
         articles=articles,
         keyword=keyword,
         category_id=category_id,
-        status=status,
-        verified_only=verified_only,
+        status=status,   # ✅ SEND TO TEMPLATE
         categories=categories
     )
     
@@ -1786,6 +1641,118 @@ def logout():
 
     session.clear()
     return redirect(url_for("login.login"))
+
+
+
+@app.route('/ai-detect')
+def ai_detect_page():
+    return render_template('ai_detect.html')
+
+
+@app.route('/detect', methods=['POST'])
+def detect_image_route():
+    file = request.files.get('image')
+
+    if not file:
+        return jsonify({"error": "No image uploaded"}), 400
+
+    upload_path = "temp_detect_image.jpg"
+    file.save(upload_path)
+
+    score = detect_image(upload_path)
+
+    result = "Fake / AI-generated" if score >= 0.5 else "Real"
+
+    return jsonify({
+        "result": result,
+        "fake_probability": round(score, 4)
+    })
+
+
+@app.route('/detect-media', methods=['POST'])
+def detect_media_route():
+    file = request.files.get('media')
+
+    if not file:
+        return jsonify({"error": "No image or video uploaded"}), 400
+
+    filename = file.filename.lower()
+
+    allowed_image_ext = ('.jpg', '.jpeg', '.png', '.bmp', '.webp')
+    allowed_video_ext = ('.mp4', '.mov', '.avi', '.mkv', '.webm')
+
+    upload_folder = "temp_media_uploads"
+    os.makedirs(upload_folder, exist_ok=True)
+
+    upload_path = os.path.join(upload_folder, file.filename)
+    file.save(upload_path)
+
+    try:
+        if filename.endswith(allowed_image_ext):
+            score = detect_image(upload_path)
+            label = classify_score(score)
+            metadata = check_image_metadata(upload_path)
+
+            has_camera_info = bool(metadata.get("camera_make") or metadata.get("camera_model"))
+            has_metadata_warning = bool(metadata.get("warning"))
+
+            needs_review = (
+                score >= 0.15
+                or not metadata.get("has_exif")
+                or not has_camera_info
+                or has_metadata_warning
+                )
+            
+            final_recommendation = "Review recommended" if needs_review else "Low concern"
+            
+            display_result = "Needs review" if needs_review else "Low risk based on current checks"
+            
+            result = {
+                "media_type": "image",
+                "result": display_result,
+                "fake_probability": round(score, 4),
+                "metadata": metadata,
+                "final_recommendation": final_recommendation,
+                "explanation": "The uploaded image was checked using AI-generated media detection and metadata analysis."
+            }
+
+        elif filename.endswith(allowed_video_ext):
+            video_result = detect_video(upload_path, max_frames=8)
+            score = video_result["average_fake_probability"]
+            label = classify_score(score)
+
+            result = {
+                "media_type": "video",
+                "result": label,
+                "fake_probability": round(score, 4),
+                "frames_checked": video_result["frames_checked"],
+                "frame_scores": [round(s, 4) for s in video_result["frame_scores"]],
+                "explanation": "The uploaded video was analysed by extracting several frames and checking each frame with the AI authenticity detection model."
+            }
+
+        else:
+            return jsonify({
+                "error": "Unsupported file type. Please upload an image or video."
+            }), 400
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({
+            "error": "Detection failed",
+            "details": str(e)
+        }), 500
+
+    finally:
+        try:
+            os.remove(upload_path)
+        except OSError:
+            pass
+
+
+@app.route('/ai-media-detect')
+def ai_media_detect_page():
+    return render_template('ai_media_detect.html')
 
 
 if __name__ == "__main__":
