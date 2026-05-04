@@ -12,8 +12,8 @@
 {% block topbar_nav %}
   <a href="{{ url_for('home.unreg_home') + '#articles' }}">Articles</a>
   <a href="{{ url_for('home.unreg_home') + '#testimonials' }}">Testimonials</a>
-  <a href="{{ url_for('home.unreg_home') + '#product-feature' }}">Product Feature</a>
-  <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">Company Profile</a>
+  <a href="{{ url_for('home.unreg_home') + '#product-feature' }}">Product Features</a>
+  <a href="{{ url_for('home.unreg_home') + '#companyinfo' }}">About Us</a>
   <a href="{{ url_for('home.unreg_home') + '#pricing' }}">Subscription</a>
   <a href="{{ url_for('login.login') }}">Log In</a>
 {% endblock %}
@@ -249,7 +249,7 @@
 
   <section id="product-feature" class="feature reveal">
     <div class="container">
-      <h1 class="features-title">Product Feature</h1>
+      <h1 class="features-title">Product Features</h1>
       <div class="features-grid" id="prodfeatures">
         {% if features %}
           {% for f in features[:4] %}

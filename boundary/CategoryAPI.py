@@ -4,8 +4,30 @@ import pymysql.cursors
 
 category_bp = Blueprint("category_api", __name__)
 
+def category_exists(cursor, name, exclude_id=None):
+    if exclude_id:
+        cursor.execute(
+            """
+            SELECT categoryID
+            FROM ArticleCategory
+            WHERE LOWER(TRIM(categoryName)) = LOWER(TRIM(%s))
+            AND categoryID != %s
+            """,
+            (name, exclude_id)
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT categoryID
+            FROM ArticleCategory
+            WHERE LOWER(TRIM(categoryName)) = LOWER(TRIM(%s))
+            """,
+            (name,)
+        )
 
-# ⭐ GET ALL
+    return cursor.fetchone() is not None
+
+# GET ALL
 @category_bp.route("/admin/categories", methods=["GET"])
 def get_categories():
     try:
@@ -25,53 +47,98 @@ def get_categories():
         return jsonify({"message": "Server error"}), 500
 
 
-# ⭐ ADD
+# ADD
 @category_bp.route("/admin/category", methods=["POST"])
 def add_category():
+    conn = None
+    cursor = None
 
-    data = request.get_json()
-    name = data.get("categoryName")
+    try:
+        data = request.get_json(silent=True)
 
-    if not name:
-        return jsonify({"message": "Category name missing"}), 400
+        if not data:
+            return jsonify({"message": "Invalid request data"}), 400
 
-    created_by = session.get("userID")   # ⭐⭐⭐ 改这里！！！
+        name = data.get("categoryName")
 
-    if not created_by:
-        return jsonify({"message": "Session expired"}), 401
+        if not name or not name.strip():
+            return jsonify({"message": "Category name missing"}), 400
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+        name = name.strip()
 
-    cursor.execute(
-        """
-        INSERT INTO ArticleCategory
-        (categoryName, categoryStatus, created_by)
-        VALUES (%s, %s, %s)
-        """,
-        (name, "active", created_by)
-    )
+        created_by = session.get("userID")
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        if not created_by:
+            return jsonify({"message": "Session expired. Please login again."}), 401
 
-    return jsonify({"message": "Category added successfully"})
+        conn = get_db_connection()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
 
-# ⭐ UPDATE
+        # Check duplicate category
+        cursor.execute(
+            """
+            SELECT categoryID
+            FROM ArticleCategory
+            WHERE LOWER(TRIM(categoryName)) = LOWER(TRIM(%s))
+            LIMIT 1
+            """,
+            (name,)
+        )
+
+        existing_category = cursor.fetchone()
+
+        if existing_category:
+            return jsonify({"message": "Category already exists"}), 409
+
+        cursor.execute(
+            """
+            INSERT INTO ArticleCategory
+            (categoryName, categoryStatus, created_by)
+            VALUES (%s, %s, %s)
+            """,
+            (name, "active", created_by)
+        )
+
+        conn.commit()
+
+        return jsonify({"message": "Category added successfully"}), 201
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+
+        print("ADD CATEGORY ERROR:", e)
+        return jsonify({"message": "Server error while adding category"}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# UPDATE
 @category_bp.route("/admin/category/<int:id>", methods=["PUT"])
 def update_category(id):
     try:
         data = request.get_json()
-        name = data.get("categoryName")
+        name = data.get("categoryName", "").strip()
 
         if not name:
             return jsonify({"message": "Category name missing"}), 400
 
-        updated_by = session.get("adminID")
+        updated_by = session.get("userID")
+
+        if not updated_by:
+            return jsonify({"message": "Session expired"}), 401
 
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        # Check duplicate category, excluding current category ID
+        if category_exists(cursor, name, exclude_id=id):
+            cursor.close()
+            conn.close()
+            return jsonify({"message": "Category already exists"}), 409
 
         cursor.execute(
             """
@@ -94,7 +161,7 @@ def update_category(id):
         return jsonify({"message": "Server error"}), 500
 
 
-# ⭐ DELETE
+# DELETE
 @category_bp.route("/admin/category/<int:id>", methods=["DELETE"])
 def delete_category(id):
     try:

@@ -252,7 +252,7 @@ function loadCategories() {
                     <td>
                         <div class="action-wrap">
                             <button class="edit-btn" type="button"
-                            onclick="editCategory(${cat.categoryID})">Edit</button>
+                            onclick="editCategory(${cat.categoryID}, this)">Edit</button>
                             
                             <button class="delete-btn" type="button"
                             onclick="deleteCategory(${cat.categoryID})">Delete</button>
@@ -267,7 +267,7 @@ function loadCategories() {
     });
 }
 
-function addCategory() {
+async function addCategory() {
 
     let input = document.getElementById("categoryName")
     let name = input.value.trim()
@@ -278,80 +278,94 @@ function addCategory() {
         return
     }
 
-    fetch("/admin/category", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            categoryName: name
+    try {
+        const res = await fetch("/admin/category", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                categoryName: name
+            })
         })
-    })
-    .then(async res => {
+
+        const data = await res.json()
 
         if (!res.ok) {
-
-            let text = await res.text()
-            console.error("SERVER ERROR:", text)
-
-            alert("Server error while adding category")
-            throw new Error("server error")
+            alert(data.message)
+            return
         }
 
-        return res.json()
-
-    })
-    .then(data => {
-
         alert(data.message)
-
         input.value = ""
-
         loadCategories()
 
-    })
-    .catch(err => {
-
-        console.error("Add failed:", err)
-        alert("Add failed")
-
-    })
-
+    } catch (err) {
+        console.error("Add category failed:", err)
+        alert("Unable to add category. Please try again.")
+    }
 }
 
-function editCategory(id){
+async function editCategory(id, button) {
 
     let input = document.getElementById(`name-${id}`)
-    let button = event.target
 
-    if(button.innerText === "Edit"){
+    if (button.innerText === "Edit") {
+
+        // Save original value before editing
+        input.setAttribute("data-original", input.value)
 
         input.removeAttribute("disabled")
         input.focus()
-
         button.innerText = "Save"
 
-    }else{
+    } else {
 
         let newName = input.value.trim()
 
-        fetch(`/admin/category/${id}`,{
-            method:"PUT",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                categoryName:newName
+        if (!newName) {
+            alert("Category name cannot be empty")
+            input.focus()
+            return
+        }
+
+        try {
+            const res = await fetch(`/admin/category/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    categoryName: newName
+                })
             })
-        })
-        .then(res=>res.json())
-        .then(data=>{
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                alert(data.message)
+
+                // Reset UI because update failed
+                input.value = input.getAttribute("data-original")
+                input.setAttribute("disabled", true)
+                button.innerText = "Edit"
+
+                return
+            }
+
             alert(data.message)
             loadCategories()
-        })
 
+        } catch (err) {
+            console.error("Update category failed:", err)
+            alert("Unable to update category. Please try again.")
+
+            // Reset UI because unexpected error happened
+            input.value = input.getAttribute("data-original")
+            input.setAttribute("disabled", true)
+            button.innerText = "Edit"
+        }
     }
-
 }
 
 function deleteCategory(id) {
