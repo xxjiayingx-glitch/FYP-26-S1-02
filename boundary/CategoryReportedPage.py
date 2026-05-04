@@ -3,6 +3,25 @@ from entity.db_connection import get_db_connection
 
 category_reported_page_bp = Blueprint("category_reported_page_bp", __name__)
 
+def report_category_exists(cursor, name, exclude_id=None):
+    if exclude_id:
+        cursor.execute("""
+            SELECT reportCategoryID
+            FROM ReportCategory
+            WHERE LOWER(TRIM(categoryName)) = LOWER(TRIM(%s))
+            AND reportCategoryID != %s
+            LIMIT 1
+        """, (name, exclude_id))
+    else:
+        cursor.execute("""
+            SELECT reportCategoryID
+            FROM ReportCategory
+            WHERE LOWER(TRIM(categoryName)) = LOWER(TRIM(%s))
+            LIMIT 1
+        """, (name,))
+
+    return cursor.fetchone() is not None
+
 
 @category_reported_page_bp.route("/admin/report-category", methods=["GET", "POST"])
 def report_category_page():
@@ -30,8 +49,23 @@ def report_category_page():
             conn.close()
             return redirect(url_for("category_reported_page_bp.report_category_page"))
 
+        # if category_status not in ["active", "inactive"]:
+        #     category_status = "active"
+
+        # cursor.execute("""
+        #     INSERT INTO ReportCategory (categoryName, categoryStatus, created_by, updated_by)
+        #     VALUES (%s, %s, %s, %s)
+        # """, (category_name, category_status, created_by, created_by))
+
         if category_status not in ["active", "inactive"]:
             category_status = "active"
+
+        # Check duplicate report category
+        if report_category_exists(cursor, category_name):
+            flash("Report category already exists.", "error")
+            cursor.close()
+            conn.close()
+            return redirect(url_for("category_reported_page_bp.report_category_page"))
 
         cursor.execute("""
             INSERT INTO ReportCategory (categoryName, categoryStatus, created_by, updated_by)
@@ -91,10 +125,32 @@ def edit_report_category(category_id):
     """, (category_id,))
     category = cursor.fetchone()
 
+    # if not category:
+    #     cursor.close()
+    #     conn.close()
+    #     flash("Report category not found.", "error")
+    #     return redirect(url_for("category_reported_page_bp.report_category_page"))
+
+    # cursor.execute("""
+    #     UPDATE ReportCategory
+    #     SET categoryName = %s,
+    #         categoryStatus = %s,
+    #         updated_by = %s,
+    #         updated_at = CURRENT_TIMESTAMP
+    #     WHERE reportCategoryID = %s
+    # """, (category_name, category_status, updated_by, category_id))
+
     if not category:
         cursor.close()
         conn.close()
         flash("Report category not found.", "error")
+        return redirect(url_for("category_reported_page_bp.report_category_page"))
+
+    # Check duplicate report category, excluding current category
+    if report_category_exists(cursor, category_name, exclude_id=category_id):
+        cursor.close()
+        conn.close()
+        flash("Report category already exists.", "error")
         return redirect(url_for("category_reported_page_bp.report_category_page"))
 
     cursor.execute("""

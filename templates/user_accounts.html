@@ -21,7 +21,7 @@
         </div>
 
         <select name="userType" class="status-select">
-            <option value="">--Select--</option>
+            <option value="">--Select Role--</option>
             {% for role in user_roles %}
                 <option value="{{ role }}" {% if user_type == role %}selected{% endif %}>
                     {{ role }}
