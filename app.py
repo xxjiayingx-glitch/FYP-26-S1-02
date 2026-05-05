@@ -123,7 +123,7 @@ app.register_blueprint(category_reported_page_bp)
 app.register_blueprint(editor_applications_page_bp)
 
 # Image File Size
-app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
 
 # Upload image
 app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "uploads")
