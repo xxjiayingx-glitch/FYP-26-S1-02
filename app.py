@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify, current_app
 
 from flask import (
     Flask,
@@ -13,6 +13,7 @@ from flask import (
 from dotenv import load_dotenv
 load_dotenv()
 import os
+import uuid
 import nltk
 
 NLTK_DATA_DIR = os.path.join(os.getcwd(), "nltk_data")
@@ -1487,6 +1488,65 @@ def reject_article():
         conn.close()
 
     return redirect(url_for("editor_approval_articles"))
+
+#-----------------------#
+# Update editor profile #
+#-----------------------#
+SUPPORTING_DOC_FOLDER = "static/uploads/editor_documents"
+ALLOWED_DOC_EXTENSIONS = {"pdf", "doc", "docx", "png", "jpg", "jpeg"}
+
+def allowed_supporting_document(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_DOC_EXTENSIONS
+
+
+def save_supporting_document(file):
+    if not file or file.filename == "":
+        return None
+
+    if not allowed_supporting_document(file.filename):
+        return None
+
+    filename = secure_filename(file.filename)
+    ext = filename.rsplit(".", 1)[1].lower()
+
+    new_filename = f"supporting_doc_{uuid.uuid4().hex}.{ext}"
+
+    upload_path = os.path.join(current_app.root_path, SUPPORTING_DOC_FOLDER)
+    os.makedirs(upload_path, exist_ok=True)
+
+    file.save(os.path.join(upload_path, new_filename))
+
+    return f"{SUPPORTING_DOC_FOLDER}/{new_filename}"
+
+
+PROFILE_IMAGE_FOLDER = "static/uploads"
+ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+
+
+def allowed_profile_image(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+
+def save_profile_image(file):
+    if not file or file.filename == "":
+        return None
+
+    if not allowed_profile_image(file.filename):
+        return None
+
+    filename = secure_filename(file.filename)
+    ext = filename.rsplit(".", 1)[1].lower()
+
+    new_filename = f"profile_{uuid.uuid4().hex}.{ext}"
+
+    upload_path = os.path.join(current_app.root_path, PROFILE_IMAGE_FOLDER)
+    os.makedirs(upload_path, exist_ok=True)
+
+    file.save(os.path.join(upload_path, new_filename))
+
+    # Only save filename because your HTML uses static/uploads/{{ profile.profileImage }}
+    return new_filename
+
     
 @app.route("/editor/manage_profile", methods=["GET", "POST"])
 def editor_manage_profile():
@@ -1517,25 +1577,42 @@ def editor_manage_profile():
                 editor_bio = request.form.get("editor_bio", "").strip()
                 portfolio_link = request.form.get("portfolio_link", "").strip()
 
+                supporting_document_file = request.files.get("supporting_document")
+                supporting_document_path = None
+
+                profile_image_file = request.files.get("profile_image")
+                profile_image_filename = None
+
+                if profile_image_file and profile_image_file.filename != "":
+                    profile_image_filename = save_profile_image(profile_image_file)
+
+                    if not profile_image_filename:
+                        flash("Invalid profile image. Please upload PNG, JPG, JPEG, GIF, or WEBP.", "error")
+                        return redirect(url_for("editor_manage_profile"))
+
+                if supporting_document_file and supporting_document_file.filename != "":
+                    supporting_document_path = save_supporting_document(supporting_document_file)
+
+                    if not supporting_document_path:
+                        flash("Invalid supporting document. Please upload PDF, DOC, DOCX, PNG, JPG, or JPEG.", "error")
+                        return redirect(url_for("editor_manage_profile"))
+
                 name_parts = full_name.split()
                 first_name = name_parts[0] if len(name_parts) > 0 else ""
                 last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
 
-                update_sql = """
-                    UPDATE UserAccount
-                    SET first_name = %s,
-                        last_name = %s,
-                        username = %s,
-                        email = %s,
-                        phone = %s,
-                        yearsExperience = %s,
-                        editorBio = %s,
-                        portfolioLink = %s,
-                        updated_at = NOW()
-                    WHERE userID = %s
-                """
+                update_fields = [
+                    "first_name = %s",
+                    "last_name = %s",
+                    "username = %s",
+                    "email = %s",
+                    "phone = %s",
+                    "yearsExperience = %s",
+                    "editorBio = %s",
+                    "portfolioLink = %s"
+                ]
 
-                cursor.execute(update_sql, (
+                params = [
                     first_name,
                     last_name,
                     username,
@@ -1543,12 +1620,35 @@ def editor_manage_profile():
                     phone,
                     years_experience if years_experience else None,
                     editor_bio,
-                    portfolio_link,
-                    user_id
-                ))
+                    portfolio_link
+                ]
+
+                if supporting_document_path:
+                    update_fields.append("supportingDocument = %s")
+                    params.append(supporting_document_path)
+
+                if profile_image_filename:
+                    update_fields.append("profileImage = %s")
+                    params.append(profile_image_filename)
+
+                update_fields.append("updated_at = NOW()")
+
+                params.append(user_id)
+
+                update_sql = f"""
+                    UPDATE UserAccount
+                    SET {", ".join(update_fields)}
+                    WHERE userID = %s
+                """
+
+                cursor.execute(update_sql, tuple(params))
                 conn.commit()
 
                 session["username"] = username
+                
+                if profile_image_filename:
+                    session["profileImage"] = profile_image_filename
+                    
                 flash("Profile updated successfully.", "success")
 
             elif form_type == "password":
@@ -1590,6 +1690,7 @@ def editor_manage_profile():
                         conn.commit()
 
                         flash("Password changed successfully.", "success")
+                
 
         cursor.execute("SELECT * FROM UserAccount WHERE userID = %s", (user_id,))
         profile = cursor.fetchone()

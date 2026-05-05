@@ -2847,8 +2847,7 @@ class FactCheckController:
                 "highly_credible_min": 75,
                 "generally_reliable_min": 65,
                 "mixed_min": 50,
-                "low_confidence_min": 30,
-                "misleading_cutoff": 40
+                "low_confidence_min": 30
             }
 
         return {
@@ -2856,8 +2855,7 @@ class FactCheckController:
             "highly_credible_min": float(rule["highlyCredibleMinScore"]),
             "generally_reliable_min": float(rule["generallyReliableMinScore"]),
             "mixed_min": float(rule["mixedMinScore"]),
-            "low_confidence_min": float(rule["lowConfidenceMinScore"]),
-            "misleading_cutoff": float(rule["misleadingCutoffScore"])
+            "low_confidence_min": float(rule["lowConfidenceMinScore"])
         }
 
     @staticmethod
@@ -2898,9 +2896,7 @@ class FactCheckController:
 
         # Strong negative signals
         if has_stat_mismatch or has_factcheck_false:
-            if score < thresholds["misleading_cutoff"]:
-                return "Potentially Misleading"
-            return "Low Confidence"
+            return "Low Confidence" if score >= thresholds["low_confidence_min"] else "Potentially Misleading"
 
         # Strong verified signals
         if (has_stat_match or has_factcheck_true) and score >= thresholds["verified_min"]:

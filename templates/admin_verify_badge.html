@@ -17,7 +17,7 @@
 
 <section class="page-header">
     <div>
-        <h1>Verified Badge Requests</h2>
+        <h1>Verified Badge Requests</h1>
         <p>Approve Or Reject Requests</p>
     </div>
 </section>
@@ -33,6 +33,7 @@
                     <th>Qualifying Articles</th>
                     <th>Published Articles</th>
                     <th>Total Articles Reported</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -46,6 +47,7 @@
                     <td>{{ request.qualifying_articles }}</td>
                     <td>{{ request.total_published_articles }}</td>
                     <td>{{ request.totalArticlesReported }}</td>
+                    <td>{{ request.verifiedBadgeStatus }}</td>
                     <td>
                         <div class="action-buttons">
                             <form method="POST" action="/admin/verified-approve/{{ request.userID }}" style="display:inline;">

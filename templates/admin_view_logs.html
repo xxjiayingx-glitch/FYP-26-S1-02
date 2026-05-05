@@ -33,6 +33,7 @@
                 <option value="targetID" {% if search_by == 'targetID' %}selected{% endif %}>Target ID</option>
                 <option value="action" {% if search_by == 'action' %}selected{% endif %}>Action</option>
                 <option value="targetType" {% if search_by == 'targetType' %}selected{% endif %}>Target Type</option>
+                <option value="username" {% if search_by == 'username' %}selected{% endif %}>Username</option>
             </select>
 
             <input type="date" name="start_date" value="{{ start_date if start_date else '' }}" class="date-input">

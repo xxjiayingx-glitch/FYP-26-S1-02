@@ -23,26 +23,24 @@
 }
 
 .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-right: 80px;
+    margin-bottom: 45px;
 }
 
 .page-header h1 {
-    font-size: 30px;
-    margin-bottom: 8px;
+    font-size: 28px;
+    margin-bottom: 6px;
 }
 
 .page-header p {
     color: #54aee8;
-    margin-bottom: 24px;
+    font-size: 16px;
+    margin-bottom: 34px;
 }
 
 .action-buttons {
     display: flex;
-    gap: 20px;  
+    gap: 12px;
+    white-space: nowrap;
 }
 
 .btn {
@@ -69,16 +67,24 @@
     font-weight: 700;
     cursor: pointer;
 }
+/* 
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+} */
 
 .table-section {
-    display: flex;
-    justify-content: center;
-    padding-right: 80px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
 }
 
 .request-table {
-    width: 100%;
-    max-width: 1080px;
+    width: 1200px;
+    max-width: none;
     border-collapse: separate;
     border-spacing: 0;
     background: #efeffb;

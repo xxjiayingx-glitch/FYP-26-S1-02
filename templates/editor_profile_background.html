@@ -42,9 +42,13 @@
 
         <div class="profile-section">
             <strong>Supporting Document:</strong>
+
             {% if profile.supportingDocument %}
                 <p>
-                    <a href="{{ url_for('static', filename='uploads/' ~ profile.supportingDocument) }}" target="_blank">
+                    <a 
+                        href="{{ url_for('static', filename=profile.supportingDocument.replace('static/', '', 1)) }}" 
+                        target="_blank"
+                    >
                         View Document
                     </a>
                 </p>

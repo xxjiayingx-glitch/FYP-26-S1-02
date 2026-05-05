@@ -312,7 +312,7 @@ class UserAccount:
         cursor.execute("""
             UPDATE UserAccount
             SET isVerifiedPublisher = 1,
-                verifiedBadgeStatus = 'Approved',
+                verifiedBadgeStatus = 'approved',
                 updated_at = NOW()
             WHERE userID = %s
         """, (userID,))
@@ -330,7 +330,7 @@ class UserAccount:
         cursor.execute("""
             UPDATE UserAccount
             SET isVerifiedPublisher = 0,
-                verifiedBadgeStatus = 'Rejected',
+                verifiedBadgeStatus = 'rejected',
                 updated_at = NOW()
             WHERE userID = %s
         """, (userID,))
@@ -359,6 +359,7 @@ class UserAccount:
                 u.userID,
                 u.username,
                 u.email,
+                u.verifiedBadgeStatus,
                 COUNT(DISTINCT CASE 
                     WHEN a.articleStatus = 'Published' THEN a.articleID
                 END) AS total_published_articles,
@@ -369,7 +370,7 @@ class UserAccount:
             FROM UserAccount u
             LEFT JOIN Article a ON u.userID = a.created_by
             LEFT JOIN ReportedArticle ra ON ra.articleID = a.articleID
-            WHERE u.verifiedBadgeStatus = 'Pending'
+            WHERE u.verifiedBadgeStatus IS NOT NULL
             GROUP BY u.userID, u.username, u.email
             ORDER BY u.userID ASC
         """, (min_score,))

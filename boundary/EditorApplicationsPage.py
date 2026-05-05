@@ -354,11 +354,12 @@ def change_requests_page():
             ua.last_name,
             r.currentExpertise,
             r.requestedExpertise,
+            ua.supportingDocument,
             r.status,
             r.requested_at
         FROM EditorExpertiseRequest r
         LEFT JOIN UserAccount ua ON r.userID = ua.userID
-        WHERE status = "pending"
+        WHERE r.status IS NOT NULL
         ORDER BY r.requested_at ASC
     """)
     rows = cursor.fetchall()
@@ -375,6 +376,20 @@ def change_requests_page():
         new_expertise = row.get("requestedExpertise")
         status = row.get("status")
         requested_at = row.get("requested_at")
+        supporting_document = row.get("supportingDocument")
+
+        supporting_document_name = ""
+        supporting_document_path = ""
+
+        if supporting_document:
+            supporting_document_name = os.path.basename(supporting_document)
+
+            if supporting_document.startswith("http") or supporting_document.startswith("/"):
+                supporting_document_path = supporting_document
+            elif supporting_document.startswith("static/"):
+                supporting_document_path = "/" + supporting_document
+            else:
+                supporting_document_path = "/" + supporting_document
 
         full_name = f"{first_name or ''} {last_name or ''}".strip()
         if not full_name:
@@ -419,6 +434,8 @@ def change_requests_page():
             "email": email or "-",
             "currentExpertise": current_expertise or "-",
             "newExpertise": new_expertise or "-",
+            "supportingDocumentName": supporting_document_name,
+            "supportingDocumentPath": supporting_document_path,
             "status": status.lower(),
             "requested_at": applied_at_display
         })
@@ -479,71 +496,54 @@ def approve_change(request_id):
     if "userID" not in session:
         return redirect(url_for("login.login"))
 
-    # admin_remarks = request.form.get("adminRemarks", "").strip()
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # cursor.execute("""
-    #     UPDATE EditorExpertiseRequest
-    #     SET status = %s,
-    #         reviewed_at = CURRENT_TIMESTAMP
-    #     WHERE requestID = %s
-    # """, ("approved", request_id))
+    try:
+        # Get request details first
+        cursor.execute("""
+            SELECT userID, requestedExpertise
+            FROM EditorExpertiseRequest
+            WHERE requestID = %s
+        """, (request_id,))
 
-    # Fetch the request FIRST
-    cursor.execute("""
-        SELECT userID, requestedExpertise
-        FROM EditorExpertiseRequest
-        WHERE requestID = %s
-    """, (request_id,))
-    expertise_request = cursor.fetchone()
+        change_request = cursor.fetchone()
 
-    # Update request status
-    cursor.execute("""
-        UPDATE EditorExpertiseRequest
-        SET status = 'approved',
-            reviewed_at = CURRENT_TIMESTAMP
-        WHERE requestID = %s
-    """, (request_id,))
+        if not change_request:
+            flash("Change request not found or already reviewed.", "error")
+            return redirect(url_for("editor_applications_page_bp.change_requests_page"))
 
-    # Update the editor's expertiseArea in UserAccount
-    if expertise_request:
+        user_id = change_request["userID"]
+        requested_expertise = change_request["requestedExpertise"]
+
+        # Update request status
+        cursor.execute("""
+            UPDATE EditorExpertiseRequest
+            SET status = %s,
+                reviewed_at = CURRENT_TIMESTAMP
+            WHERE requestID = %s
+        """, ("approved", request_id))
+
+        # Update editor expertise area
         cursor.execute("""
             UPDATE UserAccount
             SET expertiseArea = %s,
-                updated_at = CURRENT_TIMESTAMP
+                updated_at = NOW()
             WHERE userID = %s
-        """, (expertise_request["requestedExpertise"], expertise_request["userID"]))
+        """, (requested_expertise, user_id))
 
-    # cursor.execute("""
-    #     SELECT username, first_name, last_name, email
-    #     FROM UserAccount
-    #     WHERE userID = %s
-    # """, (user_id,))
+        conn.commit()
 
-    # user = cursor.fetchone()
-    conn.commit()
-    cursor.close()
-    conn.close()
+        flash("Change request approved successfully.", "success")
 
-    # if user and user.get("email"):
-    #     full_name = f"{user.get('first_name') or ''} {user.get('last_name') or ''}".strip()
-    #     if not full_name:
-    #         full_name = user.get("username") or "Applicant"
+    except Exception as e:
+        conn.rollback()
+        print("APPROVE CHANGE REQUEST ERROR:", e)
+        flash("Something went wrong while approving the change request.", "error")
 
-    #     email_sent = send_editor_application_decision_email(
-    #         to_email=user["email"],
-    #         full_name=full_name,
-    #         decision="approved",
-    #         remarks=admin_remarks
-    #     )
-
-    #     if email_sent:
-    #         flash("Application approved successfully. Email notification sent.", "success")
-    #     else:
-    #         flash("Application approved successfully, but email could not be sent.", "warning")
-    flash("Chnage request approved successfully")
+    finally:
+        cursor.close()
+        conn.close()
 
     return redirect(url_for("editor_applications_page_bp.change_requests_page"))
 
@@ -593,6 +593,6 @@ def reject_change(request_id):
     #     else:
     #         flash("Application rejected successfully, but email could not be sent.", "warning")
 
-    flash("Application rejected successfully, but applicant email was not found.", "warning")
+    flash("Application rejected successfully.", "success")
 
     return redirect(url_for("editor_applications_page_bp.change_requests_page"))

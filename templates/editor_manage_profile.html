@@ -493,7 +493,11 @@
 
                     <div class="form-group">
                         <label>Supporting Document</label>
-                        <input type="file" name="supporting_document">
+                        <input 
+                            type="file" 
+                            name="supporting_document"
+                            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                        >
                         {% if profile and profile.supportingDocument %}
                             <div class="hint-text">Current file: {{ profile.supportingDocument }}</div>
                         {% endif %}

@@ -227,6 +227,22 @@ def manage_subscription_plan():
                     "message": "planID is required for update"
                 }), 400
 
+            # Check whether the plan really exists first
+            cursor.execute("""
+                SELECT planID
+                FROM SubscriptionPlan
+                WHERE planID = %s
+                LIMIT 1
+            """, (plan_id,))
+            existing_plan = cursor.fetchone()
+
+            if not existing_plan:
+                return jsonify({
+                    "success": False,
+                    "message": "Subscription plan not found"
+                }), 404
+
+            # Check duplicate plan name, excluding current plan
             cursor.execute("""
                 SELECT planID
                 FROM SubscriptionPlan
@@ -263,12 +279,6 @@ def manage_subscription_plan():
                 current_user_id,
                 plan_id
             ))
-
-            if cursor.rowcount == 0:
-                return jsonify({
-                    "success": False,
-                    "message": "Subscription plan not found"
-                }), 404
 
             conn.commit()
 

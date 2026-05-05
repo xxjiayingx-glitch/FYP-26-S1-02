@@ -1,9 +1,10 @@
-from flask import Blueprint, request, jsonify, session, redirect, current_app
+from flask import Blueprint, request, jsonify, session, redirect, current_app, flash
 from entity.db_connection import get_db_connection
 from datetime import datetime
 import math
 import os
 import uuid
+import re
 from werkzeug.utils import secure_filename
 
 web_admin_api_bp = Blueprint("web_admin_api", __name__)
@@ -26,14 +27,37 @@ def get_company_profile():
 
 @web_admin_api_bp.route("/admin/company-profile", methods=["PUT"])
 def update_company_profile():
-    data = request.json
+    data = request.get_json(silent=True) or {}
 
-    company_name = data.get("companyName")
-    description = data.get("description")
-    mission = data.get("mission")
-    vision = data.get("vision")
-    contact_email = data.get("contactEmail")
-    contact_phone = data.get("contactPhone")
+    company_name = data.get("companyName", "").strip()
+    description = data.get("description", "").strip()
+    mission = data.get("mission", "").strip()
+    vision = data.get("vision", "").strip()
+    contact_email = data.get("contactEmail", "").strip()
+    contact_phone = data.get("contactPhone", "").strip()
+
+    if not company_name:
+        return jsonify({"message": "Company name cannot be empty"}), 400
+
+    if not description:
+        return jsonify({"message": "Description cannot be empty"}), 400
+
+    if not mission:
+        return jsonify({"message": "Mission cannot be empty"}), 400
+
+    if not vision:
+        return jsonify({"message": "Vision cannot be empty"}), 400
+
+    if not contact_email:
+        return jsonify({"message": "Contact email cannot be empty"}), 400
+    
+    email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+
+    if not re.match(email_pattern, contact_email):
+        return jsonify({"message": "Please enter a valid email address"}), 400
+
+    if not contact_phone:
+        return jsonify({"message": "Contact phone cannot be empty"}), 400
 
     updated_by = session.get("userID")
 
@@ -118,48 +142,48 @@ def get_subscription_plan():
     return jsonify(result if result else {})
 
 
-@web_admin_api_bp.route("/admin/subscription-plan", methods=["PUT"])
-def update_subscription_plan():
+# @web_admin_api_bp.route("/admin/subscription-plan", methods=["PUT"])
+# def update_subscription_plan():
 
-    data = request.json
+#     data = request.json
 
-    plan_id = data.get("planID")
-    plan_name = data.get("planName")
-    plan_description = data.get("planDescription")
-    price = data.get("price")
-    billing_cycle = data.get("billingCycle")
-    plan_status = data.get("planStatus")
+#     plan_id = data.get("planID")
+#     plan_name = data.get("planName")
+#     plan_description = data.get("planDescription")
+#     price = data.get("price")
+#     billing_cycle = data.get("billingCycle")
+#     plan_status = data.get("planStatus")
 
-    if not plan_id:
-        return jsonify({"message": "Missing planID"}), 400
+#     if not plan_id:
+#         return jsonify({"message": "Missing planID"}), 400
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
 
-    cursor.execute("""
-        UPDATE SubscriptionPlan
-        SET planName = %s,
-            planDescription = %s,
-            price = %s,
-            billingCycle = %s,
-            planStatus = %s
-        WHERE planID = %s
-    """, (
-        plan_name,
-        plan_description,
-        price,
-        billing_cycle,
-        plan_status,
-        plan_id
-    ))
+#     cursor.execute("""
+#         UPDATE SubscriptionPlan
+#         SET planName = %s,
+#             planDescription = %s,
+#             price = %s,
+#             billingCycle = %s,
+#             planStatus = %s
+#         WHERE planID = %s
+#     """, (
+#         plan_name,
+#         plan_description,
+#         price,
+#         billing_cycle,
+#         plan_status,
+#         plan_id
+#     ))
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+#     conn.commit()
+#     cursor.close()
+#     conn.close()
 
-    return jsonify({
-        "message": "Subscription plan updated successfully"
-    })
+#     return jsonify({
+#         "message": "Subscription plan updated successfully"
+#     })
 
 
 # -------------------- KEY PRODUCT FEATURES --------------------
@@ -258,26 +282,30 @@ def add_key_feature():
     image_file = request.files.get("image")
 
     if not feature_name or not feature_description:
+        flash("Feature name and description are required.", "error")
         return redirect("/admin/edit-key-product-features")
 
     if not image_file or image_file.filename == "":
-        return "Image is required when adding a new feature.", 400
+        flash("Image is required when adding a new feature.", "error")
+        return redirect("/admin/edit-key-product-features")
 
     image_filename = save_feature_image(image_file)
 
     if not image_filename:
-        return "Invalid image file.", 400
-
+        flash("Invalid image file. Please upload PNG, JPG, JPEG, GIF, or WEBP.", "error")
+        return redirect("/admin/edit-key-product-features")
+    
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO ProductFeature (featureName, featureDescription, featureImage, created_at, updated_at)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO ProductFeature (featureName, featureDescription, featureImage, featureStatus, created_at, updated_at)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, (
         feature_name,
         feature_description,
         image_filename,
+        "active",
         datetime.now(),
         datetime.now()
     ))
@@ -286,7 +314,9 @@ def add_key_feature():
     cursor.close()
     conn.close()
 
+    flash("Feature added successfully.", "success")
     return redirect("/admin/edit-key-product-features")
+
 
 
 @web_admin_api_bp.route("/admin/key-features/update", methods=["POST"])
@@ -300,6 +330,7 @@ def update_key_feature():
     image_file = request.files.get("image")
 
     if not feature_id or not feature_name or not feature_description:
+        flash("Feature name and description are required.", "error")
         return redirect("/admin/edit-key-product-features")
 
     conn = get_db_connection()
@@ -315,6 +346,7 @@ def update_key_feature():
     if not existing:
         cursor.close()
         conn.close()
+        flash("Feature not found.", "error")
         return redirect("/admin/edit-key-product-features")
 
     image_filename = existing["image"]
@@ -344,6 +376,7 @@ def update_key_feature():
     cursor.close()
     conn.close()
 
+    flash("Feature updated successfully.", "success")
     return redirect("/admin/edit-key-product-features")
 
 
@@ -366,6 +399,10 @@ def delete_key_feature(feature_id):
         delete_feature_image(existing["image"])
         cursor.execute("DELETE FROM ProductFeature WHERE featureID = %s", (feature_id,))
         conn.commit()
+        flash("Feature deleted successfully.", "success")
+    else:
+        flash("Feature not found.", "error")
+
 
     cursor.close()
     conn.close()

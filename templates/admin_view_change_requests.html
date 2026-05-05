@@ -327,8 +327,28 @@
     }
 
     .modal-detail span {
+        display: block;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+
+    .document-link {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: #e8ecff;
+        color: #3949ab;
+        font-size: 14px;
         font-weight: 800;
-        color: #111827;
+        text-decoration: none;
+    }
+
+    .document-link:hover {
+        background: #dbe1ff;
     }
 
     .close-modal-btn {
@@ -506,14 +526,16 @@
                                     type="button"
                                     class="action-btn view-btn"
                                     title="View request"
-                                    onclick="openRequestModal(
-                                        '{{ app.fullName|e }}',
-                                        '{{ app.email|e }}',
-                                        '{{ app.currentExpertise|e }}',
-                                        '{{ app.newExpertise|e }}',
-                                        '{{ app.requested_at|e }}',
-                                        '{{ app.status|e }}'
-                                    )"
+                                    onclick='openRequestModal(
+                                        {{ app.fullName|tojson }},
+                                        {{ app.email|tojson }},
+                                        {{ app.currentExpertise|tojson }},
+                                        {{ app.newExpertise|tojson }},
+                                        {{ app.requested_at|tojson }},
+                                        {{ app.status|tojson }},
+                                        {{ app.supportingDocumentName|tojson }},
+                                        {{ app.supportingDocumentPath|tojson }}
+                                    )'
                                 >
                                     👁
                                 </button>
@@ -593,6 +615,21 @@
             <span id="modalStatus"></span>
         </div>
 
+        <div class="modal-detail">
+            <small>Supporting Document</small>
+            <span id="modalDocumentText"></span>
+            <br>
+            <a 
+                id="modalDocumentLink" 
+                href="#" 
+                target="_blank" 
+                class="document-link" 
+                style="display:none;"
+            >
+                View Document
+            </a>
+        </div>
+
         <button class="close-modal-btn" onclick="closeRequestModal()">Close</button>
     </div>
 </div>
@@ -627,13 +664,26 @@
         document.getElementById("visibleCount").textContent = visibleCount;
     }
 
-    function openRequestModal(name, email, currentExpertise, newExpertise, requestedAt, status) {
+    function openRequestModal(name, email, currentExpertise, newExpertise, requestedAt, status, documentName, documentPath) {
         document.getElementById("modalName").textContent = name;
         document.getElementById("modalEmail").textContent = email;
         document.getElementById("modalCurrent").textContent = currentExpertise;
         document.getElementById("modalNew").textContent = newExpertise;
         document.getElementById("modalDate").textContent = requestedAt;
         document.getElementById("modalStatus").textContent = status;
+
+        const documentText = document.getElementById("modalDocumentText");
+        const documentLink = document.getElementById("modalDocumentLink");
+
+        if (documentPath && documentPath.trim() !== "") {
+            documentText.textContent = documentName || "Supporting document uploaded";
+            documentLink.href = documentPath;
+            documentLink.style.display = "inline-block";
+        } else {
+            documentText.textContent = "No supporting document uploaded";
+            documentLink.href = "#";
+            documentLink.style.display = "none";
+        }
 
         document.getElementById("requestModalBg").style.display = "flex";
     }

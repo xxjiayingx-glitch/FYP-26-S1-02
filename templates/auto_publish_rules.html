@@ -119,20 +119,6 @@
                     required
                 >
             </div>
-
-            <div class="form-group">
-                <label for="misleadingCutoffScore">Potentially Misleading Cutoff Score</label>
-                <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    id="misleadingCutoffScore"
-                    name="misleadingCutoffScore"
-                    value="{{ current_credibility_rule.misleadingCutoffScore if current_credibility_rule else '' }}"
-                    required
-                >
-            </div>
         </div>
 
         <button type="submit" class="save-btn">Save Configuration</button>
@@ -162,7 +148,6 @@
     <p><strong>Generally Reliable Minimum Score:</strong> {{ current_credibility_rule.generallyReliableMinScore }}</p>
     <p><strong>Mixed / Needs Verification Minimum Score:</strong> {{ current_credibility_rule.mixedMinScore }}</p>
     <p><strong>Low Confidence Minimum Score:</strong> {{ current_credibility_rule.lowConfidenceMinScore }}</p>
-    <p><strong>Potentially Misleading Cutoff Score:</strong> {{ current_credibility_rule.misleadingCutoffScore }}</p>
     <p><strong>Status:</strong> {{ current_credibility_rule.ruleStatus }}</p>
     <p><strong>Last Updated:</strong> 
         {% if current_credibility_rule.updated_at %}

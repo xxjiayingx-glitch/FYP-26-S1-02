@@ -63,7 +63,7 @@
         <div class="form-row two-col">
             <div>
                 <label>Contact Email</label>
-                <input id="contactEmail" class="input-modern">
+                <input id="contactEmail" class="input-modern" type="email">
             </div>
 
             <div>
@@ -125,27 +125,84 @@ function loadCompanyProfile(){
 
 function saveCompanyProfile(){
 
+    const companyName = document.getElementById("companyName").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const mission = document.getElementById("mission").value.trim();
+    const vision = document.getElementById("vision").value.trim();
+    const contactEmail = document.getElementById("contactEmail").value.trim();
+    const contactPhone = document.getElementById("contactPhone").value.trim();
+
+    if (!companyName) {
+        alert("Company name cannot be empty");
+        document.getElementById("companyName").focus();
+        return;
+    }
+
+    if (!description) {
+        alert("Description cannot be empty");
+        document.getElementById("description").focus();
+        return;
+    }
+
+    if (!mission) {
+        alert("Mission cannot be empty");
+        document.getElementById("mission").focus();
+        return;
+    }
+
+    if (!vision) {
+        alert("Vision cannot be empty");
+        document.getElementById("vision").focus();
+        return;
+    }
+
+    if (!contactEmail) {
+        alert("Contact email cannot be empty");
+        document.getElementById("contactEmail").focus();
+        return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(contactEmail)) {
+        alert("Please enter a valid email address");
+        document.getElementById("contactEmail").focus();
+        return;
+    }
+
+    if (!contactPhone) {
+        alert("Contact phone cannot be empty");
+        document.getElementById("contactPhone").focus();
+        return;
+    }
+
     fetch("/admin/company-profile",{
         method:"PUT",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
-            companyName: document.getElementById("companyName").value,
-            description: document.getElementById("description").value,
-            mission: document.getElementById("mission").value,
-            vision: document.getElementById("vision").value,
-            contactEmail: document.getElementById("contactEmail").value,
-            contactPhone: document.getElementById("contactPhone").value
+            companyName: companyName,
+            description: description,
+            mission: mission,
+            vision: vision,
+            contactEmail: contactEmail,
+            contactPhone: contactPhone
         })
     })
-    .then(res=>{
-        if(!res.ok){
-            throw new Error("Update failed");
+    .then(res => res.json().then(data => ({
+        ok: res.ok,
+        data: data
+    })))
+    .then(result => {
+
+        if (!result.ok) {
+            alert(result.data.message || "Update failed");
+            return;
         }
-        return res.json();
-    })
-    .then(data=>{
-        alert(data.message);
-        window.location.href="/admin/webpage-management";
+
+        alert(result.data.message || "Company profile updated successfully");
+
+        // Stay on same page
+        loadCompanyProfile();
     })
     .catch(err=>{
         console.error(err);
