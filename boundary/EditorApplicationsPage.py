@@ -484,12 +484,37 @@ def approve_change(request_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # cursor.execute("""
+    #     UPDATE EditorExpertiseRequest
+    #     SET status = %s,
+    #         reviewed_at = CURRENT_TIMESTAMP
+    #     WHERE requestID = %s
+    # """, ("approved", request_id))
+
+    # Fetch the request FIRST
+    cursor.execute("""
+        SELECT userID, requestedExpertise
+        FROM EditorExpertiseRequest
+        WHERE requestID = %s
+    """, (request_id,))
+    expertise_request = cursor.fetchone()
+
+    # Update request status
     cursor.execute("""
         UPDATE EditorExpertiseRequest
-        SET status = %s,
+        SET status = 'approved',
             reviewed_at = CURRENT_TIMESTAMP
         WHERE requestID = %s
-    """, ("approved", request_id))
+    """, (request_id,))
+
+    # Update the editor's expertiseArea in UserAccount
+    if expertise_request:
+        cursor.execute("""
+            UPDATE UserAccount
+            SET expertiseArea = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE userID = %s
+        """, (expertise_request["requestedExpertise"], expertise_request["userID"]))
 
     # cursor.execute("""
     #     SELECT username, first_name, last_name, email

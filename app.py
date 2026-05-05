@@ -1383,6 +1383,12 @@ def editor_approval_articles():
     cursor = conn.cursor()
 
     cursor.execute("""
+        SELECT expertiseArea FROM UserAccount WHERE userID = %s
+    """, (session["userID"],))
+    editor = cursor.fetchone()
+    expertise = editor["expertiseArea"] if editor else None
+
+    cursor.execute("""
         SELECT a.articleID,
                a.articleTitle,
                a.articleStatus,
@@ -1392,8 +1398,9 @@ def editor_approval_articles():
         FROM Article a
         JOIN ArticleCategory c ON a.categoryID = c.categoryID
         WHERE a.articleStatus = 'pending review'
+        AND c.categoryName = %s
         ORDER BY a.created_at DESC
-    """)
+    """, (expertise,))
     articles = cursor.fetchall()
 
     cursor.close()
