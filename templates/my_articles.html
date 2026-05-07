@@ -34,10 +34,12 @@
                class="{% if status == 'published' %}active{% endif %}">
                 Published
             </a>
-            <a href="{{ url_for('my_articles', verified_only='true') }}" 
-                class="{% if verified_only %}active{% endif %}">
-                ✔ Verified Only
-            </a>
+            {% if session.get('userType') == 'premium' and session.get('verifiedBadgeStatus') == 'approved' %}
+                <a href="{{ url_for('my_articles', verified_only='true') }}" 
+                    class="{% if verified_only %}active{% endif %}">
+                    ✔ Verified Only
+                </a>
+            {% endif %}
         </div>
 
         <a href="{{ url_for('create_article') }}" class="btn create-article-btn">
