@@ -21,6 +21,9 @@ class ArticleController:
     def get_categories(self):
         return self.article_entity.get_categories()
     
+    def get_editor_expertise_category(self, user_id):
+        return self.article_entity.get_editor_expertise_category(user_id)
+    
     def get_my_articles(self, user_id):
         return self.search_my_articles(user_id)    
     

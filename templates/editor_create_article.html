@@ -436,7 +436,7 @@
                 <input type="text" name="title" placeholder="Enter your article title" required>
             </div>
 
-            <div class="form-row">
+            <!-- <div class="form-row">
                 <label>Category</label>
                 <select name="category" required>
                     <option disabled selected>Select your article category</option>
@@ -444,6 +444,18 @@
                         <option value="{{ cat.categoryID }}">{{ cat.categoryName }}</option>
                     {% endfor %}
                 </select>
+            </div> -->
+
+            <div class="form-row">
+                <label>Category</label>
+                <select name="category" required class="locked-select" tabindex="-1">
+                    <option value="{{ category.categoryID }}" selected>
+                        {{ category.categoryName }}
+                    </option>
+                </select>
+                <small class="category-note">
+                    This category is assigned based on your editor expertise.
+                </small>
             </div>
 
             <div class="form-row">

@@ -1085,167 +1085,8 @@ def generate_ai_review_ajax(article_id):
         })
     
 # ----------------------------
-# ---------- EDITOR ----------
+# ---------- ADMIN ----------
 # ----------------------------
-
-@app.route("/editor/dashboard")
-def editor_dashboard():
-    if "userID" not in session:
-        return redirect(url_for("login.login"))
-
-    user_type = (session.get("userType") or "").strip().lower()
-    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
-
-    if user_type != "editor" or editor_status != "approved":
-        return redirect(url_for("login.login"))
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        SELECT expertiseArea
-        FROM UserAccount
-        WHERE userID = %s
-    """, (session["userID"],))
-    editor = cursor.fetchone()
-    expertise = editor["expertiseArea"] if editor else None 
-
-    # ===== TOTAL =====
-    cursor.execute("SELECT COUNT(articleID) AS total FROM Article")
-    total_articles = cursor.fetchone()["total"]
-
-    # ===== PENDING (own category only) =====
-    cursor.execute("""
-        SELECT a.articleID, a.articleTitle, a.articleStatus, a.created_at
-        FROM Article a
-        JOIN ArticleCategory c ON a.categoryID = c.categoryID
-        WHERE a.articleStatus = 'pending review'
-        AND c.categoryName = %s
-        ORDER BY a.created_at DESC
-        LIMIT 5
-    """, (expertise,))
-    pending_articles = cursor.fetchall()
-    pending_count = len(pending_articles)
-
-    # ===== APPROVED COUNT =====
-    cursor.execute("SELECT COUNT(*) AS count FROM Article WHERE articleStatus = 'published'")
-    approved_count = cursor.fetchone()["count"]
-
-    # ===== PENDING REVIEW COUNT =====
-    cursor.execute("""
-        SELECT COUNT(DISTINCT r.articleID) AS count
-        FROM ReportedArticle r
-        JOIN Article a ON r.articleID = a.articleID
-        JOIN ArticleCategory c ON a.categoryID = c.categoryID
-        WHERE r.reportStatus = 'pending review'
-        AND c.categoryName = %s
-    """, (expertise,))
-
-    reported_count = cursor.fetchone()["count"]
-    
-    cursor.execute("""
-        SELECT expertiseArea
-        FROM UserAccount
-        WHERE userID = %s
-    """, (session["userID"],))
-    editor = cursor.fetchone()
-    expertise = editor["expertiseArea"] if editor else None
-    
-    # ===== REPORTED ARTICLES (own category + pending only) =====
-    cursor.execute("""
-        SELECT 
-            MIN(r.reportID) AS reportID,
-            r.articleID,
-            a.articleTitle,
-            c.categoryName AS category,
-            COUNT(r.reportID) AS totalReports,
-            MAX(r.reported_at) AS latestReportDate,
-            a.articleStatus,
-            CASE 
-                WHEN SUM(CASE WHEN r.reportStatus = 'pending review' THEN 1 ELSE 0 END) > 0 
-                THEN 'pending review'
-                ELSE 'completed'
-            END AS reportStatus
-        FROM ReportedArticle r
-        JOIN Article a ON r.articleID = a.articleID
-        JOIN ArticleCategory c ON a.categoryID = c.categoryID
-        WHERE r.reportStatus = 'pending review'
-        AND c.categoryName = %s
-        GROUP BY r.articleID, a.articleTitle, c.categoryName, a.articleStatus
-        ORDER BY latestReportDate DESC
-    """, (expertise,))
-    reported_articles = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return render_template(
-        "editor_dashboard.html",
-        active_page="dashboard",
-        total_articles=total_articles,
-        pending_articles=pending_articles,
-        pending_count=pending_count,
-        approved_count=approved_count,
-        reported_count=reported_count,
-        reported_articles=reported_articles
-    )
-    
-@app.route("/editor/category_articles")
-def editor_category_articles():
-    if "userID" not in session:
-        return redirect(url_for("login.login"))
-
-    user_id = session["userID"]
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT expertiseArea
-        FROM UserAccount
-        WHERE userID = %s
-    """, (user_id,))
-    editor = cursor.fetchone()
-
-    expertise = editor["expertiseArea"] if editor else None
-
-    cursor.execute("""
-        SELECT categoryID
-        FROM ArticleCategory
-        WHERE categoryName = %s AND categoryStatus = 'active'
-    """, (expertise,))
-    category = cursor.fetchone()
-
-    category_id = category["categoryID"] if category else None
-
-    if category_id:
-        cursor.execute("""
-            SELECT a.articleID,
-                   a.articleTitle,
-                   c.categoryName,
-                   a.created_by,
-                   a.created_at,
-                   a.approved_at
-            FROM Article a
-            JOIN ArticleCategory c ON a.categoryID = c.categoryID
-            WHERE a.categoryID = %s
-            ORDER BY a.created_at DESC
-        """, (category_id,))
-        articles = cursor.fetchall()
-    else:
-        articles = []
-
-    cursor.close()
-    conn.close()
-
-    return render_template(
-        "editor_category_articles.html",
-        active_page="category",
-        articles=articles,
-        expertise=expertise
-    )
-
-
 @app.route("/admin/category_articles")
 def admin_category_articles():
     if "userID" not in session:
@@ -1462,6 +1303,167 @@ def admin_review_pending_article(articleID):
         active_page="category",
         admin=admin_data["admin"]
     )
+    
+# ----------------------------
+# ---------- EDITOR ----------
+# ----------------------------
+
+@app.route("/editor/dashboard")
+def editor_dashboard():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+    editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+    if user_type != "editor" or editor_status != "approved":
+        return redirect(url_for("login.login"))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT expertiseArea
+        FROM UserAccount
+        WHERE userID = %s
+    """, (session["userID"],))
+    editor = cursor.fetchone()
+    expertise = editor["expertiseArea"] if editor else None 
+
+    # ===== TOTAL =====
+    cursor.execute("SELECT COUNT(articleID) AS total FROM Article")
+    total_articles = cursor.fetchone()["total"]
+
+    # ===== PENDING (own category only) =====
+    cursor.execute("""
+        SELECT a.articleID, a.articleTitle, a.articleStatus, a.created_at
+        FROM Article a
+        JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        WHERE a.articleStatus = 'pending review'
+        AND c.categoryName = %s
+        ORDER BY a.created_at DESC
+        LIMIT 5
+    """, (expertise,))
+    pending_articles = cursor.fetchall()
+    pending_count = len(pending_articles)
+
+    # ===== APPROVED COUNT =====
+    cursor.execute("SELECT COUNT(*) AS count FROM Article WHERE articleStatus = 'published'")
+    approved_count = cursor.fetchone()["count"]
+
+    # ===== PENDING REVIEW COUNT =====
+    cursor.execute("""
+        SELECT COUNT(DISTINCT r.articleID) AS count
+        FROM ReportedArticle r
+        JOIN Article a ON r.articleID = a.articleID
+        JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        WHERE r.reportStatus = 'pending review'
+        AND c.categoryName = %s
+    """, (expertise,))
+
+    reported_count = cursor.fetchone()["count"]
+    
+    cursor.execute("""
+        SELECT expertiseArea
+        FROM UserAccount
+        WHERE userID = %s
+    """, (session["userID"],))
+    editor = cursor.fetchone()
+    expertise = editor["expertiseArea"] if editor else None
+    
+    # ===== REPORTED ARTICLES (own category + pending only) =====
+    cursor.execute("""
+        SELECT 
+            MIN(r.reportID) AS reportID,
+            r.articleID,
+            a.articleTitle,
+            c.categoryName AS category,
+            COUNT(r.reportID) AS totalReports,
+            MAX(r.reported_at) AS latestReportDate,
+            a.articleStatus,
+            CASE 
+                WHEN SUM(CASE WHEN r.reportStatus = 'pending review' THEN 1 ELSE 0 END) > 0 
+                THEN 'pending review'
+                ELSE 'completed'
+            END AS reportStatus
+        FROM ReportedArticle r
+        JOIN Article a ON r.articleID = a.articleID
+        JOIN ArticleCategory c ON a.categoryID = c.categoryID
+        WHERE r.reportStatus = 'pending review'
+        AND c.categoryName = %s
+        GROUP BY r.articleID, a.articleTitle, c.categoryName, a.articleStatus
+        ORDER BY latestReportDate DESC
+    """, (expertise,))
+    reported_articles = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "editor_dashboard.html",
+        active_page="dashboard",
+        total_articles=total_articles,
+        pending_articles=pending_articles,
+        pending_count=pending_count,
+        approved_count=approved_count,
+        reported_count=reported_count,
+        reported_articles=reported_articles
+    )
+    
+@app.route("/editor/category_articles")
+def editor_category_articles():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_id = session["userID"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT expertiseArea
+        FROM UserAccount
+        WHERE userID = %s
+    """, (user_id,))
+    editor = cursor.fetchone()
+
+    expertise = editor["expertiseArea"] if editor else None
+
+    cursor.execute("""
+        SELECT categoryID
+        FROM ArticleCategory
+        WHERE categoryName = %s AND categoryStatus = 'active'
+    """, (expertise,))
+    category = cursor.fetchone()
+
+    category_id = category["categoryID"] if category else None
+
+    if category_id:
+        cursor.execute("""
+            SELECT a.articleID,
+                   a.articleTitle,
+                   c.categoryName,
+                   a.created_by,
+                   a.created_at,
+                   a.approved_at
+            FROM Article a
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            WHERE a.categoryID = %s
+            ORDER BY a.created_at DESC
+        """, (category_id,))
+        articles = cursor.fetchall()
+    else:
+        articles = []
+
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "editor_category_articles.html",
+        active_page="category",
+        articles=articles,
+        expertise=expertise
+    )
 
 @app.route("/editor/article_preview/<int:article_id>")
 def editor_article_preview(article_id):
@@ -1529,9 +1531,15 @@ def editor_create_article():
 
     user_id = session.get("userID")
 
+    # Get editor assigned category first
+    category = article_controller.get_editor_expertise_category(user_id)
+
+    if not category:
+        flash("No active category is assigned to your editor account.", "danger")
+        return redirect(url_for("editor_my_articles"))
+
     if request.method == "POST":
         title = request.form.get("title")
-        category_id = request.form.get("category")
         content = request.form.get("content")
         ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
         ai_fact_check_status = request.form.get("ai_fact_check_status")
@@ -1542,6 +1550,8 @@ def editor_create_article():
             status = "published"
         else:
             status = "draft"
+
+        category_id = category["categoryID"]
 
         featured_image = request.files.get("featured_image")
         image_filename = None
@@ -1565,7 +1575,7 @@ def editor_create_article():
         if articleID:
             SystemLogCTL.logAction(
                 accountID=session["userID"],
-                action="Created Article",
+                action=f"Created Article under category {category['categoryName']}",
                 targetID=articleID,
                 targetType="Article"
             )
@@ -1577,12 +1587,13 @@ def editor_create_article():
 
             return redirect(url_for("editor_my_articles"))
 
-    categories = article_controller.get_categories()
+        flash("Failed to create article.", "danger")
+
     current_time = datetime.now().strftime("%d %b %Y %H:%M:%S")
 
     return render_template(
         "editor_create_article.html",
-        categories=categories,
+        category=category,
         current_time=current_time,
         active_page="my_articles"
     )

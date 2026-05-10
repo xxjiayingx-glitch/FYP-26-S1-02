@@ -555,6 +555,33 @@ class Article:
         conn.close()
         return categories
     
+    def get_editor_expertise_category(self, user_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT expertiseArea
+            FROM UserAccount
+            WHERE userID = %s
+        """, (user_id,))
+        editor = cursor.fetchone()
+
+        expertise = editor["expertiseArea"] if editor else None
+
+        cursor.execute("""
+            SELECT categoryID, categoryName
+            FROM ArticleCategory
+            WHERE categoryName = %s
+            AND categoryStatus = 'active'
+        """, (expertise,))
+        editor_category = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return editor_category
+
+    
     @staticmethod
     def home_article_by_category(category_id, exclude_id=None):
         conn = get_db_connection()
