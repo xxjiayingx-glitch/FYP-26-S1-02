@@ -89,6 +89,16 @@
                     <span class="menu-text">User Accounts</span>
                 </a>
 
+                 <a href="/admin/category_articles" class="{% block category_active %}{% endblock %}">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    <span class="menu-text">Articles Pending Review</span>
+                </a>
+
+                <a href="/admin/article-reported" class="{% block reported_active %}{% endblock %}">
+                    <i class="fa-solid fa-flag"></i>
+                    <span class="menu-text">Articles Reported</span>
+                </a>
+
                 <a href="/admin/category-management" class="{% block categories_active %}{% endblock %}">
                     <i class="fa-solid fa-table-cells-large"></i>
                     <span class="menu-text">Category Management</span>

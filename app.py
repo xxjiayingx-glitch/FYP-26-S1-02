@@ -83,6 +83,7 @@ from boundary.EditorApplicationsPage import editor_applications_page_bp
 from control.ArticleController import ArticleController
 from control.SystemLogCTL import SystemLogCTL
 from control.ArticleController import ArticleController
+from control.AdminDashboardCTL import AdminDashboardControl
 article_controller = ArticleController()
 
 
@@ -1242,6 +1243,224 @@ def editor_category_articles():
         active_page="category",
         articles=articles,
         expertise=expertise
+    )
+
+
+@app.route("/admin/category_articles")
+def admin_category_articles():
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+
+    if user_type != "system admin":
+        flash("Access denied.", "danger")
+        return redirect(url_for("login.login"))
+    
+    dashboard_control = AdminDashboardControl()
+    admin_data = dashboard_control.get_dashboard_data()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            a.articleID,
+            a.articleTitle,
+            c.categoryName,
+            a.created_by,
+            a.created_at,
+            a.approved_at,
+            a.articleStatus,
+            a.aiFactCheckScore
+        FROM Article a
+        JOIN ArticleCategory c 
+            ON a.categoryID = c.categoryID
+        WHERE a.articleStatus = 'pending review'
+
+        AND NOT EXISTS (
+            SELECT 1
+            FROM UserAccount editor
+            WHERE LOWER(editor.userType) = 'editor'
+            AND LOWER(editor.editorApprovalStatus) = 'approved'
+            AND editor.expertiseArea = c.categoryName
+        )
+
+        ORDER BY a.created_at DESC
+    """)
+
+    articles = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "admin_category_articles.html",
+        active_page="category",
+        articles=articles,
+        admin=admin_data["admin"]
+    )
+
+@app.route("/admin/category_articles/<int:articleID>/decision", methods=["POST"])
+def admin_decide_pending_article(articleID):
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+
+    if user_type != "system admin":
+        flash("Access denied.", "danger")
+        return redirect(url_for("login.login"))
+    
+    dashboard_control = AdminDashboardControl()
+    admin_data = dashboard_control.get_dashboard_data()
+
+    action = request.form.get("action", "").strip().lower()
+    reviewed_by = session.get("userID")
+
+    if action not in ["approve", "reject"]:
+        flash("Invalid action.", "danger")
+        return redirect(url_for("admin_review_pending_article", articleID=articleID))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if action == "approve":
+        cursor.execute("""
+            UPDATE Article
+            SET articleStatus = 'published',
+                approved_at = NOW()
+            WHERE articleID = %s
+            AND articleStatus = 'pending review'
+        """, (articleID,))
+
+        message = "Article approved and published successfully."
+        log_action = f"System admin approved article {articleID}"
+
+    else:
+        cursor.execute("""
+            UPDATE Article
+            SET articleStatus = 'rejected'
+            WHERE articleID = %s
+            AND articleStatus = 'pending review'
+        """, (articleID,))
+
+        message = "Article rejected successfully."
+        log_action = f"System admin rejected article {articleID}"
+
+    conn.commit()
+    updated = cursor.rowcount > 0
+
+    cursor.close()
+    conn.close()
+
+    if updated:
+        flash(message, "success")
+
+        SystemLogCTL.logAction(
+            accountID=reviewed_by,
+            action=log_action,
+            targetID=articleID,
+            targetType="Article"
+        )
+    else:
+        flash("Failed to update article. It may no longer be pending review.", "danger")
+
+    return redirect(url_for("admin_category_articles"))
+
+@app.route("/admin/category_articles/<int:articleID>")
+def admin_review_pending_article(articleID):
+    if "userID" not in session:
+        return redirect(url_for("login.login"))
+
+    user_type = (session.get("userType") or "").strip().lower()
+
+    if user_type != "system admin":
+        flash("Access denied.", "danger")
+        return redirect(url_for("login.login"))
+
+    dashboard_control = AdminDashboardControl()
+    admin_data = dashboard_control.get_dashboard_data()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            a.articleID,
+            a.articleTitle,
+            a.content,
+            a.articleStatus,
+            a.created_at,
+            a.approved_at,
+            a.credibilityScore,
+            a.aiFactCheckScore,
+            a.aiFactCheckStatus,
+            ac.categoryName AS category,
+            author.username AS createdBy,
+            MIN(ai.imageURL) AS imageURL
+        FROM Article a
+        LEFT JOIN ArticleCategory ac
+            ON a.categoryID = ac.categoryID
+        LEFT JOIN UserAccount author
+            ON a.created_by = author.userID
+        LEFT JOIN ArticleImage ai
+            ON a.articleID = ai.articleID
+        WHERE a.articleID = %s
+        GROUP BY
+            a.articleID,
+            a.articleTitle,
+            a.content,
+            a.articleStatus,
+            a.created_at,
+            a.approved_at,
+            a.credibilityScore,
+            a.aiFactCheckScore,
+            a.aiFactCheckStatus,
+            ac.categoryName,
+            author.username
+    """, (articleID,))
+
+    article = cursor.fetchone()
+
+    if not article:
+        cursor.close()
+        conn.close()
+        flash("Article not found.", "danger")
+        return redirect(url_for("admin_category_articles"))
+
+    if article["articleStatus"] != "pending review":
+        cursor.close()
+        conn.close()
+        flash("This article is no longer pending review.", "warning")
+        return redirect(url_for("admin_category_articles"))
+
+    # Admin only reviews article if no approved editor exists for this category
+    cursor.execute("""
+        SELECT userID
+        FROM UserAccount
+        WHERE LOWER(userType) = 'editor'
+        AND LOWER(editorApprovalStatus) = 'approved'
+        AND expertiseArea = %s
+        LIMIT 1
+    """, (article["category"],))
+
+    assigned_editor = cursor.fetchone()
+
+    if assigned_editor:
+        cursor.close()
+        conn.close()
+        flash("This article already has an approved editor assigned.", "warning")
+        return redirect(url_for("admin_category_articles"))
+
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "admin_review_pending_article.html",
+        article=article,
+        active_page="category",
+        admin=admin_data["admin"]
     )
 
 @app.route("/editor/article_preview/<int:article_id>")
