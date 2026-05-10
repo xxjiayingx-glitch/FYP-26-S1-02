@@ -50,44 +50,110 @@ class ReportedArticle:
         return result
 
     
+    # @staticmethod
+    # def get_article_reported(expertise_category=None):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+    #     query = """
+    #         SELECT
+    #             MIN(ra.reportID) AS reportID,
+    #             a.articleID,
+    #             a.articleTitle,
+    #             ac.categoryName as category,
+    #             COUNT(ra.articleID) AS totalReports,
+    #             MAX(ra.reported_at) AS latestReportDate,
+    #             a.articleStatus,
+    #             MIN(ra.reportStatus) AS reportStatus
+    #         FROM ReportedArticle ra
+    #         JOIN Article a ON ra.articleID = a.articleID
+    #         LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
+    #         WHERE 1=1
+    #     """
+
+    #     params = []
+
+    #     if expertise_category:
+    #         query += " AND ac.categoryName = %s"
+    #         params.append(expertise_category)
+
+    #     query += """
+    #         GROUP BY a.articleID, a.articleTitle, ac.categoryName, a.articleStatus
+    #         ORDER BY totalReports DESC
+    #     """
+
+    #     print("expertise_category =", expertise_category)
+    #     print("query =", query)
+    #     print("params =", params)
+        
+    #     cursor.execute(query, params)
+    #     result = cursor.fetchall()
+    #     conn.close()
+    #     return result
+
     @staticmethod
-    def get_article_reported(expertise_category=None):
+    def get_article_reported(expertise_category=None, admin_fallback_only=False):
         conn = get_db_connection()
         cursor = conn.cursor()
+
         query = """
             SELECT
                 MIN(ra.reportID) AS reportID,
                 a.articleID,
                 a.articleTitle,
-                ac.categoryName as category,
+                ac.categoryName AS category,
                 COUNT(ra.articleID) AS totalReports,
                 MAX(ra.reported_at) AS latestReportDate,
                 a.articleStatus,
                 MIN(ra.reportStatus) AS reportStatus
             FROM ReportedArticle ra
-            JOIN Article a ON ra.articleID = a.articleID
-            LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
+            JOIN Article a 
+                ON ra.articleID = a.articleID
+            LEFT JOIN ArticleCategory ac 
+                ON a.categoryID = ac.categoryID
             WHERE 1=1
         """
 
         params = []
 
+        # Editor view:
+        # Show only reported articles that match the editor's expertise category
         if expertise_category:
             query += " AND ac.categoryName = %s"
             params.append(expertise_category)
 
+        # Admin fallback view:
+        # Show only reported articles where no approved editor exists for that category
+        if admin_fallback_only:
+            query += """
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM UserAccount editor
+                    WHERE LOWER(editor.userType) = 'editor'
+                    AND LOWER(editor.editorApprovalStatus) = 'approved'
+                    AND editor.expertiseArea = ac.categoryName
+                )
+            """
+
         query += """
-            GROUP BY a.articleID, a.articleTitle, ac.categoryName, a.articleStatus
+            GROUP BY 
+                a.articleID, 
+                a.articleTitle, 
+                ac.categoryName, 
+                a.articleStatus
             ORDER BY totalReports DESC
         """
 
         print("expertise_category =", expertise_category)
+        print("admin_fallback_only =", admin_fallback_only)
         print("query =", query)
         print("params =", params)
-        
+
         cursor.execute(query, params)
         result = cursor.fetchall()
+
+        cursor.close()
         conn.close()
+
         return result
      
     @staticmethod
@@ -101,8 +167,10 @@ class ReportedArticle:
                 GROUP_CONCAT(DISTINCT rc.categoryName SEPARATOR ', ') AS reasons,
                 totals.totalReports,
                 a.articleTitle,
+                ac.categoryName AS category,
                 author.username AS createdBy,
                 a.credibilityScore,
+                a.aiFactCheckScore,
                 a.articleStatus,
                 ra.reportStatus,
                 ai.imageURL,
@@ -113,6 +181,7 @@ class ReportedArticle:
             LEFT JOIN ReportCategory rc on ra.reportCategoryID = rc.reportCategoryID
             LEFT JOIN UserAccount ua on ra.userID = ua.userID
             LEFT JOIN UserAccount author on a.created_by = author.userID
+            LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
             JOIN (
                 SELECT articleID, COUNT(*) AS totalReports
                 FROM ReportedArticle
