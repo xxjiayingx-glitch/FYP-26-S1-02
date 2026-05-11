@@ -84,6 +84,7 @@ from control.ArticleController import ArticleController
 from control.SystemLogCTL import SystemLogCTL
 from control.ArticleController import ArticleController
 from control.AdminDashboardCTL import AdminDashboardControl
+from control.FactCheckCTL import FactCheckController
 article_controller = ArticleController()
 
 
@@ -569,27 +570,175 @@ def my_articles():
         verified_only=verified_only,
         categories=categories
     )
+#------------------------------------------#
+# Get minimum auto publish threshold score #
+#------------------------------------------#
+def get_auto_publish_threshold():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT minCredibilityScore
+        FROM AutoPublishRule 
+        WHERE ruleStatus = "active"
+        ORDER BY rule_ID DESC
+        LIMIT 1
+    """)
+
+    rule = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if rule and rule.get("minCredibilityScore") is not None:
+        return float(rule["minCredibilityScore"])
+
+    return 75.0
+
+#---------------------------------------------#
+# RUn final ai check when user submit article #
+#---------------------------------------------#
+def run_final_ai_fact_check(title, content, category_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT categoryName
+        FROM ArticleCategory
+        WHERE categoryID = %s
+    """, (category_id,))
+    category = cursor.fetchone()
+
+    cursor.execute("""
+        SELECT categoryName
+        FROM ArticleCategory
+        WHERE categoryStatus = 'active'
+    """)
+    category_rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    category_name = category["categoryName"] if category else None
+    available_categories = [row["categoryName"] for row in category_rows]
+
+    ai_result = FactCheckController.analyse_content(
+        content,
+        title=title,
+        selected_category=category_name,
+        available_categories=available_categories
+    )
+
+    score = float(ai_result.get("score") or 0)
+    status = ai_result.get("status") or "Not Checked"
+
+    return score, status
+
     
+# @app.route("/create_article", methods=["GET", "POST"])
+# def create_article():
+#     user_id = session.get("userID")
+#     if not user_id:
+#         return redirect(url_for("login.login"))
+
+#     if request.method == "POST":
+#         title = request.form.get("title")
+#         category_id = request.form.get("category")
+#         content = request.form.get("content")
+#         ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
+#         ai_fact_check_status = request.form.get("ai_fact_check_status")
+
+#         submit_action = request.form.get("submit_action", "").strip().lower()
+
+#         if submit_action == "submit":
+#             status = "pending review"
+#         else:
+#             status = "draft"
+
+
+#         featured_image = request.files.get("featured_image")
+#         image_filename = None
+
+#         if featured_image and featured_image.filename:
+#             image_filename = secure_filename(featured_image.filename)
+#             save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
+#             featured_image.save(save_path)
+
+#         articleID = article_controller.create_article(
+#             user_id=user_id,
+#             title=title,
+#             category_id=category_id,
+#             content=content,
+#             status=status,
+#             featured_image=image_filename,
+#             ai_fact_check_score=ai_fact_check_score,
+#             ai_fact_check_status=ai_fact_check_status
+#         )
+
+#         print("FREE USER article created with ID =", articleID, flush=True)
+
+#         if articleID:
+#             SystemLogCTL.logAction(
+#                 accountID=session["userID"],
+#                 action="Created Article",
+#                 targetID=articleID,
+#                 targetType="Article"
+#             )
+
+#             if status == "pending review":
+#                 flash("Article submitted for review successfully!", "success")
+#             else:
+#                 flash("Article saved as draft successfully!", "success")
+
+#             return redirect(url_for("my_articles"))
+
+#     categories = article_controller.get_categories()
+#     current_time = datetime.now().strftime("%d %b %Y %H:%M:%S")
+
+#     return render_template(
+#         "create_article.html",
+#         categories=categories,
+#         current_time=current_time
+#     )
+
+
 @app.route("/create_article", methods=["GET", "POST"])
 def create_article():
     user_id = session.get("userID")
+
     if not user_id:
         return redirect(url_for("login.login"))
+    
+    threshold = get_auto_publish_threshold()
 
     if request.method == "POST":
         title = request.form.get("title")
         category_id = request.form.get("category")
         content = request.form.get("content")
-        ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
-        ai_fact_check_status = request.form.get("ai_fact_check_status")
 
         submit_action = request.form.get("submit_action", "").strip().lower()
 
+        ai_fact_check_score = 0
+        ai_fact_check_status = "Not Checked"
+        threshold = get_auto_publish_threshold()
+
         if submit_action == "submit":
-            status = "pending review"
+            ai_fact_check_score, ai_fact_check_status = run_final_ai_fact_check(
+                title=title,
+                content=content,
+                category_id=category_id
+            )
+
+            
+
+            if ai_fact_check_score >= threshold:
+                status = "pending review"
+            else:
+                status = "draft"
         else:
             status = "draft"
-
+            ai_fact_check_score = request.form.get("ai_fact_check_score") or 0
+            ai_fact_check_status = request.form.get("ai_fact_check_status") or "Not Checked"
 
         featured_image = request.files.get("featured_image")
         image_filename = None
@@ -610,7 +759,7 @@ def create_article():
             ai_fact_check_status=ai_fact_check_status
         )
 
-        print("FREE USER article created with ID =", articleID, flush=True)
+        print("Article created with ID =", articleID, flush=True)
 
         if articleID:
             SystemLogCTL.logAction(
@@ -620,12 +769,26 @@ def create_article():
                 targetType="Article"
             )
 
-            if status == "pending review":
-                flash("Article submitted for review successfully!", "success")
+            if submit_action == "submit":
+                threshold = get_auto_publish_threshold()
+
+                if ai_fact_check_score >= threshold:
+                    flash(
+                        f"Article submitted for review successfully! AI Score: {ai_fact_check_score}.",
+                        "success"
+                    )
+                else:
+                    flash(
+                        f"Article saved as draft because the AI score is {ai_fact_check_score}, "
+                        f"which is below the minimum threshold of {threshold}.",
+                        "warning"
+                    )
             else:
                 flash("Article saved as draft successfully!", "success")
 
             return redirect(url_for("my_articles"))
+
+        flash("Failed to create article.", "danger")
 
     categories = article_controller.get_categories()
     current_time = datetime.now().strftime("%d %b %Y %H:%M:%S")
@@ -633,7 +796,8 @@ def create_article():
     return render_template(
         "create_article.html",
         categories=categories,
-        current_time=current_time
+        current_time=current_time,
+        threshold=threshold
     )
 
 # Edit Article Route
@@ -646,31 +810,62 @@ def edit_article(article_id):
     article = article_controller.get_article(article_id)
 
     if not article or article["created_by"] != user_id:
-        flash("You do not have permission to edit this article.", "error")
+        flash("You do not have permission to edit this article.", "danger")
 
         if (session.get("userType") or "").strip().lower() == "editor":
             return redirect(url_for("editor_my_articles"))
         return redirect(url_for("my_articles"))
 
+    user_type = (session.get("userType") or "").strip().lower()
+
     categories = article_controller.get_categories()
+
+    threshold = get_auto_publish_threshold()
 
     if request.method == "POST":
         title = request.form.get("title")
         category_id = request.form.get("category")
         content = request.form.get("content")
-        ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
-        ai_fact_check_status = request.form.get("ai_fact_check_status")
 
         submit_action = request.form.get("submit_action", "").strip().lower()
         status_from_form = request.form.get("status", "").strip().lower()
 
-        if (session.get("userType") or "").strip().lower() == "editor":
+        ai_fact_check_score = 0
+        ai_fact_check_status = "Not Checked"
+
+        # =========================
+        # EDITOR LOGIC
+        # =========================
+        if user_type == "editor":
             status = status_from_form if status_from_form else article.get("articleStatus", "draft")
+
+            # Editor draft/update can keep current preview score if available
+            ai_fact_check_score = request.form.get("ai_fact_check_score") or article.get("aiFactCheckScore") or 0
+            ai_fact_check_status = request.form.get("ai_fact_check_status") or article.get("aiFactCheckStatus") or "Not Checked"
+
+        # =========================
+        # NORMAL USER LOGIC
+        # =========================
         else:
             if submit_action == "submit":
-                status = "pending review"
+                # Run final AI check again before allowing submission
+                ai_fact_check_score, ai_fact_check_status = run_final_ai_fact_check(
+                    title=title,
+                    content=content,
+                    category_id=category_id
+                )
+
+                if ai_fact_check_score >= threshold:
+                    status = "pending review"
+                else:
+                    status = "draft"
+
             else:
                 status = "draft"
+
+                # Save draft can keep frontend preview score if available
+                ai_fact_check_score = request.form.get("ai_fact_check_score") or article.get("aiFactCheckScore") or 0
+                ai_fact_check_status = request.form.get("ai_fact_check_status") or article.get("aiFactCheckStatus") or "Not Checked"
 
         featured_image = request.files.get("featured_image")
         image_filename = None
@@ -701,32 +896,45 @@ def edit_article(article_id):
                 targetType="Article"
             )
 
-            if (session.get("userType") or "").strip().lower() == "editor":
+            if user_type == "editor":
                 flash("Article updated successfully!", "success")
-                return redirect("/editor/my_articles")
+                return redirect(url_for("editor_my_articles"))
 
-            if status == "pending review":
-                flash("Article updated and resubmitted for review successfully!", "success")
+            if submit_action == "submit":
+                if ai_fact_check_score >= threshold:
+                    flash(
+                        f"Article updated and resubmitted for review successfully! "
+                        f"AI Score: {ai_fact_check_score}.",
+                        "success"
+                    )
+                else:
+                    flash(
+                        f"Article updated but saved as draft because the AI score is {ai_fact_check_score}, "
+                        f"which is below the minimum threshold of {threshold}.",
+                        "warning"
+                    )
             else:
                 flash("Article updated and saved as draft successfully!", "success")
 
             return redirect(url_for("my_articles"))
 
         else:
-            flash("Failed to update article.", "error")
+            flash("Failed to update article.", "danger")
 
-    if (session.get("userType") or "").strip().lower() == "editor":
+    if user_type == "editor":
         return render_template(
             "editor_edit_article.html",
             article=article,
             categories=categories,
+            threshold=threshold,
             active_page="my_articles"
         )
 
     return render_template(
         "edit_article.html",
         article=article,
-        categories=categories
+        categories=categories,
+        threshold=threshold
     )
 
 # Delete Article Route

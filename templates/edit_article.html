@@ -471,6 +471,14 @@
     .btn-submit:hover {
         background: #15803d;
     }
+
+    .submit-note {
+        margin-top: 12px;
+        text-align: center;
+        font-size: 14px;
+        color: #6b7280;
+        line-height: 1.5;
+    }
 </style>
 
 <div class="edit-article-page">
@@ -591,6 +599,11 @@
                 <button type="submit" name="submit_action" value="draft" class="btn-draft">Save as Draft</button>
                 <button type="submit" name="submit_action" value="submit" class="btn-submit">Update & Submit</button>
             </div>
+
+            <p class="submit-note">
+                Note: Only articles with an AI credibility score of at least <strong>{{ threshold }}</strong> 
+                will be submitted to an editor for approval. Articles below this threshold will be saved as draft.
+            </p>
         </form>
     </div>
 </div>

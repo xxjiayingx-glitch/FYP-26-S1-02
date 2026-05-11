@@ -87,8 +87,10 @@
                     AI Score: {{ "%.0f"|format(headline.aiFactCheckScore|float) }}
                 </span>
 
-                <span class="ai-status-badge status-{{ headline.aiFactCheckStatus|lower|replace(' ', '-') }}">
-                    {{ headline.aiFactCheckStatus }}
+                {% set ai_status = headline.aiFactCheckStatus or "Not Checked" %}
+
+                <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
+                    {{ ai_status }}
                 </span>
             </div>
 
@@ -147,8 +149,14 @@
                 AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
             </span>
 
-            <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
+            <!-- <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
                 {{ article.aiFactCheckStatus }}
+            </span> -->
+
+            {% set ai_status = article.aiFactCheckStatus or "Not Checked" %}
+
+            <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
+                {{ ai_status }}
             </span>
         </div>
 

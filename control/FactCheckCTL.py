@@ -1708,16 +1708,121 @@ class FactCheckController:
     #         print(f"[LLM] Groq call failed: {e}")
     #         return {"verdict": "Uncertain", "confidence": 0.5, "reason": str(e)}
 
+    # @staticmethod
+    # def check_category_match(title, content, selected_category, available_categories):
+    #     api_key = os.getenv("GROQ_API_KEY")
+    #     if not api_key:
+    #         return {
+    #             "ok": False,
+    #             "matched": None,
+    #             "suggested_category": None,
+    #             "confidence": 0,
+    #             "reason": "AI category check is unavailable."
+    #         }
+
+    #     headers = {
+    #         "Authorization": f"Bearer {api_key}",
+    #         "Content-Type": "application/json"
+    #     }
+
+    #     prompt = f"""
+    #         You are checking whether a news article is submitted correctly.
+
+    #         Selected category:
+    #         {selected_category}
+
+    #         Available categories:
+    #         {", ".join(available_categories)}
+
+    #         Article title:
+    #         {title}
+
+    #         Article content:
+    #         {content[:3000]}
+
+    #         Return only valid JSON:
+    #         {{
+    #         "matched": true,
+    #         "title_matched": true,
+    #         "suggested_category": "one category from available categories",
+    #         "confidence": 0.85,
+    #         "reason": "short explanation"
+    #         }}
+
+    #         Rules:
+    #         - "matched" checks whether the selected category fits the article content.
+    #         - "title_matched" checks whether the title fits the article content.
+    #         - If the selected category does not fit, set "matched" to false.
+    #         - If the title and content discuss different topics, set "title_matched" to false.
+    #         - "suggested_category" must be one category from the available categories.
+    #         - Do not invent categories.
+    #         - In the reason, mention both issues if both category and title are mismatched.
+    #         - Keep the reason short and user-friendly.
+    #     """
+
+    #     payload = {
+    #         "model": "llama-3.3-70b-versatile",
+    #         "temperature": 0.1,
+    #         "max_completion_tokens": 200,
+    #         "response_format": {"type": "json_object"},
+    #         "messages": [
+    #             {
+    #                 "role": "system",
+    #                 "content": "You are a news category classification assistant. Return only valid JSON."
+    #             },
+    #             {
+    #                 "role": "user",
+    #                 "content": prompt
+    #             }
+    #         ]
+    #     }
+
+    #     try:
+    #         r = requests.post(
+    #             "https://api.groq.com/openai/v1/chat/completions",
+    #             headers=headers,
+    #             json=payload,
+    #             timeout=10
+    #         )
+    #         r.raise_for_status()
+
+    #         raw = r.json()["choices"][0]["message"]["content"].strip()
+    #         parsed = json.loads(raw)
+
+    #         suggested = parsed.get("suggested_category")
+    #         if suggested not in available_categories:
+    #             suggested = selected_category
+
+    #         return {
+    #             "ok": True,
+    #             "matched": bool(parsed.get("matched")),
+    #             "suggested_category": suggested,
+    #             "confidence": float(parsed.get("confidence", 0)),
+    #             "reason": parsed.get("reason", "No reason provided."),
+    #             "title_matched": bool(parsed.get("title_matched", True)),
+    #         }
+
+    #     except Exception as e:
+    #         return {
+    #             "ok": False,
+    #             "matched": None,
+    #             "suggested_category": None,
+    #             "confidence": 0,
+    #             "reason": f"Category check failed: {str(e)}"
+    #         }
+
     @staticmethod
     def check_category_match(title, content, selected_category, available_categories):
         api_key = os.getenv("GROQ_API_KEY")
+
         if not api_key:
             return {
                 "ok": False,
                 "matched": None,
                 "suggested_category": None,
                 "confidence": 0,
-                "reason": "AI category check is unavailable."
+                "reason": "AI category check is unavailable.",
+                "title_matched": None
             }
 
         headers = {
@@ -1725,14 +1830,16 @@ class FactCheckController:
             "Content-Type": "application/json"
         }
 
+        available_categories_text = ", ".join(available_categories)
+
         prompt = f"""
-            You are checking whether a news article is submitted correctly.
+            You are checking whether a news article is submitted to the correct category.
 
             Selected category:
             {selected_category}
 
             Available categories:
-            {", ".join(available_categories)}
+            {available_categories_text}
 
             Article title:
             {title}
@@ -1740,35 +1847,57 @@ class FactCheckController:
             Article content:
             {content[:3000]}
 
-            Return only valid JSON:
-            {{
-            "matched": true,
-            "title_matched": true,
-            "suggested_category": "one category from available categories",
-            "confidence": 0.85,
-            "reason": "short explanation"
-            }}
+            You must follow these rules strictly:
 
-            Rules:
-            - "matched" checks whether the selected category fits the article content.
-            - "title_matched" checks whether the title fits the article content.
-            - If the selected category does not fit, set "matched" to false.
-            - If the title and content discuss different topics, set "title_matched" to false.
-            - "suggested_category" must be one category from the available categories.
-            - Do not invent categories.
-            - In the reason, mention both issues if both category and title are mismatched.
-            - Keep the reason short and user-friendly.
+            1. You must choose suggested_category from the available categories only.
+            2. Do not invent categories.
+            3. Classify based on the MAIN topic of the article, not one minor word.
+            4. If the selected category is reasonably acceptable, set matched to true.
+            5. Only set matched to false if the selected category is clearly unsuitable.
+            6. If the article is ambiguous, prefer the selected category instead of changing suggestion randomly.
+            7. If confidence is below 0.70, suggested_category should usually stay as the selected category.
+
+            Category guidance:
+            - Travel: tourism, travel safety, hikers, tourists, trips, destinations, transport disruption, travel-related incidents.
+            - Health: illness, injury, disease, treatment, hospitals, public health, medical safety.
+            - Politics: elections, political parties, ministers, campaigns, parliament, political conflict.
+            - Government: public administration, rescue operations by state agencies, official response, laws, public services.
+            - Business: companies, markets, finance, economy, trade, jobs, corporate activity.
+            - Sports: matches, athletes, tournaments, sports teams.
+            - Education: schools, universities, learning, exams, academic policy.
+            - Technology: AI, software, devices, cybersecurity, digital platforms.
+            - Entertainment: movies, celebrities, music, events, shows.
+            - Art: artists, exhibitions, paintings, design, creative works.
+
+            Special rule for natural disasters:
+            - If the article mainly discusses hikers, tourists, travel disruption, or travel safety, choose Travel.
+            - If the article mainly discusses government rescue response or official disaster management, choose Government.
+            - If the article mainly discusses injuries, deaths, illness, or medical impact, choose Health.
+            - If more than one category fits, choose the selected category if it is reasonable.
+
+            Return only valid JSON in this exact structure:
+            {{
+                "matched": true,
+                "title_matched": true,
+                "suggested_category": "one category from available categories",
+                "confidence": 0.85,
+                "reason": "short user-friendly explanation"
+            }}
         """
 
         payload = {
             "model": "llama-3.3-70b-versatile",
-            "temperature": 0.1,
+            "temperature": 0,
+            "top_p": 1,
             "max_completion_tokens": 200,
             "response_format": {"type": "json_object"},
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are a news category classification assistant. Return only valid JSON."
+                    "content": (
+                        "You are a deterministic news category classification assistant. "
+                        "Return only valid JSON. Follow the user's category rules exactly."
+                    )
                 },
                 {
                     "role": "user",
@@ -1776,6 +1905,15 @@ class FactCheckController:
                 }
             ]
         }
+
+        def to_bool(value, default=False):
+            if isinstance(value, bool):
+                return value
+
+            if isinstance(value, str):
+                return value.strip().lower() == "true"
+
+            return default
 
         try:
             r = requests.post(
@@ -1789,17 +1927,31 @@ class FactCheckController:
             raw = r.json()["choices"][0]["message"]["content"].strip()
             parsed = json.loads(raw)
 
+            matched = to_bool(parsed.get("matched"), False)
+            title_matched = to_bool(parsed.get("title_matched"), True)
+
             suggested = parsed.get("suggested_category")
+            confidence = float(parsed.get("confidence", 0) or 0)
+
+            # Suggested category must be from available categories
             if suggested not in available_categories:
                 suggested = selected_category
 
+            # Stability rule:
+            # If AI is not confident and selected category is available,
+            # keep the selected category to avoid random switching.
+            if confidence < 0.70 and selected_category in available_categories:
+                suggested = selected_category
+
+            reason = parsed.get("reason") or "No reason provided."
+
             return {
                 "ok": True,
-                "matched": bool(parsed.get("matched")),
+                "matched": matched,
                 "suggested_category": suggested,
-                "confidence": float(parsed.get("confidence", 0)),
-                "reason": parsed.get("reason", "No reason provided."),
-                "title_matched": bool(parsed.get("title_matched", True)),
+                "confidence": confidence,
+                "reason": reason,
+                "title_matched": title_matched,
             }
 
         except Exception as e:
@@ -1808,7 +1960,8 @@ class FactCheckController:
                 "matched": None,
                 "suggested_category": None,
                 "confidence": 0,
-                "reason": f"Category check failed: {str(e)}"
+                "reason": f"Category check failed: {str(e)}",
+                "title_matched": None
             }
     
     @staticmethod
