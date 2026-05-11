@@ -49,8 +49,8 @@ class ArticleController:
     def get_featured_article_by_category(self, category_id, exclude_id=None):
         return self.article_entity.get_featured_article_by_category(category_id, exclude_id)
 
-    def get_home_latest_articles(self, exclude_id=None):
-        return self.article_entity.get_home_latest_articles(exclude_id)
+    def get_home_latest_articles(self, exclude_id=None, exclude_ids=None):
+        return self.article_entity.get_home_latest_articles(exclude_id=exclude_id, exclude_ids=exclude_ids)
     
     def home_article_by_category(self, category_id, exclude_id=None):
         return self.article_entity.home_article_by_category(
@@ -132,7 +132,6 @@ class ArticleController:
                 a.updated_at,
                 a.aiFactCheckScore,
                 a.aiFactCheckStatus,
-
                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
                 u.username,
                 u.userType,
@@ -632,7 +631,7 @@ class ArticleController:
         conn = get_db_connection()
         cursor = conn.cursor()
         query = """
-            SELECT a.articleID, a.articleTitle, a.content, c.categoryID, c.categoryName, u.username,
+            SELECT a.articleID, a.articleTitle, a.content, c.categoryID, c.categoryName, u.username, u.userType,
                 IFNULL(ai.imageURL, NULL) AS featured_image,
                 IFNULL(an.views, 0) AS views,
                 IFNULL(an.likes, 0) AS likes,
@@ -720,7 +719,7 @@ class ArticleController:
         cursor = conn.cursor()
         placeholders = ",".join(["%s"] * len(category_ids))
         query = f"""
-            SELECT a.articleID, a.articleTitle, a.content, c.categoryName,
+            SELECT a.articleID, a.articleTitle, a.content, c.categoryName, u.userType,
                 IFNULL(ai.imageURL, NULL) AS featured_image,
                 IFNULL(an.views, 0) AS views,
                 IFNULL(an.likes, 0) AS likes,
@@ -730,6 +729,7 @@ class ArticleController:
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
             LEFT JOIN ArticleAnalytics an ON a.articleID = an.articleID
             LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN UserAccount u ON a.created_by = u.userID
             WHERE a.articleStatus = 'published'
             AND a.categoryID IN ({placeholders})
         """

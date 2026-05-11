@@ -597,6 +597,7 @@ class Article:
                 a.categoryID,
                 ac.categoryName,
                 ai.imageURL,
+                u.userType,
                 IFNULL(aa.views, 0) AS views,
                 IFNULL(aa.likes, 0) AS likes,
                 IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
@@ -605,6 +606,7 @@ class Article:
             LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
             LEFT JOIN ArticleAnalytics aa ON a.articleID = aa.articleID
+            LEFT JOIN UserAccount u ON a.created_by = u.userID
             WHERE a.articleStatus = 'published'
             AND a.categoryID = %s
         """
@@ -898,7 +900,7 @@ class Article:
 
         try:
             base_select = """
-                SELECT a.*, c.categoryName, ai.imageURL AS featured_image, u.username,
+                SELECT a.*, c.categoryName, ai.imageURL AS featured_image, u.username, u.userType,
                     IFNULL(an.views, 0) AS views,
                     IFNULL(an.likes, 0) AS likes,
                     IFNULL(a.credibilityScore, 0) AS credibilityScore,
@@ -953,7 +955,7 @@ class Article:
         sql = """
         SELECT a.articleID, a.articleTitle, a.content, a.created_at,
             a.categoryID, a.articleStatus,
-            c.categoryName, ai.imageURL As featured_image, u.username,
+            c.categoryName, ai.imageURL As featured_image, u.username, u.userType,
             IFNULL(an.views, 0) AS views,
             IFNULL(an.likes, 0) AS likes,
             IFNULL(a.credibilityScore, 0) AS credibilityScore,
@@ -1017,7 +1019,7 @@ class Article:
         conn.close()
         return article
 
-    def get_home_latest_articles(self, exclude_id=None):
+    def get_home_latest_articles(self, exclude_id=None, exclude_ids=None):
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -1029,6 +1031,7 @@ class Article:
                 ai.imageURL,
                 c.categoryName,
                 u.username,
+                u.userType,
                 IFNULL(an.views, 0) AS views,
                 IFNULL(an.likes, 0) AS likes,
                 IFNULL(a.credibilityScore, 0) AS credibilityScore,
@@ -1044,9 +1047,20 @@ class Article:
 
         params = []
 
+        final_exclude_ids = []
+
         if exclude_id:
-            sql += " AND a.articleID != %s"
-            params.append(exclude_id)
+            final_exclude_ids.append(exclude_id)
+
+        if exclude_ids:
+            for article_id in exclude_ids:
+                if article_id and article_id not in final_exclude_ids:
+                    final_exclude_ids.append(article_id)
+
+        if final_exclude_ids:
+            placeholders = ", ".join(["%s"] * len(final_exclude_ids))
+            sql += f" AND a.articleID NOT IN ({placeholders})"
+            params.extend(final_exclude_ids)
 
         sql += """
             ORDER BY a.created_at DESC

@@ -372,6 +372,12 @@
                 <span class="category-badge">{{ headline.categoryName }}</span>
             </div>
 
+            <div class="headline-badges">
+                {% if headline.userType and headline.userType|trim|lower == "editor" %}
+                    <span class="editor-badge">✓ Published by Editor</span>
+                {% endif %}
+            </div>
+
             <h1 class="featured-title">{{ headline.articleTitle }}</h1>
 
             <div class="ai-factcheck-row">
@@ -431,6 +437,13 @@
 
                 <div class="category-carousel-content">
                 <span class="category-badge">{{ item.category.categoryName }}</span>
+
+                <div class="headline-badges">
+                    {% if item.article.userType and item.article.userType|trim|lower == "editor" %}
+                        <span class="editor-badge">✓ Published by Editor</span>
+                    {% endif %}
+                </div>
+
                 <h4>{{ item.article.articleTitle }}</h4>
 
                 <!-- <div class="article-meta">
@@ -490,6 +503,13 @@
                 {% endif %}
 
                 <span class="category-badge">{{ article.categoryName }}</span>
+
+                <div class="headline-badges">
+                    {% if article.userType and article.userType|trim|lower == "editor" %}
+                        <span class="editor-badge">✓ Published by Editor</span>
+                    {% endif %}
+                </div>
+
                 <h4>{{ article.articleTitle }}</h4>
 
                 <div class="ai-factcheck-row">
@@ -567,6 +587,13 @@
                 {% endif %}
 
                 <span class="category-badge">{{ article.categoryName }}</span>
+
+                <div class="headline-badges">
+                    {% if article.userType and article.userType|trim|lower == "editor" %}
+                        <span class="editor-badge">✓ Published by Editor</span>
+                    {% endif %}
+                </div>
+
                 <h4>{{ article.articleTitle }}</h4>
 
                 <div class="ai-factcheck-row">

@@ -200,13 +200,18 @@ def free_homepage():
    
     # First top viewed article used as headline/exclude reference
     # top_headline = top_viewed[0] if top_viewed else None
-    
-
-    # Latest and Top viewed by category (HEADER)
-    category_featured_articles = []
 
     exclude_id = headline["articleID"] if headline else None
     exclude_category_id = headline["categoryID"] if headline else None
+
+    # Store article IDs that should not appear again in Latest News
+    excluded_article_ids = []
+
+    if exclude_id:
+        excluded_article_ids.append(exclude_id)
+    
+    # Latest and Top viewed by category (HEADER)
+    category_featured_articles = []
 
     for category in categories:
         if exclude_category_id and category["categoryID"] == exclude_category_id:
@@ -222,6 +227,10 @@ def free_homepage():
                 "category": category,
                 "article": article
             })
+
+            # Exclude carousel article from Latest News
+            if article["articleID"] not in excluded_article_ids:
+                excluded_article_ids.append(article["articleID"])
 
     # User interest category top articles
     interest_names = article_controller.get_user_interests(user_id)
@@ -240,8 +249,8 @@ def free_homepage():
     if search_query:
         latest_articles = article_controller.search(search_query) 
     else:
-        latest_articles = article_controller.get_home_latest_articles(exclude_id=exclude_id)
-
+        latest_articles = article_controller.get_home_latest_articles(exclude_ids=excluded_article_ids)
+        
     for article in latest_articles:
             article["featured_image"] = article.get("imageURL")
 

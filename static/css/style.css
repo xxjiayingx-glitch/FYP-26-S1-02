@@ -2008,3 +2008,17 @@ a {
   padding: 0;
   line-height: 1;
 }
+
+/* Article details editor badge */
+.editor-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}

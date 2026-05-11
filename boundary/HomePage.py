@@ -17,16 +17,11 @@ def unreg_home():
     # Headline
     headline = articleCTL.get_home_headline()
 
-    exclude_id = headline["articleID"] if headline else None
-    exclude_category_id = headline["categoryID"] if headline else None
-
-    # Latest articles
-    latest_articles = articleCTL.get_home_latest_articles(
-        exclude_id=exclude_id
-    )
-
     # Latest and top article for each category
     categories = articleCTL.get_categories()
+
+    exclude_id = headline["articleID"] if headline else None
+    exclude_category_id = headline["categoryID"] if headline else None
 
     visible_count = 8
     visible_categories = categories[:visible_count]
@@ -34,9 +29,14 @@ def unreg_home():
 
     category_featured_articles = []
 
+    # Store article IDs that should not appear again in Latest News
+    excluded_article_ids = []
+
+    if exclude_id:
+        excluded_article_ids.append(exclude_id)
 
     for category in categories:
-        # skip the same category as the main headline
+        # Skip the same category as the main headline
         if exclude_category_id and category["categoryID"] == exclude_category_id:
             continue
 
@@ -50,8 +50,17 @@ def unreg_home():
                 "category": category,
                 "article": article
             })
+
+            # Exclude category carousel article from Latest News
+            excluded_article_ids.append(article["articleID"])
+
+    # Latest articles
+    latest_articles = articleCTL.get_home_latest_articles(
+        exclude_ids=excluded_article_ids
+    )
+
     # Display testimonial
-    testimonials=testimonialCTL.getHomeTestimonials()
+    testimonials = testimonialCTL.getHomeTestimonials()
 
     # For product features, to display 4 on guest homepage on load
     features = featuresCTL.get_features(offset=0, limit=4)
@@ -60,8 +69,6 @@ def unreg_home():
     profile = companyProfileCTL.getCompanyProfile()
 
     plans = subscriptionCTL.getSubscriptionPlans()
-
-    
 
     return render_template(
         "Unregistered/UnregHome.html",
