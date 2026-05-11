@@ -90,6 +90,41 @@ class Article:
         finally:
             conn.close()
 
+
+    @staticmethod
+    def update_status(articleID, action):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            new_status = None
+
+            if action == "suspend":
+                new_status = "suspended"
+            elif action == "unsuspend":
+                new_status = "published"
+            else:
+                conn.close()
+                return False
+            
+            if new_status is not None:
+                cursor.execute("""
+                    UPDATE Article
+                    SET articleStatus = %s
+                    WHERE articleID = %s
+                """, (new_status, articleID))
+
+            conn.commit()
+            return True
+
+        except Exception as e:
+            conn.rollback()
+            print("update_status error:", e)
+            return False
+
+        finally:
+            conn.close()
+
     @staticmethod
     def get_articles_last_7_days():
         conn = get_db_connection()
@@ -127,6 +162,69 @@ class Article:
         conn.close()
 
         return result["total"] if result else 0
+    
+    def list_all_articles():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                c.categoryName,
+                a.created_by,
+                a.created_at,
+                a.approved_at,
+                a.articleStatus,
+                a.aiFactCheckScore,
+                u.userID,
+                u.username
+            FROM Article a
+            JOIN ArticleCategory c ON a.categoryID = c.categoryID
+            LEFT JOIN UserAccount u on a.created_by = u.userID
+            WHERE articleStatus = "suspended" OR articleStatus = "published" 
+            ORDER BY a.created_at DESC
+        """)
+
+        articles = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return articles
+    
+    def get_article_details(article_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(""" 
+            SELECT 
+                a.articleID,
+                a.articleTitle,
+                ac.categoryName AS category,
+                u.username,
+                u.userID,
+                a.credibilityScore,
+                a.aiFactCheckScore,
+                a.aiFactCheckStatus,     
+                a.articleStatus,
+                ai.imageURL,
+                a.content,
+                a.created_at,
+                a.created_by,
+                a.approved_at
+            FROM Article a
+            JOIN ArticleImage ai on a.articleID = ai.articleID
+            LEFT JOIN UserAccount u on a.created_by = u.userID
+            LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
+            WHERE a.articleID = %s
+        """, (article_id,))
+
+        articleDetails = cursor.fetchone()
+        conn.close()
+
+        return articleDetails
+
+
     #--------#
     #  User  # 
     #--------#

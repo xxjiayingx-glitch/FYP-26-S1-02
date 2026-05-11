@@ -753,3 +753,16 @@ class ArticleController:
         cursor.close()
         conn.close()
         return articles
+    
+    @staticmethod
+    def list_all_articles():
+        return Article.list_all_articles()
+    
+    @staticmethod
+    def get_article_details(article_id):
+        return Article.get_article_details(article_id)
+    
+    
+    
+    
+
