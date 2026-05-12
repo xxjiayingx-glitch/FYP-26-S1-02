@@ -44,3 +44,4 @@ lxml
 breadability
 textstat
 rake-nltk
+pillow

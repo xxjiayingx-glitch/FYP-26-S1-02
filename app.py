@@ -15,6 +15,7 @@ load_dotenv()
 import os
 import uuid
 import nltk
+from PIL import Image, UnidentifiedImageError
 
 NLTK_DATA_DIR = os.path.join(os.getcwd(), "nltk_data")
 os.makedirs(NLTK_DATA_DIR, exist_ok=True)
@@ -712,6 +713,31 @@ def run_final_ai_fact_check(title, content, category_id):
 #         current_time=current_time
 #     )
 
+#-------------------#
+# Upload Image Rule #
+#-------------------#
+ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
+
+def is_allowed_image(file):
+    if not file or not file.filename:
+        return False
+
+    filename = file.filename
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        return False
+
+    try:
+        image = Image.open(file.stream)
+        image.verify()
+        file.stream.seek(0)
+        return True
+
+    except (UnidentifiedImageError, OSError):
+        file.stream.seek(0)
+        return False
+
 
 @app.route("/create_article", methods=["GET", "POST"])
 def create_article():
@@ -754,11 +780,22 @@ def create_article():
         featured_image = request.files.get("featured_image")
         image_filename = None
 
-        if featured_image and featured_image.filename:
-            image_filename = secure_filename(featured_image.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
-            featured_image.save(save_path)
+        if not featured_image or not featured_image.filename:
+            flash("Please upload a featured image.", "danger")
+            return redirect(url_for("create_article"))
 
+        if not is_allowed_image(featured_image):
+            flash("Only image files are allowed. Please upload JPG, PNG, GIF, or WEBP.", "danger")
+            return redirect(url_for("create_article"))
+
+        original_filename = secure_filename(featured_image.filename)
+        ext = original_filename.rsplit(".", 1)[-1].lower()
+
+        image_filename = f"{uuid.uuid4().hex}.{ext}"
+        save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
+
+        featured_image.save(save_path)
+        
         articleID = article_controller.create_article(
             user_id=user_id,
             title=title,

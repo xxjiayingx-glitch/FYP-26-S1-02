@@ -176,7 +176,7 @@ class Article:
                     ON a.categoryID = c.categoryID
                 LEFT JOIN UserAccount u 
                     ON a.created_by = u.userID
-                WHERE a.articleStatus IN ('published', 'suspended')
+                WHERE a.articleStatus IN ('published', 'suspended', 'rejected')
             """
 
             params = []

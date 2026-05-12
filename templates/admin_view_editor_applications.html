@@ -655,13 +655,12 @@
 
                 <select id="expertiseFilter" class="filter-select">
                     <option value="all">Expertise: All</option>
-                    {% if applications %}
-                        {% for application in applications %}
-                            {% if application.expertiseArea %}
-                                <option value="{{ application.expertiseArea|lower }}">{{ application.expertiseArea }}</option>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
+
+                    {% for category in expertise_categories %}
+                        <option value="{{ category.categoryName|lower }}">
+                            {{ category.categoryName }}
+                        </option>
+                    {% endfor %}
                 </select>
             </div>
 

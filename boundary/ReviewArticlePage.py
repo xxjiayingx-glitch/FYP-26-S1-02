@@ -103,7 +103,10 @@ def suspend_or_unsuspend(articleID):
     result = control.update_article_and_report_status(articleID, action, reviewed_by)
 
     if result:
-        flash("Article status updated successfully", "success")
+        if action == "complete":
+            flash("Review status updated successfully", "success")
+        else:
+            flash("Article status updated successfully", "success")
 
         role_label = "System admin" if user_type == "system admin" else "Editor"
 

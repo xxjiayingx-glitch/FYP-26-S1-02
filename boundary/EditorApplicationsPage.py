@@ -142,6 +142,14 @@ def editor_applications_page():
     """)
     total_count = cursor.fetchone().get("total", 0)
 
+    cursor.execute("""
+        SELECT categoryID, categoryName
+        FROM ArticleCategory
+        WHERE categoryStatus = 'active'
+        ORDER BY categoryName ASC
+    """)
+    expertise_categories = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
@@ -149,6 +157,7 @@ def editor_applications_page():
         "admin_view_editor_applications.html",
         admin=admin,
         applications=applications,
+        expertise_categories=expertise_categories,
         pending_count=pending_count,
         approved_count=approved_count,
         rejected_count=rejected_count,
