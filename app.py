@@ -753,6 +753,19 @@ def create_article():
         category_id = request.form.get("category")
         content = request.form.get("content")
 
+        # Validation
+        if not title or not title.strip():
+            flash("Please enter a title.", "danger")
+            return redirect(url_for("create_article"))
+
+        if not category_id:
+            flash("Please select a category.", "danger")
+            return redirect(url_for("create_article"))
+
+        if not content or not content.strip():
+            flash("Please enter article content.", "danger")
+            return redirect(url_for("create_article"))
+
         submit_action = request.form.get("submit_action", "").strip().lower()
 
         ai_fact_check_score = 0

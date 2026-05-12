@@ -611,10 +611,13 @@
 
             <div class="form-row">
                 <label>Category</label>
-                <select name="category" required>
-                    <option disabled selected>Select your article category</option>
-                    {% for cat in categories %}
-                        <option value="{{ cat.categoryID }}">{{ cat.categoryName }}</option>
+                <select name="category" class="form-control" required>
+                    <option value="">-- Select Category --</option>
+
+                    {% for category in categories %}
+                        <option value="{{ category.categoryID }}">
+                            {{ category.categoryName }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
