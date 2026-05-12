@@ -795,7 +795,7 @@ def create_article():
         save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
 
         featured_image.save(save_path)
-        
+
         articleID = article_controller.create_article(
             user_id=user_id,
             title=title,
@@ -919,8 +919,20 @@ def edit_article(article_id):
         image_filename = None
 
         if featured_image and featured_image.filename:
-            image_filename = secure_filename(featured_image.filename)
+            if not is_allowed_image(featured_image):
+                flash("Only image files are allowed. Please upload JPG, PNG, GIF, or WEBP.", "danger")
+
+                if user_type == "editor":
+                    return redirect(url_for("edit_article", article_id=article_id))
+
+                return redirect(url_for("edit_article", article_id=article_id))
+
+            original_filename = secure_filename(featured_image.filename)
+            ext = original_filename.rsplit(".", 1)[-1].lower()
+
+            image_filename = f"{uuid.uuid4().hex}.{ext}"
             save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
+
             featured_image.save(save_path)
 
         updated = article_controller.update_article(
@@ -1812,10 +1824,21 @@ def editor_create_article():
         featured_image = request.files.get("featured_image")
         image_filename = None
 
-        if featured_image and featured_image.filename:
-            image_filename = secure_filename(featured_image.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
-            featured_image.save(save_path)
+        if not featured_image or not featured_image.filename:
+            flash("Please upload a featured image.", "danger")
+            return redirect(url_for("create_article"))
+
+        if not is_allowed_image(featured_image):
+            flash("Only image files are allowed. Please upload JPG, PNG, GIF, or WEBP.", "danger")
+            return redirect(url_for("create_article"))
+
+        original_filename = secure_filename(featured_image.filename)
+        ext = original_filename.rsplit(".", 1)[-1].lower()
+
+        image_filename = f"{uuid.uuid4().hex}.{ext}"
+        save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
+
+        featured_image.save(save_path)
 
         articleID = article_controller.create_article(
             user_id=user_id,
