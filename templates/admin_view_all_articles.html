@@ -130,6 +130,89 @@
         color: #777;
         font-size: 16px;
     }
+
+    .filter-card {
+        margin-bottom: 24px;
+        padding: 18px;
+        background: #f8fafc;
+        border: 1px solid #dbe3ee;
+        border-radius: 12px;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1.5fr 0.8fr 0.9fr auto;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .filter-group label {
+        display: block;
+        height: 22px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #374151;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #cfd8e3;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .btn-clear {
+        background: #6b7280;
+    }
+
+    .result-summary {
+        margin-bottom: 12px;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+
+    .page-link {
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #e8f4fd;
+        color: #1769aa;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .page-link:hover {
+        background: #d7ecfb;
+    }
+
+    .page-link.active {
+        background: #2383c4;
+        color: white;
+    }
+
+    .page-link.disabled {
+        background: #e5e7eb;
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding-top: 30px;
+    }
 </style>
 
 <div class="page-wrapper">
@@ -153,6 +236,61 @@
             </div>
         {% endif %}
     {% endwith %}
+
+    <div class="filter-card">
+        <form method="GET" action="{{ url_for('all_articles.admin_view_all_articles') }}" class="filter-form">
+
+            <div class="filter-group">
+                <label>Search</label>
+                <input 
+                    type="text" 
+                    name="q" 
+                    placeholder="Search by ID or title"
+                    value="{{ search_query }}"
+                >
+            </div>
+
+            <div class="filter-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="">All Status</option>
+                    <option value="published" {% if status_filter == "published" %}selected{% endif %}>
+                        Published
+                    </option>
+                    <option value="suspended" {% if status_filter == "suspended" %}selected{% endif %}>
+                        Suspended
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Category</label>
+                <select name="category_id">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option 
+                            value="{{ category.categoryID }}"
+                            {% if category_filter|string == category.categoryID|string %}selected{% endif %}
+                        >
+                            {{ category.categoryName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn">Search</button>
+
+                <a href="{{ url_for('all_articles.admin_view_all_articles') }}" class="btn btn-clear">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <p class="result-summary">
+        Showing {{ articles|length }} of {{ total_articles }} article(s)
+    </p>
 
     {% if articles %}
         <table>
@@ -211,6 +349,56 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        {% if total_pages > 1 %}
+        <div class="pagination">
+
+            {% if page > 1 %}
+                <a class="page-link" href="{{ url_for(
+                    'all_articles.admin_view_all_articles',
+                    page=page-1,
+                    q=search_query,
+                    status=status_filter,
+                    category_id=category_filter
+                ) }}">
+                    Previous
+                </a>
+            {% else %}
+                <span class="page-link disabled">Previous</span>
+            {% endif %}
+
+            {% for p in page_numbers %}
+                {% if p == page %}
+                    <span class="page-link active">{{ p }}</span>
+                {% else %}
+                    <a class="page-link" href="{{ url_for(
+                        'all_articles.admin_view_all_articles',
+                        page=p,
+                        q=search_query,
+                        status=status_filter,
+                        category_id=category_filter
+                    ) }}">
+                        {{ p }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page < total_pages %}
+                <a class="page-link" href="{{ url_for(
+                    'all_articles.admin_view_all_articles',
+                    page=page+1,
+                    q=search_query,
+                    status=status_filter,
+                    category_id=category_filter
+                ) }}">
+                    Next
+                </a>
+            {% else %}
+                <span class="page-link disabled">Next</span>
+            {% endif %}
+        </div>
+    {% endif %}
+
     {% else %}
         <div class="empty-box">
             No article available.

@@ -191,7 +191,9 @@
 
     <div class="review-section">
         <h3>Author:</h3>
-        <p>User ID: {{ article.created_by if article.created_by else '-' }} Username: {{ article.username if article.username else '-' }}  </p>
+        <p>User ID: {{ article.created_by if article.created_by else '-' }} 
+        <br> Username: {{ article.username if article.username else '-' }}
+        <br> User Type: {{ article.userType if article.userType else '-' }}  </p>
     </div>
 
     <div class="review-section">

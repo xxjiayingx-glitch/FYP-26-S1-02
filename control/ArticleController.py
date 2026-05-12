@@ -755,8 +755,14 @@ class ArticleController:
         return articles
     
     @staticmethod
-    def list_all_articles():
-        return Article.list_all_articles()
+    def list_all_articles(search_query=None, status_filter=None, category_filter=None, page=1, per_page=10):
+        return Article.list_all_articles(
+            search_query=search_query,
+            status_filter=status_filter,
+            category_filter=category_filter,
+            page=page,
+            per_page=per_page
+        )
     
     @staticmethod
     def get_article_details(article_id):

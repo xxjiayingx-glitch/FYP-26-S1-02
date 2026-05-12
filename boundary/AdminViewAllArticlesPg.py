@@ -20,11 +20,44 @@ def admin_view_all_articles():
     dashboard_control = AdminDashboardControl()
     admin_data = dashboard_control.get_dashboard_data()
 
-    articles = ArticleController.list_all_articles()
+    search_query = request.args.get("q", "").strip()
+    status_filter = request.args.get("status", "").strip()
+    category_filter = request.args.get("category_id", "").strip()
+
+    page = request.args.get("page", 1, type=int)
+    per_page = 10
+
+    result = ArticleController.list_all_articles(
+        search_query=search_query,
+        status_filter=status_filter,
+        category_filter=category_filter,
+        page=page,
+        per_page=per_page
+    )
+
+    articles = result["articles"]
+    total_articles = result["total_articles"]
+    total_pages = result["total_pages"]
+
+    control = ArticleController()
+    categories = control.get_categories()
+
+    start_page = max(1, page - 2)
+    end_page = min(total_pages, page + 2)
+    page_numbers = range(start_page, end_page + 1)
 
     return render_template(
         "admin_view_all_articles.html",
         articles=articles,
+        categories=categories,
+        search_query=search_query,
+        status_filter=status_filter,
+        category_filter=category_filter,
+        page=page,
+        per_page=per_page,
+        total_articles=total_articles,
+        total_pages=total_pages,
+        page_numbers=page_numbers,
         admin=admin_data["admin"]
     )
 

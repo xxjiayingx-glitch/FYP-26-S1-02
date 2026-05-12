@@ -2,6 +2,7 @@
 from entity.db_connection import get_db_connection
 from datetime import datetime, timedelta
 import re
+import math
 
 class Article:
     #-------#
@@ -163,35 +164,98 @@ class Article:
 
         return result["total"] if result else 0
     
-    def list_all_articles():
+    @staticmethod
+    def list_all_articles(search_query=None, status_filter=None, category_filter=None, page=1, per_page=10):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT 
-                a.articleID,
-                a.articleTitle,
-                c.categoryName,
-                a.created_by,
-                a.created_at,
-                a.approved_at,
-                a.articleStatus,
-                a.aiFactCheckScore,
-                u.userID,
-                u.username
-            FROM Article a
-            JOIN ArticleCategory c ON a.categoryID = c.categoryID
-            LEFT JOIN UserAccount u on a.created_by = u.userID
-            WHERE articleStatus = "suspended" OR articleStatus = "published" 
-            ORDER BY a.created_at DESC
-        """)
+        try:
+            base_from = """
+                FROM Article a
+                JOIN ArticleCategory c 
+                    ON a.categoryID = c.categoryID
+                LEFT JOIN UserAccount u 
+                    ON a.created_by = u.userID
+                WHERE a.articleStatus IN ('published', 'suspended')
+            """
 
-        articles = cursor.fetchall()
+            params = []
 
-        cursor.close()
-        conn.close()
+            if search_query:
+                base_from += """
+                    AND (
+                        CAST(a.articleID AS CHAR) LIKE %s
+                        OR a.articleTitle LIKE %s
+                    )
+                """
+                search_value = f"%{search_query}%"
+                params.extend([search_value, search_value])
 
-        return articles
+            if status_filter:
+                base_from += """
+                    AND a.articleStatus = %s
+                """
+                params.append(status_filter)
+
+            if category_filter:
+                base_from += """
+                    AND a.categoryID = %s
+                """
+                params.append(category_filter)
+
+            # Count total filtered articles
+            count_query = f"""
+                SELECT COUNT(*) AS total
+                {base_from}
+            """
+
+            cursor.execute(count_query, params)
+            count_result = cursor.fetchone()
+            total_articles = count_result["total"] if count_result else 0
+
+            total_pages = math.ceil(total_articles / per_page) if total_articles > 0 else 1
+
+            if page < 1:
+                page = 1
+
+            if page > total_pages:
+                page = total_pages
+
+            offset = (page - 1) * per_page
+
+            # Get paginated articles
+            data_query = f"""
+                SELECT 
+                    a.articleID,
+                    a.articleTitle,
+                    c.categoryName,
+                    a.created_by,
+                    a.created_at,
+                    a.approved_at,
+                    a.articleStatus,
+                    a.aiFactCheckScore,
+                    u.userID,
+                    u.username
+                {base_from}
+                ORDER BY a.created_at DESC
+                LIMIT %s OFFSET %s
+            """
+
+            data_params = params.copy()
+            data_params.extend([per_page, offset])
+
+            cursor.execute(data_query, data_params)
+            articles = cursor.fetchall()
+
+            return {
+                "articles": articles,
+                "total_articles": total_articles,
+                "total_pages": total_pages
+            }
+
+        finally:
+            cursor.close()
+            conn.close()
     
     def get_article_details(article_id):
         conn = get_db_connection()
@@ -203,6 +267,7 @@ class Article:
                 ac.categoryName AS category,
                 u.username,
                 u.userID,
+                u.userType,
                 a.credibilityScore,
                 a.aiFactCheckScore,
                 a.aiFactCheckStatus,     
