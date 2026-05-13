@@ -97,7 +97,7 @@
 
 <div class="add-testimonial-container">
     <h2>Add Your Testimonial</h2>
-    <form method="POST">
+    <form method="POST" id="testimonialForm">
         <label for="rating">Rating:</label>
         <div class="star-container" id="starContainer">
             <span class="star" data-value="1">★</span>
@@ -112,37 +112,89 @@
         <label for="comment">Comment:</label>
         <textarea name="comment" id="comment" required placeholder="Write your feedback here..."></textarea>
 
-        <button type="submit">Submit</button>
+        <p id="ratingError" style="color:red; display:none; margin-top:-10px; margin-bottom:15px;">
+            Please select a rating.
+        </p>
+
+        <button type="submit" id="submitBtn">
+            Submit
+        </button>
     </form>
 </div>
 
 <script>
 const stars = document.querySelectorAll(".star");
 const ratingInput = document.getElementById("rating");
+const form = document.getElementById("testimonialForm");
+const submitBtn = document.getElementById("submitBtn");
+const ratingError = document.getElementById("ratingError");
+
 let selectedRating = 0;
 
 stars.forEach(star => {
+
     // Hover effect
     star.addEventListener("mouseover", () => {
         const val = parseInt(star.dataset.value);
         highlightStars(val);
     });
 
+    // Remove hover
     star.addEventListener("mouseout", () => {
         highlightStars(selectedRating);
     });
 
-    // Click to select
+    // Select rating
     star.addEventListener("click", () => {
         selectedRating = parseInt(star.dataset.value);
+
         ratingInput.value = selectedRating;
+
         highlightStars(selectedRating);
+
+        // Enable button
+        submitBtn.disabled = false;
+
+        // Hide error
+        ratingError.style.display = "none";
     });
 });
 
+// Final validation
+form.addEventListener("submit", function(e) {
+
+    const comment = document.getElementById("comment").value.trim();
+
+    // Check rating
+    if (!ratingInput.value) {
+
+        e.preventDefault();
+
+        ratingError.style.display = "block";
+
+        alert("Please select a rating.");
+
+        return;
+    }
+
+    // Check comment
+    if (comment === "") {
+
+        e.preventDefault();
+
+        alert("Please enter your comment.");
+
+        return;
+    }
+});
+
+// Highlight stars
 function highlightStars(rating) {
+
     stars.forEach(star => {
+
         const val = parseInt(star.dataset.value);
+
         if (val <= rating) {
             star.classList.add("selected");
         } else {
