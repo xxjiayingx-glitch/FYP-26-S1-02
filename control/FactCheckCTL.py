@@ -1833,58 +1833,67 @@ class FactCheckController:
         available_categories_text = ", ".join(available_categories)
 
         prompt = f"""
-            You are checking whether a news article is submitted to the correct category.
+        You are checking whether a news article is submitted to the correct category.
 
-            Selected category:
-            {selected_category}
+        Selected category:
+        {selected_category}
 
-            Available categories:
-            {available_categories_text}
+        Available categories:
+        {available_categories_text}
 
-            Article title:
-            {title}
+        Article title:
+        {title}
 
-            Article content:
-            {content[:3000]}
+        Article content:
+        {content[:3000]}
 
-            You must follow these rules strictly:
+        You must follow these rules strictly:
 
-            1. You must choose suggested_category from the available categories only.
-            2. Do not invent categories.
-            3. Classify based on the MAIN topic of the article, not one minor word.
-            4. If the selected category is reasonably acceptable, set matched to true.
-            5. Only set matched to false if the selected category is clearly unsuitable.
-            6. If the article is ambiguous, prefer the selected category instead of changing suggestion randomly.
-            7. If confidence is below 0.70, suggested_category should usually stay as the selected category.
+        1. You must choose suggested_category from the available categories only.
+        2. Do not invent categories.
+        3. Classify based on the MAIN topic of the article, not one minor word.
+        4. If the selected category is reasonably acceptable, set matched to true.
+        5. Only set matched to false if the selected category is clearly unsuitable.
+        6. If the article is ambiguous, prefer the selected category instead of changing suggestion randomly.
+        7. If confidence is below 0.70, suggested_category should usually stay as the selected category.
+        8. title_matched checks whether the article title accurately represents the main content.
+        9. Set title_matched to true if the title covers the main topic, even if the title can be improved.
+        10. Do not mark title_matched as false only because you can suggest a better wording.
+        11. Set title_matched to false only if the title is misleading, unrelated, or focuses on a different main topic from the article.
+        12. If title_matched is false, suggest one better article title based only on the article content.
+        13. The suggested_title must be factual, clear, and not clickbait.
+        14. The suggested_title must not invent information not found in the article.
+        15. If title_matched is false, suggested_title must not be empty.
+        16. If title_matched is true, suggested_title must be an empty string.
 
-            Category guidance:
-            - Travel: tourism, travel safety, hikers, tourists, trips, destinations, transport disruption, travel-related incidents.
-            - Health: illness, injury, disease, treatment, hospitals, public health, medical safety.
-            - Politics: elections, political parties, ministers, campaigns, parliament, political conflict.
-            - Government: public administration, rescue operations by state agencies, official response, laws, public services.
-            - Business: companies, markets, finance, economy, trade, jobs, corporate activity.
-            - Sports: matches, athletes, tournaments, sports teams.
-            - Education: schools, universities, learning, exams, academic policy.
-            - Technology: AI, software, devices, cybersecurity, digital platforms.
-            - Entertainment: movies, celebrities, music, events, shows.
-            - Art: artists, exhibitions, paintings, design, creative works.
+        Category guidance:
+        - Travel: tourism, travel safety, hikers, tourists, trips, destinations, transport disruption, travel-related incidents.
+        - Health: illness, injury, disease, treatment, hospitals, public health, medical safety.
+        - Politics: elections, political parties, ministers, campaigns, parliament, political conflict.
+        - Government: public administration, rescue operations by state agencies, official response, laws, public services.
+        - Business: companies, markets, finance, economy, trade, jobs, corporate activity.
+        - Sports: matches, athletes, tournaments, sports teams.
+        - Education: schools, universities, learning, exams, academic policy.
+        - Technology: AI, software, devices, cybersecurity, digital platforms.
+        - Entertainment: movies, celebrities, music, events, shows.
+        - Art: artists, exhibitions, paintings, design, creative works.
 
-            Special rule for natural disasters:
-            - If the article mainly discusses hikers, tourists, travel disruption, or travel safety, choose Travel.
-            - If the article mainly discusses government rescue response or official disaster management, choose Government.
-            - If the article mainly discusses injuries, deaths, illness, or medical impact, choose Health.
-            - If more than one category fits, choose the selected category if it is reasonable.
+        Special rule for natural disasters:
+        - If the article mainly discusses hikers, tourists, travel disruption, or travel safety, choose Travel.
+        - If the article mainly discusses government rescue response or official disaster management, choose Government.
+        - If the article mainly discusses injuries, deaths, illness, or medical impact, choose Health.
+        - If more than one category fits, choose the selected category if it is reasonable.
 
-            Return only valid JSON in this exact structure:
-            {{
-                "matched": true,
-                "title_matched": true,
-                "suggested_category": "one category from available categories",
-                "confidence": 0.85,
-                "reason": "short user-friendly explanation"
-            }}
+        Return only valid JSON in this exact structure:
+        {{
+            "matched": true,
+            "title_matched": true,
+            "suggested_category": "one category from available categories",
+            "suggested_title": "better title if title does not match, otherwise empty string",
+            "confidence": 0.85,
+            "reason": "short user-friendly explanation"
+        }}
         """
-
         payload = {
             "model": "llama-3.3-70b-versatile",
             "temperature": 0,
@@ -1931,7 +1940,24 @@ class FactCheckController:
             title_matched = to_bool(parsed.get("title_matched"), True)
 
             suggested = parsed.get("suggested_category")
+            suggested_title = parsed.get("suggested_title") or ""
             confidence = float(parsed.get("confidence", 0) or 0)
+
+            if suggested not in available_categories:
+                suggested = selected_category
+
+            if confidence < 0.70 and selected_category in available_categories:
+                suggested = selected_category
+
+            current_title_clean = (title or "").strip().lower()
+            suggested_title_clean = suggested_title.strip().lower()
+
+            if suggested_title_clean == current_title_clean:
+                title_matched = True
+                suggested_title = ""
+            
+            if title_matched:
+                suggested_title = ""
 
             # Suggested category must be from available categories
             if suggested not in available_categories:
@@ -1949,6 +1975,7 @@ class FactCheckController:
                 "ok": True,
                 "matched": matched,
                 "suggested_category": suggested,
+                "suggested_title": suggested_title,
                 "confidence": confidence,
                 "reason": reason,
                 "title_matched": title_matched,
@@ -1959,6 +1986,7 @@ class FactCheckController:
                 "ok": False,
                 "matched": None,
                 "suggested_category": None,
+                "suggested_title": "",
                 "confidence": 0,
                 "reason": f"Category check failed: {str(e)}",
                 "title_matched": None

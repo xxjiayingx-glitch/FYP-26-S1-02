@@ -417,6 +417,29 @@
         background: #16a34a;
     }
 
+    .submit-note {
+        margin-top: 12px;
+        text-align: center;
+        font-size: 14px;
+        color: #6b7280;
+        line-height: 1.5;
+    }
+
+    .use-title-btn {
+        margin-top: 12px;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 8px;
+        background: #2563eb;
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .use-title-btn:hover {
+        background: #1d4ed8;
+    }
 </style>
 
 <div class="article-form-page">
@@ -489,6 +512,14 @@
                         <div id="categoryCheckCard" class="factcheck-card" style="display:none;">
                             <h4>Category Check</h4>
                             <p><strong>Title Match:</strong> <span id="titleMatchText"></span></p>
+                            <p id="suggestedTitleRow" style="display:none;">
+                                <strong>Suggested Title:</strong> 
+                                <span id="suggestedTitleText"></span>
+                                <br>
+                                <button type="button" id="useSuggestedTitleBtn" class="use-title-btn">
+                                    Use Title
+                                </button>
+                            </p>
                             <p><strong>Selected Category:</strong> <span id="selectedCategoryText"></span></p>
                             <p><strong>AI Suggestion:</strong> <span id="suggestedCategoryText"></span></p>
                             <p><strong>Result:</strong> <span id="categoryMatchText"></span></p>
@@ -526,6 +557,10 @@
                 <button type="submit" name="submit_action" value="submit" class="btn btn-submit">Submit</button>            
             </div>
 
+            <p class="submit-note">
+                Note: Only articles with an AI credibility score of at least <strong>{{ threshold }}</strong> 
+                will be submitted to an editor for approval. Articles below this threshold will be saved as draft.
+            </p>
         </form>
     </div>
 </div>
@@ -568,6 +603,35 @@ document.getElementById("checkScoreBtn").addEventListener("click", async functio
         document.getElementById("selectedCategoryText").textContent = selectedText;
         document.getElementById("suggestedCategoryText").textContent = categoryCheck.suggested_category || "-";
         document.getElementById("categoryReasonText").textContent = categoryCheck.reason || "-";
+
+        const suggestedTitle = categoryCheck.suggested_title || "";
+        const suggestedTitleRow = document.getElementById("suggestedTitleRow");
+        const suggestedTitleText = document.getElementById("suggestedTitleText");
+        useSuggestedTitleBtn.onclick = function () {
+            document.querySelector('input[name="title"]').value = suggestedTitle;
+
+            // Hide old suggestion row
+            suggestedTitleRow.style.display = "none";
+
+            // Reset old title match text while rechecking
+            document.getElementById("titleMatchText").textContent = "Rechecking...";
+            document.getElementById("titleMatchText").style.color = "#6b7280";
+
+            // Re-run AI check using the new title
+            document.getElementById("checkScoreBtn").click();
+        };
+        
+        if (suggestedTitle) {
+            suggestedTitleRow.style.display = "block";
+            suggestedTitleText.textContent = suggestedTitle;
+
+            useSuggestedTitleBtn.onclick = function () {
+                document.querySelector('input[name="title"]').value = suggestedTitle;
+            };
+        } else {
+            suggestedTitleRow.style.display = "none";
+            suggestedTitleText.textContent = "";
+        }
 
         const resultEl = document.getElementById("categoryMatchText");
 

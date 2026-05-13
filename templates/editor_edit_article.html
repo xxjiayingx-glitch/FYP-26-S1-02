@@ -79,6 +79,18 @@
         line-height: 1.6;
     }
 
+    .status-display {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 600;
+        box-sizing: border-box;
+    }
+
     .image-preview-box {
         margin-top: 12px;
         border: 1px solid #e5e7eb;
@@ -432,6 +444,48 @@
     .btn-submit:hover {
         background: #15803d;
     }
+
+    .btn-draft {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 130px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-draft:hover {
+        background: #d97706;
+    }
+
+    .submit-note {
+        margin-top: 12px;
+        font-size: 14px;
+        color: #6b7280;
+        line-height: 1.5;
+    }
+
+    .use-title-btn {
+        margin-top: 12px;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 8px;
+        background: #2563eb;
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .use-title-btn:hover {
+        background: #1d4ed8;
+    }
 </style>
 
 <div class="edit-article-page">
@@ -453,7 +507,7 @@
                 <input type="text" id="title" name="title" value="{{ article.articleTitle }}" required>
             </div>
 
-            <div class="form-section">
+            <!-- <div class="form-section">
                 <label for="category">Category</label>
                 <select id="category" name="category" required>
                     {% for cat in categories %}
@@ -462,6 +516,18 @@
                         </option>
                     {% endfor %}
                 </select>
+            </div> -->
+
+            <div class="form-row">
+                <label>Category</label>
+                <select name="category" required class="locked-select" tabindex="-1">
+                    <option value="{{ category.categoryID }}" selected>
+                        {{ category.categoryName }}
+                    </option>
+                </select>
+                <small class="category-note">
+                    This category is assigned based on your editor expertise.
+                </small>
             </div>
 
             <div class="form-section">
@@ -481,12 +547,19 @@
                 {% endif %}
             </div>
 
-            <div class="form-section">
+            <!-- <div class="form-section">
                 <label for="status">Status</label>
                 <select id="status" name="status" required>
                     <option value="draft" {% if article.articleStatus|string == 'draft' %}selected{% endif %}>Draft</option>
                     <option value="published" {% if article.articleStatus|string == 'published' %}selected{% endif %}>Published</option>
                 </select>
+            </div> -->
+
+            <div class="form-section">
+                <label>Status</label>
+                <div class="status-display">
+                    {{ article.articleStatus }}
+                </div>
             </div>
 
             <button type="button" id="checkScoreBtn" class="check-btn">Recheck Current Score</button>
@@ -510,6 +583,14 @@
                         <div id="categoryCheckCard" class="factcheck-card" style="display:none;">
                             <h4>Category Check</h4>
                             <p><strong>Title Match:</strong> <span id="titleMatchText"></span></p>
+                            <p id="suggestedTitleRow" style="display:none;">
+                                <strong>Suggested Title:</strong> 
+                                <span id="suggestedTitleText"></span>
+                                <br>
+                                <button type="button" id="useSuggestedTitleBtn" class="use-title-btn">
+                                    Use Title
+                                </button>
+                            </p>
                             <p><strong>Selected Category:</strong> <span id="selectedCategoryText"></span></p>
                             <p><strong>AI Suggestion:</strong> <span id="suggestedCategoryText"></span></p>
                             <p><strong>Result:</strong> <span id="categoryMatchText"></span></p>
@@ -547,8 +628,21 @@
 
             <div class="action-row">
                 <a href="{{ url_for('editor_my_articles') }}" class="btn-link">Cancel</a>
-                <button type="submit" class="btn-submit">Update</button>
+
+                <button type="submit" name="submit_action" value="draft" class="btn-draft">
+                    Save as Draft
+                </button>
+
+                <button type="submit" name="submit_action" value="submit" class="btn-submit">
+                    Update & Publish
+                </button>
             </div>
+
+            <p class="submit-note">
+                Note: Only articles with an AI credibility score of at least 
+                <strong>{{ threshold }}</strong> 
+                will be published. Articles below this threshold will be saved as draft.
+            </p>
         </form>
     </div>
 </div>
@@ -591,6 +685,35 @@ document.getElementById("checkScoreBtn").addEventListener("click", async functio
         document.getElementById("selectedCategoryText").textContent = selectedText;
         document.getElementById("suggestedCategoryText").textContent = categoryCheck.suggested_category || "-";
         document.getElementById("categoryReasonText").textContent = categoryCheck.reason || "-";
+
+        const suggestedTitle = categoryCheck.suggested_title || "";
+        const suggestedTitleRow = document.getElementById("suggestedTitleRow");
+        const suggestedTitleText = document.getElementById("suggestedTitleText");
+        useSuggestedTitleBtn.onclick = function () {
+            document.querySelector('input[name="title"]').value = suggestedTitle;
+
+            // Hide old suggestion row
+            suggestedTitleRow.style.display = "none";
+
+            // Reset old title match text while rechecking
+            document.getElementById("titleMatchText").textContent = "Rechecking...";
+            document.getElementById("titleMatchText").style.color = "#6b7280";
+
+            // Re-run AI check using the new title
+            document.getElementById("checkScoreBtn").click();
+        };
+
+        if (suggestedTitle) {
+            suggestedTitleRow.style.display = "block";
+            suggestedTitleText.textContent = suggestedTitle;
+
+            useSuggestedTitleBtn.onclick = function () {
+                document.querySelector('input[name="title"]').value = suggestedTitle;
+            };
+        } else {
+            suggestedTitleRow.style.display = "none";
+            suggestedTitleText.textContent = "";
+        }
 
         const resultEl = document.getElementById("categoryMatchText");
 

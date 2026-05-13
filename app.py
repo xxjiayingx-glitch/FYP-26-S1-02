@@ -879,54 +879,62 @@ def edit_article(article_id):
 
     user_type = (session.get("userType") or "").strip().lower()
 
-    categories = article_controller.get_categories()
-
     threshold = get_auto_publish_threshold()
+
+    if user_type == "editor":
+        category = article_controller.get_editor_expertise_category(user_id)
+
+        if not category:
+            flash("No active category is assigned to your editor account.", "danger")
+            return redirect(url_for("editor_my_articles"))
+
+        categories = [category]
+    else:
+        category = None
+        categories = article_controller.get_categories()
 
     if request.method == "POST":
         title = request.form.get("title")
-        category_id = request.form.get("category")
+        if user_type == "editor":
+            category_id = category["categoryID"]
+        else:
+            category_id = request.form.get("category")
         content = request.form.get("content")
 
         submit_action = request.form.get("submit_action", "").strip().lower()
-        status_from_form = request.form.get("status", "").strip().lower()
 
         ai_fact_check_score = 0
         ai_fact_check_status = "Not Checked"
 
         # =========================
-        # EDITOR LOGIC
+        # SUBMIT LOGIC FOR BOTH EDITOR AND NORMAL USER
         # =========================
-        if user_type == "editor":
-            status = status_from_form if status_from_form else article.get("articleStatus", "draft")
+        if submit_action == "submit":
+            # Run final AI check again before allowing submission/publishing
+            ai_fact_check_score, ai_fact_check_status = run_final_ai_fact_check(
+                title=title,
+                content=content,
+                category_id=category_id
+            )
 
-            # Editor draft/update can keep current preview score if available
-            ai_fact_check_score = request.form.get("ai_fact_check_score") or article.get("aiFactCheckScore") or 0
-            ai_fact_check_status = request.form.get("ai_fact_check_status") or article.get("aiFactCheckStatus") or "Not Checked"
-
-        # =========================
-        # NORMAL USER LOGIC
-        # =========================
-        else:
-            if submit_action == "submit":
-                # Run final AI check again before allowing submission
-                ai_fact_check_score, ai_fact_check_status = run_final_ai_fact_check(
-                    title=title,
-                    content=content,
-                    category_id=category_id
-                )
-
-                if ai_fact_check_score >= threshold:
-                    status = "pending review"
+            if ai_fact_check_score >= threshold:
+                if user_type == "editor":
+                    # Editor can publish directly if AI score meets threshold
+                    status = "published"
                 else:
-                    status = "draft"
-
+                    # Normal user must still go through editor approval
+                    status = "pending review"
             else:
+                # If score is below threshold, save as draft
                 status = "draft"
 
-                # Save draft can keep frontend preview score if available
-                ai_fact_check_score = request.form.get("ai_fact_check_score") or article.get("aiFactCheckScore") or 0
-                ai_fact_check_status = request.form.get("ai_fact_check_status") or article.get("aiFactCheckStatus") or "Not Checked"
+        else:
+            # Save as draft
+            status = "draft"
+
+            # Draft can keep frontend preview score if available
+            ai_fact_check_score = request.form.get("ai_fact_check_score") or article.get("aiFactCheckScore") or 0
+            ai_fact_check_status = request.form.get("ai_fact_check_status") or article.get("aiFactCheckStatus") or "Not Checked"
 
         featured_image = request.files.get("featured_image")
         image_filename = None
@@ -934,10 +942,6 @@ def edit_article(article_id):
         if featured_image and featured_image.filename:
             if not is_allowed_image(featured_image):
                 flash("Only image files are allowed. Please upload JPG, PNG, GIF, or WEBP.", "danger")
-
-                if user_type == "editor":
-                    return redirect(url_for("edit_article", article_id=article_id))
-
                 return redirect(url_for("edit_article", article_id=article_id))
 
             original_filename = secure_filename(featured_image.filename)
@@ -970,14 +974,27 @@ def edit_article(article_id):
             )
 
             if user_type == "editor":
-                flash("Article updated successfully!", "success")
+                if submit_action == "submit":
+                    if ai_fact_check_score >= threshold:
+                        flash(
+                            f"Article updated and published successfully! AI Score: {ai_fact_check_score}.",
+                            "success"
+                        )
+                    else:
+                        flash(
+                            f"Article updated but saved as draft because the AI score is {ai_fact_check_score}, "
+                            f"which is below the minimum threshold of {threshold}.",
+                            "warning"
+                        )
+                else:
+                    flash("Article updated and saved as draft successfully!", "success")
+
                 return redirect(url_for("editor_my_articles"))
 
             if submit_action == "submit":
                 if ai_fact_check_score >= threshold:
                     flash(
-                        f"Article updated and resubmitted for review successfully! "
-                        f"AI Score: {ai_fact_check_score}.",
+                        f"Article updated and resubmitted for review successfully! AI Score: {ai_fact_check_score}.",
                         "success"
                     )
                 else:
@@ -998,7 +1015,7 @@ def edit_article(article_id):
         return render_template(
             "editor_edit_article.html",
             article=article,
-            categories=categories,
+            category=category,
             threshold=threshold,
             active_page="my_articles"
         )
@@ -1819,31 +1836,50 @@ def editor_create_article():
         flash("No active category is assigned to your editor account.", "danger")
         return redirect(url_for("editor_my_articles"))
 
+    threshold = get_auto_publish_threshold()
+
     if request.method == "POST":
         title = request.form.get("title")
         content = request.form.get("content")
-        ai_fact_check_score = request.form.get("ai_fact_check_score", 0)
-        ai_fact_check_status = request.form.get("ai_fact_check_status")
 
         submit_action = request.form.get("submit_action", "").strip().lower()
 
+        # Force category to editor's assigned category
+        category_id = category["categoryID"]
+
+        ai_fact_check_score = 0
+        ai_fact_check_status = "Not Checked"
+
+        # =========================
+        # FINAL AI CHECK BEFORE PUBLISHING
+        # =========================
         if submit_action == "submit":
-            status = "published"
+            ai_fact_check_score, ai_fact_check_status = run_final_ai_fact_check(
+                title=title,
+                content=content,
+                category_id=category_id
+            )
+
+            if ai_fact_check_score >= threshold:
+                status = "published"
+            else:
+                status = "draft"
+
         else:
             status = "draft"
-
-        category_id = category["categoryID"]
+            ai_fact_check_score = request.form.get("ai_fact_check_score") or 0
+            ai_fact_check_status = request.form.get("ai_fact_check_status") or "Not Checked"
 
         featured_image = request.files.get("featured_image")
         image_filename = None
 
         if not featured_image or not featured_image.filename:
             flash("Please upload a featured image.", "danger")
-            return redirect(url_for("create_article"))
+            return redirect(url_for("editor_create_article"))
 
         if not is_allowed_image(featured_image):
             flash("Only image files are allowed. Please upload JPG, PNG, GIF, or WEBP.", "danger")
-            return redirect(url_for("create_article"))
+            return redirect(url_for("editor_create_article"))
 
         original_filename = secure_filename(featured_image.filename)
         ext = original_filename.rsplit(".", 1)[-1].lower()
@@ -1872,8 +1908,18 @@ def editor_create_article():
                 targetType="Article"
             )
 
-            if status == "published":
-                flash("Article published successfully!", "success")
+            if submit_action == "submit":
+                if ai_fact_check_score >= threshold:
+                    flash(
+                        f"Article published successfully! AI Score: {ai_fact_check_score}.",
+                        "success"
+                    )
+                else:
+                    flash(
+                        f"Article saved as draft because the AI score is {ai_fact_check_score}, "
+                        f"which is below the minimum threshold of {threshold}.",
+                        "warning"
+                    )
             else:
                 flash("Article saved as draft successfully!", "success")
 
@@ -1887,6 +1933,7 @@ def editor_create_article():
         "editor_create_article.html",
         category=category,
         current_time=current_time,
+        threshold=threshold,
         active_page="my_articles"
     )
 

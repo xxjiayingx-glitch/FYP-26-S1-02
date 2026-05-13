@@ -521,6 +521,11 @@ a {
     color: #15803d;
 }
 
+.status-highly-credible {
+    background: #dcfce7;
+    color: #166534;
+}
+
 .status-generally-reliable {
     background: #dbeafe;
     color: #1d4ed8;
