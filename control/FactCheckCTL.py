@@ -1880,7 +1880,7 @@ class FactCheckController:
         {{
             "matched": true,
             "title_matched": true,
-            "suggested_category": "one category from available categories"
+            "suggested_category": "one category from available categories",
             "confidence": 0.85,
             "reason": "short user-friendly explanation"
         }}
@@ -1939,6 +1939,9 @@ class FactCheckController:
 
             if confidence < 0.70 and selected_category in available_categories:
                 suggested = selected_category
+
+            if suggested == selected_category and matched is False:
+                matched = True
 
             # current_title_clean = (title or "").strip().lower()
             # suggested_title_clean = suggested_title.strip().lower()
