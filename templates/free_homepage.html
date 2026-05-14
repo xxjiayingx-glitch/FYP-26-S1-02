@@ -431,6 +431,8 @@
             Top Stories by Category
         </h2>
 
+
+        <!-- TOP STORIES BY CATEGORY -->
         <div class="category-carousel-wrapper">
 
             <button class="carousel-btn category-prev" onclick="moveCategoryCarousel(-1)">
@@ -576,10 +578,21 @@
                 {% endfor %}
 
             {% else %}
-                <p>No popular articles available.</p>
+                <p>No articles in your favorite category yet.</p>
             {% endif %}
-
         </div>
+
+        {% if category_top_articles|length > 4 %}
+        <div class="news-btn">
+            <button class="view-more-articles" type="button" id="viewMoreFavoriteBtn" onclick="showMoreFavoriteArticles()">
+                View More
+            </button>
+    
+            <button class="view-less-articles is-hidden" type="button" id="viewLessFavoriteBtn" onclick="showLessFavoriteArticles()">
+                View Less
+            </button>
+        </div>
+        {% endif %}
 
     </section>
     {% endif %}
@@ -671,8 +684,29 @@
                 {% endif %}
 
             {% endif %}
-
         </div>
+
+        {% if latest_articles|length > 4 %}
+        <div class="news-btn">
+            <button 
+                class="view-more-articles" 
+                type="button" 
+                id="viewMoreLatestBtn" 
+                onclick="showMoreLatestArticles()"
+            >
+                View More
+            </button>
+
+            <button 
+                class="view-less-articles is-hidden" 
+                type="button" 
+                id="viewLessLatestBtn" 
+                onclick="showLessLatestArticles()"
+            >
+                View Less
+            </button>
+        </div>
+        {% endif %}
 
     </section>
 {% endblock %}

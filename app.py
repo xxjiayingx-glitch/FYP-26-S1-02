@@ -1450,9 +1450,6 @@ def admin_decide_pending_article(articleID):
     if user_type != "system admin":
         flash("Access denied.", "danger")
         return redirect(url_for("login.login"))
-    
-    dashboard_control = AdminDashboardControl()
-    admin_data = dashboard_control.get_dashboard_data()
 
     action = request.form.get("action", "").strip().lower()
     reviewed_by = session.get("userID")
@@ -1461,49 +1458,67 @@ def admin_decide_pending_article(articleID):
         flash("Invalid action.", "danger")
         return redirect(url_for("admin_review_pending_article", articleID=articleID))
 
+    reject_reason = request.form.get("reject_reason", "").strip()
+
+    if action == "reject" and not reject_reason:
+        flash("Please provide a rejection reason before rejecting the article.", "danger")
+        return redirect(url_for("admin_review_pending_article", articleID=articleID))
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    if action == "approve":
-        cursor.execute("""
-            UPDATE Article
-            SET articleStatus = 'published',
-                approved_at = NOW()
-            WHERE articleID = %s
-            AND articleStatus = 'pending review'
-        """, (articleID,))
+    try:
+        if action == "approve":
+            cursor.execute("""
+                UPDATE Article
+                SET articleStatus = 'published',
+                    approved_at = NOW(),
+                    updated_at = NOW()
+                WHERE articleID = %s
+                AND articleStatus = 'pending review'
+            """, (articleID,))
 
-        message = "Article approved and published successfully."
-        log_action = f"System admin approved article {articleID}"
+            message = "Article approved and published successfully."
+            log_action = f"System admin approved article {articleID}"
 
-    else:
-        cursor.execute("""
-            UPDATE Article
-            SET articleStatus = 'rejected'
-            WHERE articleID = %s
-            AND articleStatus = 'pending review'
-        """, (articleID,))
+        else:
+            cursor.execute("""
+                UPDATE Article
+                SET articleStatus = 'rejected',
+                    rejectionReason = %s,
+                    rejected_by = %s,
+                    rejected_at = NOW(),
+                    updated_at = NOW()
+                WHERE articleID = %s
+                AND articleStatus = 'pending review'
+            """, (reject_reason, reviewed_by, articleID))
 
-        message = "Article rejected successfully."
-        log_action = f"System admin rejected article {articleID}"
+            message = "Article rejected successfully with reason."
+            log_action = f"System admin rejected article {articleID} with reason"
 
-    conn.commit()
-    updated = cursor.rowcount > 0
+        updated = cursor.rowcount > 0
+        conn.commit()
 
-    cursor.close()
-    conn.close()
+        if updated:
+            flash(message, "success")
 
-    if updated:
-        flash(message, "success")
+            SystemLogCTL.logAction(
+                accountID=reviewed_by,
+                action=log_action,
+                targetID=articleID,
+                targetType="Article"
+            )
+        else:
+            flash("Failed to update article. It may no longer be pending review.", "danger")
 
-        SystemLogCTL.logAction(
-            accountID=reviewed_by,
-            action=log_action,
-            targetID=articleID,
-            targetType="Article"
-        )
-    else:
-        flash("Failed to update article. It may no longer be pending review.", "danger")
+    except Exception as e:
+        conn.rollback()
+        print("ADMIN ARTICLE DECISION ERROR:", e)
+        flash("Something went wrong while updating the article.", "danger")
+
+    finally:
+        cursor.close()
+        conn.close()
 
     return redirect(url_for("admin_category_articles"))
 
