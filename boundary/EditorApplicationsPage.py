@@ -365,11 +365,17 @@ def change_requests_page():
             r.requestedExpertise,
             ua.supportingDocument,
             r.status,
-            r.requested_at
+            r.requested_at,
+            r.requestStatus
         FROM EditorExpertiseRequest r
         LEFT JOIN UserAccount ua ON r.userID = ua.userID
         WHERE r.status IS NOT NULL
-        ORDER BY r.requested_at ASC
+        ORDER BY 
+        CASE 
+            WHEN LOWER(r.status) = 'pending' THEN 0
+            ELSE 1
+        END,
+        r.requested_at DESC           
     """)
     rows = cursor.fetchall()
 
@@ -385,6 +391,7 @@ def change_requests_page():
         new_expertise = row.get("requestedExpertise")
         status = row.get("status")
         requested_at = row.get("requested_at")
+        requestStatus = row.get("requestStatus")
         supporting_document = row.get("supportingDocument")
 
         supporting_document_name = ""
@@ -413,30 +420,6 @@ def change_requests_page():
         else:
             applied_at_display = "-"
 
-        # resume_file_name = ""
-        # resume_file_path = ""
-
-        # if supporting_document:
-        #     resume_file_path = supporting_document
-        #     resume_file_name = os.path.basename(supporting_document)
-
-        # applications.append({
-        #     # "applicationID": user_id,
-        #     # "userID": user_id,
-        #     "fullName": full_name,
-        #     "email": email or "-",
-        #     "currentExpertise": current_expertise,
-        #     # "yearsOfExperience": str(years_experience) if years_experience is not None else "-",
-        #     # "editorBio": editor_bio or "-",
-        #     # "portfolioLink": portfolio_link or "",
-        #     # "resumeFileName": resume_file_name,
-        #     # "resumeFilePath": resume_file_path,
-        #     "status": status.lower(),
-        #     # "adminRemarks": editor_admin_remarks or "",
-        #     "newExpertise": new_expertise,
-        #     "requested_at": applied_at_display
-        # })
-
         applications.append({
             "requestID": requestID,
             "fullName": full_name,
@@ -446,36 +429,9 @@ def change_requests_page():
             "supportingDocumentName": supporting_document_name,
             "supportingDocumentPath": supporting_document_path,
             "status": status.lower(),
-            "requested_at": applied_at_display
+            "requested_at": applied_at_display,
+            "requestStatus": requestStatus
         })
-
-    # cursor.execute("""
-    #     SELECT COUNT(*) AS total
-    #     FROM UserAccount
-    #     WHERE editorApprovalStatus = 'pending'
-    # """)
-    # pending_count = cursor.fetchone().get("total", 0)
-
-    # cursor.execute("""
-    #     SELECT COUNT(*) AS total
-    #     FROM UserAccount
-    #     WHERE editorApprovalStatus = 'approved'
-    # """)
-    # approved_count = cursor.fetchone().get("total", 0)
-
-    # cursor.execute("""
-    #     SELECT COUNT(*) AS total
-    #     FROM UserAccount
-    #     WHERE editorApprovalStatus = 'rejected'
-    # """)
-    # rejected_count = cursor.fetchone().get("total", 0)
-
-    # cursor.execute("""
-    #     SELECT COUNT(*) AS total
-    #     FROM UserAccount
-    #     WHERE editorApprovalStatus IS NOT NULL
-    # """)
-    # total_count = cursor.fetchone().get("total", 0)
 
     cursor.execute("""
         SELECT categoryID, categoryName
@@ -493,10 +449,6 @@ def change_requests_page():
         admin=admin,
         applications=applications,
         expertise_categories=expertise_categories
-        # pending_count=pending_count,
-        # approved_count=approved_count,
-        # rejected_count=rejected_count,
-        # total_count=total_count
     )
 
 
@@ -505,13 +457,19 @@ def approve_change(request_id):
     if "userID" not in session:
         return redirect(url_for("login.login"))
 
+    user_type = (session.get("userType") or "").strip().lower()
+
+    if user_type != "system admin":
+        flash("Access denied.", "danger")
+        return redirect(url_for("login.login"))
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         # Get request details first
         cursor.execute("""
-            SELECT userID, requestedExpertise
+            SELECT userID, requestedExpertise, status
             FROM EditorExpertiseRequest
             WHERE requestID = %s
         """, (request_id,))
@@ -519,19 +477,31 @@ def approve_change(request_id):
         change_request = cursor.fetchone()
 
         if not change_request:
-            flash("Change request not found or already reviewed.", "error")
+            flash("Change request not found.", "danger")
+            return redirect(url_for("editor_applications_page_bp.change_requests_page"))
+
+        # Stop if already reviewed
+        if (change_request["status"] or "").lower() != "pending":
+            flash("This change request has already been reviewed.", "warning")
             return redirect(url_for("editor_applications_page_bp.change_requests_page"))
 
         user_id = change_request["userID"]
         requested_expertise = change_request["requestedExpertise"]
 
-        # Update request status
+        # Update request status only if still pending
         cursor.execute("""
             UPDATE EditorExpertiseRequest
             SET status = %s,
+                requestStatus = %s,
                 reviewed_at = CURRENT_TIMESTAMP
             WHERE requestID = %s
-        """, ("approved", request_id))
+            AND status = 'pending'
+        """, ("approved", "completed", request_id))
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            flash("This change request has already been reviewed.", "warning")
+            return redirect(url_for("editor_applications_page_bp.change_requests_page"))
 
         # Update editor expertise area
         cursor.execute("""
@@ -548,7 +518,7 @@ def approve_change(request_id):
     except Exception as e:
         conn.rollback()
         print("APPROVE CHANGE REQUEST ERROR:", e)
-        flash("Something went wrong while approving the change request.", "error")
+        flash("Something went wrong while approving the change request.", "danger")
 
     finally:
         cursor.close()
@@ -562,46 +532,60 @@ def reject_change(request_id):
     if "userID" not in session:
         return redirect(url_for("login.login"))
 
-    # admin_remarks = request.form.get("adminRemarks", "").strip()
+    user_type = (session.get("userType") or "").strip().lower()
+
+    if user_type != "system admin":
+        flash("Access denied.", "danger")
+        return redirect(url_for("login.login"))
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        UPDATE EditorExpertiseRequest
-        SET status = %s,
-            reviewed_at = CURRENT_TIMESTAMP
-        WHERE requestID = %s
-    """, ("rejected", request_id))
+    try:
+        # Check current request status first
+        cursor.execute("""
+            SELECT status
+            FROM EditorExpertiseRequest
+            WHERE requestID = %s
+        """, (request_id,))
 
-    # cursor.execute("""
-    #     SELECT username, first_name, last_name, email
-    #     FROM UserAccount
-    #     WHERE userID = %s
-    # """, (user_id,))
+        change_request = cursor.fetchone()
 
-    # user = cursor.fetchone()
-    conn.commit()
-    cursor.close()
-    conn.close()
+        if not change_request:
+            flash("Change request not found.", "danger")
+            return redirect(url_for("editor_applications_page_bp.change_requests_page"))
 
-    # if user and user.get("email"):
-    #     full_name = f"{user.get('first_name') or ''} {user.get('last_name') or ''}".strip()
-    #     if not full_name:
-    #         full_name = user.get("username") or "Applicant"
+        # Stop if already reviewed
+        if (change_request["status"] or "").lower() != "pending":
+            flash("This change request has already been reviewed.", "warning")
+            return redirect(url_for("editor_applications_page_bp.change_requests_page"))
 
-    #     email_sent = send_editor_application_decision_email(
-    #         to_email=user["email"],
-    #         full_name=full_name,
-    #         decision="rejected",
-    #         remarks=admin_remarks
-    #     )
+        # Reject only if still pending
+        cursor.execute("""
+            UPDATE EditorExpertiseRequest
+            SET status = %s,
+                requestStatus = %s,
+                reviewed_at = CURRENT_TIMESTAMP
+            WHERE requestID = %s
+            AND status = 'pending'
+        """, ("rejected", "completed", request_id))
 
-    #     if email_sent:
-    #         flash("Application rejected successfully. Email notification sent.", "success")
-    #     else:
-    #         flash("Application rejected successfully, but email could not be sent.", "warning")
+        if cursor.rowcount == 0:
+            conn.rollback()
+            flash("This change request has already been reviewed.", "warning")
+            return redirect(url_for("editor_applications_page_bp.change_requests_page"))
 
-    flash("Application rejected successfully.", "success")
+        conn.commit()
+
+        flash("Change request rejected successfully.", "success")
+
+    except Exception as e:
+        conn.rollback()
+        print("REJECT CHANGE REQUEST ERROR:", e)
+        flash("Something went wrong while rejecting the change request.", "danger")
+
+    finally:
+        cursor.close()
+        conn.close()
 
     return redirect(url_for("editor_applications_page_bp.change_requests_page"))

@@ -34,6 +34,21 @@
                class="{% if status == 'published' %}active{% endif %}">
                 Published
             </a>
+
+            <a href="{{ url_for('my_articles', status='rejected') }}" 
+               class="{% if status == 'rejected' %}active{% endif %}">
+                Rejected
+            </a>
+
+            <a href="{{ url_for('my_articles', status='suspended') }}" 
+               class="{% if status == 'suspended' %}active{% endif %}">
+                Suspended
+            </a>
+
+            <a href="{{ url_for('my_articles', status='pending review') }}" 
+               class="{% if status == 'pending review' %}active{% endif %}">
+                Pending
+            </a>
             {% if session.get('userType') == 'premium' and session.get('verifiedBadgeStatus') == 'approved' %}
                 <a href="{{ url_for('my_articles', verified_only='true') }}" 
                     class="{% if verified_only %}active{% endif %}">
@@ -99,6 +114,19 @@
                                 {% endif %}
                             </span>
                         </div>
+
+                        {% if article.articleStatus == 'rejected' and article.rejectionReason %}
+                            <div class="rejection-box">
+                                <strong>Rejection Reason:</strong>
+                                <p>{{ article.rejectionReason }}</p>
+
+                                {% if article.rejected_at %}
+                                    <small>
+                                        Rejected on {{ article.rejected_at.strftime('%d %b %Y %H:%M') }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        {% endif %}
 
                         <div class="article-actions">
                             <a href="{{ url_for('article_detail', article_id=article.articleID) }}" class="btn my_view-btn">

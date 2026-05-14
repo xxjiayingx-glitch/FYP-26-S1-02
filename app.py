@@ -1743,7 +1743,8 @@ def editor_category_articles():
                    c.categoryName,
                    a.created_by,
                    a.created_at,
-                   a.approved_at
+                   a.approved_at,
+                   a.rejected_at
             FROM Article a
             JOIN ArticleCategory c ON a.categoryID = c.categoryID
             WHERE a.categoryID = %s
@@ -2021,6 +2022,44 @@ def approve_article():
     return redirect(url_for("editor_approval_articles"))
 
 
+# @app.route("/editor/reject_article", methods=["POST"])
+# def reject_article():
+#     if "userID" not in session:
+#         return redirect(url_for("login.login"))
+
+#     user_type = (session.get("userType") or "").strip().lower()
+#     editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
+
+#     if user_type != "editor" or editor_status != "approved":
+#         return redirect(url_for("login.login"))
+
+#     article_id = request.form.get("article_id")
+
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+
+#     try:
+#         cursor.execute("""
+#             UPDATE Article
+#             SET articleStatus = 'rejected',
+#                 updated_at = NOW()
+#             WHERE articleID = %s
+#         """, (article_id,))
+#         conn.commit()
+#         flash("Article rejected successfully.", "warning")
+
+#     except Exception as e:
+#         conn.rollback()
+#         print("REJECT ARTICLE ERROR:", e)
+#         flash("Failed to reject article.", "error")
+
+#     finally:
+#         cursor.close()
+#         conn.close()
+
+#     return redirect(url_for("editor_approval_articles"))
+
+
 @app.route("/editor/reject_article", methods=["POST"])
 def reject_article():
     if "userID" not in session:
@@ -2033,6 +2072,12 @@ def reject_article():
         return redirect(url_for("login.login"))
 
     article_id = request.form.get("article_id")
+    reject_reason = request.form.get("reject_reason", "").strip()
+    rejected_by = session.get("userID")
+
+    if not reject_reason:
+        flash("Please provide a rejection reason before rejecting the article.", "danger")
+        return redirect(url_for("editor_approval_articles"))
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -2041,16 +2086,28 @@ def reject_article():
         cursor.execute("""
             UPDATE Article
             SET articleStatus = 'rejected',
+                rejectionReason = %s,
+                rejected_by = %s,
+                rejected_at = NOW(),
                 updated_at = NOW()
             WHERE articleID = %s
-        """, (article_id,))
+        """, (reject_reason, rejected_by, article_id))
+
         conn.commit()
-        flash("Article rejected successfully.", "warning")
+
+        SystemLogCTL.logAction(
+            accountID=rejected_by,
+            action=f"Rejected article {article_id} with reason",
+            targetID=article_id,
+            targetType="Article"
+        )
+
+        flash("Article rejected successfully with reason.", "warning")
 
     except Exception as e:
         conn.rollback()
         print("REJECT ARTICLE ERROR:", e)
-        flash("Failed to reject article.", "error")
+        flash("Failed to reject article.", "danger")
 
     finally:
         cursor.close()

@@ -25,7 +25,7 @@ class ArticleController:
         return self.article_entity.get_editor_expertise_category(user_id)
     
     def get_my_articles(self, user_id):
-        return self.search_my_articles(user_id)    
+        return self.article_entity.get_my_articles(user_id)    
     
     def create_article(self, user_id, title, category_id, content, status, featured_image=None,
                    ai_fact_check_score=0, ai_fact_check_status=None):
@@ -75,17 +75,16 @@ class ArticleController:
                 a.created_at,
                 a.first_edited_at,
                 a.last_edited_at,
+                a.rejectionReason,
+                a.rejected_at,
                 c.categoryName,
                 ai.imageURL,
-
                 u.userType,
                 u.verifiedBadgeStatus
-
             FROM Article a
             LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
             LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
             JOIN UserAccount u ON a.created_by = u.userID
-
             WHERE a.created_by = %s
         """
         params = [user_id]
