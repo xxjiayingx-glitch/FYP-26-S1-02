@@ -292,10 +292,12 @@
         display: none !important;
     }
 
-
-    .home-section #favoriteCategorySection {
-        scroll-margin-top: 200px;
+    #topStoriesSection,
+    #favoriteCategorySection,
+    #latestArticleSection{
+        scroll-margin-top: 180px;
     }
+    
     
 
     /* MOBILE RESPONSIVE */
@@ -364,298 +366,315 @@
     </div>
 
     <!-- TOP VIEWED ARTICLE -->
-    {% if not search_query and headline %}
-    <div class="featured-news" style="margin-bottom:40px;">
-        <div class="featured-left">
-             <div class="headline-badges">
-                <span class="headline-tag">TOP STORY</span>
-                <span class="category-badge">{{ headline.categoryName }}</span>
-            </div>
+{% if not search_query and headline %}
+<div class="featured-news" style="margin-bottom:40px;">
+    <div class="featured-left">
 
-            <div class="headline-badges">
-                {% if headline.userType and headline.userType|trim|lower == "editor" %}
-                    <span class="editor-badge">✓ Published by Editor</span>
-                {% endif %}
-            </div>
-
-            <h1 class="featured-title">{{ headline.articleTitle }}</h1>
-
-            <div class="ai-factcheck-row">
-                <span class="ai-score-badge">
-                    AI Score: {{ "%.0f"|format(headline.aiFactCheckScore|float) }}
-                </span>
-                
-                {% set ai_status = headline.aiFactCheckStatus or "Not Checked" %}
-
-                <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
-                    {{ ai_status }}
-                </span>
-            </div>
-
-            <div class="top-article-meta">
-                <span class="top-article-badge">👁 {{headline.views }}</span>
-                <span class="top-article-badge like">❤️ {{ headline.likes }}</span>
-            </div>
-
-            <p class="featured-desc">
-                {{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif %}
-            </p>
-            <a class="read-more" href="{{ url_for('article_detail', article_id=headline.articleID) }}">
-                Read more...
-            </a>
+        <div class="headline-badges">
+            <span class="headline-tag">TOP STORY</span>
+            <span class="category-badge">{{ headline.categoryName }}</span>
         </div>
-        <div class="featured-right">
-            {% if headline.featured_image %}
-            <img src="{{ url_for('static', filename='uploads/' + headline.featured_image) }}" alt="Top Viewed Article">
-            {% else %}
-            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+
+        <div class="headline-badges">
+            {% if headline.userType and headline.userType|trim|lower == "editor" %}
+                <span class="editor-badge">✓ Published by Editor</span>
             {% endif %}
         </div>
+
+        <h1 class="featured-title">{{ headline.articleTitle }}</h1>
+
+        <div class="ai-factcheck-row">
+            <span class="ai-score-badge">
+                AI Score: {{ "%.0f"|format(headline.aiFactCheckScore|float) }}
+            </span>
+
+            {% set ai_status = headline.aiFactCheckStatus or "Not Checked" %}
+
+            <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
+                {{ ai_status }}
+            </span>
+        </div>
+
+        <div class="top-article-meta">
+            <span class="top-article-badge">👁 {{headline.views }}</span>
+            <span class="top-article-badge like">❤️ {{ headline.likes }}</span>
+        </div>
+
+        <p class="featured-desc">
+            {{ headline.content[:170] }}{% if headline.content|length > 170 %}...{% endif %}
+        </p>
+
+        <a class="read-more" href="{{ url_for('article_detail', article_id=headline.articleID) }}">
+            Read more...
+        </a>
+    </div>
+
+    <div class="featured-right">
+        {% if headline.featured_image %}
+        <img src="{{ url_for('static', filename='uploads/' + headline.featured_image) }}" alt="Top Viewed Article">
+        {% else %}
+        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+        {% endif %}
+    </div>
     </div>
     {% endif %}
 
+
     {% if not search_query %}
-    <!-- Latest and top article from each category -->
-    <section class="home-section category-carousel-section reveal"     
-        id="topStoriesSection"
-        style="margin-top:80px;">
-        <h2 class="home-section-title">Top Stories by Category</h2>
-        <!-- <h3 class="latest-title">Top Stories by Category</h3> -->
+    <!-- TOP STORIES -->
+    <section 
+        class="home-section category-carousel-section reveal"
+        style="margin-top:80px;"
+    >
+
+        <h2 class="home-section-title" id="topStoriesSection">
+            Top Stories by Category
+        </h2>
+
         <div class="category-carousel-wrapper">
-        <button class="carousel-btn category-prev" onclick="moveCategoryCarousel(-1)">&#10094;</button>
 
-        <div class="category-carousel-viewport">
-            <div class="category-carousel-track" id="categoryCarouselTrack">
-            {% for item in category_featured_articles %}
-            <div class="category-carousel-card">
-                {% if item.article.featured_image %}
-                <img src="{{ url_for('static', filename='uploads/' + item.article.featured_image) }}" alt="{{ item.article.articleTitle }}">
-                {% else %}
-                <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
-                {% endif %}
+            <button class="carousel-btn category-prev" onclick="moveCategoryCarousel(-1)">
+                &#10094;
+            </button>
 
-                <div class="category-carousel-content">
-                <span class="category-badge">{{ item.category.categoryName }}</span>
+            <div class="category-carousel-viewport">
 
-                <div class="headline-badges">
-                    {% if item.article.userType and item.article.userType|trim|lower == "editor" %}
-                        <span class="editor-badge">✓ Published by Editor</span>
-                    {% endif %}
-                </div>
+                <div class="category-carousel-track" id="categoryCarouselTrack">
 
-                <h4>{{ item.article.articleTitle }}</h4>
+                    {% for item in category_featured_articles %}
+                    <div class="category-carousel-card">
 
-                <!-- <div class="article-meta">
-                    <span class="meta-item views">👁 {{ item.article.views }}</span>
-                    <span class="meta-item likes">❤️ {{ item.article.likes }}</span>
-                </div> -->
+                        {% if item.article.featured_image %}
+                        <img src="{{ url_for('static', filename='uploads/' + item.article.featured_image) }}" alt="{{ item.article.articleTitle }}">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
+                        {% endif %}
 
-                <div class="ai-factcheck-row">
-                    <span class="ai-score-badge">
-                        AI Score: {{ "%.0f"|format(item.article.aiFactCheckScore|float) }}
-                    </span>
+                        <div class="category-carousel-content">
 
-                    {% set ai_status = item.article.aiFactCheckStatus or "Not Checked" %}
+                            <span class="category-badge">
+                                {{ item.category.categoryName }}
+                            </span>
 
-                    <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
-                        {{ ai_status }}
-                    </span>
-                </div>
+                            <div class="headline-badges">
+                                {% if item.article.userType and item.article.userType|trim|lower == "editor" %}
+                                    <span class="editor-badge">✓ Published by Editor</span>
+                                {% endif %}
+                            </div>
 
-                <div class="top-article-meta">
-                    <span class="top-article-badge">👁 {{ item.article.views }}</span>
-                    <span class="top-article-badge like">❤️ {{ item.article.likes }}</span>
-                </div>
+                            <h4>{{ item.article.articleTitle }}</h4>
 
-                <p>{{ item.article.content[:120] }}{% if item.article.content|length > 120 %}...{% endif %}</p>
+                            <div class="ai-factcheck-row">
+                                <span class="ai-score-badge">
+                                    AI Score: {{ "%.0f"|format(item.article.aiFactCheckScore|float) }}
+                                </span>
 
-                <a class="read-more" href="{{ url_for('home.unreg_article_detail', article_id=item.article.articleID) }}">
-                    Read more......
-                </a>
+                                {% set ai_status = item.article.aiFactCheckStatus or "Not Checked" %}
+
+                                <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
+                                    {{ ai_status }}
+                                </span>
+                            </div>
+
+                            <div class="top-article-meta">
+                                <span class="top-article-badge">👁 {{ item.article.views }}</span>
+                                <span class="top-article-badge like">❤️ {{ item.article.likes }}</span>
+                            </div>
+
+                            <p>
+                                {{ item.article.content[:120] }}{% if item.article.content|length > 120 %}...{% endif %}
+                            </p>
+
+                            <a class="read-more" href="{{ url_for('article_detail', article_id=item.article.articleID) }}">
+                                Read more...
+                            </a>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+
                 </div>
             </div>
-            {% endfor %}
-            </div>
-        </div>
 
-        <button class="carousel-btn category-next" onclick="moveCategoryCarousel(1)">&#10095;</button>
+            <button class="carousel-btn category-next" onclick="moveCategoryCarousel(1)">
+                &#10095;
+            </button>
+
         </div>
     </section>
     {% endif %}
+
 
     {% if not search_query %}
-    <!-- CATEGORY ARTICLES -->
+    <!-- FAVORITE CATEGORY ARTICLES -->
     <section class="home-section" id="favoriteCategorySection">
-        <h2 class="home-section-title" id="favoriteCategoryTitle">Articles From Your Favorite Category</h2>
+
+        <h2 class="home-section-title" id="favoriteCategoryTitle">
+            Articles From Your Favorite Category
+        </h2>
+
         <div class="article-grid">
-        {% if category_top_articles %}
-            {% for article in category_top_articles %}
-            <div class="news-card favorite-category-card {% if loop.index > 4 %}extra-favorite-card is-hidden{% endif %}">
-                {% if article.featured_image %}
-                <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
-                {% else %}
-                <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
-                {% endif %}
 
-                <span class="category-badge">{{ article.categoryName }}</span>
+            {% if category_top_articles %}
 
-                <div class="headline-badges">
-                    {% if article.userType and article.userType|trim|lower == "editor" %}
-                        <span class="editor-badge">✓ Published by Editor</span>
+                {% for article in category_top_articles %}
+
+                <div class="news-card favorite-category-card {% if loop.index > 4 %}extra-favorite-card is-hidden{% endif %}">
+
+                    {% if article.featured_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
                     {% endif %}
-                </div>
 
-                <h4>{{ article.articleTitle }}</h4>
-
-                <div class="ai-factcheck-row">
-                    <span class="ai-score-badge">
-                        AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+                    <span class="category-badge">
+                        {{ article.categoryName }}
                     </span>
 
-                    <!-- <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
-                        {{ article.aiFactCheckStatus }}
-                    </span> -->
-
-                    {% set ai_status = article.aiFactCheckStatus or "Not Checked" %}
-
-                    <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
-                        {{ ai_status }}
-                    </span>
-                </div>
-
-                <div class="article-news-meta">
-                    <div class="article-news-item">
-                        👁 <span>{{ article.views }}</span>
+                    <div class="headline-badges">
+                        {% if article.userType and article.userType|trim|lower == "editor" %}
+                            <span class="editor-badge">✓ Published by Editor</span>
+                        {% endif %}
                     </div>
-                    <div class="article-news-item like">
-                        ❤️ <span>{{ article.likes }}</span>
+
+                    <h4>{{ article.articleTitle }}</h4>
+
+                    <div class="ai-factcheck-row">
+
+                        <span class="ai-score-badge">
+                            AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+                        </span>
+
+                        {% set ai_status = article.aiFactCheckStatus or "Not Checked" %}
+
+                        <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
+                            {{ ai_status }}
+                        </span>
                     </div>
+
+                    <div class="article-news-meta">
+
+                        <div class="article-news-item">
+                            👁 <span>{{ article.views }}</span>
+                        </div>
+
+                        <div class="article-news-item like">
+                            ❤️ <span>{{ article.likes }}</span>
+                        </div>
+
+                    </div>
+
+                    <p>
+                        {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
+                    </p>
+
+                    <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                        Read more...
+                    </a>
+
                 </div>
+                {% endfor %}
 
-                <p>
-                    {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
-                </p>
+            {% else %}
+                <p>No popular articles available.</p>
+            {% endif %}
 
-                <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
-                    Read more...
-                </a>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p>No popular articles available.</p>
-        {% endif %}
         </div>
 
-        {% if category_top_articles|length > 4 %}
-        <div class="news-btn">
-            <button class="view-more-articles" type="button" id="viewMoreFavoriteBtn" onclick="showMoreFavoriteArticles()">
-                View More
-            </button>
-
-            <button class="view-less-articles is-hidden" type="button" id="viewLessFavoriteBtn" onclick="showLessFavoriteArticles()">
-                View Less
-            </button>
-        </div>
-        {% endif %}
     </section>
     {% endif %}
+
 
     <!-- LATEST ARTICLES -->
     <section class="home-section" id="latestArticleSection">
+
         <h2 class="home-section-title" id="latestArticleTitle">
+
             {% if search_query %}
                 Search results for "{{ search_query }}"
             {% else %}
                 Latest Articles
             {% endif %}
+
         </h2>
 
         <div class="article-grid">
-        {% if latest_articles %}
-            {% for article in latest_articles %}
-            <div class="news-card latest-article-card {% if loop.index > 4 %}extra-latest-card is-hidden{% endif %}">
 
-                {% if article.featured_image %}
-                <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+            {% if latest_articles %}
+
+                {% for article in latest_articles %}
+
+                <div class="news-card latest-article-card {% if loop.index > 4 %}extra-latest-card is-hidden{% endif %}">
+
+                    {% if article.featured_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+                    {% endif %}
+
+                    <span class="category-badge">
+                        {{ article.categoryName }}
+                    </span>
+
+                    <div class="headline-badges">
+                        {% if article.userType and article.userType|trim|lower == "editor" %}
+                            <span class="editor-badge">✓ Published by Editor</span>
+                        {% endif %}
+                    </div>
+
+                    <h4>{{ article.articleTitle }}</h4>
+
+                    <div class="ai-factcheck-row">
+
+                        <span class="ai-score-badge">
+                            AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
+                        </span>
+
+                        {% set ai_status = article.aiFactCheckStatus or "Not Checked" %}
+
+                        <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
+                            {{ ai_status }}
+                        </span>
+
+                    </div>
+
+                    <div class="article-news-meta">
+
+                        <div class="article-news-item">
+                            👁 <span>{{ article.views }}</span>
+                        </div>
+
+                        <div class="article-news-item like">
+                            ❤️ <span>{{ article.likes }}</span>
+                        </div>
+
+                    </div>
+
+                    <p>
+                        {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
+                    </p>
+
+                    <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
+                        Read more...
+                    </a>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                {% if search_query %}
+                    <p>No articles found for "{{ search_query }}".</p>
                 {% else %}
-                <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+                    <p>No latest articles available.</p>
                 {% endif %}
 
-                <span class="category-badge">{{ article.categoryName }}</span>
-
-                <div class="headline-badges">
-                    {% if article.userType and article.userType|trim|lower == "editor" %}
-                        <span class="editor-badge">✓ Published by Editor</span>
-                    {% endif %}
-                </div>
-
-                <h4>{{ article.articleTitle }}</h4>
-
-                <div class="ai-factcheck-row">
-                    <span class="ai-score-badge">
-                        AI Score: {{ "%.0f"|format(article.aiFactCheckScore|float) }}
-                    </span>
-
-                    <!-- <span class="ai-status-badge status-{{ article.aiFactCheckStatus|lower|replace(' ', '-') }}">
-                        {{ article.aiFactCheckStatus }}
-                    </span> -->
-
-                    {% set ai_status = article.aiFactCheckStatus or "Not Checked" %}
-
-                    <span class="ai-status-badge status-{{ ai_status|lower|replace(' ', '-') }}">
-                        {{ ai_status }}
-                    </span>
-                </div>
-
-                <div class="article-news-meta">
-                    <div class="article-news-item">
-                        👁 <span>{{ article.views }}</span>
-                    </div>
-                    <div class="article-news-item like">
-                        ❤️ <span>{{ article.likes }}</span>
-                    </div>
-                </div>
-
-                <p>
-                    {{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}
-                </p>
-                <a class="read-more" href="{{ url_for('article_detail', article_id=article.articleID) }}">
-                    Read more...
-                </a>
-            </div>
-            {% endfor %}
-        {% else %}
-            {% if search_query %}
-                <p>No articles found for "{{ search_query }}".</p>
-            {% else %}
-                <p>No latest articles available.</p>
             {% endif %}
-        {% endif %}
+
         </div>
 
-        {% if latest_articles|length > 4 %}
-        <div class="news-btn">
-            <button 
-                class="view-more-articles" 
-                type="button" 
-                id="viewMoreLatestBtn" 
-                onclick="showMoreLatestArticles()"
-            >
-                View More
-            </button>
-
-            <button 
-                class="view-less-articles is-hidden" 
-                type="button" 
-                id="viewLessLatestBtn" 
-                onclick="showLessLatestArticles()"
-            >
-                View Less
-            </button>
-        </div>
-        {% endif %}
     </section>
-</div>
 {% endblock %}
 
 {% block extra_scripts %}

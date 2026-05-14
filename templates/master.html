@@ -688,17 +688,17 @@
                 News
             </div>
 
-            <a href="#topStoriesSection" onclick="closeSidebar()">
+            <a href="{{ url_for('free_homepage') }}#topStoriesSection" onclick="closeSidebar()">
                 <i class="fa-solid fa-fire"></i>
                 Top Articles
             </a>
 
-            <a href="#favoriteCategorySection" onclick="closeSidebar()">
+            <a href="{{ url_for('free_homepage') }}#favoriteCategorySection" onclick="closeSidebar()">
                 <i class="fa-solid fa-heart"></i>
                 Favorite Category Articles
             </a>
 
-            <a href="#latestArticleSection" onclick="closeSidebar()">
+            <a href="{{ url_for('free_homepage') }}#latestArticleSection" onclick="closeSidebar()">
                 <i class="fa-regular fa-clock"></i>
                 Latest Articles
             </a>
@@ -713,12 +713,12 @@
                 Profile Information
             </a>
 
-            <a href="{{ url_for('subscription.change_plan') }}">
+            <a href="{{ url_for('profile.profile_page') }}#subscription-plan">
                 <i class="fa-solid fa-crown"></i>
                 Subscription Plans
             </a>
 
-            <a href="{{ url_for('profile.profile_page') }}#change-password">
+            <a href="{{ url_for('profile.profile_page') }}#security-settings">
                 <i class="fa-solid fa-lock"></i>
                 Change Password
             </a>
