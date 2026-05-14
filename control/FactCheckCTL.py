@@ -1857,14 +1857,6 @@ class FactCheckController:
         6. If the article is ambiguous, prefer the selected category instead of changing suggestion randomly.
         7. If confidence is below 0.70, suggested_category should usually stay as the selected category.
         8. title_matched checks whether the article title accurately represents the main content.
-        9. Set title_matched to true if the title covers the main topic, even if the title can be improved.
-        10. Do not mark title_matched as false only because you can suggest a better wording.
-        11. Set title_matched to false only if the title is misleading, unrelated, or focuses on a different main topic from the article.
-        12. If title_matched is false, suggest one better article title based only on the article content.
-        13. The suggested_title must be factual, clear, and not clickbait.
-        14. The suggested_title must not invent information not found in the article.
-        15. If title_matched is false, suggested_title must not be empty.
-        16. If title_matched is true, suggested_title must be an empty string.
 
         Category guidance:
         - Travel: tourism, travel safety, hikers, tourists, trips, destinations, transport disruption, travel-related incidents.
@@ -1888,14 +1880,13 @@ class FactCheckController:
         {{
             "matched": true,
             "title_matched": true,
-            "suggested_category": "one category from available categories",
-            "suggested_title": "better title if title does not match, otherwise empty string",
+            "suggested_category": "one category from available categories"
             "confidence": 0.85,
             "reason": "short user-friendly explanation"
         }}
         """
         payload = {
-            "model": "llama-3.3-70b-versatile",
+            "model": "llama-3.1-8b-instant",
             "temperature": 0,
             "top_p": 1,
             "max_completion_tokens": 200,
@@ -1940,7 +1931,7 @@ class FactCheckController:
             title_matched = to_bool(parsed.get("title_matched"), True)
 
             suggested = parsed.get("suggested_category")
-            suggested_title = parsed.get("suggested_title") or ""
+            # suggested_title = parsed.get("suggested_title") or ""
             confidence = float(parsed.get("confidence", 0) or 0)
 
             if suggested not in available_categories:
@@ -1949,25 +1940,15 @@ class FactCheckController:
             if confidence < 0.70 and selected_category in available_categories:
                 suggested = selected_category
 
-            current_title_clean = (title or "").strip().lower()
-            suggested_title_clean = suggested_title.strip().lower()
+            # current_title_clean = (title or "").strip().lower()
+            # suggested_title_clean = suggested_title.strip().lower()
 
-            if suggested_title_clean == current_title_clean:
-                title_matched = True
-                suggested_title = ""
+            # if suggested_title_clean == current_title_clean:
+            #     title_matched = True
+            #     suggested_title = ""
             
-            if title_matched:
-                suggested_title = ""
-
-            # Suggested category must be from available categories
-            if suggested not in available_categories:
-                suggested = selected_category
-
-            # Stability rule:
-            # If AI is not confident and selected category is available,
-            # keep the selected category to avoid random switching.
-            if confidence < 0.70 and selected_category in available_categories:
-                suggested = selected_category
+            # if title_matched:
+            #     suggested_title = ""
 
             reason = parsed.get("reason") or "No reason provided."
 
@@ -1975,7 +1956,7 @@ class FactCheckController:
                 "ok": True,
                 "matched": matched,
                 "suggested_category": suggested,
-                "suggested_title": suggested_title,
+                # "suggested_title": suggested_title,
                 "confidence": confidence,
                 "reason": reason,
                 "title_matched": title_matched,
@@ -1986,7 +1967,7 @@ class FactCheckController:
                 "ok": False,
                 "matched": None,
                 "suggested_category": None,
-                "suggested_title": "",
+                # "suggested_title": "",
                 "confidence": 0,
                 "reason": f"Category check failed: {str(e)}",
                 "title_matched": None
@@ -2737,7 +2718,7 @@ class FactCheckController:
             general_result = item.get("general_result")
 
             if item.get("time_inconsistent"):
-                score -= 5
+                score -= 2
                 reasons.append(
                     "Temporal inconsistency detected: the timing of the event may be unclear or conflicting."
                 )
@@ -2789,7 +2770,7 @@ class FactCheckController:
                         f"{stats_result.get('year_note')}"
                     )
                 else:
-                    score += 10
+                    score += 12
                     reasons.append(
                         f"Statistical claim matches official data from {stats_result.get('source')}."
                     )
@@ -2803,13 +2784,13 @@ class FactCheckController:
 
             elif has_stat_mismatch and not stat_penalty_applied:
                 if stats_result.get("year_note"):
-                    score -= 8
+                    score -= 6
                     reasons.append(
                         f"Statistical claim differs from the latest available official data from {stats_result.get('source')}. "
                         f"{stats_result.get('year_note')}"
                     )
                 else:
-                    score -= 10
+                    score -= -8
                     reasons.append(
                         f"Statistical mismatch detected: claimed {stats_result.get('claimed_value')}, "
                         f"official value {stats_result.get('official_value')} from {stats_result.get('source')}."
@@ -2831,7 +2812,7 @@ class FactCheckController:
                 ]
 
                 if any(word in rating for word in false_words) and not factcheck_penalty_applied:
-                    score -= 10
+                    score -= 8
                     reasons.append(
                         f"Published fact-check from {google_result.get('publisher', 'unknown')} rated the claim as "
                         f"'{google_result.get('rating')}'."
@@ -2839,7 +2820,7 @@ class FactCheckController:
                     factcheck_penalty_applied = True
 
                 elif any(word in rating for word in true_words) and not factcheck_bonus_applied:
-                    score += 6
+                    score += 12
                     reasons.append(
                         f"Published fact-check from {google_result.get('publisher', 'unknown')} rated the claim as "
                         f"'{google_result.get('rating')}'."
@@ -2860,7 +2841,7 @@ class FactCheckController:
                 and general_result
                 and general_result.get("verdict") == "Plausible"
             ):
-                score += 2
+                score += 10
                 reasons.append(
                     "The statement is clearly attributed to an official authority and appears plausible."
                 )
@@ -2872,7 +2853,7 @@ class FactCheckController:
                 and general_result
                 and general_result.get("verdict") == "Plausible"
             ):
-                score += 1
+                score += 8
                 reasons.append(
                     "The information is attributed to an official authority and appears plausible."
                 )
@@ -2925,11 +2906,11 @@ class FactCheckController:
 
                 elif verdict == "Plausible" and not llm_bonus_applied:
                     if full_agreement and conf >= 0.85:
-                        score += 8
+                        score += 14
                     elif conf >= 0.75:
-                        score += 6
+                        score += 12
                     else:
-                        score += 4
+                        score += 10
 
                     plausible_reasons.append(reason_text)
                     llm_bonus_applied = True

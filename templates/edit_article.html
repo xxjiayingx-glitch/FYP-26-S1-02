@@ -480,7 +480,7 @@
         line-height: 1.5;
     }
 
-    .use-title-btn {
+    /* .use-title-btn {
         margin-top: 12px;
         padding: 5px 10px;
         border: none;
@@ -494,7 +494,7 @@
 
     .use-title-btn:hover {
         background: #1d4ed8;
-    }
+    } */
 </style>
 
 <div class="edit-article-page">
@@ -575,14 +575,14 @@
                         <div id="categoryCheckCard" class="factcheck-card" style="display:none;">
                             <h4>Category Check</h4>
                             <p><strong>Title Match:</strong> <span id="titleMatchText"></span></p>
-                            <p id="suggestedTitleRow" style="display:none;">
+                            <!-- <p id="suggestedTitleRow" style="display:none;">
                                 <strong>Suggested Title:</strong> 
                                 <span id="suggestedTitleText"></span>
                                 <br>
                                 <button type="button" id="useSuggestedTitleBtn" class="use-title-btn">
                                     Use Title
                                 </button>
-                            </p>
+                            </p> -->
                             <p><strong>Selected Category:</strong> <span id="selectedCategoryText"></span></p>
                             <p><strong>AI Suggestion:</strong> <span id="suggestedCategoryText"></span></p>
                             <p><strong>Result:</strong> <span id="categoryMatchText"></span></p>
@@ -671,34 +671,34 @@ document.getElementById("checkScoreBtn").addEventListener("click", async functio
         document.getElementById("suggestedCategoryText").textContent = categoryCheck.suggested_category || "-";
         document.getElementById("categoryReasonText").textContent = categoryCheck.reason || "-";
 
-        const suggestedTitle = categoryCheck.suggested_title || "";
-        const suggestedTitleRow = document.getElementById("suggestedTitleRow");
-        const suggestedTitleText = document.getElementById("suggestedTitleText");
-        useSuggestedTitleBtn.onclick = function () {
-            document.querySelector('input[name="title"]').value = suggestedTitle;
+        // const suggestedTitle = categoryCheck.suggested_title || "";
+        // const suggestedTitleRow = document.getElementById("suggestedTitleRow");
+        // const suggestedTitleText = document.getElementById("suggestedTitleText");
+        // useSuggestedTitleBtn.onclick = function () {
+        //     document.querySelector('input[name="title"]').value = suggestedTitle;
 
-            // Hide old suggestion row
-            suggestedTitleRow.style.display = "none";
+        //     // Hide old suggestion row
+        //     suggestedTitleRow.style.display = "none";
 
-            // Reset old title match text while rechecking
-            document.getElementById("titleMatchText").textContent = "Rechecking...";
-            document.getElementById("titleMatchText").style.color = "#6b7280";
+        //     // Reset old title match text while rechecking
+        //     document.getElementById("titleMatchText").textContent = "Rechecking...";
+        //     document.getElementById("titleMatchText").style.color = "#6b7280";
 
-            // Re-run AI check using the new title
-            document.getElementById("checkScoreBtn").click();
-        };
+        //     // Re-run AI check using the new title
+        //     document.getElementById("checkScoreBtn").click();
+        // };
         
-        if (suggestedTitle) {
-            suggestedTitleRow.style.display = "block";
-            suggestedTitleText.textContent = suggestedTitle;
+        // if (suggestedTitle) {
+        //     suggestedTitleRow.style.display = "block";
+        //     suggestedTitleText.textContent = suggestedTitle;
 
-            useSuggestedTitleBtn.onclick = function () {
-                document.querySelector('input[name="title"]').value = suggestedTitle;
-            };
-        } else {
-            suggestedTitleRow.style.display = "none";
-            suggestedTitleText.textContent = "";
-        }
+        //     useSuggestedTitleBtn.onclick = function () {
+        //         document.querySelector('input[name="title"]').value = suggestedTitle;
+        //     };
+        // } else {
+        //     suggestedTitleRow.style.display = "none";
+        //     suggestedTitleText.textContent = "";
+        // }
 
         const resultEl = document.getElementById("categoryMatchText");
 
