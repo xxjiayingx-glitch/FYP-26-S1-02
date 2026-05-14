@@ -364,6 +364,11 @@
                class="{% if status == 'published' %}active{% endif %}">
                 Published
             </a>
+
+            <a href="{{ url_for('editor_my_articles', status='suspended') }}"
+               class="{% if status == 'suspended' %}active{% endif %}">
+                Suspended
+            </a>
         </div>
 
         <a href="{{ url_for('editor_create_article') }}" class="btn create-article-btn">
