@@ -363,6 +363,15 @@
         margin-top: 8px;
     }
 
+    .reviewed-label {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #f3f4f6;
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
     @media (max-width: 1100px) {
         .change-summary-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -540,25 +549,31 @@
                                     👁
                                 </button>
 
-                                <form 
-                                    method="POST" 
-                                    action="{{ url_for('editor_applications_page_bp.approve_change', request_id=app.requestID) }}"
-                                    onsubmit="return confirm('Approve this expertise change request?');"
-                                >
-                                    <button type="submit" class="action-btn approve-btn" title="Approve request">
-                                        ✓
-                                    </button>
-                                </form>
+                                {% if app.status|lower == "pending" %}
+                                    <form 
+                                        method="POST" 
+                                        action="{{ url_for('editor_applications_page_bp.approve_change', request_id=app.requestID) }}"
+                                        onsubmit="return confirm('Approve this expertise change request?');"
+                                    >
+                                        <button type="submit" class="action-btn approve-btn" title="Approve request">
+                                            ✓
+                                        </button>
+                                    </form>
 
-                                <form 
-                                    method="POST" 
-                                    action="{{ url_for('editor_applications_page_bp.reject_change', request_id=app.requestID) }}"
-                                    onsubmit="return confirm('Reject this expertise change request?');"
-                                >
-                                    <button type="submit" class="action-btn reject-btn" title="Reject request">
-                                        ×
-                                    </button>
-                                </form>
+                                    <form 
+                                        method="POST" 
+                                        action="{{ url_for('editor_applications_page_bp.reject_change', request_id=app.requestID) }}"
+                                        onsubmit="return confirm('Reject this expertise change request?');"
+                                    >
+                                        <button type="submit" class="action-btn reject-btn" title="Reject request">
+                                            ×
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="reviewed-label">
+                                        {{ app.requestStatus|capitalize }}
+                                    </span>
+                                {% endif %}
 
                             </div>
                         </td>

@@ -881,6 +881,30 @@ a {
     margin-bottom: 18px;
 }
 
+.rejection-box {
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #7f1d1d;
+    font-size: 14px;
+}
+
+.rejection-box strong {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.rejection-box p {
+    margin: 0 0 6px;
+    line-height: 1.5;
+}
+
+.rejection-box small {
+    color: #991b1b;
+}
+
 
 /* =====  My Articles Button Style ===== */
 .article-actions {

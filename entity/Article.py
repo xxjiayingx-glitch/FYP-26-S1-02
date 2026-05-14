@@ -502,7 +502,9 @@ class Article:
             a.first_edited_at,
             a.last_edited_at,
             c.categoryName,
-            ai.imageURL
+            ai.imageURL,
+            a.rejectionReason,
+            a.rejected_at
         FROM Article a
         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
@@ -986,51 +988,51 @@ class Article:
             cursor.close()
             conn.close()
 
-    def search_my_articles(self, user_id, keyword="", category_id="", status=""):
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    # def search_my_articles(self, user_id, keyword="", category_id="", status=""):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
 
-        query = """
-            SELECT 
-                a.articleID,
-                a.articleTitle,
-                a.content,
-                a.articleStatus,
-                a.categoryID,
-                a.created_at,
-                a.first_edited_at,
-                a.last_edited_at,
-                c.categoryName,
-                ai.imageURL,
-                IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
-                COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
-            FROM Article a
-            LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
-            LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
-            WHERE a.created_by = %s
-        """
-        params = [user_id]
+    #     query = """
+    #         SELECT 
+    #             a.articleID,
+    #             a.articleTitle,
+    #             a.content,
+    #             a.articleStatus,
+    #             a.categoryID,
+    #             a.created_at,
+    #             a.first_edited_at,
+    #             a.last_edited_at,
+    #             c.categoryName,
+    #             ai.imageURL,
+    #             IFNULL(a.aiFactCheckScore, 0) AS aiFactCheckScore,
+    #             COALESCE(NULLIF(a.aiFactCheckStatus, ''), 'Not Checked') AS aiFactCheckStatus
+    #         FROM Article a
+    #         LEFT JOIN ArticleCategory c ON a.categoryID = c.categoryID
+    #         LEFT JOIN ArticleImage ai ON a.articleID = ai.articleID
+    #         WHERE a.created_by = %s
+    #     """
+    #     params = [user_id]
 
-        if keyword:
-            query += " AND a.articleTitle LIKE %s"
-            params.append(f"%{keyword}%")
+    #     if keyword:
+    #         query += " AND a.articleTitle LIKE %s"
+    #         params.append(f"%{keyword}%")
 
-        if category_id:
-            query += " AND a.categoryID = %s"
-            params.append(category_id)
+    #     if category_id:
+    #         query += " AND a.categoryID = %s"
+    #         params.append(category_id)
 
-        if status:
-            query += " AND LOWER(a.articleStatus) = LOWER(%s)"
-            params.append(status)
+    #     if status:
+    #         query += " AND LOWER(a.articleStatus) = LOWER(%s)"
+    #         params.append(status)
 
-        query += " ORDER BY a.created_at DESC"
+    #     query += " ORDER BY a.created_at DESC"
 
-        cursor.execute(query, params)
-        articles = cursor.fetchall()
+    #     cursor.execute(query, params)
+    #     articles = cursor.fetchall()
 
-        cursor.close()
-        conn.close()
-        return articles
+    #     cursor.close()
+    #     conn.close()
+    #     return articles
 
     # def get_home_headline_article(self):
     #     conn = get_db_connection()
