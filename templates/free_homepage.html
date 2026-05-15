@@ -658,11 +658,15 @@
                     {% endif %} -->
 
                     {% if article.featured_image %}
-                    <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+                        {% if article.featured_image.startswith('http') %}
+                            <img src="{{ article.featured_image }}" alt="Article Image">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}" alt="Article Image">
+                        {% endif %}
                     {% else %}
-                    <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+                        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
                     {% endif %}
-
+                    
                     <span class="category-badge">
                         {{ article.categoryName }}
                     </span>
