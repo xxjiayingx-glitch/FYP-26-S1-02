@@ -544,11 +544,13 @@
                 {% endif %} -->
 
                 {% if article.featured_image %}
+                <div class="image-preview-box">
                     {% if article.featured_image.startswith('http') %}
                         <img src="{{ article.featured_image }}" alt="Current article image">
                     {% else %}
                         <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}" alt="Current article image">
                     {% endif %}
+                </div>
                 {% endif %}
             </div>
 

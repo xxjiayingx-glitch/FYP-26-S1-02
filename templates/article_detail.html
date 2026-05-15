@@ -9,9 +9,15 @@
     <!-- ARTICLE STATS -->
 
     {% if article.featured_image %}
-    <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}"
-         alt="Article Image"
-         style="width:100%; max-height:400px; object-fit:cover; margin:15px 0;">
+        {% if article.featured_image.startswith('http') %}
+            <img src="{{ article.featured_image }}"
+                alt="Article Image"
+                style="width:100%; max-height:400px; object-fit:cover; margin:15px 0;">
+        {% else %}
+            <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}"
+                alt="Article Image"
+                style="width:100%; max-height:400px; object-fit:cover; margin:15px 0;">
+        {% endif %}
     {% endif %}
 
     <div style="color:gray; font-size:0.9em; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:10px;">

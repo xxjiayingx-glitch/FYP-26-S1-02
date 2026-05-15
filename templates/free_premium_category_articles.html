@@ -730,11 +730,25 @@
                 </a>
             </div>
 
-            <div class="featured-right">
+            <!-- <div class="featured-right">
                 {% set headline_image = headline.get('imageURL') or headline.get('featured_image') %}
 
                 {% if headline_image %}
                     <img src="{{ url_for('static', filename='uploads/' + headline_image) }}" alt="Headline article image">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder image">
+                {% endif %}
+            </div> -->
+
+            <div class="featured-right">
+                {% set headline_image = headline.get('imageURL') or headline.get('featured_image') %}
+
+                {% if headline_image %}
+                    {% if headline_image.startswith('http') %}
+                        <img src="{{ headline_image }}" alt="Headline article image">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ headline_image) }}" alt="Headline article image">
+                    {% endif %}
                 {% else %}
                     <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder image">
                 {% endif %}
@@ -768,7 +782,11 @@
             {% set article_image = article.get('imageURL') or article.get('featured_image') %}
 
             {% if article_image %}
-                <img src="{{ url_for('static', filename='uploads/' + article_image) }}" alt="Article image">
+                {% if article_image.startswith('http') %}
+                    <img src="{{ article_image }}" alt="Article image">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ article_image) }}" alt="Article image">
+                {% endif %}
             {% else %}
                 <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder image">
             {% endif %}

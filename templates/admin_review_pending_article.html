@@ -292,10 +292,24 @@
 
     <hr>
 
-    <div class="review-section">
+    <!-- <div class="review-section">
         <h3>Image:</h3>
         {% if article.imageURL %}
             <img src="{{ url_for('static', filename='uploads/' ~ article.imageURL) }}" alt="Article Image" class="article-image">
+        {% else %}
+            <div class="image-placeholder">No Image</div>
+        {% endif %}
+    </div> -->
+
+    <div class="review-section">
+        <h3>Image:</h3>
+
+        {% if article.imageURL %}
+            {% if article.imageURL.startswith('http') %}
+                <img src="{{ article.imageURL }}" alt="Article Image" class="article-image">
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/' ~ article.imageURL) }}" alt="Article Image" class="article-image">
+            {% endif %}
         {% else %}
             <div class="image-placeholder">No Image</div>
         {% endif %}

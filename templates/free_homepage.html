@@ -409,11 +409,23 @@
         </a>
     </div>
 
-    <div class="featured-right">
+    <!-- <div class="featured-right">
         {% if headline.featured_image %}
         <img src="{{ url_for('static', filename='uploads/' + headline.featured_image) }}" alt="Top Viewed Article">
         {% else %}
         <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+        {% endif %}
+    </div> -->
+
+    <div class="featured-right">
+        {% if headline.featured_image %}
+            {% if headline.featured_image.startswith('http') %}
+                <img src="{{ headline.featured_image }}" alt="Top Viewed Article">
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/' ~ headline.featured_image) }}" alt="Top Viewed Article">
+            {% endif %}
+        {% else %}
+            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
         {% endif %}
     </div>
     </div>
@@ -446,10 +458,20 @@
                     {% for item in category_featured_articles %}
                     <div class="category-carousel-card">
 
-                        {% if item.article.featured_image %}
+                        <!-- {% if item.article.featured_image %}
                         <img src="{{ url_for('static', filename='uploads/' + item.article.featured_image) }}" alt="{{ item.article.articleTitle }}">
                         {% else %}
                         <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
+                        {% endif %} -->
+
+                        {% if item.article.featured_image %}
+                            {% if item.article.featured_image.startswith('http') %}
+                                <img src="{{ item.article.featured_image }}" alt="{{ item.article.articleTitle }}">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/' ~ item.article.featured_image) }}" alt="{{ item.article.articleTitle }}">
+                            {% endif %}
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
                         {% endif %}
 
                         <div class="category-carousel-content">
@@ -523,10 +545,20 @@
 
                 <div class="news-card favorite-category-card {% if loop.index > 4 %}extra-favorite-card is-hidden{% endif %}">
 
-                    {% if article.featured_image %}
+                    <!-- {% if article.featured_image %}
                     <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
                     {% else %}
                     <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+                    {% endif %} -->
+
+                    {% if article.featured_image %}
+                        {% if article.featured_image.startswith('http') %}
+                            <img src="{{ article.featured_image }}" alt="Article Image">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}" alt="Article Image">
+                        {% endif %}
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
                     {% endif %}
 
                     <span class="category-badge">
@@ -618,6 +650,12 @@
                 {% for article in latest_articles %}
 
                 <div class="news-card latest-article-card {% if loop.index > 4 %}extra-latest-card is-hidden{% endif %}">
+
+                    <!-- {% if article.featured_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+                    {% endif %} -->
 
                     {% if article.featured_image %}
                     <img src="{{ url_for('static', filename='uploads/' + article.featured_image) }}" alt="Article Image">
