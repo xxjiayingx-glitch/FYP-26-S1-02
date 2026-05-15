@@ -164,12 +164,15 @@ def unreg_article_detail(article_id):
     is_premium = "premium" in user_type
     is_saved = articleCTL.is_article_saved(user_id, article_id) if user_id else False
 
+    report_categories = articleCTL.get_report_category()
+
     return render_template(
         "article_detail.html",
         article=article,
         comments=comments,
         is_saved=is_saved,
-        is_premium=is_premium
+        is_premium=is_premium,
+        report_categories=report_categories
     )
 
 @home_bp.route("/all-articles")

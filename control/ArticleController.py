@@ -767,6 +767,27 @@ class ArticleController:
     def get_article_details(article_id):
         return Article.get_article_details(article_id)
     
+    #----------------------------#   
+    # get active report category #
+    #----------------------------#
+    def get_report_category(self):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT reportCategoryID, categoryName
+            FROM ReportCategory
+            WHERE LOWER(categoryStatus) = 'active'
+            ORDER BY categoryName ASC
+        """)
+
+        report_categories = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return report_categories
+    
     
     
     

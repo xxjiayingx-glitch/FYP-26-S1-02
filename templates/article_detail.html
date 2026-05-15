@@ -135,11 +135,21 @@
             <input type="hidden" name="articleID" value="{{ article.articleID }}">
             <input type="hidden" name="authorID" value="{{ article.created_by }}">
 
-            <select name="report_category_id" required class="report-select">
+            <!-- <select name="report_category_id" required class="report-select">
                 <option value="" disabled selected>Select a reason</option>
                 <option value="1">Spam</option>
                 <option value="2">Offensive Content</option>
                 <option value="3">False Information</option>
+            </select> -->
+            
+            <select name="report_category_id" required class="report-select">
+                <option value="" disabled selected>Select a reason</option>
+
+                {% for category in report_categories %}
+                    <option value="{{ category.reportCategoryID }}">
+                        {{ category.categoryName }}
+                    </option>
+                {% endfor %}
             </select>
 
             <textarea name="optionalComment"

@@ -432,39 +432,33 @@ def dashboard():
     else:
         return redirect(url_for("free_homepage"))
 
+
 # Article detail page
 @app.route("/article/<int:article_id>")
 def article_detail(article_id):
-    print("ARTICLE ROUTE FILE:", __file__, flush=True)
-
+    print("ARTICLE DETAIL ROUTE USED:", __name__, flush=True)
+    print("REPORT CATEGORIES:", report_categories, flush=True)
     user_id = session.get("userID")
 
-    # Increase view first so updated count can be fetched
     article_controller.increment_view_count(article_id)
 
     article = article_controller.get_article(article_id)
     comments = article_controller.get_comments_for_article(article_id)
 
-    # Safely check if the article is saved
     is_saved = article_controller.is_article_saved(user_id, article_id)
 
-    # Make premium check robust
     user_type = session.get("userType", "").strip().lower()
     is_premium = "premium" in user_type
 
-    print("ARTICLE DETAIL session userID:", session.get("userID"), flush=True)
-    print("ARTICLE DETAIL article_id:", article_id, flush=True)
-    print("ARTICLE DETAIL is_saved:", is_saved, flush=True)
-    print("ARTICLE DETAIL views:", article.get("views") if article else None, flush=True)
-    print("ARTICLE DETAIL likes:", article.get("likes") if article else None, flush=True)
-    print("ARTICLE DETAIL ROUTE HIT", flush=True)
+    report_categories = article_controller.get_report_category()
 
     return render_template(
         "article_detail.html",
         article=article,
         comments=comments,
         is_saved=is_saved,
-        is_premium=is_premium
+        is_premium=is_premium,
+        report_categories=report_categories
     )
 
 # Add comment route
@@ -536,13 +530,25 @@ def report_article_route(article_id):
     return redirect(url_for('article_detail', article_id=article_id))
 
 def is_valid_report_category(report_category_id):
-    # Query the ReportCategory table to ensure the category exists and is active
+    if not report_category_id:
+        return False
+
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT 1 FROM ReportCategory WHERE reportCategoryID = %s AND categoryStatus = 'active'", (report_category_id,))
+
+    cursor.execute("""
+        SELECT 1
+        FROM ReportCategory
+        WHERE reportCategoryID = %s
+        AND LOWER(TRIM(categoryStatus)) = 'active'
+        LIMIT 1
+    """, (report_category_id,))
+
     result = cursor.fetchone()
+
     cursor.close()
     conn.close()
+
     return result is not None
 
 # My Articles Route
