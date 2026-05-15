@@ -176,6 +176,18 @@
     </div>
 
     <div class="review-section">
+        <h3>Optional Comments:</h3>
+        
+        {% if report.optionalComments %}
+            <p style="white-space: pre-line;">
+                {{ report.optionalComments }}
+            </p>
+        {% else %}
+            <p>-</p>
+        {% endif %}
+    </div>
+
+    <div class="review-section">
         <h3>Reported By:</h3>
         <p>{{ report.reportedBy if report.reportedBy else '-' }}</p>
     </div>

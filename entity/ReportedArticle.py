@@ -160,11 +160,23 @@ class ReportedArticle:
     def get_report_details(report_id):
         conn = get_db_connection()
         cursor = conn.cursor()
+
         cursor.execute(""" 
             SELECT 
                 a.articleID,
                 GROUP_CONCAT(DISTINCT ua.username SEPARATOR ', ') AS reportedBy,
                 GROUP_CONCAT(DISTINCT rc.categoryName SEPARATOR ', ') AS reasons,
+
+                GROUP_CONCAT(
+                    DISTINCT
+                    CASE 
+                        WHEN ra.optionalComment IS NOT NULL 
+                        AND TRIM(ra.optionalComment) != ''
+                        THEN CONCAT(ua.username, ': ', ra.optionalComment)
+                    END
+                    SEPARATOR '\n'
+                ) AS optionalComments,
+
                 totals.totalReports,
                 a.articleTitle,
                 ac.categoryName AS category,
@@ -172,28 +184,49 @@ class ReportedArticle:
                 a.credibilityScore,
                 a.aiFactCheckScore,
                 a.articleStatus,
-                ra.reportStatus,
+                MIN(ra.reportStatus) AS reportStatus,
                 ai.imageURL,
                 a.content
             FROM ReportedArticle ra
-            JOIN Article a ON ra.articleID = a.articleID
-            JOIN ArticleImage ai on a.articleID = ai.articleID
-            LEFT JOIN ReportCategory rc on ra.reportCategoryID = rc.reportCategoryID
-            LEFT JOIN UserAccount ua on ra.userID = ua.userID
-            LEFT JOIN UserAccount author on a.created_by = author.userID
-            LEFT JOIN ArticleCategory ac ON a.categoryID = ac.categoryID
+            JOIN Article a 
+                ON ra.articleID = a.articleID
+            LEFT JOIN ArticleImage ai 
+                ON a.articleID = ai.articleID
+            LEFT JOIN ReportCategory rc 
+                ON ra.reportCategoryID = rc.reportCategoryID
+            LEFT JOIN UserAccount ua 
+                ON ra.userID = ua.userID
+            LEFT JOIN UserAccount author 
+                ON a.created_by = author.userID
+            LEFT JOIN ArticleCategory ac 
+                ON a.categoryID = ac.categoryID
             JOIN (
                 SELECT articleID, COUNT(*) AS totalReports
                 FROM ReportedArticle
                 GROUP BY articleID
-            ) totals ON totals.articleID = a.articleID
+            ) totals 
+                ON totals.articleID = a.articleID
             WHERE a.articleID = (
                 SELECT articleID
                 FROM ReportedArticle
-                WHERE reportID = %s)
+                WHERE reportID = %s
+            )
+            GROUP BY
+                a.articleID,
+                a.articleTitle,
+                ac.categoryName,
+                author.username,
+                a.credibilityScore,
+                a.aiFactCheckScore,
+                a.articleStatus,
+                ai.imageURL,
+                a.content,
+                totals.totalReports
         """, (report_id,))
 
         reportDetails = cursor.fetchone()
+
+        cursor.close()
         conn.close()
 
         return reportDetails
