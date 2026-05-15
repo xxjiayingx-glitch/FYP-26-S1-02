@@ -702,7 +702,13 @@
                 <i class="fa-regular fa-clock"></i>
                 Latest Articles
             </a>
-
+            
+            {% if session.get("userType","").lower() == "premium" %}
+            <a href="{{ url_for('premium_homepage') }}#premiumSavedSection" onclick="closeSidebar()">
+                <i class="fa-solid fa-bookmark"></i>
+                Saved Articles
+            </a>
+            {% endif %}
             <!-- ACCOUNT -->
             <div class="sidebar-section-title">
                 Account
