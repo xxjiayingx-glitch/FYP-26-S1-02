@@ -93,13 +93,25 @@
             </a>
           </div>
 
-          <div class="featured-right">
+          <!-- <div class="featured-right">
             {% if headline.featured_image %}
             <img src="{{ url_for('static', filename='uploads/' + headline.featured_image) }}" />
             {% else %}
             <img src="{{ url_for('static', filename='uploads/placeholder.png') }}">
             {% endif %}
-          </div>
+          </div> -->
+
+          <div class="featured-right">
+            {% if headline.featured_image %}
+                {% if headline.featured_image.startswith('http') %}
+                    <img src="{{ headline.featured_image }}" alt="Top Viewed Article">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ headline.featured_image) }}" alt="Top Viewed Article">
+                {% endif %}
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder Image">
+            {% endif %}
+        </div>
         </div>
         {% else %}
         <p class="no-headline">No headline available</p>
@@ -119,9 +131,13 @@
           {% for item in category_featured_articles %}
           <div class="category-carousel-card">
             {% if item.article.featured_image %}
-              <img src="{{ url_for('static', filename='uploads/' + item.article.featured_image) }}" alt="{{ item.article.articleTitle }}">
+                {% if item.article.featured_image.startswith('http') %}
+                    <img src="{{ item.article.featured_image }}" alt="{{ item.article.articleTitle }}">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ item.article.featured_image) }}" alt="{{ item.article.articleTitle }}">
+                {% endif %}
             {% else %}
-              <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
+                <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="placeholder">
             {% endif %}
 
             <div class="category-carousel-content">
@@ -173,10 +189,16 @@
       {% if articles %}
         {% for article in articles %}
         <div class="news-card latest-article-card {% if loop.index > 3 %}extra-latest-card is-hidden{% endif %}">
-          {% if article.imageURL %}
-          <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="{{ article['articleTitle'] }}" />
+          {% set article_image = article.get('imageURL') or article.get('featured_image') %}
+
+          {% if article_image %}
+              {% if article_image.startswith('http') %}
+                  <img src="{{ article_image }}" alt="Article image">
+              {% else %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ article_image) }}" alt="Article image">
+              {% endif %}
           {% else %}
-          <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" />
+              <img src="{{ url_for('static', filename='uploads/placeholder.png') }}" alt="Placeholder image">
           {% endif %}
  
           <span class="category-badge">{{ article['categoryName'] }}</span>
