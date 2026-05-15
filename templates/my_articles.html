@@ -66,8 +66,18 @@
         <div class="articles-grid">
             {% for article in articles %}
                 <div class="article-card">
-                    {% if article.imageURL %}
+                    <!-- {% if article.imageURL %}
                         <img src="{{ url_for('static', filename='uploads/' + article.imageURL) }}" alt="Article Image" class="article-img">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='img/default.jpg') }}" alt="Default Image" class="article-img">
+                    {% endif %} -->
+
+                    {% if article.imageURL %}
+                        {% if article.imageURL.startswith('http') %}
+                            <img src="{{ article.imageURL }}" alt="Article Image" class="article-img">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/' ~ article.imageURL) }}" alt="Article Image" class="article-img">
+                        {% endif %}
                     {% else %}
                         <img src="{{ url_for('static', filename='img/default.jpg') }}" alt="Default Image" class="article-img">
                     {% endif %}

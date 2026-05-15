@@ -536,11 +536,19 @@
                 <label for="featured_image">Upload New Featured Image</label>
                 <input type="file" id="featured_image" name="featured_image" accept="image/*">
 
-                {% if article.featured_image %}
+                <!-- {% if article.featured_image %}
                 <div class="image-preview-box">
                     <strong>Current Image</strong>
                     <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}" alt="Current article image">
                 </div>
+                {% endif %} -->
+
+                {% if article.featured_image %}
+                    {% if article.featured_image.startswith('http') %}
+                        <img src="{{ article.featured_image }}" alt="Current article image">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ article.featured_image) }}" alt="Current article image">
+                    {% endif %}
                 {% endif %}
             </div>
 

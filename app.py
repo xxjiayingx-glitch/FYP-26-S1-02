@@ -16,6 +16,7 @@ import os
 import uuid
 import nltk
 from PIL import Image, UnidentifiedImageError
+import boto3
 
 NLTK_DATA_DIR = os.path.join(os.getcwd(), "nltk_data")
 os.makedirs(NLTK_DATA_DIR, exist_ok=True)
@@ -713,6 +714,43 @@ def run_final_ai_fact_check(title, content, category_id):
 #         current_time=current_time
 #     )
 
+#----------------------#
+# Save Image to AWS S3 #
+#----------------------#
+
+s3 = boto3.client(
+    "s3",
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    region_name=os.getenv("AWS_REGION")
+)
+
+def upload_image_to_s3(file):
+    if not file or not file.filename:
+        return None
+
+    original_filename = secure_filename(file.filename)
+    ext = original_filename.rsplit(".", 1)[-1].lower()
+
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    s3_key = f"uploads/{filename}"
+
+    bucket_name = os.getenv("S3_BUCKET_NAME")
+    region = os.getenv("AWS_REGION")
+
+    s3.upload_fileobj(
+        file,
+        bucket_name,
+        s3_key,
+        ExtraArgs={
+            "ContentType": file.content_type
+        }
+    )
+
+    image_url = f"https://{bucket_name}.s3.{region}.amazonaws.com/{s3_key}"
+
+    return image_url
+
 #-------------------#
 # Upload Image Rule #
 #-------------------#
@@ -801,13 +839,11 @@ def create_article():
             flash("Only image files are allowed. Please upload JPG, PNG, GIF, or WEBP.", "danger")
             return redirect(url_for("create_article"))
 
-        original_filename = secure_filename(featured_image.filename)
-        ext = original_filename.rsplit(".", 1)[-1].lower()
+        image_url = upload_image_to_s3(featured_image)
 
-        image_filename = f"{uuid.uuid4().hex}.{ext}"
-        save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
-
-        featured_image.save(save_path)
+        if not image_url:
+            flash("Failed to upload image. Please try again.", "danger")
+            return redirect(url_for("create_article"))
 
         articleID = article_controller.create_article(
             user_id=user_id,
@@ -815,7 +851,7 @@ def create_article():
             category_id=category_id,
             content=content,
             status=status,
-            featured_image=image_filename,
+            featured_image=image_url,
             ai_fact_check_score=ai_fact_check_score,
             ai_fact_check_status=ai_fact_check_status
         )
@@ -937,20 +973,18 @@ def edit_article(article_id):
             ai_fact_check_status = request.form.get("ai_fact_check_status") or article.get("aiFactCheckStatus") or "Not Checked"
 
         featured_image = request.files.get("featured_image")
-        image_filename = None
+        image_url = None
 
         if featured_image and featured_image.filename:
             if not is_allowed_image(featured_image):
                 flash("Only image files are allowed. Please upload JPG, PNG, GIF, or WEBP.", "danger")
                 return redirect(url_for("edit_article", article_id=article_id))
 
-            original_filename = secure_filename(featured_image.filename)
-            ext = original_filename.rsplit(".", 1)[-1].lower()
+            image_url = upload_image_to_s3(featured_image)
 
-            image_filename = f"{uuid.uuid4().hex}.{ext}"
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
-
-            featured_image.save(save_path)
+            if not image_url:
+                flash("Failed to upload image. Please try again.", "danger")
+                return redirect(url_for("edit_article", article_id=article_id))
 
         updated = article_controller.update_article(
             article_id=article_id,
@@ -962,8 +996,8 @@ def edit_article(article_id):
             ai_fact_check_status=ai_fact_check_status
         )
 
-        if updated and image_filename:
-            article_controller.update_article_image(article_id, image_filename)
+        if updated and image_url:
+            article_controller.update_article_image(article_id, image_url)
 
         if updated:
             SystemLogCTL.logAction(
@@ -1887,7 +1921,7 @@ def editor_create_article():
             ai_fact_check_status = request.form.get("ai_fact_check_status") or "Not Checked"
 
         featured_image = request.files.get("featured_image")
-        image_filename = None
+        image_url = None
 
         if not featured_image or not featured_image.filename:
             flash("Please upload a featured image.", "danger")
@@ -1897,13 +1931,11 @@ def editor_create_article():
             flash("Only image files are allowed. Please upload JPG, PNG, GIF, or WEBP.", "danger")
             return redirect(url_for("editor_create_article"))
 
-        original_filename = secure_filename(featured_image.filename)
-        ext = original_filename.rsplit(".", 1)[-1].lower()
+        image_url = upload_image_to_s3(featured_image)
 
-        image_filename = f"{uuid.uuid4().hex}.{ext}"
-        save_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
-
-        featured_image.save(save_path)
+        if not image_url:
+            flash("Failed to upload image. Please try again.", "danger")
+            return redirect(url_for("editor_create_article"))
 
         articleID = article_controller.create_article(
             user_id=user_id,
@@ -1911,7 +1943,7 @@ def editor_create_article():
             category_id=category_id,
             content=content,
             status=status,
-            featured_image=image_filename,
+            featured_image=image_url,
             ai_fact_check_score=ai_fact_check_score,
             ai_fact_check_status=ai_fact_check_status
         )
@@ -2035,44 +2067,6 @@ def approve_article():
         conn.close()
 
     return redirect(url_for("editor_approval_articles"))
-
-
-# @app.route("/editor/reject_article", methods=["POST"])
-# def reject_article():
-#     if "userID" not in session:
-#         return redirect(url_for("login.login"))
-
-#     user_type = (session.get("userType") or "").strip().lower()
-#     editor_status = (session.get("editorApprovalStatus") or "").strip().lower()
-
-#     if user_type != "editor" or editor_status != "approved":
-#         return redirect(url_for("login.login"))
-
-#     article_id = request.form.get("article_id")
-
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-
-#     try:
-#         cursor.execute("""
-#             UPDATE Article
-#             SET articleStatus = 'rejected',
-#                 updated_at = NOW()
-#             WHERE articleID = %s
-#         """, (article_id,))
-#         conn.commit()
-#         flash("Article rejected successfully.", "warning")
-
-#     except Exception as e:
-#         conn.rollback()
-#         print("REJECT ARTICLE ERROR:", e)
-#         flash("Failed to reject article.", "error")
-
-#     finally:
-#         cursor.close()
-#         conn.close()
-
-#     return redirect(url_for("editor_approval_articles"))
 
 
 @app.route("/editor/reject_article", methods=["POST"])

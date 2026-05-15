@@ -45,3 +45,4 @@ breadability
 textstat
 rake-nltk
 pillow
+boto3
