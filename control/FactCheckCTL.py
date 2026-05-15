@@ -1857,6 +1857,16 @@ class FactCheckController:
         6. If the article is ambiguous, prefer the selected category instead of changing suggestion randomly.
         7. If confidence is below 0.70, suggested_category should usually stay as the selected category.
         8. title_matched checks whether the article title accurately represents the main content.
+        9. title_matched must compare ONLY the article title against the article content.
+        10. title_matched must NOT depend on selected_category.
+        11. title_matched must NOT depend on suggested_category.
+        12. If the title accurately describes the main content, set title_matched to true even if the selected category is wrong.
+        13. If the selected category is wrong but the title matches the content, return matched=false and title_matched=true.
+        14. The "matched" field must only check whether selected_category fits the article content.
+        15. Do not set "matched" to false only because the title does not match the content.
+        16. If suggested_category is different from selected_category and confidence is 0.70 or higher, matched should normally be false.
+        17. If suggested_category is the same as selected_category, matched should be true.
+        18. The reason should clearly separate title issue and category issue if both exist.
 
         Category guidance:
         - Travel: tourism, travel safety, hikers, tourists, trips, destinations, transport disruption, travel-related incidents.
@@ -1940,8 +1950,13 @@ class FactCheckController:
             if confidence < 0.70 and selected_category in available_categories:
                 suggested = selected_category
 
-            if suggested == selected_category and matched is False:
+            selected_clean = (selected_category or "").strip().lower()
+            suggested_clean = (suggested or "").strip().lower()
+
+            if suggested_clean == selected_clean:
                 matched = True
+            elif suggested in available_categories and confidence >= 0.70:
+                matched = False
 
             # current_title_clean = (title or "").strip().lower()
             # suggested_title_clean = suggested_title.strip().lower()
@@ -3191,16 +3206,16 @@ class FactCheckController:
         # ===== CATEGORY & TITLE CHECK IMPACT =====
         if category_result:
             if category_result.get("matched") is False and category_result.get("title_matched") is False:
-                score -= 7
+                score -= 10
                 score_reasons.append("Both the selected category and article title may not match the content.")
 
             else:
                 if category_result.get("matched") is False:
-                    score -= 3
+                    score -= 6
                     score_reasons.append("Selected category may not match the article content.")
 
                 if category_result.get("title_matched") is False:
-                    score -= 4
+                    score -= 6
                     score_reasons.append("Article title may not match the article content.")
 
         score = max(0, min(score, 100))

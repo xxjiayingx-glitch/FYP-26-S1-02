@@ -104,33 +104,51 @@ class ReportedArticle:
                 COUNT(ra.articleID) AS totalReports,
                 MAX(ra.reported_at) AS latestReportDate,
                 a.articleStatus,
-                MIN(ra.reportStatus) AS reportStatus
+                MIN(ra.reportStatus) AS reportStatus,
+                author.userType AS authorType,
+                author.username AS authorName
             FROM ReportedArticle ra
             JOIN Article a 
                 ON ra.articleID = a.articleID
             LEFT JOIN ArticleCategory ac 
                 ON a.categoryID = ac.categoryID
+            LEFT JOIN UserAccount author
+                ON a.created_by = author.userID
             WHERE 1=1
+            AND ra.reportStatus = 'pending review'
         """
 
         params = []
 
         # Editor view:
-        # Show only reported articles that match the editor's expertise category
+        # Editor only sees reported articles in their expertise category,
+        # but editor-created articles must go to system admin instead.
         if expertise_category:
-            query += " AND ac.categoryName = %s"
+            query += """
+                AND ac.categoryName = %s
+                AND (
+                    author.userType IS NULL
+                    OR LOWER(TRIM(author.userType)) != 'editor'
+                )
+            """
             params.append(expertise_category)
 
         # Admin fallback view:
-        # Show only reported articles where no approved editor exists for that category
+        # Admin sees:
+        # 1. Reported articles created by editors
+        # 2. Reported articles where no approved editor exists for that category
         if admin_fallback_only:
             query += """
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM UserAccount editor
-                    WHERE LOWER(editor.userType) = 'editor'
-                    AND LOWER(editor.editorApprovalStatus) = 'approved'
-                    AND editor.expertiseArea = ac.categoryName
+                AND (
+                    LOWER(TRIM(author.userType)) = 'editor'
+
+                    OR NOT EXISTS (
+                        SELECT 1
+                        FROM UserAccount editor
+                        WHERE LOWER(TRIM(editor.userType)) = 'editor'
+                        AND LOWER(TRIM(editor.editorApprovalStatus)) = 'approved'
+                        AND editor.expertiseArea = ac.categoryName
+                    )
                 )
             """
 
@@ -139,7 +157,9 @@ class ReportedArticle:
                 a.articleID, 
                 a.articleTitle, 
                 ac.categoryName, 
-                a.articleStatus
+                a.articleStatus,
+                author.userType,
+                author.username
             ORDER BY totalReports DESC
         """
 
@@ -186,7 +206,9 @@ class ReportedArticle:
                 a.articleStatus,
                 MIN(ra.reportStatus) AS reportStatus,
                 ai.imageURL,
-                a.content
+                a.content,
+                author.userID,
+                author.userType
             FROM ReportedArticle ra
             JOIN Article a 
                 ON ra.articleID = a.articleID

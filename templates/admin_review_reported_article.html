@@ -175,7 +175,10 @@
 
     <div class="review-section">
         <h3>Author:</h3>
-        <p>{{ report.createdBy if report.createdBy else '-' }}</p>
+        <p> User ID: {{ report.userID if report.userID else '-' }}
+        <br> Username:{{ report.createdBy if report.createdBy else '-' }}
+        <br> User Type: {{ report.userType if report.userType else '-' }}
+        </p>
     </div>
 
     <div class="review-section">
