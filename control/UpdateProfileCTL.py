@@ -169,12 +169,20 @@ class UpdateProfileCTL:
         if user.get("verifiedBadgeStatus") == "Pending":
             raise ValueError("Your verification application is already pending.")
 
-        # FIXED (correct source)
-        eligible_article_count = Article.count_eligible_verified_articles(userID)
+        rule = VerifiedBadgeRule.get_verified_badge_rule()
 
-        if eligible_article_count < 5:
+        required_article_count = int(rule["required_article_count"])
+        minimum_factcheck_score = float(rule["minimum_factcheck_score"])
+
+        eligible_article_count = Article.count_eligible_verified_articles(
+            userID,
+            minimum_factcheck_score
+        )
+
+        if eligible_article_count < required_article_count:
             raise ValueError(
-                "You need at least 5 published articles with AI fact-check scores of 90 or above to apply."
+                f"You need at least {required_article_count} published articles "
+                f"with AI fact-check scores of {minimum_factcheck_score} or above to apply."
             )
 
         success = UserAccount.apply_verified_badge(userID)
@@ -184,7 +192,13 @@ class UpdateProfileCTL:
 
     @staticmethod
     def verify_count(userID):
-        return Article.count_eligible_verified_articles(userID)
+        rule = VerifiedBadgeRule.get_verified_badge_rule()
+        minimum_factcheck_score = float(rule["minimum_factcheck_score"])
+
+        return Article.count_eligible_verified_articles(
+            userID,
+            minimum_factcheck_score
+        )
     
     @staticmethod
     def get_verified_badge_rule():

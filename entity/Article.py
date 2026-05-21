@@ -1267,22 +1267,42 @@ class Article:
         conn.close()
         return result["total_articles"]
 
+    # @staticmethod
+    # def count_eligible_verified_articles(userID):
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+
+    #     cursor.execute(
+    #         """
+    #         SELECT COUNT(*) AS total
+    #         FROM Article
+    #         WHERE created_by = %s
+    #         AND articleStatus = 'Published'
+    #         AND credibilityScore >= 90
+    #     """,
+    #         (userID,),
+    #     )
+
+    #     result = cursor.fetchone()
+    #     conn.close()
+    #     return result["total"] if result else 0
+
     @staticmethod
-    def count_eligible_verified_articles(userID):
+    def count_eligible_verified_articles(userID, minimum_factcheck_score):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute(
-            """
+        cursor.execute("""
             SELECT COUNT(*) AS total
             FROM Article
             WHERE created_by = %s
-            AND articleStatus = 'Published'
-            AND credibilityScore >= 90
-        """,
-            (userID,),
-        )
+            AND LOWER(articleStatus) = 'published'
+            AND aiFactCheckScore >= %s
+        """, (userID, minimum_factcheck_score))
 
         result = cursor.fetchone()
+
+        cursor.close()
         conn.close()
+
         return result["total"] if result else 0

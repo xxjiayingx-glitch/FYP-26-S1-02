@@ -276,7 +276,7 @@
                     {% elif user.get('verifiedBadgeStatus') == 'Pending' %}
                         <button type="button" class="btn" disabled>Application Pending</button>
 
-                    {% elif eligible_article_count >= 5 %}
+                    {% elif eligible_article_count >= eligibility_rule.required_article_count %}
                         <form method="POST" action="/profile/apply-verified-badge">
                             <button type="submit" class="btn-primary">Apply for Verification</button>
                         </form>
@@ -285,7 +285,7 @@
                         <button type="button" class="btn" disabled>Not Eligible Yet</button>
                     {% endif %}
 
-                    {% if is_eligible 
+                    {% if not is_eligible 
                         and user.get('isVerifiedPublisher') != 1 
                         and user.get('verifiedBadgeStatus') != 'Pending' %}
                         <p class="eligibility-note">
